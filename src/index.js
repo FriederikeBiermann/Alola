@@ -7,12 +7,15 @@ colour_outline_dict = {'ACP':'#3d79d6', 'AT':'#df5d5d', 'KS':'#5fc65f',
                        'TE':'#a25ba0', 'KR*':'#5fbb87'}
 regionName="r1c4"
 function removePaddingBGC(BGC){
-  for (let orfIndex=0; orfIndex<BGC.orfs.length; orfIndex++){
-    BGC.orfs[orfIndex].start=BGC.orfs[orfIndex].start-BGC.start
-    BGC.orfs[orfIndex].end=BGC.orfs[orfIndex].end-BGC.start
-  }
-  console.log(BGC)
-  return BGC
+  let BGC_with_padding=JSON.parse(JSON.stringify(BGC));
+  console.log(BGC_with_padding.orfs[0].start,BGC_with_padding)
+  if (BGC_with_padding.orfs[0].start!=0){ console.log("34")
+  for (let orfIndex=0; orfIndex<BGC_with_padding.orfs.length; orfIndex++){
+    BGC_with_padding.orfs[orfIndex].start=BGC_with_padding.orfs[orfIndex].start-BGC.start
+    BGC_with_padding.orfs[orfIndex].end=BGC_with_padding.orfs[orfIndex].end-BGC.start
+  }}
+  console.log(BGC_with_padding)
+  return BGC_with_padding
 }
     let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
     function updateProteins(geneMatrix){
