@@ -6,6 +6,14 @@ colour_outline_dict = {'ACP':'#3d79d6', 'AT':'#df5d5d', 'KS':'#5fc65f',
                        'KR':'#5fbb87', 'DH':'#ca9862', 'ER':'#61bbad',
                        'TE':'#a25ba0', 'KR*':'#5fbb87'}
 regionName="r1c4"
+function removePaddingBGC(BGC){
+  for (let orfIndex=0; orfIndex<BGC.orfs.length; orfIndex++){
+    BGC.orfs[orfIndex].start=BGC.orfs[orfIndex].start-BGC.start
+    BGC.orfs[orfIndex].end=BGC.orfs[orfIndex].end-BGC.start
+  }
+  console.log(BGC)
+  return BGC
+}
     let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
     function updateProteins(geneMatrix){
       let proteinsForDisplay= JSON.parse(JSON.stringify(BGC));
@@ -24,7 +32,7 @@ regionName="r1c4"
 
         }}
         console.log("test2",proteinsForDisplay.orfs)
-      $("#protein_container").html(Proteiner.drawClusterSVG(proteinsForDisplay));
+      $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(proteinsForDisplay)));
     }
     function setDisplayedStatus(id, geneMatrix) {
       id.slice(-11,-1);
@@ -40,9 +48,9 @@ regionName="r1c4"
 
       }
 function selectRegion(recordData, regionName){
-  for (let BGC=0; BGC<recordData[0].regions.length;BGC++){
-    if (recordData[0].regions[BGC].anchor==regionName){
-      return BGC
+  for (let region_index=0; region_index<recordData[0].regions.length;region_index++){
+    if (recordData[0].regions[region_index].anchor==regionName){
+      return region_index
     }}
 
 
@@ -114,11 +122,13 @@ console.log(arrowId,arrow.getAttribute("fill"))
 return outputForRaichu
 }
 //create record for diplaying BGC in BGC explorer
-var BGC = Object.keys(recordData[0].regions[selectRegion(recordData, regionName)]).reduce(function(obj, k) {
-  if (k== "start" || k== "end" || k=="orfs") obj[k] = recordData[0].regions[0][k];
+let regionNumber=selectRegion(recordData, regionName)
+console.log(recordData[0].regions[regionNumber])
+let BGC = Object.keys(recordData[0].regions[regionNumber]).reduce(function(obj, k) {
+  if (k== "start" || k== "end" || k=="orfs") obj[k] = recordData[0].regions[regionNumber][k];
   return obj;
 }, {});
-
+console.log(BGC)
 for (const [key_1, value_1] of Object.entries(details_data)) {
   if (value_1.id==regionName){
 
@@ -141,13 +151,13 @@ geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
 }
 // display BGC in BGC explorer
 let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
-
+console.log(BGC)
 for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
   delete BGCForDisplay["orfs"][geneIndex]["domains"];
 }
 
 updateProteins(geneMatrix)
-$("#arrow_container").html(Arrower.drawClusterSVG(BGCForDisplay));
+$("#arrow_container").html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
 //add click event to every gene arrow
 for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
 arrow_id="#"+geneMatrix[geneIndex].id+"_gene_arrow"
