@@ -170,7 +170,7 @@ const arrow = document.querySelector(arrow_id);
 arrow.addEventListener (
    'click',
    function() {           // anonyme Funktion
-    setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix);changeColor(arrow_id)
+    setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
    },
    false
 );
