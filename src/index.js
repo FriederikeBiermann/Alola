@@ -8,9 +8,21 @@ function removePaddingBGC(BGC){
     BGC_with_padding.orfs[orfIndex].start=BGC_with_padding.orfs[orfIndex].start-BGC.start
     BGC_with_padding.orfs[orfIndex].end=BGC_with_padding.orfs[orfIndex].end-BGC.start
   }}
-  console.log(BGC_with_padding)
-  return BGC_with_padding
-}
+  return BGC_with_padding}
+  function removeSpaceBetweenProteins(BGC){
+    let margin = 100;
+    let BGC_without_space=JSON.parse(JSON.stringify(BGC));
+    for (let orfIndex=0; orfIndex<BGC_without_space.orfs.length; orfIndex++){
+      let orf_length=BGC_without_space.orfs[orfIndex].end-BGC_without_space.orfs[orfIndex].start
+      if (orfIndex==0){BGC_without_space.orfs[orfIndex].start=0;
+      BGC_without_space.orfs[orfIndex].end=BGC_without_space.orfs[orfIndex].start+orf_length}
+      if (orfIndex!=0){BGC_without_space.orfs[orfIndex].start=BGC_without_space.orfs[orfIndex-1].end + margin
+      BGC_without_space.orfs[orfIndex].end=BGC_without_space.orfs[orfIndex].start+ margin+ orf_length}
+
+  }
+  return BGC_without_space;
+  }
+
     let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
     function updateProteins(geneMatrix){
       let proteinsForDisplay= JSON.parse(JSON.stringify(BGC));
@@ -29,7 +41,7 @@ function removePaddingBGC(BGC){
 
         }}
         console.log("test2",proteinsForDisplay.orfs)
-      $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(proteinsForDisplay)));
+      $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(proteinsForDisplay))));
     }
     function setDisplayedStatus(id, geneMatrix) {
       id.slice(-11,-1);
@@ -144,7 +156,7 @@ geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
 "position_in_BGC":geneIndex+1,
 "position":geneIndex+1,
 "ko":false,
-"displayed":true});
+"displayed":false});
 }
 // display BGC in BGC explorer
 let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
@@ -153,7 +165,7 @@ for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
   delete BGCForDisplay["orfs"][geneIndex]["domains"];
 }
 
-updateProteins(geneMatrix)
+
 $("#arrow_container").html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
 //add click event to every gene arrow
 for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
@@ -169,7 +181,7 @@ arrow.addEventListener (
    false
 );
 }
-
+updateProteins(geneMatrix)
 //fetching svg an displaying it
 //let svg=["test",{"test":"test"}]
 let data=extractAntismashPredictionsFromRegionSJ(details_data, regionName)
