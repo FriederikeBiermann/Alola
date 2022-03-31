@@ -1,38 +1,70 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@700&display=swap" rel="stylesheet">
  <style>
- #BGC_explorer{
-background-color:#b8d0eb;
-float: left;
-width: 1500px;
- height: 250px;
-box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+ body{
+   color:white;
+   font-family: 'Catamaran', sans-serif;
+   font-size: 40px;
 
- padding: 10px;}
+ }
+ #BGC_explorer{
+
+   border-radius:6px;
+background-color:#1F1F1F
+;
+margin-bottom: 10px;
+float: left;
+width:75%;
+ height: 300px;
+box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
   #Protein_explorer{
- background-color:#b298dc;
+    border-radius:6px;
+ background-color:#1F1F1F;
  float: left;
- padding: 10px;
+
  box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
  height: 750px;
- width: 1500px;}
-  #Gene_explorer{
- background-color:#b9faf8;
- float: right;
- height: 500px;
- padding: 10px;
- box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+width: 75%;}
 
-  width: 350px;}
   #Structure_explorer{
- background-color:#a663cc;
+    border-radius:6px;
+ background-color:#1F1F1F;
   float: right;
   height: 500px;
- padding: 10px;
- box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 
-  width: 350px;}
+ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+  width: 24.5%;}
+  #Gene_explorer{
+    margin-bottom: 10px;
+    border-radius:6px;
+width: 24.5%;
+ background-color:#1F1F1F;
+ float: right;
+ height: 500px;
+
+ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
+ .heading-container{
+   background-color:#2B2B2B;
+   border-radius:6px;
+   padding-left: 5%;
+   width: 92%;
+ }
+  .container {
+
+    padding: 5%;
+    width: 87%;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+.contentWithPadding{
+  margin:10px;
+  width:100%;
+}
+
  </style>
 
  <body>
@@ -42,22 +74,26 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
    	<script type="text/javascript" src="./protein_drawer.js"></script>
     <!-- <script type="text/javascript" src="./regions-test.js"></script> -->
 
-<h1> The first Alola page </h1>
-<div id="BGC_explorer">BGC explorer
-<div id= "arrow_container"> </div>
+<div id="BGC_explorer">
+  <div class= "contentWithPadding"> <div class= "heading-container"> Biosynthetic gene cluster explorer</div>
+<div class="container" id= "arrow_container"> </div>
 </div>
-<div id="Gene_explorer">Gene explorer
-
+</div>
+<div id="Gene_explorer">
+    <div class= "contentWithPadding">
+      <div class= "heading-container"> Gene explorer</div>
+<div id= "gene_container"> </div>
 </div>
 
-<div id="Protein_explorer">Protein explorer
-<div id= "protein_container"> </div>
+</div>
+<div id="Protein_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Protein explorer</div>
+<div class="container" id= "protein_container"> </div>
+</div>
 </div>
 
-
-
-<div id="Structure_explorer">Structure explorer
+<div id="Structure_explorer">   <div class= "contentWithPadding"> <div class= "heading-container"> Structure explorer</div>
 <div id= "structure_container"> </div>
+</div>
 </div>
 
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.js"></script>

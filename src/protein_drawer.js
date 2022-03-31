@@ -1,5 +1,11 @@
 /* Copyright 2017 Satria A. Kautsar */
-
+//Colour dicts to match antiSMASH domain colouring
+colour_fill_dict = {'ACP':'#81bef7', 'PKS_AT':'#f78181', 'PKS_KS(Modular-KS)':'#81f781',
+                    'PKS_KR':'#80f680', 'PKS_DH':'#f7be81', 'PKS_ER':'#81f7f3',
+                    'PKS_TE':'#f5c4f2', 'KR*':'#80f680'}
+colour_outline_dict = {'PKS_ACP':'#3d79d6', 'PKS_AT':'#df5d5d', 'PKS_KS':'#5fc65f',
+                       'PKS_KR':'#5fbb87', 'PKS_DH':'#ca9862', 'PKS_ER':'#61bbad',
+                       'PKS_TE':'#a25ba0', 'KR*':'#5fbb87'}
 var Proteiner = {
     version: "1.0.0",
     required: [
@@ -33,9 +39,11 @@ Proteiner.drawClusterSVG = (function(cluster, height = 40) {
       $(pol.node).mouseover({orf: orf}, function(handler){
         var start = handler.data.orf.start;
         var end = handler.data.orf.end;
-        Proteiner.showToolTip("ORF: " + handler.data.orf.id + "<br/>" + start + " - " + end, handler);
+        Proteiner.showToolTip("ORF: " + handler.data.orf.locus_tag + "<br/>" + start + " - " + end, handler);
         $(handler.target).css("stroke-width", "3px");
-        $(handler.target).css("stroke", "red");
+        $(handler.target).css("stroke", "#E11839"
+
+);
         handler.stopPropagation();
       });
       $(pol.node).mouseleave(function(handler){
@@ -49,10 +57,14 @@ Proteiner.drawClusterSVG = (function(cluster, height = 40) {
         for (var j in orf.domains) {
           var domain = orf.domains[j];
           var color = "gray";
-          if (domain.hasOwnProperty("color")) {
-            color = domain.color;
+          if (domain.hasOwnProperty("type")) {
+            if (colour_fill_dict.hasOwnProperty(domain.type)){
+              color = colour_fill_dict[domain.type];
+            }
+            else{color="#025699"}
+
           }
-          else{color="blue"}
+          else{color="#025699"}
           var dom = draw.polygon(Proteiner.toPointString(Proteiner.getDomainPoints(domain, orf, cluster, height, scale)))
                       .fill(color)
                       .stroke({width: 0})
@@ -60,9 +72,11 @@ Proteiner.drawClusterSVG = (function(cluster, height = 40) {
           $(dom.node).mouseover({domain: domain}, function(handler){
             var start = handler.data.domain.start;
             var end = handler.data.domain.end;
-            Proteiner.showToolTip("Domain: " + handler.data.domain.code + " (" + domain.bitscore + ")" + "<br/>" + start + " - " + end, handler);
+            Proteiner.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end, handler);
             $(handler.target).css("stroke-width", "3px");
-            $(handler.target).css("stroke", "red");
+            $(handler.target).css("stroke", "#E11839"
+
+);
             handler.stopPropagation();
           });
           $(dom.node).mouseleave(function(handler){
@@ -76,7 +90,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 40) {
   }
 
   $(draw.node).parent().mouseover({domain: domain}, function(handler){
-    var bgc_desc = "<b>BGC: " + cluster.id + "</b>";
+    var bgc_desc = "<b>BGC: " + recordData[0].seq_id+" region "+regionName + "</b>";
     if (cluster.hasOwnProperty("desc")) {
       bgc_desc += "<br /> " + cluster["desc"];
     }

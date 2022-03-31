@@ -1,10 +1,4 @@
-//Colour dicts to match antiSMASH domain colouring
-colour_fill_dict = {'ACP':'#81bef7', 'AT':'#f78181', 'KS':'#81f781',
-                    'KR':'#80f680', 'DH':'#f7be81', 'ER':'#81f7f3',
-                    'TE':'#f5c4f2', 'KR*':'#80f680'}
-colour_outline_dict = {'ACP':'#3d79d6', 'AT':'#df5d5d', 'KS':'#5fc65f',
-                       'KR':'#5fbb87', 'DH':'#ca9862', 'ER':'#61bbad',
-                       'TE':'#a25ba0', 'KR*':'#5fbb87'}
+
 regionName="r1c4"
 function removePaddingBGC(BGC){
   let BGC_with_padding=JSON.parse(JSON.stringify(BGC));
@@ -62,10 +56,10 @@ function changeColor(arrowId){
 
   const arrow = document.querySelector(arrowId);
 console.log(arrowId,arrow.getAttribute("fill"))
-  if (arrow.getAttribute("fill")=='red'){
+  if (arrow.getAttribute("fill")=="#E11839"){
   arrow.setAttribute('fill', '#ffffff');
   }
-  else{arrow.setAttribute('fill', 'red');
+  else{arrow.setAttribute('fill', "#E11839");
 }}
   function extractAntismashPredictionsFromRegionSJ(details_data, region_index){
     let outputForRaichu=[]

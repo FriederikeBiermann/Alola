@@ -15,14 +15,13 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
   var scale = (function(val) { return parseInt(val / (1000 / height)); })
 
   // draw line
-  draw.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({width: 2});
+  draw.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({color: "white",width: 2});
   var width = scale(cluster.end - cluster.start);
 
   if (cluster.hasOwnProperty("orfs")) {
     // draw arrows
     for (var i in cluster.orfs) {
       var orf = cluster.orfs[i];
-      console.log(orf["locus_tag"])
       var orf_color = "white";//"gray";
       if (orf.hasOwnProperty("color")) {
         orf_color = orf.color;
@@ -41,7 +40,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
         var end = handler.data.orf.end;
         Arrower.showToolTip("ORF: " + handler.data.orf.locus_tag + "<br/>" + start + " - " + end, handler);
         $(handler.target).css("stroke-width", "3px");
-        $(handler.target).css("stroke", "red");
+        $(handler.target).css("stroke", "#E11839");
         handler.stopPropagation();
       });
       $(pol.node).mouseleave(function(handler){
@@ -67,7 +66,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
             var end = handler.data.domain.end;
             Arrower.showToolTip("Domain: " + handler.data.domain.code + " (" + domain.bitscore + ")" + "<br/>" + start + " - " + end, handler);
             $(handler.target).css("stroke-width", "3px");
-            $(handler.target).css("stroke", "red");
+            $(handler.target).css("stroke", "#E11839");
             handler.stopPropagation();
           });
           $(dom.node).mouseleave(function(handler){
@@ -81,7 +80,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
   }
 
   $(draw.node).parent().mouseover({domain: domain}, function(handler){
-    var bgc_desc = "<b>BGC: " + "BGC of interest" + "</b>";
+    var bgc_desc = "<b>BGC: " + recordData[0].seq_id+" region "+regionName + "</b>";
     if (cluster.hasOwnProperty("desc")) {
       bgc_desc += "<br /> " + cluster["desc"];
     }
