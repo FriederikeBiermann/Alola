@@ -17,7 +17,7 @@ var Proteiner = {
 
 Proteiner.drawClusterSVG = (function(cluster, height = 40) {
   var container = document.createElement("div");
-  var draw = SVG(container).size('100%', height).group();
+  document.getElementById('protein_container').innerHTML = "";
   var scale = (function(val) { return parseInt(val / (1000 / height)); })
 
   // draw line
@@ -32,18 +32,24 @@ Proteiner.drawClusterSVG = (function(cluster, height = 40) {
       if (orf.hasOwnProperty("color")) {
         orf_color = orf.color;
       }
+      var innerContainer= document.createElement('div');
+      innerContainer.id="innerProteinContainer"+orf.locus_tag
+
+      innerContainer.style.width=String(scale(orf.end - orf.start))+"px"
+      document.getElementById('protein_container').appendChild(innerContainer).setAttribute("draggable","true");
+      document.getElementById('innerProteinContainer'+orf.locus_tag).setAttribute("class","box");
+      var draw = SVG(innerContainer).size(String(scale(orf.end - orf.start))+"px", height).group();
       var pol = draw.polygon(Proteiner.toPointString(Proteiner.getproteinPoints(orf, cluster, height, scale)))
                   .fill(orf_color)
                   .stroke({width: 2})
                   .addClass("Proteiner-orf");
+      pol.node.id= orf["locus_tag"]+"_protein";
       $(pol.node).mouseover({orf: orf}, function(handler){
         var start = handler.data.orf.start;
         var end = handler.data.orf.end;
         Proteiner.showToolTip("ORF: " + handler.data.orf.locus_tag + "<br/>" + start + " - " + end, handler);
         $(handler.target).css("stroke-width", "3px");
-        $(handler.target).css("stroke", "#E11839"
-
-);
+        $(handler.target).css("stroke", "#E11839");
         handler.stopPropagation();
       });
       $(pol.node).mouseleave(function(handler){
