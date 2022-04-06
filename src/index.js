@@ -141,7 +141,7 @@ function removePaddingBGC(BGC){
       geneMatrix.sort((a, b) => {
           return a.position - b.position;
       });
-  
+
       for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].displayed==true){
 
@@ -185,10 +185,13 @@ function changeColor(arrowId){
   function extractAntismashPredictionsFromRegionSJ(details_data, region_index){
     let outputForRaichu=[]
    let  region=details_data[region_index];
+
   for (let orfIndex=0; orfIndex<region.orfs.length;orfIndex++){
     let orf=region.orfs[orfIndex];
+
     for (let moduleIndex=0; moduleIndex<orf.modules.length;moduleIndex++){
     let  module=orf.modules[moduleIndex];
+    console.log("module",module)
     let moduleArray=[];
     let startModule=module.start;
     let endModule=module.end;
@@ -200,7 +203,9 @@ function changeColor(arrowId){
     let starterSubstrate="OC(=O)CC(S)=O"
     for (let domainIndex=0; domainIndex<orf.domains.length;domainIndex++){
       let domain=orf.domains[domainIndex];
+
         if (startModule>=domain.start && domain.start>=endModule || endModule>=domain.start && domain.start>=startModule){
+
           if (domain.abbreviation=="KR"){
             if (domain.predictions !=[]){
 
@@ -211,11 +216,12 @@ function changeColor(arrowId){
 
              nameDomain="KR_"+domainStereochemistry
               }
-
+              else{nameDomain="KR"}
             }
-
+          else{nameDomain="KR"}}
+          else{nameDomain=domain.abbreviation}
           if (domain.abbreviation==""){ nameDomain=domain.type}
-
+          console.log("domain", nameDomain)
           domainArray.push(nameDomain)
           if (domain.abbreviation=="AT"){if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}
           else{substrate=malonylcoa}
@@ -227,6 +233,7 @@ function changeColor(arrowId){
         if (domainArray.includes("KS") && !(domainArray.includes("TE"))){typeModule= "elongation_module";
       moduleArray.push(nameModule,typeModule,substrate);
       moduleArray.push(domainArray)}
+      console.log( moduleArray)
         if (domainArray.includes("TE")){typeModule= "terminator_module";
       moduleArray.push(nameModule,typeModule,substrate);
       moduleArray.push(domainArray)}
@@ -236,9 +243,10 @@ function changeColor(arrowId){
 
   }
 
-}}
-return outputForRaichu
-}
+}console.log(outputForRaichu);
+return outputForRaichu}
+
+
 addDragDrop()
 //create record for diplaying BGC in BGC explorer
 let regionNumber=selectRegion(recordData, regionName)
@@ -298,6 +306,7 @@ updateProteins(geneMatrix)
 //fetching svg an displaying it
 //let svg=["test",{"test":"test"}]
 let data=extractAntismashPredictionsFromRegionSJ(details_data, regionName)
+console.log( "test",data)
 let data_string=JSON.stringify(data);
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 fetch(url+data_string)
