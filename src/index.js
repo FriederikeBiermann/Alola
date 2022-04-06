@@ -1,8 +1,13 @@
 
-regionName="r1c4"
+regionName="r1c3"
+cluster_type=  "nrpspks"
 let items = document.querySelectorAll('.test-container .box')
 var dragSrcEl = null;
-
+function removeAllInstances(arr, item) {
+   for (var i = arr.length; i--;) {
+     if (arr[i] === item) arr.splice(i, 1);
+   }
+}
 function handleDragStart(e) {
   this.style.opacity = '0.4';
 
@@ -182,9 +187,20 @@ function changeColor(arrowId){
   }
   else{arrow.setAttribute('fill', "#E11839");
 }}
-  function extractAntismashPredictionsFromRegionSJ(details_data, region_index){
+function formatInputRaichuKS(data){
+  string_data= JSON.stringify(data);
+  trimmed_data=string_data.replaceAll(',"PKS_PP"',"").replaceAll(',"ACP"',"").replaceAll(',"KS"',"").replaceAll(',"AT"',"").replaceAll(',"TE"',"").replaceAll('"PKS_PP",',"").replaceAll(',"ACP"',"").replaceAll('"KS",',"").replaceAll('"AT",',"").replaceAll('"TE",',"").replaceAll('"PKS_PP",',"").replaceAll('"ACP"',"").replaceAll('"KS"',"").replaceAll('"AT"',"").replaceAll('"TE"',"")
+  console.log(string_data,"trimmed",trimmed_data)
+
+  return trimmed_data
+}
+  function extractAntismashPredictionsFromRegionSJKS(details_data, region_index){
     let outputForRaichu=[]
-   let  region=details_data[region_index];
+    console.log(details_data)
+    let  region=[]
+  if (details_data.hasOwnProperty(cluster_type)){region=details_data[cluster_type][region_index];}
+ else{region=details_data[region_index];}
+   console.log("index",region_index)
 
   for (let orfIndex=0; orfIndex<region.orfs.length;orfIndex++){
     let orf=region.orfs[orfIndex];
@@ -207,7 +223,7 @@ function changeColor(arrowId){
         if (startModule>=domain.start && domain.start>=endModule || endModule>=domain.start && domain.start>=startModule){
 
           if (domain.abbreviation=="KR"){
-            if (domain.predictions !=[]){
+            if (domain.predictions.length!=0){
 
               let domainActivity=domain.predictions[0][1]
               if (domainActivity=="inactive"){continue}
@@ -223,7 +239,8 @@ function changeColor(arrowId){
           if (domain.abbreviation==""){ nameDomain=domain.type}
           console.log("domain", nameDomain)
           domainArray.push(nameDomain)
-          if (domain.abbreviation=="AT"){if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}
+          console.log(domain,domain.predictions)
+          if (domain.abbreviation=="AT"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ console.log("34",domain);if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}}}
           else{substrate=malonylcoa}
         }}}
 
@@ -232,6 +249,16 @@ function changeColor(arrowId){
       moduleArray.push(nameModule,typeModule,starterSubstrate)}
         if (domainArray.includes("KS") && !(domainArray.includes("TE"))){typeModule= "elongation_module";
       moduleArray.push(nameModule,typeModule,substrate);
+      if (domainArray.includes ("DH")&&domainArray.includes ("ER")){
+removeAllInstances(domainArray,"DH")
+removeAllInstances(domainArray,"ER");
+domainArray.push("DH","ER")
+      }
+      else if (domainArray.includes("DH")){
+        removeAllInstances(domainArray,"DH");
+        domainArray.push("DH");
+      }
+
       moduleArray.push(domainArray)}
       console.log( moduleArray)
         if (domainArray.includes("TE")){typeModule= "terminator_module";
@@ -243,7 +270,7 @@ function changeColor(arrowId){
 
   }
 
-}console.log(outputForRaichu);
+}console.log("xyz",outputForRaichu);
 return outputForRaichu}
 
 
@@ -286,7 +313,7 @@ for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
 $("#arrow_container").html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
 //add click event to every gene arrow
 for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-arrow_id="#"+geneMatrix[geneIndex].id+"_gene_arrow"
+arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
 
 const arrow = document.querySelector(arrow_id);
 
@@ -305,13 +332,16 @@ arrow.addEventListener (
 updateProteins(geneMatrix)
 //fetching svg an displaying it
 //let svg=["test",{"test":"test"}]
-let data=extractAntismashPredictionsFromRegionSJ(details_data, regionName)
+let data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName)
 console.log( "test",data)
-let data_string=JSON.stringify(data);
+//data=[['module_1','starter_module','SC(=O)CC'],['module_2','elongation_module','methylmalonylcoa',['KR_B2']],['module_3','elongation_module','methylmalonylcoa',['KR_A1']],['module_4','elongation_module','methylmalonylcoa',['KR_C2']],['module_5','elongation_module','methylmalonylcoa',['KR','DH','ER']],['module_6','elongation_module','methylmalonylcoa',['KR_A1']],['module_7','terminator_module','methylmalonylcoa',['KR_A1']]];
+data_string=formatInputRaichuKS(data)
+console.log( data);
+//data_string='[["module_3_0","starter_module","CCC(S)=O"],["module_3_1","elongation_module","methylmalonylcoa",["KR_B2"]],["module_3_2","elongation_module","methylmalonylcoa",["KR_A1"]],["module_4_0","elongation_module","methylmalonylcoa",[]],["module_4_1","elongation_module","methylmalonylcoa",["DH","ER","KR"]],["module_5_0","elongation_module","methylmalonylcoa",["KR_A1"]],["module_5_1","terminator_module","methylmalonylcoa",["KR_A1"]]]'
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 fetch(url+data_string)
 .then(response => {const thing=response.json();
 return thing})
       .then((data) => {let container = document.getElementById("structure_container");
-
+      console.log(data.svg)
       container.innerHTML = data.svg;})

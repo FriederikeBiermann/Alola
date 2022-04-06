@@ -30,6 +30,7 @@ def pks_cluster_to_structure(modules, visualization_mechanism = False, \
     for module in modules:
         #Find starting unit SMILES, convert to structure
         if module == modules[0]:
+            print(module)
             assert len(module) == 3
             assert module[1] == 'starter_module'
             starter_unit = Smiles(module[2]).smiles_to_structure()
@@ -194,8 +195,8 @@ def pks_cluster_to_structure(modules, visualization_mechanism = False, \
     # Reset the atom color in the final structure to black
     for atom in chain_intermediate.graph:
         atom.draw.colour = 'black'
-    if not visualization_mechanism and not draw_structures_per_module:
-        Drawer(chain_intermediate)
+    #if not visualization_mechanism and not draw_structures_per_module:
+     #   Drawer(chain_intermediate)
     # Remove all intermediate structure files
     if path.exists('1.png'):
         os.remove('1.png')
