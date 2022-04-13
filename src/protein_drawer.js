@@ -12,7 +12,8 @@ var Proteiner = {
       "jquery",
       "svg.js==2.7.1"
     ],
-    tooltip_id: "Proteiner-tooltip-1234567890"
+    tooltip_id: "Proteiner-tooltip-1234567890",
+    tooltip_id_protein: "Proteiner-tooltip-123"
 };
 
 Proteiner.drawClusterSVG = (function(cluster, height = 70) {
@@ -50,7 +51,8 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
       document.getElementById('innerDropdownContainer'+orf.locus_tag).appendChild(innerDropdownContent);
       document.getElementById("innerDropdownContent"+orf.locus_tag).setAttribute("class","dropdown-content");
       innerDropdownContent.innerHTML=""
-      for (let geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
+      let geneIndex=0
+      for (geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
         if (geneMatrix[geneIndex].id==orf.locus_tag){
           for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].options.length;optionIndex++){
           innerDropdownContent.innerHTML +='<a href="#">'+geneMatrix[geneIndex].options[optionIndex]+'</a>'
@@ -62,7 +64,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
       var draw = SVG(innerDropdownButton).size(String(scale(orf.end - orf.start)+10)+"px", height).group();
       points=Proteiner.getproteinPoints(orf, cluster, height, scale)
 
-      var pol = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+20)
+      var pol = draw.rect(Math.abs(points["4"].x-points["0"].x)+10,Math.abs(points["4"].y-points["0"].y)+20)
                   .rx("10")
                   .ry("10")
                   .fill(orf_color)
@@ -87,6 +89,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
 
         // draw domains
         for (var j in orf.domains) {
+
           var domain = orf.domains[j];
           var color = "gray";
           if (domain.hasOwnProperty("type")) {
@@ -97,6 +100,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
 
           }
           else{color="#025699"}
+
           points=Proteiner.getDomainPoints(domain, orf, cluster, height, scale)
 
           let x=0;
@@ -108,7 +112,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
             x=points["0"].x
           }
           var dom = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+20)
-                      .x(x)
+                      .x(x+5)
                       .y(points["0"].y)
                       .rx("10")
                       .ry("10")
@@ -116,9 +120,19 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                       .stroke({width: 2})
                       .addClass("Proteiner-domain");
           $(dom.node).mouseover({domain: domain}, function(handler){
+            $("#" + Proteiner.tooltip_id).css("display", "none")
             var start = handler.data.domain.start;
             var end = handler.data.domain.end;
-            Proteiner.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end, handler);
+            let contentTooltip=""
+            for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
+              console.log(geneMatrix[geneIndex].domains[domainIndex].start,handler.data.domain.start)
+              if (geneMatrix[geneIndex].domains[domainIndex].start==handler.data.domain.start){
+                for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].domains[domainIndex].domainOptions.length; optionIndex++){
+                  console.log("TEST&/");
+                contentTooltip +='<a href="#">'+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+'</a>';
+              }
+            break}}
+            Proteiner.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end+ contentTooltip, handler);
             $(handler.target).css("stroke-width", "3px");
             $(handler.target).css("stroke", "#E11839"
 
@@ -128,7 +142,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
           $(dom.node).mouseleave(function(handler){
             $(handler.target).css("stroke-width", "2px");
             $(handler.target).css("stroke", "black");
-            $("#" + Proteiner.tooltip_id).css("display", "none");
+
           });
         }
       }
@@ -355,9 +369,13 @@ Proteiner.drawRandomClusterSVG = (function() {
 });
 
 Proteiner.showToolTip = (function(html, handler){
-  var divTooltip = $("#" + Proteiner.tooltip_id);
+  var divTooltip =""
+if (html.includes("<a") ){ divTooltip =$("#" + Proteiner.tooltip_id_protein);}
+else{divTooltip = $("#" + Proteiner.tooltip_id);}
+console.log(divTooltip)
+
   if (divTooltip.length < 1) {
-    divTooltip = $("<div id='" + Proteiner.tooltip_id + "'>");
+    divTooltip = $("<div id='" + Proteiner.tooltip_id+ "'>");
     divTooltip.css("background-color", "white");
     divTooltip.css("border", "1px solid black");
     divTooltip.css("color", "black");
@@ -366,11 +384,20 @@ Proteiner.showToolTip = (function(html, handler){
     divTooltip.css("pointer-events", "none");
     divTooltip.css("position", "fixed");
     divTooltip.css("z-index", "99999");
+    console.log(typeof(html),html.includes("<a"))
+
     divTooltip.appendTo($(document.body));
   }
+
   divTooltip.html(html);
   divTooltip.css("cursor", "default");
   divTooltip.css("top", handler.clientY + "px");
   divTooltip.css("left", handler.clientX + "px");
   divTooltip.css("display", "block");
+  if (html.includes("a") ){
+    console.log("hahah")
+    divTooltip.addClass("dropdown-content");
+
+
+  }
 });

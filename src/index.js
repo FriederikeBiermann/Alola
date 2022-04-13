@@ -316,13 +316,21 @@ else if (value_1.hasOwnProperty([regionName])){
 
 var geneMatrix=[];
 for (let geneIndex = 0; geneIndex < BGC["orfs"].length; geneIndex++) {
+  let domains=[]
+if (BGC["orfs"][geneIndex].hasOwnProperty("domains")){domains=JSON.parse(JSON.stringify(BGC["orfs"][geneIndex].domains))
+for (let domainIndex=0; domainIndex<domains.length;domainIndex++){
+  domains[domainIndex]["domainOptions"]=["Test 3","Test 4"]
+}}
+else{domains=[]}
 geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
 "position_in_BGC":geneIndex+1,
 "position":geneIndex+1,
 "ko":false,
 "displayed":true,
-"options":["Test1","Test"]});
+"options":["Test1","Test"],
+"domains":domains});
 }
+console.log(geneMatrix)
 // display BGC in BGC explorer
 let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
 
