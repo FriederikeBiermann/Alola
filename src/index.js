@@ -187,6 +187,15 @@ function changeColor(arrowId){
   }
   else{arrow.setAttribute('fill', "#E11839");
 }}
+function changeProteinColorON(ProteinId){
+ console.log(ProteinId);
+  const arrow = document.querySelector(ProteinId);
+  arrow.setAttribute('fill', "#E11839");}
+function changeProteinColorOFF(ProteinId){
+ console.log(ProteinId);
+  const arrow = document.querySelector(ProteinId);
+  arrow.setAttribute('fill', '#ffffff');
+}
 function displayTextInGeneExplorer(geneId){
 
   for (let geneIndex=0;geneIndex<BGCForDisplay["orfs"].length;geneIndex++)
@@ -340,6 +349,8 @@ for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
 
 
 $("#arrow_container").html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
+
+updateProteins(geneMatrix)
 //add click event to every gene arrow
 for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
 arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
@@ -353,12 +364,25 @@ arrow.addEventListener (
    },
    false
 );
+arrow.addEventListener (
+   'mouseenter',
+   function() {           // anonyme Funktion
+    changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein")
+   },
+   false
+);
+arrow.addEventListener (
+   'mouseleave',
+   function() {           // anonyme Funktion
+    changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein")
+   },
+   false
+);
 }
 //add drag and drop for proteins
 
 
 
-updateProteins(geneMatrix)
 //fetching svg an displaying it
 //let svg=["test",{"test":"test"}]
 let data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName)
