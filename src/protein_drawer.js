@@ -15,7 +15,7 @@ var Proteiner = {
     tooltip_id: "Proteiner-tooltip-1234567890"
 };
 
-Proteiner.drawClusterSVG = (function(cluster, height = 40) {
+Proteiner.drawClusterSVG = (function(cluster, height = 70) {
   var container = document.createElement("div");
   document.getElementById('protein_container').innerHTML = "";
   var scale = (function(val) { return parseInt(val / (1000 / height)); })
@@ -34,12 +34,37 @@ Proteiner.drawClusterSVG = (function(cluster, height = 40) {
       }
       var innerContainer= document.createElement('div');
       innerContainer.id="innerProteinContainer"+orf.locus_tag
-
+      var innerDropdownContainer=document.createElement('div');
+      innerDropdownContainer.id="innerDropdownContainer"+orf.locus_tag
+      var innerDropdownButton=document.createElement('button');
+      innerDropdownButton.id="innerDropdownButton"+orf.locus_tag
+      var innerDropdownContent=document.createElement('div');
+      innerDropdownContent.id="innerDropdownContent"+orf.locus_tag
       innerContainer.style.width=String(scale(orf.end - orf.start))+"px"
       document.getElementById('protein_container').appendChild(innerContainer).setAttribute("draggable","true");
       document.getElementById('innerProteinContainer'+orf.locus_tag).setAttribute("class","box");
-      var draw = SVG(innerContainer).size(String(scale(orf.end - orf.start))+"px", height).group();
-      var pol = draw.polygon(Proteiner.toPointString(Proteiner.getproteinPoints(orf, cluster, height, scale)))
+      document.getElementById('innerProteinContainer'+orf.locus_tag).appendChild(innerDropdownContainer);
+      document.getElementById("innerDropdownContainer"+orf.locus_tag).setAttribute("class","dropdown");
+      document.getElementById('innerDropdownContainer'+orf.locus_tag).appendChild(innerDropdownButton);
+      document.getElementById("innerDropdownButton"+orf.locus_tag).setAttribute("class","dropbtn");
+      document.getElementById('innerDropdownContainer'+orf.locus_tag).appendChild(innerDropdownContent);
+      document.getElementById("innerDropdownContent"+orf.locus_tag).setAttribute("class","dropdown-content");
+      innerDropdownContent.innerHTML=""
+      for (let geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
+        if (geneMatrix[geneIndex].id==orf.locus_tag){
+          for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].options.length;optionIndex++){
+          innerDropdownContent.innerHTML +='<a href="#">'+geneMatrix[geneIndex].options[optionIndex]+'</a>'
+        }
+      break}
+
+      }
+
+      var draw = SVG(innerDropdownButton).size(String(scale(orf.end - orf.start)+10)+"px", height).group();
+      points=Proteiner.getproteinPoints(orf, cluster, height, scale)
+
+      var pol = draw.rect(Math.abs(points["4"].x-points["0"].x)+10,Math.abs(points["4"].y-points["0"].y)+20,points["0"].x-10,points["0"].y)
+                  .rx("10")
+                  .ry("10")
                   .fill(orf_color)
                   .stroke({width: 2})
                   .addClass("Proteiner-orf");
@@ -57,8 +82,9 @@ Proteiner.drawClusterSVG = (function(cluster, height = 40) {
         $(handler.target).css("stroke", "black");
         $("#" + Proteiner.tooltip_id).css("display", "none");
       });
-
+console.log("orf",orf)
       if (orf.hasOwnProperty("domains")) {
+        console.log("domains")
         // draw domains
         for (var j in orf.domains) {
           var domain = orf.domains[j];
@@ -239,7 +265,13 @@ Proteiner.flipHorizontal = (function(points, leftBound, rightBound) {
 
   return new_points;
 });
-
+Proteiner.toPointCoordinates= (function(points) {
+  console.log(typeof(points["0"].x))
+  coordinates=[points["0"].x,points["0"].y,(points["4"].x-points["0"].x),(points["4"].y-points["0"].y)]
+  coordinates_string=points["0"].x.toString()+","+points["0"].y.toString()+","+(points["4"].x-points["0"].x).toString()+","+(points["4"].y-points["0"].y).toString()
+console.log("porint",coordinates)
+  return coordinates
+});
 Proteiner.toPointString = (function(points) {
   points_string = "";
 

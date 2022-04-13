@@ -187,27 +187,34 @@ function changeColor(arrowId){
   }
   else{arrow.setAttribute('fill', "#E11839");
 }}
+function displayTextInGeneExplorer(geneId){
+
+  for (let geneIndex=0;geneIndex<BGCForDisplay["orfs"].length;geneIndex++)
+  if (BGCForDisplay["orfs"][geneIndex].locus_tag==geneId){
+    gene_container.innerHTML =BGCForDisplay["orfs"][geneIndex].description
+  }
+}
 function formatInputRaichuKS(data){
   string_data= JSON.stringify(data);
   trimmed_data=string_data.replaceAll(',"PKS_PP"',"").replaceAll(',"ACP"',"").replaceAll(',"KS"',"").replaceAll(',"AT"',"").replaceAll(',"TE"',"").replaceAll('"PKS_PP",',"").replaceAll(',"ACP"',"").replaceAll('"KS",',"").replaceAll('"AT",',"").replaceAll('"TE",',"").replaceAll('"PKS_PP",',"").replaceAll('"ACP"',"").replaceAll('"KS"',"").replaceAll('"AT"',"").replaceAll('"TE"',"")
-  console.log(string_data,"trimmed",trimmed_data)
+
 
   return trimmed_data
 }
   function extractAntismashPredictionsFromRegionSJKS(details_data, region_index){
     let outputForRaichu=[]
-    console.log(details_data)
+
     let  region=[]
   if (details_data.hasOwnProperty(cluster_type)){region=details_data[cluster_type][region_index];}
  else{region=details_data[region_index];}
-   console.log("index",region_index)
+
 
   for (let orfIndex=0; orfIndex<region.orfs.length;orfIndex++){
     let orf=region.orfs[orfIndex];
 
     for (let moduleIndex=0; moduleIndex<orf.modules.length;moduleIndex++){
     let  module=orf.modules[moduleIndex];
-    console.log("module",module)
+
     let moduleArray=[];
     let startModule=module.start;
     let endModule=module.end;
@@ -237,9 +244,9 @@ function formatInputRaichuKS(data){
           else{nameDomain="KR"}}
           else{nameDomain=domain.abbreviation}
           if (domain.abbreviation==""){ nameDomain=domain.type}
-          console.log("domain", nameDomain)
+
           domainArray.push(nameDomain)
-          console.log(domain,domain.predictions)
+
           if (domain.abbreviation=="AT"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ console.log("34",domain);if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}}}
           else{substrate=malonylcoa}
         }}}
@@ -260,7 +267,7 @@ domainArray.push("DH","ER")
       }
 
       moduleArray.push(domainArray)}
-      console.log( moduleArray)
+
         if (domainArray.includes("TE")){typeModule= "terminator_module";
       moduleArray.push(nameModule,typeModule,substrate);
       moduleArray.push(domainArray)}
@@ -270,7 +277,7 @@ domainArray.push("DH","ER")
 
   }
 
-}console.log("xyz",outputForRaichu);
+}
 return outputForRaichu}
 
 
@@ -283,15 +290,29 @@ let BGC = Object.keys(recordData[0].regions[regionNumber]).reduce(function(obj, 
 }, {});
 
 for (const [key_1, value_1] of Object.entries(details_data)) {
+  console.log("keys",key_1,value_1)
   if (value_1.id==regionName){
 
     for (let orf_index =0; orf_index<value_1.orfs.length; orf_index++){
       orf=value_1.orfs[orf_index]
+      console.log("345",orf.domains)
       for (let BGC_orf_index =0; BGC_orf_index<BGC.orfs.length; BGC_orf_index++){
       if (orf.id==BGC.orfs[BGC_orf_index].locus_tag){
       BGC.orfs[BGC_orf_index]["domains"]=orf.domains
     }}
-}}}
+}}
+else if (value_1.hasOwnProperty([regionName])){
+  for (let orf_index =0; orf_index<value_1[regionName].orfs.length; orf_index++){
+    orf=value_1[regionName].orfs[orf_index]
+    console.log("345",orf.domains)
+    for (let BGC_orf_index =0; BGC_orf_index<BGC.orfs.length; BGC_orf_index++){
+    if (orf.id==BGC.orfs[BGC_orf_index].locus_tag){
+    BGC.orfs[BGC_orf_index]["domains"]=orf.domains
+  }}
+}
+
+}
+}
 
 
 var geneMatrix=[];
@@ -300,7 +321,8 @@ geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
 "position_in_BGC":geneIndex+1,
 "position":geneIndex+1,
 "ko":false,
-"displayed":true});
+"displayed":true,
+"options":["Test1","Test"]});
 }
 // display BGC in BGC explorer
 let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
@@ -320,7 +342,7 @@ const arrow = document.querySelector(arrow_id);
 arrow.addEventListener (
    'click',
    function() {           // anonyme Funktion
-    setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
+    displayTextInGeneExplorer(geneMatrix[geneIndex].id);setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
    },
    false
 );
