@@ -157,15 +157,29 @@ function removePaddingBGC(BGC){
       $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(proteinsForDisplay))));
       addDragDrop();
     }
+    function setKoStatus(geneIndex, domainIndex,geneMatrix){
+
+
+          if (geneMatrix[geneIndex].domains[domainIndex].ko === false){
+            geneMatrix[geneIndex].domains[domainIndex].ko= true;
+
+
+
+          }
+        else {geneMatrix[geneIndex].domains[domainIndex].ko = false;}
+    }
     function setDisplayedStatus(id, geneMatrix) {
       id.slice(-11,-1);
       for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++){
         if (geneMatrix[geneIndex].id === id){
           if (geneMatrix[geneIndex].displayed === false){
             geneMatrix[geneIndex].displayed = true;
+            geneMatrix[geneIndex].ko= true;
+
 
           }
-        else {geneMatrix[geneIndex].displayed = false;}
+        else {geneMatrix[geneIndex].displayed = false;
+        geneMatrix[geneIndex].ko= false;}
         }
       }
 
@@ -186,6 +200,17 @@ function changeColor(arrowId){
   arrow.setAttribute('fill', '#ffffff');
   }
   else{arrow.setAttribute('fill', "#E11839");
+}}
+function changeDomainColor(domainId){
+   console.log(domainId)
+  const domainObject = document.querySelector(domainId);
+
+  const domain = document.querySelector(domainId);
+
+  if (domain.getAttribute("fill")=="#E11839"){
+  updateProteins(geneMatrix);
+  }
+  else{domain.setAttribute('fill', "#E11839");
 }}
 function changeProteinColorON(ProteinId){
  console.log(ProteinId);
@@ -328,7 +353,8 @@ for (let geneIndex = 0; geneIndex < BGC["orfs"].length; geneIndex++) {
   let domains=[]
 if (BGC["orfs"][geneIndex].hasOwnProperty("domains")){domains=JSON.parse(JSON.stringify(BGC["orfs"][geneIndex].domains))
 for (let domainIndex=0; domainIndex<domains.length;domainIndex++){
-  domains[domainIndex]["domainOptions"]=["Test 3","Test 4"]
+  domains[domainIndex]["domainOptions"]=["Test 3","Test 4"];
+  domains[domainIndex]["ko"]=false;
 }}
 else{domains=[]}
 geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
@@ -354,7 +380,7 @@ updateProteins(geneMatrix)
 //add click event to every gene arrow
 for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
 arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
-
+protein_id=("#"+geneMatrix[geneIndex].id+"_protein").replace(".","_")
 const arrow = document.querySelector(arrow_id);
 
 arrow.addEventListener (
@@ -378,6 +404,18 @@ arrow.addEventListener (
    },
    false
 );
+for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
+ domain=geneMatrix[geneIndex].domains[domainIndex]
+  domainId="#"+geneMatrix[geneIndex].id+"_domain_"+domain.sequence;
+  console.log(domainId)
+  const domainObject = document.querySelector(domainId);
+  domainObject.addEventListener (
+     'click',
+     function() {           // anonyme Funktion
+     changeDomainColor("#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);setKoStatus(geneIndex, domainIndex,geneMatrix)},
+     false
+  );
+  }
 }
 //add drag and drop for proteins
 

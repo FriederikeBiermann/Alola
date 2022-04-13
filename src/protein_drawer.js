@@ -119,6 +119,8 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                       .fill(color)
                       .stroke({width: 2})
                       .addClass("Proteiner-domain");
+          console.log(domain)
+          dom.node.id= orf["locus_tag"]+"_domain_"+domain.sequence;
           $(dom.node).mouseover({domain: domain}, function(handler){
             $("#" + Proteiner.tooltip_id).css("display", "none")
             var start = handler.data.domain.start;
