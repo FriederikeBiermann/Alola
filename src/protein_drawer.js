@@ -62,7 +62,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
       var draw = SVG(innerDropdownButton).size(String(scale(orf.end - orf.start)+10)+"px", height).group();
       points=Proteiner.getproteinPoints(orf, cluster, height, scale)
 
-      var pol = draw.rect(Math.abs(points["4"].x-points["0"].x)+10,Math.abs(points["4"].y-points["0"].y)+20,points["0"].x-10,points["0"].y)
+      var pol = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+20)
                   .rx("10")
                   .ry("10")
                   .fill(orf_color)
@@ -72,7 +72,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
       $(pol.node).mouseover({orf: orf}, function(handler){
         var start = handler.data.orf.start;
         var end = handler.data.orf.end;
-        Proteiner.showToolTip("ORF: " + handler.data.orf.locus_tag + "<br/>" + start + " - " + end, handler);
+        Proteiner.showToolTip("ORF: " + handler.data.orf.locus_tag + "<br/>", handler);
         $(handler.target).css("stroke-width", "3px");
         $(handler.target).css("stroke", "#E11839");
         handler.stopPropagation();
@@ -82,9 +82,9 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
         $(handler.target).css("stroke", "black");
         $("#" + Proteiner.tooltip_id).css("display", "none");
       });
-console.log("orf",orf)
+
       if (orf.hasOwnProperty("domains")) {
-        console.log("domains")
+
         // draw domains
         for (var j in orf.domains) {
           var domain = orf.domains[j];
@@ -97,9 +97,23 @@ console.log("orf",orf)
 
           }
           else{color="#025699"}
-          var dom = draw.polygon(Proteiner.toPointString(Proteiner.getDomainPoints(domain, orf, cluster, height, scale)))
+          points=Proteiner.getDomainPoints(domain, orf, cluster, height, scale)
+
+          let x=0;
+          if (points["0"].x>points["4"].x){
+            x=points["4"].x
+
+          }
+          else{
+            x=points["0"].x
+          }
+          var dom = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+20)
+                      .x(x)
+                      .y(points["0"].y)
+                      .rx("10")
+                      .ry("10")
                       .fill(color)
-                      .stroke({width: 0})
+                      .stroke({width: 2})
                       .addClass("Proteiner-domain");
           $(dom.node).mouseover({domain: domain}, function(handler){
             var start = handler.data.domain.start;
@@ -112,7 +126,7 @@ console.log("orf",orf)
             handler.stopPropagation();
           });
           $(dom.node).mouseleave(function(handler){
-            $(handler.target).css("stroke-width", "0px");
+            $(handler.target).css("stroke-width", "2px");
             $(handler.target).css("stroke", "black");
             $("#" + Proteiner.tooltip_id).css("display", "none");
           });

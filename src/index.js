@@ -247,7 +247,7 @@ function formatInputRaichuKS(data){
 
           domainArray.push(nameDomain)
 
-          if (domain.abbreviation=="AT"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ console.log("34",domain);if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}}}
+          if (domain.abbreviation=="AT"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}}}
           else{substrate=malonylcoa}
         }}}
 
@@ -290,12 +290,11 @@ let BGC = Object.keys(recordData[0].regions[regionNumber]).reduce(function(obj, 
 }, {});
 
 for (const [key_1, value_1] of Object.entries(details_data)) {
-  console.log("keys",key_1,value_1)
+
   if (value_1.id==regionName){
 
     for (let orf_index =0; orf_index<value_1.orfs.length; orf_index++){
       orf=value_1.orfs[orf_index]
-      console.log("345",orf.domains)
       for (let BGC_orf_index =0; BGC_orf_index<BGC.orfs.length; BGC_orf_index++){
       if (orf.id==BGC.orfs[BGC_orf_index].locus_tag){
       BGC.orfs[BGC_orf_index]["domains"]=orf.domains
