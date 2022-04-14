@@ -24,15 +24,9 @@ if __name__ == "__main__":
 
 
     #Calculate structure directly from input PKS cluster
-    erythromycin_cluster = [['module_1', 'starter_module', 'SC(=O)CC'],
-                           ['module_2', 'elongation_module', 'methylmalonylcoa', ['KR_B2']],
-                           ['module_3', 'elongation_module', 'methylmalonylcoa', ['KR_A1']],
-                           ['module_4', 'elongation_module', 'methylmalonylcoa', ['KR_C2']],
-                           ['module_5', 'elongation_module', 'methylmalonylcoa', ['KR', 'DH', 'ER']],
-                           ['module_6', 'elongation_module', 'methylmalonylcoa', ['KR_A1']],
-                           ['module_7', 'terminator_module', 'methylmalonylcoa', ['KR_A1']]]
+    erythromycin_cluster = [['module_3_0', 'starter_module', 'CCC(S)=O'], ['module_3_1', 'elongation_module', 'methylmalonylcoa', ['KS', 'AT', 'KR_B2', 'PKS_PP']], ['module_3_2', 'elongation_module', 'methylmalonylcoa', ['KS', 'AT', 'KR_A1', 'PKS_PP']], ['module_4_0', 'elongation_module', 'methylmalonylcoa', ['KS', 'AT', 'ACP']], ['module_4_1', 'elongation_module', 'methylmalonylcoa', ['KS', 'AT', 'DH', 'ER', 'KR', 'ACP']], ['module_5_0', 'elongation_module', 'methylmalonylcoa', ['KS', 'AT', 'KR_A1', 'PKS_PP']], ['module_5_1', 'terminator_module', 'methylmalonylcoa', ['KS', 'AT', 'KR_A1', 'PKS_PP', 'TE']], ['module_7_0', 'terminator_module', 'malonylcoa', ['TE']]]
     final_product = pks_cluster_to_structure(erythromycin_cluster)
-    
+    print (final_product)
     #Visualise PKS cluster
     draw_pks_cluster(erythromycin_cluster)
 

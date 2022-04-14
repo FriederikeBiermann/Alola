@@ -33,7 +33,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
 
 
 
-      pol.node.id= orf["locus_tag"]+"_gene_arrow";
+      pol.node.id= (orf["locus_tag"]+"_gene_arrow").replace(".","_");
 
       $(pol.node).mouseover({orf: orf}, function(handler){
         var start = handler.data.orf.start;

@@ -1,8 +1,13 @@
 
-regionName="r1c4"
+regionName="r1c3"
+cluster_type=  "nrpspks"
 let items = document.querySelectorAll('.test-container .box')
 var dragSrcEl = null;
-
+function removeAllInstances(arr, item) {
+   for (var i = arr.length; i--;) {
+     if (arr[i] === item) arr.splice(i, 1);
+   }
+}
 function handleDragStart(e) {
   this.style.opacity = '0.4';
 
@@ -141,7 +146,7 @@ function removePaddingBGC(BGC){
       geneMatrix.sort((a, b) => {
           return a.position - b.position;
       });
-  
+
       for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].displayed==true){
 
@@ -182,13 +187,43 @@ function changeColor(arrowId){
   }
   else{arrow.setAttribute('fill', "#E11839");
 }}
-  function extractAntismashPredictionsFromRegionSJ(details_data, region_index){
+function changeProteinColorON(ProteinId){
+ console.log(ProteinId);
+  const arrow = document.querySelector(ProteinId);
+  arrow.setAttribute('fill', "#E11839");}
+function changeProteinColorOFF(ProteinId){
+ console.log(ProteinId);
+  const arrow = document.querySelector(ProteinId);
+  arrow.setAttribute('fill', '#ffffff');
+}
+function displayTextInGeneExplorer(geneId){
+
+  for (let geneIndex=0;geneIndex<BGCForDisplay["orfs"].length;geneIndex++)
+  if (BGCForDisplay["orfs"][geneIndex].locus_tag==geneId){
+    gene_container.innerHTML =BGCForDisplay["orfs"][geneIndex].description
+  }
+}
+function formatInputRaichuKS(data){
+  string_data= JSON.stringify(data);
+  trimmed_data=string_data.replaceAll(',"PKS_PP"',"").replaceAll(',"ACP"',"").replaceAll(',"KS"',"").replaceAll(',"AT"',"").replaceAll(',"TE"',"").replaceAll('"PKS_PP",',"").replaceAll(',"ACP"',"").replaceAll('"KS",',"").replaceAll('"AT",',"").replaceAll('"TE",',"").replaceAll('"PKS_PP",',"").replaceAll('"ACP"',"").replaceAll('"KS"',"").replaceAll('"AT"',"").replaceAll('"TE"',"")
+
+
+  return trimmed_data
+}
+  function extractAntismashPredictionsFromRegionSJKS(details_data, region_index){
     let outputForRaichu=[]
-   let  region=details_data[region_index];
+
+    let  region=[]
+  if (details_data.hasOwnProperty(cluster_type)){region=details_data[cluster_type][region_index];}
+ else{region=details_data[region_index];}
+
+
   for (let orfIndex=0; orfIndex<region.orfs.length;orfIndex++){
     let orf=region.orfs[orfIndex];
+
     for (let moduleIndex=0; moduleIndex<orf.modules.length;moduleIndex++){
     let  module=orf.modules[moduleIndex];
+
     let moduleArray=[];
     let startModule=module.start;
     let endModule=module.end;
@@ -200,9 +235,11 @@ function changeColor(arrowId){
     let starterSubstrate="OC(=O)CC(S)=O"
     for (let domainIndex=0; domainIndex<orf.domains.length;domainIndex++){
       let domain=orf.domains[domainIndex];
+
         if (startModule>=domain.start && domain.start>=endModule || endModule>=domain.start && domain.start>=startModule){
+
           if (domain.abbreviation=="KR"){
-            if (domain.predictions !=[]){
+            if (domain.predictions.length!=0){
 
               let domainActivity=domain.predictions[0][1]
               if (domainActivity=="inactive"){continue}
@@ -211,13 +248,15 @@ function changeColor(arrowId){
 
              nameDomain="KR_"+domainStereochemistry
               }
-
+              else{nameDomain="KR"}
             }
-
+          else{nameDomain="KR"}}
+          else{nameDomain=domain.abbreviation}
           if (domain.abbreviation==""){ nameDomain=domain.type}
 
           domainArray.push(nameDomain)
-          if (domain.abbreviation=="AT"){if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}
+
+          if (domain.abbreviation=="AT"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}}}
           else{substrate=malonylcoa}
         }}}
 
@@ -226,7 +265,18 @@ function changeColor(arrowId){
       moduleArray.push(nameModule,typeModule,starterSubstrate)}
         if (domainArray.includes("KS") && !(domainArray.includes("TE"))){typeModule= "elongation_module";
       moduleArray.push(nameModule,typeModule,substrate);
+      if (domainArray.includes ("DH")&&domainArray.includes ("ER")){
+removeAllInstances(domainArray,"DH")
+removeAllInstances(domainArray,"ER");
+domainArray.push("DH","ER")
+      }
+      else if (domainArray.includes("DH")){
+        removeAllInstances(domainArray,"DH");
+        domainArray.push("DH");
+      }
+
       moduleArray.push(domainArray)}
+
         if (domainArray.includes("TE")){typeModule= "terminator_module";
       moduleArray.push(nameModule,typeModule,substrate);
       moduleArray.push(domainArray)}
@@ -236,9 +286,10 @@ function changeColor(arrowId){
 
   }
 
-}}
-return outputForRaichu
 }
+return outputForRaichu}
+
+
 addDragDrop()
 //create record for diplaying BGC in BGC explorer
 let regionNumber=selectRegion(recordData, regionName)
@@ -248,6 +299,7 @@ let BGC = Object.keys(recordData[0].regions[regionNumber]).reduce(function(obj, 
 }, {});
 
 for (const [key_1, value_1] of Object.entries(details_data)) {
+
   if (value_1.id==regionName){
 
     for (let orf_index =0; orf_index<value_1.orfs.length; orf_index++){
@@ -256,17 +308,38 @@ for (const [key_1, value_1] of Object.entries(details_data)) {
       if (orf.id==BGC.orfs[BGC_orf_index].locus_tag){
       BGC.orfs[BGC_orf_index]["domains"]=orf.domains
     }}
-}}}
+}}
+else if (value_1.hasOwnProperty([regionName])){
+  for (let orf_index =0; orf_index<value_1[regionName].orfs.length; orf_index++){
+    orf=value_1[regionName].orfs[orf_index]
+    console.log("345",orf.domains)
+    for (let BGC_orf_index =0; BGC_orf_index<BGC.orfs.length; BGC_orf_index++){
+    if (orf.id==BGC.orfs[BGC_orf_index].locus_tag){
+    BGC.orfs[BGC_orf_index]["domains"]=orf.domains
+  }}
+}
+
+}
+}
 
 
 var geneMatrix=[];
 for (let geneIndex = 0; geneIndex < BGC["orfs"].length; geneIndex++) {
+  let domains=[]
+if (BGC["orfs"][geneIndex].hasOwnProperty("domains")){domains=JSON.parse(JSON.stringify(BGC["orfs"][geneIndex].domains))
+for (let domainIndex=0; domainIndex<domains.length;domainIndex++){
+  domains[domainIndex]["domainOptions"]=["Test 3","Test 4"]
+}}
+else{domains=[]}
 geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
 "position_in_BGC":geneIndex+1,
 "position":geneIndex+1,
 "ko":false,
-"displayed":true});
+"displayed":true,
+"options":["Test1","Test"],
+"domains":domains});
 }
+console.log(geneMatrix)
 // display BGC in BGC explorer
 let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
 
@@ -276,16 +349,32 @@ for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
 
 
 $("#arrow_container").html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
+
+updateProteins(geneMatrix)
 //add click event to every gene arrow
 for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-arrow_id="#"+geneMatrix[geneIndex].id+"_gene_arrow"
+arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
 
 const arrow = document.querySelector(arrow_id);
 
 arrow.addEventListener (
    'click',
    function() {           // anonyme Funktion
-    setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
+    displayTextInGeneExplorer(geneMatrix[geneIndex].id);setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
+   },
+   false
+);
+arrow.addEventListener (
+   'mouseenter',
+   function() {           // anonyme Funktion
+    changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein")
+   },
+   false
+);
+arrow.addEventListener (
+   'mouseleave',
+   function() {           // anonyme Funktion
+    changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein")
    },
    false
 );
@@ -294,15 +383,18 @@ arrow.addEventListener (
 
 
 
-updateProteins(geneMatrix)
 //fetching svg an displaying it
 //let svg=["test",{"test":"test"}]
-let data=extractAntismashPredictionsFromRegionSJ(details_data, regionName)
-let data_string=JSON.stringify(data);
+let data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName)
+console.log( "test",data)
+//data=[['module_1','starter_module','SC(=O)CC'],['module_2','elongation_module','methylmalonylcoa',['KR_B2']],['module_3','elongation_module','methylmalonylcoa',['KR_A1']],['module_4','elongation_module','methylmalonylcoa',['KR_C2']],['module_5','elongation_module','methylmalonylcoa',['KR','DH','ER']],['module_6','elongation_module','methylmalonylcoa',['KR_A1']],['module_7','terminator_module','methylmalonylcoa',['KR_A1']]];
+data_string=formatInputRaichuKS(data)
+console.log( data);
+//data_string='[["module_3_0","starter_module","CCC(S)=O"],["module_3_1","elongation_module","methylmalonylcoa",["KR_B2"]],["module_3_2","elongation_module","methylmalonylcoa",["KR_A1"]],["module_4_0","elongation_module","methylmalonylcoa",[]],["module_4_1","elongation_module","methylmalonylcoa",["DH","ER","KR"]],["module_5_0","elongation_module","methylmalonylcoa",["KR_A1"]],["module_5_1","terminator_module","methylmalonylcoa",["KR_A1"]]]'
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 fetch(url+data_string)
 .then(response => {const thing=response.json();
 return thing})
       .then((data) => {let container = document.getElementById("structure_container");
-
+      console.log(data.svg)
       container.innerHTML = data.svg;})
