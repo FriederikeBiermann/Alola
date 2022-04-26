@@ -16,7 +16,9 @@ function handleDragStart(e) {
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/html', this.innerHTML);
 }
+function attach_hanging_svgs(hanging_svgs){
 
+}
 function handleDragOver(e) {
   if (e.preventDefault) {
     e.preventDefault();
@@ -255,7 +257,7 @@ function formatInputRaichuKS(data){
     let nameModule="module_"+orfIndex+ "_"+moduleIndex
     let nameDomain="n"
     let domainArray=[];
-    let typeModule= "starter_module";
+    let typeModule= "starter_module_pks";
     let substrate="malonylcoa"
     let starterSubstrate="OC(=O)CC(S)=O"
     for (let domainIndex=0; domainIndex<orf.domains.length;domainIndex++){
@@ -285,10 +287,10 @@ function formatInputRaichuKS(data){
           else{substrate=malonylcoa}
         }}}
 
-        if (domainArray.includes("AT") && !(domainArray.includes("KS")) && !("TE" in domainArray)){typeModule= "starter_module";
+        if (domainArray.includes("AT") && !(domainArray.includes("KS")) && !("TE" in domainArray)){typeModule= "starter_module_pks";
          starterSubstrate= nameToStructure[substrate];
       moduleArray.push(nameModule,typeModule,starterSubstrate)}
-        if (domainArray.includes("KS") && !(domainArray.includes("TE"))){typeModule= "elongation_module";
+        if (domainArray.includes("KS") && !(domainArray.includes("TE"))){typeModule= "elongation_module_pks";
       moduleArray.push(nameModule,typeModule,substrate);
       if (domainArray.includes ("DH")&&domainArray.includes ("ER")){
 removeAllInstances(domainArray,"DH")
@@ -302,7 +304,7 @@ domainArray.push("DH","ER")
 
       moduleArray.push(domainArray)}
 
-        if (domainArray.includes("TE")){typeModule= "terminator_module";
+        if (domainArray.includes("TE")){typeModule= "terminator_module_pks";
       moduleArray.push(nameModule,typeModule,substrate);
       moduleArray.push(domainArray)}
       if (moduleArray.length != 0){outputForRaichu.push(moduleArray)}
@@ -430,9 +432,13 @@ data_string=formatInputRaichuKS(data)
 console.log( data);
 //data_string='[["module_3_0","starter_module","CCC(S)=O"],["module_3_1","elongation_module","methylmalonylcoa",["KR_B2"]],["module_3_2","elongation_module","methylmalonylcoa",["KR_A1"]],["module_4_0","elongation_module","methylmalonylcoa",[]],["module_4_1","elongation_module","methylmalonylcoa",["DH","ER","KR"]],["module_5_0","elongation_module","methylmalonylcoa",["KR_A1"]],["module_5_1","terminator_module","methylmalonylcoa",["KR_A1"]]]'
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
+let list_hanging_svg=[]
 fetch(url+data_string)
 .then(response => {const thing=response.json();
 return thing})
       .then((data) => {let container = document.getElementById("structure_container");
       console.log(data.svg)
-      container.innerHTML = data.svg;})
+      list_hanging_svg=data.hanging_svg;
+      container.innerHTML = data.svg[2][0];
+      console.log( data.hanging_svg[2][0])
+    })

@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from matplotlib.patches import FancyArrow
 from copy import copy
+from pikachu import *
 
 KR_NO_KETOREDUCTASE_ACTIVITY = ['KR_C1', 'KR_C2', 'KR_inactive']
 
