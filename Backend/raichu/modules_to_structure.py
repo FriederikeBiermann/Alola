@@ -102,7 +102,10 @@ def cluster_to_structure(modules, visualization_mechanism=False,
         else:
             chain_intermediate = starter_unit
         if draw_structures_per_module:
-            drawing = RaichuDrawer(chain_intermediate, dont_show=True)
+            drawing = RaichuDrawer(chain_intermediate, dont_show=True, save_svg_string=True)
+            print(drawing)
+     
+            
             list_drawings_per_module.append([drawing])
 
     # If starter module = NRPS module: find SMILES in PARAS.txt and
@@ -120,7 +123,9 @@ def cluster_to_structure(modules, visualization_mechanism=False,
             copy_chain_intermediate.find_cycles()
             copy_attached = attach_to_domain_nrp(copy_chain_intermediate, 'PCP')
             copy_attached.refresh_structure(find_cycles=True)
-            drawing = RaichuDrawer(copy_attached, dont_show=True)
+            drawing = RaichuDrawer(copy_attached, dont_show=False, save_svg="test1.svg")
+     
+            
             list_drawings_per_module.append([drawing])
 
     # Iterate over remaining modules
@@ -243,7 +248,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                                               draw_mechanism_per_module)
 
             if draw_structures_per_module and attach_to_acp:
-                drawing = RaichuDrawer(chain_intermediate, dont_show=True)
+                drawing = RaichuDrawer(chain_intermediate, dont_show=True, save_svg_string=True)
                 list_drawings_per_module.append([drawing])
 
         # If the module is an NRPS module:
@@ -303,7 +308,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                     copy_attached.refresh_structure()
                     copy_attached.set_connectivities()
                     copy_attached.find_cycles()
-                    drawing = RaichuDrawer(copy_attached, dont_show=True)
+                    drawing = RaichuDrawer(copy_attached, dont_show=True, save_svg_string=True)
                     list_drawings_per_module.append([drawing])
 
                 elif visualization_mechanism and attach_to_acp:
@@ -335,7 +340,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                                 copy_attached.set_connectivities()
                                 copy_attached.find_cycles()
                                 drawing = RaichuDrawer(copy_attached,
-                                                       dont_show=True)
+                                                       dont_show=True, save_svg_string=True)
                                 list_drawings_per_module.append([drawing])
                         elif visualization_mechanism and attach_to_acp:
                             copy_chain_intermediate = chain_intermediate.deepcopy()
@@ -388,7 +393,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                                 copy_attached.set_connectivities()
                                 copy_attached.find_cycles()
                                 drawing = RaichuDrawer(copy_attached,
-                                                       dont_show=True)
+                                                       dont_show=True, save_svg_string=True)
                                 list_drawings_per_module.append([drawing])
                         elif visualization_mechanism and attach_to_acp:
                             copy_chain_intermediate = chain_intermediate.deepcopy()

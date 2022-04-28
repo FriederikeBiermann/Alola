@@ -4,7 +4,7 @@ from typing import List
 import ast
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
-from visualize_cluster import *
+from raichu.modules_to_structure import *
 
 from starlette.middleware import Middleware
 app = FastAPI()
@@ -21,7 +21,7 @@ middleware = [
 ]
 
 app = FastAPI(middleware=middleware)
-from visualize_pks_cluster import *
+
 @app.get("/")
 async def root():
   return {"message":"This is the first Version of the Alola Api for integrating Alola into the web",
@@ -39,19 +39,12 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     svg=svg_string_from_structure(final_product).replace("\n","").replace("\"","'")
     global global_final_polyketide_Drawer_object
 
-
-    # Save (don't show!) drawings of the chain intermediate per module
     list_drawings_per_module = cluster_to_structure(antismash_input_transformed,
     attach_to_acp=True, draw_structures_per_module=True)
-    # Close all matplotlib windows that were still open when generating
-    # the chain intermediate Drawer objects
-    plt.close('all')
 
-    # Build list of all modules comprised in the cluster, used to draw
-    # module/domain architecture later
+
     list_svgs=[]
     for drawing_list in list_drawings_per_module:
         for drawing in drawing_list:
-            drawing.save_svg(str(drawing)+".svg")
-            list_svgs+=[[drawing.save_svg_string().replace("\n","").replace("\"","'")]]
-    return {"svg":str(svg), "hanging_svg": list_svgs}
+            list_svgs+=[[drawing.svg_string.replace("\n","").replace("\"","'")]]
+    return {"svg":svg, "hanging_svg": list_svgs}

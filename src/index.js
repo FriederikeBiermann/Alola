@@ -437,8 +437,13 @@ fetch(url+data_string)
 .then(response => {const thing=response.json();
 return thing})
       .then((data) => {let container = document.getElementById("structure_container");
-      console.log(data.svg)
-      list_hanging_svg=data.hanging_svg;
-      container.innerHTML = data.svg[2][0];
-      console.log( data.hanging_svg[2][0])
+      console.log("349u340",data.svg, );
+
+      //list_hanging_svg=data.hanging_svg;
+      container.innerHTML = data.svg;
+      for (let intermediateIndex=0; intermediateIndex<data.hanging_svg.length;intermediateIndex++){
+        intermediate=data.hanging_svg[intermediateIndex]
+        attachToACP(intermediate,intermediateIndex)
+      }
+
     })

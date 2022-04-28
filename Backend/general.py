@@ -1,7 +1,7 @@
 """
 This script contains examples of the general functionalities of RAIChU.
 """
-from visualize_cluster import *
+from raichu.modules_to_structure import *
 from pikachu.general import *
 
 if __name__ == "__main__":
@@ -14,8 +14,8 @@ if __name__ == "__main__":
                            ['module_5', 'elongation_module_pks', 'methylmalonylcoa', ['KR', 'DH', 'ER']],
                            ['module_6', 'elongation_module_pks', 'methylmalonylcoa', ['KR_A1']],
                            ['module_7', 'terminator_module_pks', 'methylmalonylcoa', ['KR_A1']]]
- 
-    global global_final_polyketide_Drawer_object
+
+
 
 
     # Save (don't show!) drawings of the chain intermediate per module
@@ -26,27 +26,25 @@ if __name__ == "__main__":
 
     # Close all matplotlib windows that were still open when generating
     # the chain intermediate Drawer objects
-    plt.close('all')
+    #plt.close('all')
 
-  
+
     # Build list of all modules comprised in the cluster, used to draw
     # module/domain architecture later
     list_svgs=[]
     print (list_drawings_per_module)
-    
+
+
     for drawing_list in list_drawings_per_module:
         for drawing in drawing_list:
-            for atom in drawing.structure.graph:
-                atom.draw.colour = 'black'
-                if atom.annotations.domain_type:
-                    atom.annotations.set_annotation('domain_type', ' ')
-            print (drawing)
-            drawing.show_molecule()
-            list_svgs+=[[drawing.save_svg_string().replace("\n","").replace("\"","'")]]
-                    
+
+
+            list_svgs+=[[drawing.svg_string.replace("\n","").replace("\"","'")]]
+    drawing.show_molecule()
     print (list_svgs)
     #Visualise PKS cluster (interactive mode)
-
+    test=drawing.show_molecule()
+    print (test)
     #Visualise NRPS cluster
     nrps_cluster = [['NRPS module 1', 'starter_module_nrps', 'd-threonine'],
                     ['NRPS module 2', 'elongation_module_nrps', 'valine', []],

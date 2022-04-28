@@ -69,7 +69,6 @@ def draw_cluster(pks_cluster, interactive=False, save_fig = False):
     attach_to_acp=True, draw_structures_per_module=True)
 
 
-
     # Close all matplotlib windows that were still open when generating
     # the chain intermediate Drawer objects
     plt.close('all')

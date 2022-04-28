@@ -1,13 +1,15 @@
 from pikachu.drawing.drawing import *
 from pikachu.math_functions import *
 from pikachu.smiles.smiles import Smiles
+from pprint import pprint
+from io import StringIO
 
 from raichu.find_central_chain import find_central_chain
 
 
 class RaichuDrawer(Drawer):
     def __init__(self, structure, options=None, save_png=None, dont_show=False,
-                 coords_only=False, dpi=100):
+                 coords_only=False, dpi=100, save_svg = None, save_svg_string =None):
         self.dont_show = dont_show
         self.dpi = dpi
         if options == None:
@@ -20,6 +22,15 @@ class RaichuDrawer(Drawer):
             # Check if filename is valid
             assert save_png.endswith('.png')
             self.save_png = save_png
+        if save_svg_string == None:
+            self.save_svg_string = None
+        if save_svg == None:
+            self.save_svg = None
+
+        else:
+            # Check if filename is valid
+            assert save_svg.endswith('.svg')
+            self.save_svg = save_svg
         super().__init__(structure, options=None, coords_only=False)
 
     def finetune_overlap_resolution(self, masked_bonds=None):
@@ -353,18 +364,36 @@ class RaichuDrawer(Drawer):
                          horizontalalignment=horizontal_alignment,
                          verticalalignment='center',
                          color=atom.draw.colour)
-
+        if self.save_svg_string:
+                svg_string = StringIO()
+                plt.savefig(svg_string, format='svg')
+                svg = svg_string.getvalue()
+                
+                self.svg_string=svg
         # If a png filename is included in the initialization of the
         # Raichu_drawer object, don't show the structure, but do save it as a
         # png image to the provided filename
         if self.dont_show == True:
             return self
-        elif self.save_png == None and self.dont_show == False:
+        elif self.save_png == None and self.dont_show == False and self.save_svg == None:
             plt.show()
         else:
-            plt.savefig(self.save_png)
+            if self.save_png:
+                plt.savefig(self.save_png)
+            elif self.save_svg:
+                plt.savefig(self.save_svg)
+
+            elif self.save_svg_string:
+                svg_string = StringIO()
+                plt.savefig(svg_string, format='svg')
+                svg = svg_string.getvalue()
+       
+                print (svg)
+                
+                return svg
             plt.clf()
-            plt.close()
+            plt.close(plt.gcf())
+            plt.close('all')
 
     def process_structure(self):
         self.position()
@@ -900,6 +929,18 @@ class RaichuDrawer(Drawer):
             delta_x = 0.0
 
         return delta_x
+    @staticmethod
+    def save_svg_string_raichu():
+        svg_string = StringIO()
+        plt.savefig(svg_string, format='svg')
+        svg = svg_string.getvalue()
+
+        plt.clf()
+        plt.close(plt.gcf())
+        plt.close('all')
+        
+        return svg
+
 
 def get_angle(vector1, vector2):
     difference = Vector.subtract_vectors(vector1, vector2)
