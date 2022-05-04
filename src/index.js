@@ -1,8 +1,33 @@
 
 regionName="r1c3"
 cluster_type=  "nrpspks"
+let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
 let items = document.querySelectorAll('.test-container .box')
 var dragSrcEl = null;
+function fetchFromRaichu(details_data, regionName,geneMatrix){//fetching svg an displaying it
+let data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName)
+let data_string=formatInputRaichuKS(data)
+let url="http://127.0.0.1:8000/api/alola?antismash_input=";
+let list_hanging_svg=[]
+fetch(url+data_string)
+.then(response => {const thing=response.json();
+return thing})
+      .then((data) => {let container = document.getElementById("structure_container");
+
+
+      //list_hanging_svg=data.hanging_svg;
+      container.innerHTML = formatSVG(data.svg);
+      acpList=obtainACPList(geneMatrix)
+      for (let intermediateIndex=0; intermediateIndex<data.hanging_svg.length;intermediateIndex++){
+        intermediate=data.hanging_svg[intermediateIndex]
+        let intermediate_container = document.getElementById('innerIntermediateContainer'+acpList[intermediateIndex])
+        console.log(intermediate)
+
+        intermediate_container.innerHTML = formatSVG(intermediate);
+
+      }
+
+    })}
 function removeAllInstances(arr, item) {
    for (var i = arr.length; i--;) {
      if (arr[i] === item) arr.splice(i, 1);
@@ -16,9 +41,6 @@ function handleDragStart(e) {
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/html', this.innerHTML);
 }
-function attach_hanging_svgs(hanging_svgs){
-
-}
 function handleDragOver(e) {
   if (e.preventDefault) {
     e.preventDefault();
@@ -28,15 +50,12 @@ function handleDragOver(e) {
 
   return false;
 }
-
 function handleDragEnter(e) {
   this.classList.add('over');
 }
-
 function handleDragLeave(e) {
   this.classList.remove('over');
 }
-
 function handleDrop(e) {
   if (e.stopPropagation) {
     e.stopPropagation(); // stops the browser from redirecting.
@@ -87,12 +106,14 @@ function handleDrop(e) {
 
     }
     updateProteins(geneMatrix)
+    updateDomains(geneMatrix)
     }  return false;
   }
-
-
-
-
+function formatSVG(svg){
+  console.log(svg)
+  svg=svg.toString().replaceAll("#ffffff","none").replaceAll("#000000","#ffffff").replaceAll("<g transform='translate","<g style='fill: #ffffff' transform='translate");
+  return svg
+}
 function handleDragEnd(e) {
   this.style.opacity = '1';
 
@@ -101,7 +122,7 @@ function handleDragEnd(e) {
   });
 }
 function addDragDrop(){
-  items = document.querySelectorAll('.test-container .box');
+  items = document.querySelectorAll('.protein-container .box');
 
   items.forEach(function(item) {
 
@@ -113,7 +134,6 @@ function addDragDrop(){
       item.addEventListener('dragend', handleDragEnd, false);
     });
 }
-
 function removePaddingBGC(BGC){
   let BGC_with_padding=JSON.parse(JSON.stringify(BGC));
   if (BGC_with_padding.orfs.length!=0){
@@ -123,7 +143,7 @@ function removePaddingBGC(BGC){
     BGC_with_padding.orfs[orfIndex].end=BGC_with_padding.orfs[orfIndex].end-BGC.start
   }}}
   return BGC_with_padding}
-  function removeSpaceBetweenProteins(BGC){
+function removeSpaceBetweenProteins(BGC){
     let margin = 100;
     let BGC_without_space=JSON.parse(JSON.stringify(BGC));
     for (let orfIndex=0; orfIndex<BGC_without_space.orfs.length; orfIndex++){
@@ -138,9 +158,7 @@ function removePaddingBGC(BGC){
   }
   return BGC_without_space;
   }
-
-    let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
-    function updateProteins(geneMatrix){
+function updateProteins(geneMatrix){
       let proteinsForDisplay= JSON.parse(JSON.stringify(BGC));
 
       delete proteinsForDisplay.orfs
@@ -159,7 +177,44 @@ function removePaddingBGC(BGC){
       $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(proteinsForDisplay))));
       addDragDrop();
     }
-    function setKoStatus(geneIndex, domainIndex,geneMatrix){
+function obtainACPList(geneMatrix){
+  let acpList=[]
+  for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+    if (geneMatrix[geneIndex].ko==false && geneMatrix[geneIndex].domains.length!=0){
+      for (let domainIndex=0; domainIndex< geneMatrix[geneIndex].domains.length; domainIndex++){
+        if (geneMatrix[geneIndex].domains[domainIndex].ko==false){
+          if (geneMatrix[geneIndex].domains[domainIndex].type.includes("ACP")||geneMatrix[geneIndex].domains[domainIndex].type.includes("PP")){
+
+            acpList.push(geneMatrix[geneIndex].domains[domainIndex].identifier)
+          }
+        }
+      }
+
+    }}
+    return acpList;
+
+}
+    // only display proteins with domains in domain explorer
+function updateDomains(geneMatrix){
+      let domainsForDisplay= JSON.parse(JSON.stringify(BGC));
+
+      delete domainsForDisplay.orfs
+      domainsForDisplay.orfs = []
+      geneMatrix.sort((a, b) => {
+          return a.position - b.position;
+      });
+
+      for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+        if (geneMatrix[geneIndex].displayed==true && geneMatrix[geneIndex].domains.length!=0){
+
+          domainsForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC-1]);
+
+        }}
+
+        $("#Domain_container").html(Domainer.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(domainsForDisplay))));
+        addDragDrop();
+      }
+function setKoStatus(geneIndex, domainIndex,geneMatrix){
 
 
           if (geneMatrix[geneIndex].domains[domainIndex].ko === false){
@@ -170,7 +225,7 @@ function removePaddingBGC(BGC){
           }
         else {geneMatrix[geneIndex].domains[domainIndex].ko = false;}
     }
-    function setDisplayedStatus(id, geneMatrix) {
+function setDisplayedStatus(id, geneMatrix) {
       id.slice(-11,-1);
       for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++){
         if (geneMatrix[geneIndex].id === id){
@@ -194,6 +249,10 @@ function selectRegion(recordData, regionName){
 
 
 }
+function attachToACP(intermediate,intermediateIndex, acpList){
+  acp=acpList[intermediateIndex]
+
+}
 function changeColor(arrowId){
 
   const arrow = document.querySelector(arrowId);
@@ -211,6 +270,7 @@ function changeDomainColor(domainId){
 
   if (domain.getAttribute("fill")=="#E11839"){
   updateProteins(geneMatrix);
+  updateDomains(geneMatrix);
   }
   else{domain.setAttribute('fill', "#E11839");
 }}
@@ -237,7 +297,7 @@ function formatInputRaichuKS(data){
 
   return trimmed_data
 }
-  function extractAntismashPredictionsFromRegionSJKS(details_data, region_index){
+function extractAntismashPredictionsFromRegionSJKS(details_data, region_index){
     let outputForRaichu=[]
 
     let  region=[]
@@ -315,9 +375,81 @@ domainArray.push("DH","ER")
 
 }
 return outputForRaichu}
+function createGeneMatrix(BGC){
+  var geneMatrix=[];
+  for (let geneIndex = 0; geneIndex < BGC["orfs"].length; geneIndex++) {
+    let domains=[]
+  if (BGC["orfs"][geneIndex].hasOwnProperty("domains")){domains=JSON.parse(JSON.stringify(BGC["orfs"][geneIndex].domains))
+  for (let domainIndex=0; domainIndex<domains.length;domainIndex++){
+    domains[domainIndex]["identifier"]=BGC["orfs"][geneIndex].locus_tag+"_"+(domainIndex+1).toString()
+    domains[domainIndex]["domainOptions"]=["Test 3","Test 4"];
+    domains[domainIndex]["ko"]=false;
+  }}
+  else{domains=[]}
+  geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
+  "position_in_BGC":geneIndex+1,
+  "position":geneIndex+1,
+  "ko":false,
+  "displayed":true,
+  "options":["Test1","Test"],
+  "domains":domains});
+  }
+  return geneMatrix
+}
+function displayGenes(BGC){
+  // display BGC in BGC explorer
+  let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
+
+  for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
+    delete BGCForDisplay["orfs"][geneIndex]["domains"];
+  }
 
 
-addDragDrop()
+  $("#arrow_container").html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
+  return BGCForDisplay
+}
+function addArrowClick (geneMatrix){
+  //add click event to every gene arrow
+  for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+  arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
+  protein_id=("#"+geneMatrix[geneIndex].id+"_protein").replace(".","_")
+  const arrow = document.querySelector(arrow_id);
+
+  arrow.addEventListener (
+     'click',
+     function() {           // anonyme Funktion
+      displayTextInGeneExplorer(geneMatrix[geneIndex].id);setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
+     },
+     false
+  );
+  arrow.addEventListener (
+     'mouseenter',
+     function() {           // anonyme Funktion
+      changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein")
+     },
+     false
+  );
+  arrow.addEventListener (
+     'mouseleave',
+     function() {           // anonyme Funktion
+      changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein")
+     },
+     false
+  );
+  for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
+   domain=geneMatrix[geneIndex].domains[domainIndex]
+    domainId="#"+geneMatrix[geneIndex].id+"_domain_"+domain.sequence;
+    console.log(domainId)
+    const domainObject = document.querySelector(domainId);
+    domainObject.addEventListener (
+       'click',
+       function() {           // anonyme Funktion
+       changeDomainColor("#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);setKoStatus(geneIndex, domainIndex,geneMatrix)},
+       false
+    );
+    }
+  }
+}
 //create record for diplaying BGC in BGC explorer
 let regionNumber=selectRegion(recordData, regionName)
 let BGC = Object.keys(recordData[0].regions[regionNumber]).reduce(function(obj, k) {
@@ -348,102 +480,10 @@ else if (value_1.hasOwnProperty([regionName])){
 
 }
 }
-
-
-var geneMatrix=[];
-for (let geneIndex = 0; geneIndex < BGC["orfs"].length; geneIndex++) {
-  let domains=[]
-if (BGC["orfs"][geneIndex].hasOwnProperty("domains")){domains=JSON.parse(JSON.stringify(BGC["orfs"][geneIndex].domains))
-for (let domainIndex=0; domainIndex<domains.length;domainIndex++){
-  domains[domainIndex]["domainOptions"]=["Test 3","Test 4"];
-  domains[domainIndex]["ko"]=false;
-}}
-else{domains=[]}
-geneMatrix.push({"id":BGC["orfs"][geneIndex].locus_tag,
-"position_in_BGC":geneIndex+1,
-"position":geneIndex+1,
-"ko":false,
-"displayed":true,
-"options":["Test1","Test"],
-"domains":domains});
-}
-console.log(geneMatrix)
-// display BGC in BGC explorer
-let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
-
-for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
-  delete BGCForDisplay["orfs"][geneIndex]["domains"];
-}
-
-
-$("#arrow_container").html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
-
+geneMatrix=createGeneMatrix(BGC)
+BGCForDisplay=displayGenes(BGC)
+updateDomains(geneMatrix)
 updateProteins(geneMatrix)
-//add click event to every gene arrow
-for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
-protein_id=("#"+geneMatrix[geneIndex].id+"_protein").replace(".","_")
-const arrow = document.querySelector(arrow_id);
-
-arrow.addEventListener (
-   'click',
-   function() {           // anonyme Funktion
-    displayTextInGeneExplorer(geneMatrix[geneIndex].id);setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
-   },
-   false
-);
-arrow.addEventListener (
-   'mouseenter',
-   function() {           // anonyme Funktion
-    changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein")
-   },
-   false
-);
-arrow.addEventListener (
-   'mouseleave',
-   function() {           // anonyme Funktion
-    changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein")
-   },
-   false
-);
-for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
- domain=geneMatrix[geneIndex].domains[domainIndex]
-  domainId="#"+geneMatrix[geneIndex].id+"_domain_"+domain.sequence;
-  console.log(domainId)
-  const domainObject = document.querySelector(domainId);
-  domainObject.addEventListener (
-     'click',
-     function() {           // anonyme Funktion
-     changeDomainColor("#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);setKoStatus(geneIndex, domainIndex,geneMatrix)},
-     false
-  );
-  }
-}
-//add drag and drop for proteins
-
-
-
-//fetching svg an displaying it
-//let svg=["test",{"test":"test"}]
-let data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName)
-console.log( "test",data)
-//data=[['module_1','starter_module','SC(=O)CC'],['module_2','elongation_module','methylmalonylcoa',['KR_B2']],['module_3','elongation_module','methylmalonylcoa',['KR_A1']],['module_4','elongation_module','methylmalonylcoa',['KR_C2']],['module_5','elongation_module','methylmalonylcoa',['KR','DH','ER']],['module_6','elongation_module','methylmalonylcoa',['KR_A1']],['module_7','terminator_module','methylmalonylcoa',['KR_A1']]];
-data_string=formatInputRaichuKS(data)
-console.log( data);
-//data_string='[["module_3_0","starter_module","CCC(S)=O"],["module_3_1","elongation_module","methylmalonylcoa",["KR_B2"]],["module_3_2","elongation_module","methylmalonylcoa",["KR_A1"]],["module_4_0","elongation_module","methylmalonylcoa",[]],["module_4_1","elongation_module","methylmalonylcoa",["DH","ER","KR"]],["module_5_0","elongation_module","methylmalonylcoa",["KR_A1"]],["module_5_1","terminator_module","methylmalonylcoa",["KR_A1"]]]'
-let url="http://127.0.0.1:8000/api/alola?antismash_input=";
-let list_hanging_svg=[]
-fetch(url+data_string)
-.then(response => {const thing=response.json();
-return thing})
-      .then((data) => {let container = document.getElementById("structure_container");
-      console.log("349u340",data.svg, );
-
-      //list_hanging_svg=data.hanging_svg;
-      container.innerHTML = data.svg;
-      for (let intermediateIndex=0; intermediateIndex<data.hanging_svg.length;intermediateIndex++){
-        intermediate=data.hanging_svg[intermediateIndex]
-        attachToACP(intermediate,intermediateIndex)
-      }
-
-    })
+addArrowClick (geneMatrix)
+addDragDrop()
+fetchFromRaichu(details_data, regionName,geneMatrix)

@@ -104,8 +104,8 @@ def cluster_to_structure(modules, visualization_mechanism=False,
         if draw_structures_per_module:
             drawing = RaichuDrawer(chain_intermediate, dont_show=True, save_svg_string=True)
             print(drawing)
-     
-            
+
+
             list_drawings_per_module.append([drawing])
 
     # If starter module = NRPS module: find SMILES in PARAS.txt and
@@ -124,8 +124,8 @@ def cluster_to_structure(modules, visualization_mechanism=False,
             copy_attached = attach_to_domain_nrp(copy_chain_intermediate, 'PCP')
             copy_attached.refresh_structure(find_cycles=True)
             drawing = RaichuDrawer(copy_attached, dont_show=False, save_svg="test1.svg")
-     
-            
+
+
             list_drawings_per_module.append([drawing])
 
     # Iterate over remaining modules
@@ -449,7 +449,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
             RaichuDrawer(chain_intermediate)
         else:
             # chain_intermediate.find_cycles()
-            RaichuDrawer(chain_intermediate)
+            RaichuDrawer(chain_intermediate,dont_show=True)
 
     # Remove all intermediate structure files
     for i in range(1, 6):
@@ -557,10 +557,3 @@ def make_dict_aa_smiles():
         dict_aa_smiles[name] = smiles
 
     return dict_aa_smiles
-
-
-
-
-
-
-

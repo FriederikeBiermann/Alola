@@ -16,7 +16,7 @@ a:visited {
   overflow-y: auto;
 }
 #structure_container{
-  background-color:#ffffff;
+
   border-radius:6px;
   padding-left: 5%;
   padding-right: -8%;
@@ -31,7 +31,7 @@ background-color:#1F1F1F
 margin-bottom: 10px;
 float: left;
 width:75%;
-height: 300px;
+height: 200px;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
  #Protein_explorer{
@@ -40,9 +40,16 @@ background-color:#1F1F1F;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-height: 750px;
+height: 305px;
 width: 75%;}
+#Domain_explorer{
+  border-radius:6px;
+background-color:#1F1F1F;
+float: left;
 
+box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+height: 550px;
+width: 75%;}
  #Structure_explorer{
    border-radius:6px;
 background-color:#1F1F1F;
@@ -57,7 +64,7 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 width: 24.5%;
 background-color:#1F1F1F;
 float: right;
-height: 500px;
+height: 505px;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
 .heading-container{
@@ -68,8 +75,8 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
 }
  .container {
 
-   padding: 5%;
-   width: 87%;
+   padding: 1%;
+   width: 95%;
    overflow-x: auto;
    white-space: nowrap;
 }
@@ -84,28 +91,40 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
  height: 150%;
 
 }
-.test-container {
+.protein-container {
+ display: grid;
+ grid-template-columns: repeat(100, 1fr);
+ gap: 12px;
+ padding: 1.5%;
+ width: 95%;
+ overflow-x: auto;
+ white-space: nowrap;
+ height: 170px;
+ font-size: medium;
+}
+.domain-container {
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap: 10px;
- padding: 5%;
- width: 87%;
+ padding: 0%;
+ width: 97%;
  overflow-x: auto;
  white-space: nowrap;
- height: 300px;
+ height: 350px;
  font-size: medium;
 }
-
+.intermediateContainer{
+  position: relative;
+  right: 70px;
+  bottom: 50px;
+}
 .box {
-
-
  cursor: move;
 }
 /* Dropdown Button */
 .dropbtn {
-background-color:#1F1F1F;
-color: white;
 
+background-color: transparent;
 font-size: 16px;
 border: none;
 }
@@ -120,7 +139,7 @@ display: inline-block;
 .dropdown-content {
 display: none;
 position: absolute;
-background-color: #f1f1f1;
+background-color: white;
 min-width: 160px;
 box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 z-index: 1;

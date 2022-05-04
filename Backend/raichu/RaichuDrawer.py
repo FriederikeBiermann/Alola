@@ -368,7 +368,7 @@ class RaichuDrawer(Drawer):
                 svg_string = StringIO()
                 plt.savefig(svg_string, format='svg')
                 svg = svg_string.getvalue()
-                
+
                 self.svg_string=svg
         # If a png filename is included in the initialization of the
         # Raichu_drawer object, don't show the structure, but do save it as a
@@ -385,11 +385,11 @@ class RaichuDrawer(Drawer):
 
             elif self.save_svg_string:
                 svg_string = StringIO()
-                plt.savefig(svg_string, format='svg')
+                #plt.savefig(svg_string, format='svg')
                 svg = svg_string.getvalue()
-       
-                print (svg)
-                
+
+                #print (svg)
+
                 return svg
             plt.clf()
             plt.close(plt.gcf())
@@ -938,7 +938,7 @@ class RaichuDrawer(Drawer):
         plt.clf()
         plt.close(plt.gcf())
         plt.close('all')
-        
+
         return svg
 
 
@@ -946,5 +946,3 @@ def get_angle(vector1, vector2):
     difference = Vector.subtract_vectors(vector1, vector2)
     difference_angle = difference.angle()
     return difference_angle
-
-

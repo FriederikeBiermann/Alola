@@ -6,85 +6,30 @@ colour_fill_dict = {'ACP':'#81bef7', 'PKS_AT':'#f78181', 'PKS_KS(Modular-KS)':'#
 colour_outline_dict = {'PKS_ACP':'#3d79d6', 'PKS_AT':'#df5d5d', 'PKS_KS':'#5fc65f',
                        'PKS_KR':'#5fbb87', 'PKS_DH':'#ca9862', 'PKS_ER':'#61bbad',
                        'PKS_TE':'#a25ba0', 'KR*':'#5fbb87'}
-var Proteiner = {
+var Domainer = {
     version: "1.0.0",
     required: [
       "jquery",
       "svg.js==2.7.1"
     ],
-    tooltip_id: "Proteiner-tooltip-1234567890",
-    tooltip_id_protein: "Proteiner-tooltip-123"
+    tooltip_id: "Domainer-tooltip-1234567890",
+    tooltip_id_domain: "Domainer-tooltip-123"
 };
 
-Proteiner.drawClusterSVG = (function(cluster, height = 70) {
-  var container = document.createElement("div");
-  document.getElementById('protein_container').innerHTML = "";
+Domainer.drawClusterSVG = (function(cluster, height = 70) {
+  var container = document.getElementById('domain_container')
+  var line_svg = SVG(container).size('100%', height).group();
+  document.getElementById('domain_container').innerHTML = "";
   var scale = (function(val) { return parseInt(val / (1000 / height)); })
 
-  // draw line
-  //draw.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({width: 2});
+  //draw line
+  line_svg.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({color: "white",width: 2});
   var width = scale(cluster.end - cluster.start);
 
   if (cluster.hasOwnProperty("orfs")) {
-    // draw proteins
+    // draw domains
     for (var i in cluster.orfs) {
       var orf = cluster.orfs[i];
-      var orf_color = "white";//"gray";
-      if (orf.hasOwnProperty("color")) {
-        orf_color = orf.color;
-      }
-      var innerContainer= document.createElement('div');
-      innerContainer.id="innerProteinContainer"+orf.locus_tag
-      var innerDropdownContainer=document.createElement('div');
-      innerDropdownContainer.id="innerDropdownContainer"+orf.locus_tag
-      var innerDropdownButton=document.createElement('button');
-      innerDropdownButton.id="innerDropdownButton"+orf.locus_tag
-      var innerDropdownContent=document.createElement('div');
-      innerDropdownContent.id="innerDropdownContent"+orf.locus_tag
-      innerContainer.style.width=String(scale(orf.end - orf.start))+"px"
-      document.getElementById('protein_container').appendChild(innerContainer).setAttribute("draggable","true");
-      document.getElementById('innerProteinContainer'+orf.locus_tag).setAttribute("class","box");
-      document.getElementById('innerProteinContainer'+orf.locus_tag).appendChild(innerDropdownContainer);
-      document.getElementById("innerDropdownContainer"+orf.locus_tag).setAttribute("class","dropdown");
-      document.getElementById('innerDropdownContainer'+orf.locus_tag).appendChild(innerDropdownButton);
-      document.getElementById("innerDropdownButton"+orf.locus_tag).setAttribute("class","dropbtn");
-      document.getElementById('innerDropdownContainer'+orf.locus_tag).appendChild(innerDropdownContent);
-      document.getElementById("innerDropdownContent"+orf.locus_tag).setAttribute("class","dropdown-content");
-      innerDropdownContent.innerHTML=""
-      let geneIndex=0
-      for (geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
-        if (geneMatrix[geneIndex].id==orf.locus_tag){
-          for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].options.length;optionIndex++){
-          innerDropdownContent.innerHTML +='<a href="#">'+geneMatrix[geneIndex].options[optionIndex]+'</a>'
-        }
-      break}
-
-      }
-
-      var draw = SVG(innerDropdownButton).size(String(scale(orf.end - orf.start)+10)+"px", height).group();
-      points=Proteiner.getproteinPoints(orf, cluster, height, scale)
-
-      var pol = draw.rect(Math.abs(points["4"].x-points["0"].x)+10,Math.abs(points["4"].y-points["0"].y)+20)
-                  .rx("10")
-                  .ry("10")
-                  .fill(orf_color)
-                  .stroke({width: 2})
-                  .addClass("Proteiner-orf");
-      pol.node.id= orf["locus_tag"]+"_protein";
-      $(pol.node).mouseover({orf: orf}, function(handler){
-        var start = handler.data.orf.start;
-        var end = handler.data.orf.end;
-        Proteiner.showToolTip("ORF: " + handler.data.orf.locus_tag + "<br/>", handler);
-        $(handler.target).css("stroke-width", "3px");
-        $(handler.target).css("stroke", "#E11839");
-        handler.stopPropagation();
-      });
-      $(pol.node).mouseleave(function(handler){
-        $(handler.target).css("stroke-width", "2px");
-        $(handler.target).css("stroke", "black");
-        $("#" + Proteiner.tooltip_id).css("display", "none");
-      });
-
       if (orf.hasOwnProperty("domains")) {
 
         // draw domains
@@ -100,9 +45,49 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
 
           }
           else{color="#025699"}
-          console.log ("domains",domain, orf)
-          points=Proteiner.getDomainPoints(domain, orf, cluster, height, scale)
-          console.log(points,"points")
+          let geneIndex=0
+          let domainIdentifier=""
+          for (geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
+            if (geneMatrix[geneIndex].id==orf.locus_tag){
+              for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
+
+                if (geneMatrix[geneIndex].domains[domainIndex].start==domain.start){
+                  domainIdentifier=geneMatrix[geneIndex].domains[domainIndex].identifier
+                  points=Domainer.getDomainPoints(domain, orf, cluster, height, scale)
+                  var innerContainer= document.createElement('div');
+                  innerContainer.id="innerdomainContainer"+domainIdentifier
+
+                  var innerDropdownContainer=document.createElement('div');
+                  innerDropdownContainer.id="innerDropdownContainer"+domainIdentifier
+                  var innerIntermediateContainer=document.createElement('div');
+                  innerIntermediateContainer.id="innerIntermediateContainer"+domainIdentifier
+                  var innerDropdownButton=document.createElement('button');
+                  innerDropdownButton.id="innerDropdownButton"+domainIdentifier
+                  var innerDropdownContent=document.createElement('div');
+                  innerDropdownContent.id="innerDropdownContent"+domainIdentifier
+                  innerContainer.style.width=String(Math.abs(points["4"].x-points["0"].x))+"px"
+                  document.getElementById('domain_container').appendChild(innerContainer);
+                  document.getElementById('innerdomainContainer'+domainIdentifier).setAttribute("class","box");
+                  document.getElementById('innerdomainContainer'+domainIdentifier).appendChild(innerDropdownContainer);
+                  document.getElementById('innerdomainContainer'+domainIdentifier).appendChild(innerIntermediateContainer);
+                  document.getElementById("innerIntermediateContainer"+domainIdentifier).setAttribute("class","intermediateContainer");
+                  document.getElementById("innerDropdownContainer"+domainIdentifier).setAttribute("class","dropdown");
+                  document.getElementById('innerDropdownContainer'+domainIdentifier).appendChild(innerDropdownButton);
+                  document.getElementById("innerDropdownButton"+domainIdentifier).setAttribute("class","dropbtn");
+                  document.getElementById('innerDropdownContainer'+domainIdentifier).appendChild(innerDropdownContent);
+                  document.getElementById("innerDropdownContent"+domainIdentifier).setAttribute("class","dropdown-content");
+
+                  innerDropdownContent.innerHTML=""
+                  for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].domains[domainIndex].domainOptions.length; optionIndex++){
+
+                  innerDropdownContent.innerHTML +='<a href="#">'+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+'</a>';
+                }
+              break}}
+
+          }}
+
+
+          console.log(points,scale(domain.end- domain.start))
           let x=0;
           if (points["0"].x>points["4"].x){
             x=points["4"].x
@@ -111,30 +96,24 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
           else{
             x=points["0"].x
           }
+          var draw = SVG(innerDropdownButton).size(String(Math.abs(points["4"].x-points["0"].x)+1000)+"px", height).group();
           var dom = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+20)
-                      .x(x+5)
+                      .x(0)
                       .y(points["0"].y)
-                      .rx("10")
-                      .ry("10")
+                      .rx("20")
+                      .ry("20")
                       .fill(color)
-                      .stroke({width: 2})
-                      .addClass("Proteiner-domain");
+                      .stroke({width: 2});
 
-          dom.node.id= orf["locus_tag"]+"_domain_"+domain.sequence;
+          dom.node.id= "domain"+domainIdentifier
           $(dom.node).mouseover({domain: domain}, function(handler){
-            $("#" + Proteiner.tooltip_id).css("display", "none")
+            $("#" + Domainer.tooltip_id).css("display", "none")
             var start = handler.data.domain.start;
             var end = handler.data.domain.end;
             let contentTooltip=""
-            for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
 
-              if (geneMatrix[geneIndex].domains[domainIndex].start==handler.data.domain.start){
-                for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].domains[domainIndex].domainOptions.length; optionIndex++){
-
-                contentTooltip +='<a href="#">'+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+'</a>';
-              }
-            break}}
-            Proteiner.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end, handler);
+            console.log("34op")
+            Domainer.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end, handler);
             $(handler.target).css("stroke-width", "3px");
             $(handler.target).css("stroke", "#E11839"
 
@@ -156,17 +135,18 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
     if (cluster.hasOwnProperty("desc")) {
       bgc_desc += "<br /> " + cluster["desc"];
     }
-    Proteiner.showToolTip(bgc_desc, handler);
+    Domainer.showToolTip(bgc_desc, handler);
   });
   $(draw.node).parent().mouseleave(function(handler){
-    $("#" + Proteiner.tooltip_id).css("display", "none");
+    $("#" + Domainer.tooltip_id).css("display", "none");
   });
 
   $(container).find("svg").attr("width", width + "px");
   return $(container).find("svg")[0];
 });
 
-Proteiner.getOrfPoints = (function(orf, cluster, height, scale){
+
+Domainer.getOrfPoints = (function(orf, cluster, height, scale){
   var x_points = [
     scale(orf.start),
     (orf.strand === 0) ?
@@ -192,9 +172,9 @@ Proteiner.getOrfPoints = (function(orf, cluster, height, scale){
 
 });
 
-Proteiner.getproteinPoints = (function(orf, cluster, height, scale) {
+Domainer.getproteinPoints = (function(orf, cluster, height, scale) {
   var points = [];
-  var pts = Proteiner.getOrfPoints(orf, cluster, height, scale);
+  var pts = Domainer.getOrfPoints(orf, cluster, height, scale);
 
   points.push({ // blunt start
     x: pts.x[0],
@@ -226,13 +206,13 @@ Proteiner.getproteinPoints = (function(orf, cluster, height, scale) {
   });
 
   if (orf.strand < 0) {
-    points = Proteiner.flipHorizontal(points, scale(orf.start), (scale(orf.start) + scale(orf.end - orf.start)));
+    points = Domainer.flipHorizontal(points, scale(orf.start), (scale(orf.start) + scale(orf.end - orf.start)));
   }
 
   return points;
 });
 
-Proteiner.getDomainPoints = (function(domain, orf, cluster, height, scale) {
+Domainer.getDomainPoints = (function(domain, orf, cluster, height, scale) {
   var points = [];
   var protein_pts = Proteiner.getproteinPoints(orf, cluster, height, scale);
   if (orf.strand < 0) {
@@ -281,7 +261,7 @@ Proteiner.getDomainPoints = (function(domain, orf, cluster, height, scale) {
   return points;
 });
 
-Proteiner.flipHorizontal = (function(points, leftBound, rightBound) {
+Domainer.flipHorizontal = (function(points, leftBound, rightBound) {
   var new_points = [];
 
   for(var i in points) {
@@ -295,14 +275,14 @@ Proteiner.flipHorizontal = (function(points, leftBound, rightBound) {
 
   return new_points;
 });
-Proteiner.toPointCoordinates= (function(points) {
+Domainer.toPointCoordinates= (function(points) {
   console.log(typeof(points["0"].x))
   coordinates=[points["0"].x,points["0"].y,(points["4"].x-points["0"].x),(points["4"].y-points["0"].y)]
   coordinates_string=points["0"].x.toString()+","+points["0"].y.toString()+","+(points["4"].x-points["0"].x).toString()+","+(points["4"].y-points["0"].y).toString()
 console.log("porint",coordinates)
   return coordinates
 });
-Proteiner.toPointString = (function(points) {
+Domainer.toPointString = (function(points) {
   points_string = "";
 
   for(var i in points) {
@@ -316,7 +296,7 @@ Proteiner.toPointString = (function(points) {
   return points_string;
 });
 
-Proteiner.getRandomCluster = (function() {
+Domainer.getRandomCluster = (function() {
   function random(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -366,18 +346,18 @@ Proteiner.getRandomCluster = (function() {
   return cluster;
 });
 
-Proteiner.drawRandomClusterSVG = (function() {
-  return Proteiner.drawClusterSVG(Proteiner.getRandomCluster());
+Domainer.drawRandomClusterSVG = (function() {
+  return Domainer.drawClusterSVG(Domainer.getRandomCluster());
 });
 
-Proteiner.showToolTip = (function(html, handler){
+Domainer.showToolTip = (function(html, handler){
   var divTooltip =""
-if (html.includes("<a") ){ divTooltip =$("#" + Proteiner.tooltip_id_protein);}
-else{divTooltip = $("#" + Proteiner.tooltip_id);}
+if (html.includes("<a") ){ divTooltip =$("#" + Domainer.tooltip_id_domain);}
+else{divTooltip = $("#" + Domainer.tooltip_id);}
 
 
   if (divTooltip.length < 1) {
-    divTooltip = $("<div id='" + Proteiner.tooltip_id+ "'>");
+    divTooltip = $("<div id='" + Domainer.tooltip_id+ "'>");
     divTooltip.css("background-color", "white");
     divTooltip.css("border", "1px solid black");
     divTooltip.css("color", "black");

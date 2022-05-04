@@ -23,25 +23,13 @@ if __name__ == "__main__":
     attach_to_acp=True, draw_structures_per_module=True)
 
 
-
-    # Close all matplotlib windows that were still open when generating
-    # the chain intermediate Drawer objects
-    #plt.close('all')
-
-
-    # Build list of all modules comprised in the cluster, used to draw
-    # module/domain architecture later
     list_svgs=[]
-    print (list_drawings_per_module)
-
-
     for drawing_list in list_drawings_per_module:
         for drawing in drawing_list:
 
 
             list_svgs+=[[drawing.svg_string.replace("\n","").replace("\"","'")]]
     drawing.show_molecule()
-    print (list_svgs)
     #Visualise PKS cluster (interactive mode)
     test=drawing.show_molecule()
     print (test)
