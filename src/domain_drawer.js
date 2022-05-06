@@ -96,8 +96,8 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
           else{
             x=points["0"].x
           }
-          var draw = SVG(innerDropdownButton).size(String(Math.abs(points["4"].x-points["0"].x)+1000)+"px", height).group();
-          var dom = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+20)
+          var draw = SVG(innerDropdownButton).size(String(Math.abs(points["4"].x-points["0"].x))+"px", height).group();
+          var dom = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+15)
                       .x(0)
                       .y(points["0"].y)
                       .rx("20")
@@ -112,7 +112,6 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
             var end = handler.data.domain.end;
             let contentTooltip=""
 
-            console.log("34op")
             Domainer.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end, handler);
             $(handler.target).css("stroke-width", "3px");
             $(handler.target).css("stroke", "#E11839"

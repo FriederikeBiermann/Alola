@@ -11,6 +11,17 @@ a:link {
 a:visited {
  color: #E11839;
 }
+#menu_bar{
+  border-radius:6px;
+background-color:#1F1F1F
+;
+margin-bottom: 10px;
+float: left;
+width:100%;
+height: 56px;
+box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
 #gene_container{
   font-size: small;
   overflow-y: auto;
@@ -67,6 +78,18 @@ float: right;
 height: 505px;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
+#start_button {
+  float: right;
+  color: #2B2B2B;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 19px;
+}
+#start_button:hover {
+  background-color: #E11839;
+  color: black;
+}
 .heading-container{
   background-color:#2B2B2B;
   border-radius:6px;
@@ -110,7 +133,7 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
  width: 97%;
  overflow-x: auto;
  white-space: nowrap;
- height: 350px;
+ height: 450px;
  font-size: medium;
 }
 .intermediateContainer{
