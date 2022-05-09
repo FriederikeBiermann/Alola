@@ -7,7 +7,7 @@ var dragSrcEl = null;
 function fetchFromRaichu(details_data, regionName,geneMatrix){//fetching svg an displaying it
 let data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[0]
 let starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[1]
-console.log(data)
+
 let data_string=formatInputRaichuKS(data)
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 let list_hanging_svg=[]
@@ -77,7 +77,7 @@ function handleDrop(e) {
     });
     const locusTagDragged = dragSrcEl.id.substring(21)
     const locusTagTarget = this.id.substring(21)
-    console.log(locusTagDragged,locusTagTarget,geneMatrix)
+
     let positionDragged=1
     let geneIndexDragged=1
     let positionTarget=1
@@ -244,6 +244,7 @@ function setKoStatus(geneIndex, domainIndex,geneMatrix){
         if (document.querySelector('input[type=checkbox]').checked) {
           fetchFromRaichu(details_data, regionName,geneMatrix)
         }
+
     }
 function setDisplayedStatus(id, geneMatrix) {
       id.slice(-11,-1);
@@ -300,11 +301,11 @@ function changeDomainColor(domain,domainId){
   else{domainObject.setAttribute('fill', "#E11839");
 }}
 function changeProteinColorON(ProteinId){
- console.log(ProteinId);
+
   const arrow = document.querySelector(ProteinId);
   arrow.setAttribute('fill', "#E11839");}
 function changeProteinColorOFF(ProteinId){
- console.log(ProteinId);
+
   const arrow = document.querySelector(ProteinId);
   arrow.setAttribute('fill', '#ffffff');
 }
@@ -332,7 +333,7 @@ function extractAntismashPredictionsFromRegionSJKS(details_data, region_index, g
  geneMatrix.sort((a, b) => {
      return a.position - b.position;
  });
- console.log(geneMatrix)
+
 let acpCounter=-1
 let starterStatus=0
  for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
@@ -381,10 +382,10 @@ let starterStatus=0
           else{nameDomain=domain.abbreviation}
 
           if (domain.abbreviation==""){ nameDomain=domain.type}
-          console.log(acpCounter)
+
           if (domain.type.includes("ACP")||domain.type.includes("PP")){
             acpCounter+=1;}
-          console.log(acpCounter)
+
 
 
           domainArray.push(nameDomain)
@@ -392,14 +393,14 @@ let starterStatus=0
           if (domain.abbreviation=="AT"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}}}
           else{substrate=malonylcoa}
         }}}
-      else{console.log("ko")}}
+      }
 
         if (domainArray.includes("AT") && !(domainArray.includes("KS")) && !("TE" in domainArray)){typeModule= "starter_module_pks";
          starterSubstrate= nameToStructure[substrate];
       moduleArray.push(nameModule,typeModule,starterSubstrate)
     starterACP=acpCounter;
   starterStatus=1}
-  console.log(starterStatus)
+
         if (domainArray.includes("KS") && !(domainArray.includes("TE"))&&starterStatus==1){typeModule= "elongation_module_pks";
       moduleArray.push(nameModule,typeModule,substrate);
       if (domainArray.includes ("DH")&&domainArray.includes ("ER")){
@@ -424,7 +425,7 @@ domainArray.push("DH","ER")
   }break}
 }}
 }
-console.log(outputForRaichu)
+
 return [outputForRaichu,starterACP]}
 function createGeneMatrix(BGC){
   var geneMatrix=[];
@@ -490,22 +491,22 @@ function addArrowClick (geneMatrix){
   for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
    domain=geneMatrix[geneIndex].domains[domainIndex]
     domainId="#"+geneMatrix[geneIndex].id+"_domain_"+domain.sequence;
-    console.log(domainId)
+
     const domainObject = document.querySelector(domainId);
     domainObject.addEventListener (
        'click',
        function() {           // anonyme Funktion
-       changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix), console.log(geneMatrix)},
+       changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix)},
        false);
        domainId="#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier
-       console.log(domainId)
+
       const domainObject_2 = document.querySelector(domainId);
        domainObject_2.addEventListener (
           'click',
           function() {           // anonyme Funktion
-          ;changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix), console.log(geneMatrix)},
+          ;changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix)},
           false);
-          console.log("arrow_update")
+
     }
   }
 }
@@ -530,7 +531,7 @@ for (const [key_1, value_1] of Object.entries(details_data)) {
 else if (value_1.hasOwnProperty([regionName])){
   for (let orf_index =0; orf_index<value_1[regionName].orfs.length; orf_index++){
     orf=value_1[regionName].orfs[orf_index]
-    console.log("345",orf.domains)
+
     for (let BGC_orf_index =0; BGC_orf_index<BGC.orfs.length; BGC_orf_index++){
     if (orf.id==BGC.orfs[BGC_orf_index].locus_tag){
     BGC.orfs[BGC_orf_index]["domains"]=orf.domains

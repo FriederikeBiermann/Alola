@@ -100,9 +100,8 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
 
           }
           else{color="#025699"}
-          console.log ("domains",domain, orf)
           points=Proteiner.getDomainPoints(domain, orf, cluster, height, scale)
-          console.log(points,"points")
+
           let x=0;
           if (points["0"].x>points["4"].x){
             x=points["4"].x
@@ -296,10 +295,10 @@ Proteiner.flipHorizontal = (function(points, leftBound, rightBound) {
   return new_points;
 });
 Proteiner.toPointCoordinates= (function(points) {
-  console.log(typeof(points["0"].x))
+
   coordinates=[points["0"].x,points["0"].y,(points["4"].x-points["0"].x),(points["4"].y-points["0"].y)]
   coordinates_string=points["0"].x.toString()+","+points["0"].y.toString()+","+(points["4"].x-points["0"].x).toString()+","+(points["4"].y-points["0"].y).toString()
-console.log("porint",coordinates)
+
   return coordinates
 });
 Proteiner.toPointString = (function(points) {
@@ -386,7 +385,7 @@ else{divTooltip = $("#" + Proteiner.tooltip_id);}
     divTooltip.css("pointer-events", "none");
     divTooltip.css("position", "fixed");
     divTooltip.css("z-index", "99999");
-    console.log(typeof(html),html.includes("<a"))
+
 
     divTooltip.appendTo($(document.body));
   }
