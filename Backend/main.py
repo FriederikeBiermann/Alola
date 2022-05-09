@@ -31,13 +31,15 @@ async def root():
       }
 
 @app.get ("/api/alola/")
+
 async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     print ((antismash_input))
     antismash_input_transformed=ast.literal_eval(antismash_input)
     print ((antismash_input_transformed), type(antismash_input_transformed))
     final_product = cluster_to_structure(antismash_input_transformed)
+    smiles=structure_to_smiles(final_product, kekule=False)
     final_drawing=RaichuDrawer(final_product,save_svg_string =True, dont_show=True)
-    svg=final_drawing.svg_string.replace("\n","").replace("\"","'")
+    svg=final_drawing.svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='final_drawing'")
     global global_final_polyketide_Drawer_object
 
     list_drawings_per_module = cluster_to_structure(antismash_input_transformed,
@@ -48,4 +50,4 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     for drawing_list in list_drawings_per_module:
         for index_drawing,drawing in enumerate(drawing_list):
             list_svgs+=[[drawing.svg_string.replace("\n","").replace("\"","'")]]
-    return {"svg":svg, "hanging_svg": list_svgs}
+    return {"svg":svg, "hanging_svg": list_svgs[:-1], "smiles": smiles}
