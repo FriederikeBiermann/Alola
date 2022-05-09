@@ -115,6 +115,7 @@ function handleDrop(e) {
     }
     updateProteins(geneMatrix)
     updateDomains(geneMatrix)
+    addArrowClick(geneMatrix)
     }  return false;
   }
 function formatSVG(svg){
@@ -184,6 +185,10 @@ function updateProteins(geneMatrix){
 
       $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(proteinsForDisplay))));
       addDragDrop();
+
+      if (document.querySelector('input[type=checkbox]').checked) {
+        fetchFromRaichu(details_data, regionName,geneMatrix)
+      }
     }
 function obtainACPList(geneMatrix){
   let acpList=[]
@@ -221,6 +226,10 @@ function updateDomains(geneMatrix){
 
         $("#Domain_container").html(Domainer.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(domainsForDisplay))));
         addDragDrop();
+
+        if (document.querySelector('input[type=checkbox]').checked) {
+          fetchFromRaichu(details_data, regionName,geneMatrix)
+        }
       }
 function setKoStatus(geneIndex, domainIndex,geneMatrix){
 
@@ -232,6 +241,9 @@ function setKoStatus(geneIndex, domainIndex,geneMatrix){
 
           }
         else {geneMatrix[geneIndex].domains[domainIndex].ko = false;}
+        if (document.querySelector('input[type=checkbox]').checked) {
+          fetchFromRaichu(details_data, regionName,geneMatrix)
+        }
     }
 function setDisplayedStatus(id, geneMatrix) {
       id.slice(-11,-1);
@@ -457,7 +469,7 @@ function addArrowClick (geneMatrix){
   arrow.addEventListener (
      'click',
      function() {           // anonyme Funktion
-      setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow")
+      setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow");addArrowClick(geneMatrix)
      },
      false
   );
@@ -493,6 +505,7 @@ function addArrowClick (geneMatrix){
           function() {           // anonyme Funktion
           ;changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix), console.log(geneMatrix)},
           false);
+          console.log("arrow_update")
     }
   }
 }
