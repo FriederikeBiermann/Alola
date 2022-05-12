@@ -122,6 +122,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
           $(dom.node).mouseleave(function(handler){
             $(handler.target).css("stroke-width", "2px");
             $(handler.target).css("stroke", "black");
+            $("#" + Domainer.tooltip_id).css("display", "none")
 
           });
         }
@@ -351,8 +352,7 @@ Domainer.drawRandomClusterSVG = (function() {
 
 Domainer.showToolTip = (function(html, handler){
   var divTooltip =""
-if (html.includes("<a") ){ divTooltip =$("#" + Domainer.tooltip_id_domain);}
-else{divTooltip = $("#" + Domainer.tooltip_id);}
+divTooltip = $("#" + Domainer.tooltip_id);
 
 
   if (divTooltip.length < 1) {

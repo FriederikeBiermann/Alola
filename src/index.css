@@ -90,6 +90,16 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
   text-decoration: none;
   font-size: 19px;
 }
+#fake_button {
+
+  float: right;
+  background-color: #1F1F1F;
+  color:white;
+  text-align: center;
+  padding-right:5px;
+  padding-top:1px;
+  font-size: 19px;
+}
 #start_button:hover {
   background-color: #E11839;
   color: black;
@@ -100,10 +110,12 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
   padding: 2px 2px;
   text-decoration: none;
   font-size: 19px;
+  margin-bottom: :40px;
 }
 #save_button:hover {
   background-color: #E11839;
   color: black;
+
 }
 .heading-container{
   background-color:#2B2B2B;
