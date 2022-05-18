@@ -1,13 +1,19 @@
 
 regionName="r1c3"
-cluster_type=  "nrpspks"
+let cluster_type=  "nrpspks"
 let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
+let aminoacids={"arg":"arginine","his":"histidine","lys":"lysine","asp":"asparticacid","glu":"glutamicacid","ser":"serine","thr":"threonine","asn":"asparagine","gln":"glutamine","cys":"cysteine","sec":"selenocysteine","gly":"glycine","pro":"proline","ala":"alanine","val":"valine","ile":"isoleucine","leu":"leucine","met":"methionine","phe":"phenylalanine","tyr":"tyrosine","trp":"tryptophan"}
 let items = document.querySelectorAll('.test-container .box')
 var dragSrcEl = null;
-function fetchFromRaichu(details_data, regionName,geneMatrix){//fetching svg an displaying it
-let data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[0]
-let starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[1]
-
+function fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type){//fetching svg an displaying it
+  let data=""
+  let starterACP=""
+if (cluster_type=="pks"){ data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[0]
+starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[1]
+}
+else{ data=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[0]
+ starterACP=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[1]
+}
 let data_string=formatInputRaichuKS(data)
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 let list_hanging_svg=[]
@@ -253,12 +259,12 @@ function setDisplayedStatus(id, geneMatrix) {
           if (geneMatrix[geneIndex].displayed === false){
             geneMatrix[geneIndex].displayed = true;
             geneMatrix[geneIndex].ko= false;
-
+console.log("test2");
 
 
           }
         else {geneMatrix[geneIndex].displayed = false;
-        geneMatrix[geneIndex].ko= false;
+      console.log("test");
       geneMatrix[geneIndex].ko= true;}
         }
       }
@@ -266,7 +272,9 @@ function setDisplayedStatus(id, geneMatrix) {
       }
 function selectRegion(recordData, regionName){
   for (let region_index=0; region_index<recordData[0].regions.length;region_index++){
+    console.log(region_index,recordData[0].regions[region_index].anchor,recordData[0].regions.length)
     if (recordData[0].regions[region_index].anchor==regionName){
+
       return region_index
     }}
 
@@ -274,13 +282,14 @@ function selectRegion(recordData, regionName){
 }
 
 function changeColor(arrowId){
-
+  console.log("09709")
   const arrow = document.querySelector(arrowId);
 
-  if (arrow.getAttribute("fill")=="#E11839"){
+  if (arrow.getAttribute("fill")=="#E11838"){
+    console.log("0359");
   arrow.setAttribute('fill', '#ffffff');
   }
-  else{arrow.setAttribute('fill', "#E11839");
+  else{console.log("09356");arrow.setAttribute('fill', "#E11838");
 }}
 function changeDomainColor(domain,domainId){
 
@@ -300,14 +309,18 @@ function changeDomainColor(domain,domainId){
   }
   else{domainObject.setAttribute('fill', "#E11839");
 }}
-function changeProteinColorON(ProteinId){
+function changeProteinColorON(ProteinId,geneIndex){
 
+    if (geneMatrix[geneIndex].displayed===true){
   const arrow = document.querySelector(ProteinId);
-  arrow.setAttribute('fill', "#E11839");}
-function changeProteinColorOFF(ProteinId){
+  arrow.setAttribute('fill', "#E11839");}}
+function changeProteinColorOFF(ProteinId,geneIndex){
 
-  const arrow = document.querySelector(ProteinId);
-  arrow.setAttribute('fill', '#ffffff');
+  if (geneMatrix[geneIndex].displayed===true){
+    const arrow = document.querySelector(ProteinId);
+    arrow.setAttribute('fill', '#ffffff');
+  }
+
 }
 function displayTextInGeneExplorer(geneId){
 
@@ -318,11 +331,96 @@ function displayTextInGeneExplorer(geneId){
 }
 function formatInputRaichuKS(data){
   string_data= JSON.stringify(data);
-  trimmed_data=string_data.replaceAll(',"PKS_PP"',"").replaceAll(',"ACP"',"").replaceAll(',"KS"',"").replaceAll(',"AT"',"").replaceAll(',"TE"',"").replaceAll('"PKS_PP",',"").replaceAll(',"ACP"',"").replaceAll('"KS",',"").replaceAll('"AT",',"").replaceAll('"TE",',"").replaceAll('"PKS_PP",',"").replaceAll('"ACP"',"").replaceAll('"KS"',"").replaceAll('"AT"',"").replaceAll('"TE"',"")
+  trimmed_data=string_data.replaceAll(',"PKS_PP"',"").replaceAll(',"C"',"").replaceAll(',"ACP"',"").replaceAll(',"PCP"',"").replaceAll(',"KS"',"").replaceAll(',"T"',"").replaceAll(',"AT"',"").replaceAll(',"TE"',"").replaceAll(',"A"',"").replaceAll('"PKS_PP",',"").replaceAll('"C",',"").replaceAll(',"ACP"',"").replaceAll(',"T"',"").replaceAll(',"PCP"',"").replaceAll('"KS",',"").replaceAll('"AT",',"").replaceAll('"TE",',"").replaceAll('"PKS_PP",',"").replaceAll('"ACP"',"").replaceAll('"KS"',"").replaceAll('"AT"',"").replaceAll('"TE"',"").replaceAll('"C"',"").replaceAll('"A"',"").replaceAll('"ACP"',"").replaceAll('"T"',"")
 
 
   return trimmed_data
 }
+function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index, geneMatrix){
+    let outputForRaichu=[]
+
+    let  region=[]
+
+  if (details_data.hasOwnProperty(cluster_type)){region=details_data[cluster_type][region_index];}
+ else{region=details_data[region_index];}
+ geneMatrix.sort((a, b) => {
+     return a.position - b.position;
+ });
+
+let acpCounter=-1
+let starterStatus=0
+ for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+
+   if (geneMatrix[geneIndex].ko==false){
+
+  for (let orfIndex=0; orfIndex<region.orfs.length;orfIndex++){
+    let orf=region.orfs[orfIndex];
+
+    if (geneMatrix[geneIndex].id==orf.id){
+
+    for (let moduleIndex=0; moduleIndex<orf.modules.length;moduleIndex++){
+    let  module=orf.modules[moduleIndex];
+
+    let moduleArray=[];
+    let startModule=module.start;
+    let endModule=module.end;
+    let nameModule="module_"+orfIndex+ "_"+moduleIndex
+    let nameDomain="n"
+    let domainArray=[];
+    let typeModule= "starter_module_nrps";
+    let substrate="glycine"
+
+
+    for (let domainIndex=0; domainIndex<orf.domains.length;domainIndex++){
+      let domain=orf.domains[domainIndex];
+      let starterACP=""
+
+
+      if (geneMatrix[geneIndex].domains[domainIndex].ko==false){
+        if (startModule>=domain.start && domain.start>=endModule || endModule>=domain.start && domain.start>=startModule){
+
+
+          nameDomain=domain.abbreviation
+
+          if (domain.abbreviation==""){ nameDomain=domain.type}
+
+          if (domain.type.includes("PCP")||domain.type.includes("PP")){
+            acpCounter+=1;}
+
+
+
+          domainArray.push(nameDomain)
+
+          if (domain.abbreviation=="A"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ if (domain.predictions[0][1]!="unknown"){substrate=aminoacids[domain.predictions[0][1].replace("-", '').toLowerCase()]}}}
+          else{substrate="glycine"}
+        }}}}
+
+
+        if (domainArray.includes("A")  && !("TE" in domainArray)&& !("TD" in domainArray) && starterStatus==0){typeModule= "starter_module_nrps";
+
+      moduleArray.push(nameModule,typeModule,substrate)
+
+    starterACP=acpCounter;
+  starterStatus=1}
+
+        else if (domainArray.includes("C") && !(domainArray.includes("TE"))&&starterStatus==1&& !("TD" in domainArray)){typeModule= "elongation_module_nrps";
+      moduleArray.push(nameModule,typeModule,substrate);
+
+      moduleArray.push(domainArray)}
+
+        else if ((domainArray.includes("TE")||domainArray.includes("TD"))&&starterStatus==1){typeModule= "terminator_module_nrps";
+      moduleArray.push(nameModule,typeModule,substrate);
+      moduleArray.push(domainArray)}
+      if (moduleArray.length != 0){outputForRaichu.push(moduleArray)}
+
+
+
+  }break}
+}}
+
+}
+console.log(outputForRaichu)
+return [outputForRaichu,starterACP]}
 function extractAntismashPredictionsFromRegionSJKS(details_data, region_index, geneMatrix){
     let outputForRaichu=[]
 
@@ -465,26 +563,54 @@ function addArrowClick (geneMatrix){
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
   arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
   protein_id=("#"+geneMatrix[geneIndex].id+"_protein").replace(".","_")
-  const arrow = document.querySelector(arrow_id);
-
+  let arrow_1 = document.querySelector(arrow_id);
+  arrow_1.replaceWith(arrow_1.cloneNode(true));
+  let arrow = document.querySelector(arrow_id);
+  const protein = document.querySelector(protein_id);
   arrow.addEventListener (
      'click',
      function() {           // anonyme Funktion
-      setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow");addArrowClick(geneMatrix)
+       console.log("test");
+      setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow");addArrowClick(geneMatrix);
      },
      false
   );
   arrow.addEventListener (
      'mouseenter',
      function() {           // anonyme Funktion
-      displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein")
+      displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein",geneIndex)
+      console.log("#"+geneMatrix[geneIndex].id+"_protein")
      },
      false
   );
   arrow.addEventListener (
      'mouseleave',
      function() {           // anonyme Funktion
-      changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein")
+      changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein",geneIndex)
+     },
+     false
+  );
+    if (geneMatrix[geneIndex].displayed === true){
+  protein.addEventListener (
+     'click',
+     function() {           // anonyme Funktion
+       console.log("test");
+      setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow");addArrowClick(geneMatrix)
+     },
+     false
+  );
+  protein.addEventListener (
+     'mouseenter',
+     function() {           // anonyme Funktion
+      displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex)
+      console.log("#"+geneMatrix[geneIndex].id+"_protein")
+     },
+     false
+  );
+  protein.addEventListener (
+     'mouseleave',
+     function() {           // anonyme Funktion
+      changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex)
      },
      false
   );
@@ -498,20 +624,51 @@ function addArrowClick (geneMatrix){
        function() {           // anonyme Funktion
        changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix)},
        false);
+       domainObject.addEventListener (
+          'mouseenter',
+          function() {           // anonyme Funktion
+           changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein",geneIndex);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex);
+           console.log("#"+geneMatrix[geneIndex].id+"_protein")
+          },
+          false
+       );
+       domainObject.addEventListener (
+          'mouseleave',
+          function() {           // anonyme Funktion
+           changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex);changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein",geneIndex)
+          },
+          false
+       );
        domainId="#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier
 
       const domainObject_2 = document.querySelector(domainId);
        domainObject_2.addEventListener (
           'click',
           function() {           // anonyme Funktion
-          ;changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix)},
+          changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);setKoStatus(geneIndex, domainIndex,geneMatrix)},
           false);
+          domainObject_2.addEventListener (
+             'mouseenter',
+             function() {           // anonyme Funktion
+              changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein",geneIndex);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex);
+              console.log("#"+geneMatrix[geneIndex].id+"_protein")
+             },
+             false
+          );
+          domainObject_2.addEventListener (
+             'mouseleave',
+             function() {           // anonyme Funktion
+              changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex);changeProteinColorOFF("#"+geneMatrix[geneIndex].id+"_protein",geneIndex)
+             },
+             false
+          );
 
-    }
+    }}
   }
 }
 //create record for diplaying BGC in BGC explorer
 let regionNumber=selectRegion(recordData, regionName)
+console.log(regionNumber)
 let BGC = Object.keys(recordData[0].regions[regionNumber]).reduce(function(obj, k) {
   if (k== "start" || k== "end" || k=="orfs") obj[k] = recordData[0].regions[regionNumber][k];
   return obj;
@@ -547,4 +704,4 @@ updateProteins(geneMatrix)
 addArrowClick (geneMatrix)
 addDragDrop()
 
-fetchFromRaichu(details_data, regionName,geneMatrix)
+fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
