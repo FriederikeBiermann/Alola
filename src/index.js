@@ -1,10 +1,8 @@
 
 regionName="r1c3"
-<<<<<<< HEAD
-let cluster_type=  "nrps"
-=======
+
 let cluster_type=  "nrpspks"
->>>>>>> b666081029007f361e4e1c49ce690f47a3e2717e
+
 let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
 let aminoacids={"arg":"arginine","his":"histidine","lys":"lysine","asp":"asparticacid","glu":"glutamicacid","ser":"serine","thr":"threonine","asn":"asparagine","gln":"glutamine","cys":"cysteine","sec":"selenocysteine","gly":"glycine","pro":"proline","ala":"alanine","val":"valine","ile":"isoleucine","leu":"leucine","met":"methionine","phe":"phenylalanine","tyr":"tyrosine","trp":"tryptophan"}
 let items = document.querySelectorAll('.test-container .box')
@@ -12,11 +10,9 @@ var dragSrcEl = null;
 function fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type){//fetching svg an displaying it
   let data=""
   let starterACP=""
-<<<<<<< HEAD
-if (cluster_type=="pks"){ data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[0]
-=======
+
 if (cluster_type=="pks"||cluster_type=="nrpspks"){ data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[0]
->>>>>>> b666081029007f361e4e1c49ce690f47a3e2717e
+
 starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[1]
 }
 else{ data=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[0]
@@ -201,11 +197,9 @@ function updateProteins(geneMatrix){
       addDragDrop();
 
       if (document.querySelector('input[type=checkbox]').checked) {
-<<<<<<< HEAD
-        fetchFromRaichu(details_data, regionName,geneMatrix)
-=======
+
         fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
->>>>>>> b666081029007f361e4e1c49ce690f47a3e2717e
+
       }
     }
 function obtainACPList(geneMatrix){
@@ -246,11 +240,9 @@ function updateDomains(geneMatrix){
         addDragDrop();
 
         if (document.querySelector('input[type=checkbox]').checked) {
-<<<<<<< HEAD
-          fetchFromRaichu(details_data, regionName,geneMatrix)
-=======
+
           fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
->>>>>>> b666081029007f361e4e1c49ce690f47a3e2717e
+
         }
       }
 function setKoStatus(geneIndex, domainIndex,geneMatrix){
