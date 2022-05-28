@@ -55,7 +55,10 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
       for (geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
         if (geneMatrix[geneIndex].id==orf.locus_tag){
           for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].options.length;optionIndex++){
-          innerDropdownContent.innerHTML +='<a href="#">'+geneMatrix[geneIndex].options[optionIndex]+'</a>'
+            let optionContent="<button  onclick='changeSelectedpProteinOption(geneMatrix,"+geneIndex+",\x22"+geneMatrix[geneIndex].options[optionIndex]+"\x22);'  >"+geneMatrix[geneIndex].options[optionIndex]+"</button>";
+            console.log(optionContent)
+
+            innerDropdownContent.innerHTML +=optionContent    
         }
       break}
 

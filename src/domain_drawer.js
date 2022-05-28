@@ -79,9 +79,17 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
 
                   innerDropdownContent.innerHTML=""
                   for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].domains[domainIndex].domainOptions.length; optionIndex++){
+                  let optionContent="<button  onclick='changeSelectedOption(geneMatrix,"+geneIndex+','+domainIndex+",\x22"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"\x22);'  >"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"</button>";
 
-                  innerDropdownContent.innerHTML +='<a href="#">'+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+'</a>';
-                }
+                  //optionContent="<button  onclick='console.log(geneMatrix);'  >"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"</button>";
+                  console.log(geneMatrix[geneIndex].domains[domainIndex].default_option,geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex])
+                  if (geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]==geneMatrix[geneIndex].domains[domainIndex].default_option){
+                    console.log("horay")
+                     optionContent="<button style= \x22background-color:grey;hoveree \x22 onclick='changeSelectedOption(geneMatrix,"+geneIndex+','+domainIndex+",\x22"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"\x22);'  >"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"</button>";
+
+                  }
+                  console.log(optionContent)
+                  innerDropdownContent.innerHTML +=optionContent    }
               break}}
 
           }}
