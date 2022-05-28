@@ -100,7 +100,6 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
 
           }
           else{color="#025699"}
-
           points=Proteiner.getDomainPoints(domain, orf, cluster, height, scale)
 
           let x=0;
@@ -119,20 +118,22 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                       .fill(color)
                       .stroke({width: 2})
                       .addClass("Proteiner-domain");
+
+          dom.node.id= orf["locus_tag"]+"_domain_"+domain.sequence;
           $(dom.node).mouseover({domain: domain}, function(handler){
             $("#" + Proteiner.tooltip_id).css("display", "none")
             var start = handler.data.domain.start;
             var end = handler.data.domain.end;
             let contentTooltip=""
             for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
-              console.log(geneMatrix[geneIndex].domains[domainIndex].start,handler.data.domain.start)
+
               if (geneMatrix[geneIndex].domains[domainIndex].start==handler.data.domain.start){
                 for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].domains[domainIndex].domainOptions.length; optionIndex++){
-                  console.log("TEST&/");
+
                 contentTooltip +='<a href="#">'+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+'</a>';
               }
             break}}
-            Proteiner.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end+ contentTooltip, handler);
+            Proteiner.showToolTip("Domain: " + handler.data.domain.abbreviation + " (" + handler.data.domain.type + ")" + "<br/>" + start + " - " + end, handler);
             $(handler.target).css("stroke-width", "3px");
             $(handler.target).css("stroke", "#E11839"
 
@@ -294,10 +295,10 @@ Proteiner.flipHorizontal = (function(points, leftBound, rightBound) {
   return new_points;
 });
 Proteiner.toPointCoordinates= (function(points) {
-  console.log(typeof(points["0"].x))
+
   coordinates=[points["0"].x,points["0"].y,(points["4"].x-points["0"].x),(points["4"].y-points["0"].y)]
   coordinates_string=points["0"].x.toString()+","+points["0"].y.toString()+","+(points["4"].x-points["0"].x).toString()+","+(points["4"].y-points["0"].y).toString()
-console.log("porint",coordinates)
+
   return coordinates
 });
 Proteiner.toPointString = (function(points) {
@@ -372,7 +373,7 @@ Proteiner.showToolTip = (function(html, handler){
   var divTooltip =""
 if (html.includes("<a") ){ divTooltip =$("#" + Proteiner.tooltip_id_protein);}
 else{divTooltip = $("#" + Proteiner.tooltip_id);}
-console.log(divTooltip)
+
 
   if (divTooltip.length < 1) {
     divTooltip = $("<div id='" + Proteiner.tooltip_id+ "'>");
@@ -384,7 +385,7 @@ console.log(divTooltip)
     divTooltip.css("pointer-events", "none");
     divTooltip.css("position", "fixed");
     divTooltip.css("z-index", "99999");
-    console.log(typeof(html),html.includes("<a"))
+
 
     divTooltip.appendTo($(document.body));
   }
@@ -395,7 +396,7 @@ console.log(divTooltip)
   divTooltip.css("left", handler.clientX + "px");
   divTooltip.css("display", "block");
   if (html.includes("a") ){
-    console.log("hahah")
+
     divTooltip.addClass("dropdown-content");
 
 

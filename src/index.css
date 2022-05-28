@@ -4,6 +4,7 @@ body{
   font-size: 40px;
 
 }
+
 a:link {
  color: #E11839;
 }
@@ -11,17 +12,30 @@ a:link {
 a:visited {
  color: #E11839;
 }
+#menu_bar{
+  border-radius:6px;
+background-color:#1F1F1F
+;
+margin-bottom: 10px;
+float: left;
+width:100%;
+height: 35px;
+box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
 #gene_container{
   font-size: small;
   overflow-y: auto;
 }
 #structure_container{
-  background-color:#ffffff;
+
   border-radius:6px;
   padding-left: 5%;
   padding-right: -8%;
+  padding-bottom: -20%;
   width: 90%;
   text-align: center;
+  height: 390px;
 }
 #BGC_explorer{
 
@@ -31,7 +45,7 @@ background-color:#1F1F1F
 margin-bottom: 10px;
 float: left;
 width:75%;
-height: 300px;
+height: 200px;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
  #Protein_explorer{
@@ -40,9 +54,16 @@ background-color:#1F1F1F;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-height: 750px;
+height: 305px;
 width: 75%;}
+#Domain_explorer{
+  border-radius:6px;
+background-color:#1F1F1F;
+float: left;
 
+box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+height: 550px;
+width: 75%;}
  #Structure_explorer{
    border-radius:6px;
 background-color:#1F1F1F;
@@ -57,19 +78,133 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 width: 24.5%;
 background-color:#1F1F1F;
 float: right;
-height: 500px;
+height: 505px;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
+#start_button {
+
+  float: right;
+  color: #2B2B2B;
+  text-align: center;
+  padding: 2px 2px;
+  text-decoration: none;
+  font-size: 19px;
+}
+#fake_button {
+
+  float: right;
+  background-color: #1F1F1F;
+  color:white;
+  text-align: center;
+  padding-right:5px;
+  padding-top:1px;
+  font-size: 19px;
+}
+#start_button:hover {
+  background-color: #E11839;
+  color: black;
+}
+#save_button {
+
+  text-align: center;
+  padding: 2px 2px;
+  text-decoration: none;
+  font-size: 19px;
+  margin-bottom: :40px;
+}
+#save_button:hover {
+  background-color: #E11839;
+  color: black;
+
+}
 .heading-container{
   background-color:#2B2B2B;
   border-radius:6px;
   padding-left: 5%;
   width: 92%;
 }
+/* The switch - the box around the slider */
+.switch {
+ position: relative;
+ float: right;
+ display: inline-block;
+ width: 60px;
+ height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+ opacity: 0;
+ width: 0;
+ height: 0;
+}
+
+/* The slider */
+.slider {
+ position: absolute;
+ cursor: pointer;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background-color: #ccc;
+ -webkit-transition: .4s;
+ transition: .4s;
+}
+
+.slider:before {
+ position: absolute;
+ content: "";
+ height: 26px;
+ width: 26px;
+ left: 4px;
+ bottom: 4px;
+ background-color: white;
+ -webkit-transition: .4s;
+ transition: .4s;
+}
+
+input:checked + .slider {
+ background-color: #E11839;
+}
+
+input:focus + .slider {
+ box-shadow: 0 0 1px #E11839;
+}
+
+input:checked + .slider:before {
+ -webkit-transform: translateX(26px);
+ -ms-transform: translateX(26px);
+ transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+ border-radius: 34px;
+}
+
+.slider.round:before {
+ border-radius: 50%;
+}
+#save_svg {
+  float: right;
+  color: #2B2B2B;
+  background-color=white;
+  text-align: center;
+  padding: 2px 2px;
+  text-decoration: none;
+  font-size: 19px;
+}
+#smiles_container{
+  font-size: 12px;
+}
+#final_drawing{
+  max-height: 100%;
+}
  .container {
 
-   padding: 5%;
-   width: 87%;
+   padding: 1%;
+   width: 95%;
    overflow-x: auto;
    white-space: nowrap;
 }
@@ -84,28 +219,40 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
  height: 150%;
 
 }
-.test-container {
+.protein-container {
+ display: grid;
+ grid-template-columns: repeat(100, 1fr);
+ gap: 12px;
+ padding: 1.5%;
+ width: 95%;
+ overflow-x: auto;
+ white-space: nowrap;
+ height: 170px;
+ font-size: medium;
+}
+.domain-container {
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap: 10px;
- padding: 5%;
- width: 87%;
+ padding: 0%;
+ width: 97%;
  overflow-x: auto;
  white-space: nowrap;
- height: 300px;
+ height: 450px;
  font-size: medium;
 }
-
+.intermediateContainer{
+  position: relative;
+  right: 70px;
+  bottom: 50px;
+}
 .box {
-
-
  cursor: move;
 }
 /* Dropdown Button */
 .dropbtn {
-background-color:#1F1F1F;
-color: white;
 
+background-color: transparent;
 font-size: 16px;
 border: none;
 }
@@ -120,7 +267,7 @@ display: inline-block;
 .dropdown-content {
 display: none;
 position: absolute;
-background-color: #f1f1f1;
+background-color: white;
 min-width: 160px;
 box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 z-index: 1;
