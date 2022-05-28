@@ -8,7 +8,7 @@ var dragSrcEl = null;
 function fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type){//fetching svg an displaying it
   let data=""
   let starterACP=""
-if (cluster_type=="pks"){ data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[0]
+if (cluster_type=="pks"||cluster_type=="nrpspks"){ data=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[0]
 starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,geneMatrix)[1]
 }
 else{ data=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[0]
@@ -193,7 +193,7 @@ function updateProteins(geneMatrix){
       addDragDrop();
 
       if (document.querySelector('input[type=checkbox]').checked) {
-        fetchFromRaichu(details_data, regionName,geneMatrix)
+        fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
       }
     }
 function obtainACPList(geneMatrix){
@@ -234,7 +234,7 @@ function updateDomains(geneMatrix){
         addDragDrop();
 
         if (document.querySelector('input[type=checkbox]').checked) {
-          fetchFromRaichu(details_data, regionName,geneMatrix)
+          fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
         }
       }
 function setKoStatus(geneIndex, domainIndex,geneMatrix){
@@ -248,7 +248,7 @@ function setKoStatus(geneIndex, domainIndex,geneMatrix){
           }
         else {geneMatrix[geneIndex].domains[domainIndex].ko = false;}
         if (document.querySelector('input[type=checkbox]').checked) {
-          fetchFromRaichu(details_data, regionName,geneMatrix)
+          fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
         }
 
     }
