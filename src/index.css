@@ -249,8 +249,8 @@ input:checked + .slider:before {
 }
 .intermediateContainer{
   position: relative;
-  right: 70px;
-  bottom: 50px;
+  right: 53px;
+  bottom: 30px;
 }
 .box {
  cursor: move;
