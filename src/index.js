@@ -18,6 +18,7 @@ starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,ge
 else{ data=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[0]
  starterACP=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[1]
 }
+console.log(geneMatrix)
 let data_string=formatInputRaichuKS(data)
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 let list_hanging_svg=[]
@@ -131,6 +132,8 @@ function handleDrop(e) {
 function formatSVG(svg){
 
   svg=svg.toString().replaceAll("#ffffff","none").replaceAll("#000000","#ffffff").replaceAll("<g transform='translate","<g style='fill: #ffffff' transform='translate");
+  console.log(svg)
+  svg=svg.toString().replaceAll("<!-- ACP -->    <g style='fill: #ffffff'","<!-- ACP -->    <g style='fill: transparent'");
   return svg
 }
 function handleDragEnd(e) {
@@ -256,11 +259,9 @@ function setKoStatus(geneIndex, domainIndex,geneMatrix){
           }
         else {geneMatrix[geneIndex].domains[domainIndex].ko = false;}
         if (document.querySelector('input[type=checkbox]').checked) {
-<<<<<<< HEAD
-          fetchFromRaichu(details_data, regionName,geneMatrix)
-=======
+
           fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
->>>>>>> b666081029007f361e4e1c49ce690f47a3e2717e
+
         }
 
     }
@@ -334,6 +335,12 @@ function changeProteinColorOFF(ProteinId,geneIndex){
   }
 
 }
+function changeSelectedOption(geneMatrix,geneIndex,domainIndex,option){
+  console.log("erip")
+  geneMatrix[geneIndex].domains[domainIndex].selected_option=option
+
+  fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
+}
 function displayTextInGeneExplorer(geneId){
 
   for (let geneIndex=0;geneIndex<BGCForDisplay["orfs"].length;geneIndex++)
@@ -402,9 +409,10 @@ let starterStatus=0
 
 
           domainArray.push(nameDomain)
-
+          geneMatrix[geneIndex].domains[domainIndex].function=nameDomain
           if (domain.abbreviation=="A"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ if (domain.predictions[0][1]!="unknown"){substrate=aminoacids[domain.predictions[0][1].replace("-", '').toLowerCase()]}}}
           else{substrate="glycine"}
+          geneMatrix[geneIndex].domains[domainIndex].substrate=substrate
         }}}}
 
 
@@ -432,7 +440,7 @@ let starterStatus=0
 
 }
 console.log(outputForRaichu)
-return [outputForRaichu,starterACP]}
+return [outputForRaichu,starterACP,geneMatrix]}
 function extractAntismashPredictionsFromRegionSJKS(details_data, region_index, geneMatrix){
     let outputForRaichu=[]
 
@@ -440,6 +448,7 @@ function extractAntismashPredictionsFromRegionSJKS(details_data, region_index, g
 
   if (details_data.hasOwnProperty(cluster_type)){region=details_data[cluster_type][region_index];}
  else{region=details_data[region_index];}
+ //sort gene matrix by position of proteins
  geneMatrix.sort((a, b) => {
      return a.position - b.position;
  });
@@ -477,6 +486,7 @@ let starterStatus=0
         if (startModule>=domain.start && domain.start>=endModule || endModule>=domain.start && domain.start>=startModule){
 
           if (domain.abbreviation=="KR"){
+            if (geneMatrix[geneIndex].domains[domainIndex].selected_option=="Test 3"){
             if (domain.predictions.length!=0){
 
               let domainActivity=domain.predictions[0][1]
@@ -489,6 +499,9 @@ let starterStatus=0
               else{nameDomain="KR"}
             }
           else{nameDomain="KR"}}
+          else{nameDomain="KR_"+geneMatrix[geneIndex].domains[domainIndex].selected_option}
+        }
+
           else{nameDomain=domain.abbreviation}
 
           if (domain.abbreviation==""){ nameDomain=domain.type}
@@ -496,16 +509,19 @@ let starterStatus=0
           if (domain.type.includes("ACP")||domain.type.includes("PP")){
             acpCounter+=1;}
 
+          geneMatrix[geneIndex].domains[domainIndex].function=nameDomain
 
 
           domainArray.push(nameDomain)
 
           if (domain.abbreviation=="AT"){if (domain.hasOwnProperty("predictions")){if (domain.predictions.length!=0){ if (domain.predictions[1][1]!="unknown"){substrate=domain.predictions[1][1].replace("-", '').toLowerCase()}}}
           else{substrate=malonylcoa}
+          geneMatrix[geneIndex].domains[domainIndex].substrate=substrate
+
         }}}
       }
 
-        if (domainArray.includes("AT") && !(domainArray.includes("KS")) && !("TE" in domainArray)){typeModule= "starter_module_pks";
+        if (domainArray.includes("AT") && !(domainArray.includes("KS")) && !(domainArray.includes("TE"))){typeModule= "starter_module_pks";
          starterSubstrate= nameToStructure[substrate];
       moduleArray.push(nameModule,typeModule,starterSubstrate)
     starterACP=acpCounter;
@@ -535,8 +551,9 @@ domainArray.push("DH","ER")
   }break}
 }}
 }
+console.log(geneMatrix)
+return [outputForRaichu,starterACP,geneMatrix]}
 
-return [outputForRaichu,starterACP]}
 function createGeneMatrix(BGC){
   var geneMatrix=[];
   for (let geneIndex = 0; geneIndex < BGC["orfs"].length; geneIndex++) {
@@ -545,6 +562,9 @@ function createGeneMatrix(BGC){
   for (let domainIndex=0; domainIndex<domains.length;domainIndex++){
     domains[domainIndex]["identifier"]=BGC["orfs"][geneIndex].locus_tag+"_"+(domainIndex+1).toString()
     domains[domainIndex]["domainOptions"]=["Test 3","Test 4"];
+    domains[domainIndex]["default_option"]=["Test 3"];
+    domains[domainIndex]["selected_option"]=["Test 3"];
+
     domains[domainIndex]["ko"]=false;
   }}
   else{domains=[]}
@@ -553,6 +573,8 @@ function createGeneMatrix(BGC){
   "position":geneIndex+1,
   "ko":false,
   "displayed":true,
+  "default_option":"Test1",
+  "selected_option":"Test1",
   "options":["Test1","Test"],
   "domains":domains});
   }
@@ -714,6 +736,10 @@ BGCForDisplay=displayGenes(BGC)
 updateDomains(geneMatrix)
 updateProteins(geneMatrix)
 addArrowClick (geneMatrix)
-addDragDrop()
 
 fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
+createOptions(geneMatrix)
+addDragDrop()
+updateDomains(geneMatrix)
+updateProteins(geneMatrix)
+addArrowClick (geneMatrix)
