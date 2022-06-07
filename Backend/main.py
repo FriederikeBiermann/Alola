@@ -40,6 +40,7 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     smiles=structure_to_smiles(final_product, kekule=False)
     final_drawing=RaichuDrawer(final_product,save_svg_string =True, dont_show=True)
     svg=final_drawing.svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='final_drawing'")
+    #return {"svg":svg, "hanging_svg": svg, "smiles": smiles}
     global global_final_polyketide_Drawer_object
 
     list_drawings_per_module = cluster_to_structure(antismash_input_transformed,

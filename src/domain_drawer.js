@@ -47,6 +47,8 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
           else{color="#025699"}
           let geneIndex=0
           let domainIdentifier=""
+          let size=50
+          let abbreviation=""
           for (geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
             if (geneMatrix[geneIndex].id==orf.locus_tag){
               for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
@@ -54,6 +56,10 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
                 if (geneMatrix[geneIndex].domains[domainIndex].start==domain.start){
                   domainIdentifier=geneMatrix[geneIndex].domains[domainIndex].identifier
                   points=Domainer.getDomainPoints(domain, orf, cluster, height, scale)
+
+                  if (geneMatrix[geneIndex].domains[domainIndex].type.includes("ACP")||geneMatrix[geneIndex].domains[domainIndex].type.includes("PP")){
+        size=25}
+        else{abbreviation=domain.abbreviation}
                   var innerContainer= document.createElement('div');
                   innerContainer.id="innerdomainContainer"+domainIdentifier
 
@@ -65,8 +71,9 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
                   innerDropdownButton.id="innerDropdownButton"+domainIdentifier
                   var innerDropdownContent=document.createElement('div');
                   innerDropdownContent.id="innerDropdownContent"+domainIdentifier
-                  innerContainer.style.width=String(Math.abs(points["4"].x-points["0"].x))+"px"
+                  innerContainer.style.width=String(size-10)+"px"
                   document.getElementById('domain_container').appendChild(innerContainer);
+
                   document.getElementById('innerdomainContainer'+domainIdentifier).setAttribute("class","box");
                   document.getElementById('innerdomainContainer'+domainIdentifier).appendChild(innerDropdownContainer);
                   document.getElementById('innerdomainContainer'+domainIdentifier).appendChild(innerIntermediateContainer);
@@ -104,14 +111,20 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
           else{
             x=points["0"].x
           }
-          var draw = SVG(innerDropdownButton).size(String(Math.abs(points["4"].x-points["0"].x))+"px", height).group();
-          var dom = draw.rect(Math.abs(points["4"].x-points["0"].x),Math.abs(points["4"].y-points["0"].y)+15)
+          var draw = SVG(innerDropdownButton).size(String(size)+"px", height).group();
+          console.log(typeof(draw))
+          var dom = draw.rect(size,size)
                       .x(0)
-                      .y(points["0"].y)
-                      .rx("20")
-                      .ry("20")
+                      .y(points["0"].y+(50-(size)))
+                      .rx("200%")
+                      .ry("200%")
                       .fill(color)
                       .stroke({width: 2});
+          // var text = draw.append('text').text(abbreviation)
+          //                   .attr('x', 0)
+          //                   .attr('y', 0)
+          //                   .attr('fill', 'black')
+
 
           dom.node.id= "domain"+domainIdentifier
           $(dom.node).mouseover({domain: domain}, function(handler){
