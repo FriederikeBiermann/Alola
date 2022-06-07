@@ -132,6 +132,8 @@ function handleDrop(e) {
 function formatSVG(svg){
 
   svg=svg.toString().replaceAll("#ffffff","none").replaceAll("#000000","#ffffff").replaceAll("<g transform='translate","<g style='fill: #ffffff' transform='translate");
+  console.log(svg)
+  svg=svg.toString().replaceAll("<!-- ACP -->    <g style='fill: #ffffff'","<!-- ACP -->    <g style='fill: transparent'");
   return svg
 }
 function handleDragEnd(e) {
