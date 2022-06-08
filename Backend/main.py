@@ -5,6 +5,7 @@ import ast
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
 from raichu.modules_to_structure import *
+from raichu.thioesterase_reactions import *
 
 from starlette.middleware import Middleware
 app = FastAPI()
@@ -36,7 +37,7 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     print ((antismash_input))
     antismash_input_transformed=ast.literal_eval(antismash_input)
     print ((antismash_input_transformed), type(antismash_input_transformed))
-    final_product = cluster_to_structure(antismash_input_transformed)
+    final_product = thioesterase_linear_product(cluster_to_structure(antismash_input_transformed))
     smiles=structure_to_smiles(final_product, kekule=False)
     final_drawing=RaichuDrawer(final_product,save_svg_string =True, dont_show=True)
     svg=final_drawing.svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='final_drawing'")
