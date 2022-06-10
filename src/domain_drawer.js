@@ -56,9 +56,10 @@ Domainer.drawClusterSVG = (function(cluster, height = 150) {
 
 
             if (geneMatrix[geneIndex].id==orf.locus_tag){
-                console.log("modules",geneMatrix[geneIndex].modules)
-              if (!(geneMatrix[geneIndex].hasOwnProperty("modules"))){geneMatrix[geneIndex].modules=geneMatrix[geneIndex].domains[domainIndex]}
-              console.log("modules",geneMatrix[geneIndex].modules)
+
+              if (!(geneMatrix[geneIndex].hasOwnProperty("modules"))){
+                geneMatrix[geneIndex].modules=[{domains:geneMatrix[geneIndex].domains}]}
+
                 for (let moduleIndex=0; moduleIndex<geneMatrix[geneIndex].modules.length;moduleIndex++){
               for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].modules[moduleIndex].domains.length;domainIndex++){
 
@@ -66,6 +67,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 150) {
 
                   domainIdentifier=geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].identifier
                   points=Domainer.getDomainPoints(domain, orf, cluster, height, scale)
+
 //declare size of balls
                   if (geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("ACP")||geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("PP")){
         size=25;}
@@ -122,7 +124,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 150) {
                   innerDropdownContent.innerHTML +=optionContent    }
               break}}
 
-          }}
+          }
 
 
 
@@ -165,9 +167,9 @@ Domainer.drawClusterSVG = (function(cluster, height = 150) {
 
           });
         }
-      
 
-  }}}}
+
+  }}}}}
 
   $(draw.node).parent().mouseover({domain: domain}, function(handler){
     var bgc_desc = "<b>BGC: " + recordData[0].seq_id+" region "+regionName + "</b>";

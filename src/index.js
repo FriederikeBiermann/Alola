@@ -604,17 +604,28 @@ function addModulesGeneMatrix(geneMatrix){
 
            for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
              if(module.end>=geneMatrix[geneIndex].domains[domainIndex].start&& geneMatrix[geneIndex].domains[domainIndex].start>= module.start||module.start>=geneMatrix[geneIndex].domains[domainIndex].start && geneMatrix[geneIndex].domains[domainIndex].start>= module.end){
-
-
                domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
                geneMatrix[geneIndex].domains[domainIndex]["module"]=nameModule;
 
              }
+             if (module.end>geneMatrix[geneIndex].domains[domainIndex].start&& geneMatrix[geneIndex].domains[domainIndex].start< module.start&&!(geneMatrix[geneIndex].domains[domainIndex].hasOwnProperty("module"))){
+               domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
+               geneMatrix[geneIndex].domains[domainIndex]["module"]=nameModule;
+               geneMatrix[geneIndex].modules[moduleIndex]["start"]=geneMatrix[geneIndex].domains[domainIndex].start;
+             }
+             if (moduleIndex==modules.length-1&&domainIndex==geneMatrix[geneIndex].domains.length-1&&!(geneMatrix[geneIndex].domains[domainIndex].hasOwnProperty("module"))){
+               console.log("identifier",geneMatrix[geneIndex].domains[domainIndex].identifier)
+               domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
+               geneMatrix[geneIndex].domains[domainIndex]["module"]=nameModule;
+               geneMatrix[geneIndex].modules[moduleIndex]["end"]=geneMatrix[geneIndex].domains[domainIndex].end;
+             }
     }
      geneMatrix[geneIndex].modules[moduleIndex].domains=domainArray
       geneMatrix[geneIndex].modules[moduleIndex].numberOfDomains=domainArray.length
-}}}}}}
+}}}}}
 
+}
+console.log(geneMatrix)
 return geneMatrix;}
 function displayGenes(BGC){
   // display BGC in BGC explorer
@@ -629,6 +640,7 @@ function displayGenes(BGC){
   return BGCForDisplay
 }
 function addArrowClick (geneMatrix){
+
   //add click event to every gene arrow
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
   arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
@@ -768,8 +780,9 @@ else if (value_1.hasOwnProperty([regionName])){
 }
 geneMatrix=createGeneMatrix(BGC)
 BGCForDisplay=displayGenes(BGC)
-updateDomains(geneMatrix)
 updateProteins(geneMatrix)
+updateDomains(geneMatrix)
+
 addArrowClick (geneMatrix)
 
 fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
