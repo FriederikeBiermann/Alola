@@ -124,6 +124,10 @@ function handleDrop(e) {
       geneMatrix[geneIndexDragged].position=positionTarget
 
     }
+    geneMatrix.sort((a, b) => {
+        return a.position - b.position;
+    });
+    addModulesGeneMatrix(geneMatrix)
     updateProteins(geneMatrix)
     updateDomains(geneMatrix)
     addArrowClick(geneMatrix)
@@ -586,7 +590,9 @@ function addModulesGeneMatrix(geneMatrix){
   //iterate through all domains to assign them to correct module
   if (details_data.hasOwnProperty(cluster_type)){region=details_data[cluster_type][region_index];}
  else{region=details_data[region_index];}
+       for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
   for (let orfIndex = 0;orfIndex< region.orfs.length; orfIndex++) {
+     if (geneMatrix[geneIndex].id==region.orfs[orfIndex].id){
     let modules=[]
     if (region.orfs[orfIndex].hasOwnProperty("modules")){
 
@@ -594,8 +600,8 @@ function addModulesGeneMatrix(geneMatrix){
     for (let moduleIndex=0; moduleIndex< modules.length; moduleIndex++){
       module=modules[moduleIndex]
       let domainArray=[]
-      for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-         if (geneMatrix[geneIndex].id==region.orfs[orfIndex].id){
+
+
            geneMatrix[geneIndex]["modules"]=modules
            nameModule=geneMatrix[geneIndex].id+"_"+moduleIndex
            geneMatrix[geneIndex].modules[moduleIndex]["moduleIdentifier"]=nameModule
@@ -620,8 +626,9 @@ function addModulesGeneMatrix(geneMatrix){
                geneMatrix[geneIndex].modules[moduleIndex]["end"]=geneMatrix[geneIndex].domains[domainIndex].end;
              }
     }
-     geneMatrix[geneIndex].modules[moduleIndex].domains=domainArray
-      geneMatrix[geneIndex].modules[moduleIndex].numberOfDomains=domainArray.length
+     geneMatrix[geneIndex].modules[moduleIndex].domains=domainArray;
+      geneMatrix[geneIndex].modules[moduleIndex].numberOfDomains=domainArray.length;
+      geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation=0;
 }}}}}
 
 }

@@ -236,15 +236,29 @@ input:checked + .slider:before {
  height: 170px;
  font-size: medium;
 }
+.outerDomainExplorer{
+   overflow-x: auto;
+}
 .domain-container {
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap: 10px;
  padding: 0%;
  width: 97%;
- overflow-x: auto;
+
  white-space: nowrap;
  height: 450px;
+ font-size: medium;
+}
+.module-container {
+ display: grid;
+ grid-template-columns: repeat(100, 1fr);
+ gap:3px;
+ padding: 1%;
+ width: 97%;
+
+ white-space: nowrap;
+ height: 50px;
  font-size: medium;
 }
 .intermediateContainer{
