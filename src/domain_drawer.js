@@ -16,7 +16,7 @@ var Domainer = {
     tooltip_id_domain: "Domainer-tooltip-123"
 };
 
-Domainer.drawClusterSVG = (function(cluster, height = 70) {
+Domainer.drawClusterSVG = (function(cluster, height = 75) {
   var container = document.getElementById('domain_container')
   var line_svg = SVG(container).size('100%', height).group();
   document.getElementById('domain_container').innerHTML = "";
@@ -25,7 +25,8 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
   //draw line
   line_svg.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({color: "white",width: 2});
   var width = scale(cluster.end - cluster.start);
-
+  let indentSteps=15
+  let indent=0
   if (cluster.hasOwnProperty("orfs")) {
     // draw domains
     for (var i in cluster.orfs) {
@@ -34,7 +35,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
 
         // draw domains
         for (var j in orf.domains) {
-
+          var numberOfDomains=orf.domains.length
           var domain = orf.domains[j];
           var color = "gray";
           if (domain.hasOwnProperty("type")) {
@@ -48,18 +49,60 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
           let geneIndex=0
           let domainIdentifier=""
           let size=50
+          let points=""
+
           let abbreviation=""
           for (geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
-            if (geneMatrix[geneIndex].id==orf.locus_tag){
-              for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
 
-                if (geneMatrix[geneIndex].domains[domainIndex].start==domain.start){
-                  domainIdentifier=geneMatrix[geneIndex].domains[domainIndex].identifier
+
+            if (geneMatrix[geneIndex].id==orf.locus_tag){
+
+              if (!(geneMatrix[geneIndex].hasOwnProperty("modules"))){
+                geneMatrix[geneIndex].modules=[{domains:geneMatrix[geneIndex].domains}]}
+
+                for (let moduleIndex=0; moduleIndex<geneMatrix[geneIndex].modules.length;moduleIndex++){
+                let moduleLength=0
+
+              for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].modules[moduleIndex].domains.length;domainIndex++){
+
+                if (geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].start==domain.start){
+
+                  domainIdentifier=geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].identifier
                   points=Domainer.getDomainPoints(domain, orf, cluster, height, scale)
 
-                  if (geneMatrix[geneIndex].domains[domainIndex].type.includes("ACP")||geneMatrix[geneIndex].domains[domainIndex].type.includes("PP")){
-        size=25}
+//declare size of balls
+                  if (geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("ACP")||geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("PP")){
+        size=25;}
+
         else{abbreviation=domain.abbreviation}
+        geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation+=size
+        let cleanedLength=geneMatrix[geneIndex].modules[moduleIndex].domains.length
+        let cleanedDomainIndex=domainIndex
+        console.log("domains",JSON.stringify(geneMatrix[geneIndex].modules[moduleIndex].domains))
+        if (JSON.stringify(geneMatrix[geneIndex].modules[moduleIndex].domains).includes("Nterm")){
+          cleanedLength--
+          cleanedDomainIndex--
+        }
+        if (JSON.stringify(geneMatrix[geneIndex].modules[moduleIndex].domains).includes("Cterm")){
+          cleanedLength--
+        }
+        if (JSON.stringify(geneMatrix[geneIndex].modules[moduleIndex].domains).includes("Thioesterase")){
+          cleanedLength--
+        }
+        // declare indent for spaghetti diagram
+        if ((cleanedDomainIndex== 2 || cleanedDomainIndex==cleanedLength-3)&&cleanedLength>3){
+          indent=indentSteps
+
+
+        }
+        else if((cleanedDomainIndex== 3 || cleanedDomainIndex==cleanedLength-4)&&cleanedLength>4){
+
+          indent=indentSteps*2
+
+
+        }
+        else{indent=0}
+        // add all the neccesary domain containers
                   var innerContainer= document.createElement('div');
                   innerContainer.id="innerdomainContainer"+domainIdentifier
 
@@ -85,21 +128,23 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
                   document.getElementById("innerDropdownContent"+domainIdentifier).setAttribute("class","dropdown-content");
 
                   innerDropdownContent.innerHTML=""
-                  for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].domains[domainIndex].domainOptions.length; optionIndex++){
+                  for (let optionIndex=0; optionIndex<geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].domainOptions.length; optionIndex++){
                   let optionContent="<button  onclick='changeSelectedOption(geneMatrix,"+geneIndex+','+domainIndex+",\x22"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"\x22);'  >"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"</button>";
 
                   //optionContent="<button  onclick='console.log(geneMatrix);'  >"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"</button>";
-                  console.log(geneMatrix[geneIndex].domains[domainIndex].default_option,geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex])
-                  if (geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]==geneMatrix[geneIndex].domains[domainIndex].default_option){
-                    console.log("horay")
-                     optionContent="<button style= \x22background-color:grey;hoveree \x22 onclick='changeSelectedOption(geneMatrix,"+geneIndex+','+domainIndex+",\x22"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"\x22);'  >"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"</button>";
+                      if (geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].domainOptions[optionIndex]==geneMatrix[geneIndex].domains[domainIndex].default_option){
+
+                     optionContent="<button style= \x22background-color:grey; \x22 onclick='changeSelectedOption(geneMatrix,"+geneIndex+','+domainIndex+",\x22"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"\x22);'  >"+geneMatrix[geneIndex].domains[domainIndex].domainOptions[optionIndex]+"</button>";
 
                   }
-                  console.log(optionContent)
+
                   innerDropdownContent.innerHTML +=optionContent    }
               break}}
+              // create module visualization
+              var innerModuleContainer= document.createElement('div');
+              innerModuleContainer.id="innerModuleContainer"+geneIndex+"_"+moduleIndex;
 
-          }}
+          }
 
 
 
@@ -112,19 +157,14 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
             x=points["0"].x
           }
           var draw = SVG(innerDropdownButton).size(String(size)+"px", height).group();
-          console.log(typeof(draw))
+
           var dom = draw.rect(size,size)
                       .x(0)
-                      .y(points["0"].y+(50-(size)))
+                      .y(height-indent-(size))
                       .rx("200%")
                       .ry("200%")
                       .fill(color)
                       .stroke({width: 2});
-          // var text = draw.append('text').text(abbreviation)
-          //                   .attr('x', 0)
-          //                   .attr('y', 0)
-          //                   .attr('fill', 'black')
-
 
           dom.node.id= "domain"+domainIdentifier
           $(dom.node).mouseover({domain: domain}, function(handler){
@@ -147,9 +187,9 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
 
           });
         }
-      }
-    }
-  }
+
+
+  }}}}}
 
   $(draw.node).parent().mouseover({domain: domain}, function(handler){
     var bgc_desc = "<b>BGC: " + recordData[0].seq_id+" region "+regionName + "</b>";
@@ -163,10 +203,40 @@ Domainer.drawClusterSVG = (function(cluster, height = 70) {
   });
 
   $(container).find("svg").attr("width", width + "px");
+  Domainer.drawModules(geneMatrix,20,scale)
   return $(container).find("svg")[0];
 });
 
+Domainer.drawModules=(function(geneMatrix,height,scale) {
 
+  document.getElementById('module_container').innerHTML=""
+  for (let geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
+    if (geneMatrix[geneIndex].hasOwnProperty("modules")){
+      for (let moduleIndex=0; moduleIndex<geneMatrix[geneIndex].modules.length;moduleIndex++){
+        console.log(geneIndex,geneMatrix[geneIndex].modules[moduleIndex],moduleIndex)
+        var innerModuleContainer= document.createElement('div');
+        innerModuleContainer.id="innerModuleContainer"+"_"+geneMatrix[geneIndex].id+"_"+moduleIndex
+        document.getElementById('module_container').appendChild(innerModuleContainer);
+        size=geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation-3
+
+        var draw = SVG(innerModuleContainer).size(String(size)+"px", height).group();
+
+        var dom = draw.rect(size,height)
+                    .x(0)
+                    .y(height)
+                    .fill("white")
+                    .stroke("white")
+                    .stroke({width: 10})
+
+
+        dom.node.id= "module_"+moduleIndex
+        geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation=0
+    }
+
+
+  }}
+
+});
 Domainer.getOrfPoints = (function(orf, cluster, height, scale){
   var x_points = [
     scale(orf.start),

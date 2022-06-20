@@ -18,7 +18,7 @@ starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,ge
 else{ data=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[0]
  starterACP=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[1]
 }
-console.log(geneMatrix)
+
 let data_string=formatInputRaichuKS(data)
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 let list_hanging_svg=[]
@@ -124,6 +124,10 @@ function handleDrop(e) {
       geneMatrix[geneIndexDragged].position=positionTarget
 
     }
+    geneMatrix.sort((a, b) => {
+        return a.position - b.position;
+    });
+    addModulesGeneMatrix(geneMatrix)
     updateProteins(geneMatrix)
     updateDomains(geneMatrix)
     addArrowClick(geneMatrix)
@@ -132,7 +136,7 @@ function handleDrop(e) {
 function formatSVG(svg){
 
   svg=svg.toString().replaceAll("#ffffff","none").replaceAll("#000000","#ffffff").replaceAll("<g transform='translate","<g style='fill: #ffffff' transform='translate");
-  console.log(svg)
+
   svg=svg.toString().replaceAll("<!-- ACP -->    <g style='fill: #ffffff'","<!-- ACP -->    <g style='fill: transparent'");
   return svg
 }
@@ -272,12 +276,12 @@ function setDisplayedStatus(id, geneMatrix) {
           if (geneMatrix[geneIndex].displayed === false){
             geneMatrix[geneIndex].displayed = true;
             geneMatrix[geneIndex].ko= false;
-console.log("test2");
+
 
 
           }
         else {geneMatrix[geneIndex].displayed = false;
-      console.log("test");
+
       geneMatrix[geneIndex].ko= true;}
         }
       }
@@ -285,7 +289,7 @@ console.log("test2");
       }
 function selectRegion(recordData, regionName){
   for (let region_index=0; region_index<recordData[0].regions.length;region_index++){
-    console.log(region_index,recordData[0].regions[region_index].anchor,recordData[0].regions.length)
+
     if (recordData[0].regions[region_index].anchor==regionName){
 
       return region_index
@@ -295,14 +299,14 @@ function selectRegion(recordData, regionName){
 }
 
 function changeColor(arrowId){
-  console.log("09709")
+
   const arrow = document.querySelector(arrowId);
 
   if (arrow.getAttribute("fill")=="#E11838"){
-    console.log("0359");
+
   arrow.setAttribute('fill', '#ffffff');
   }
-  else{console.log("09356");arrow.setAttribute('fill', "#E11838");
+  else{arrow.setAttribute('fill', "#E11838");
 }}
 function changeDomainColor(domain,domainId){
 
@@ -336,7 +340,7 @@ function changeProteinColorOFF(ProteinId,geneIndex){
 
 }
 function changeSelectedOption(geneMatrix,geneIndex,domainIndex,option){
-  console.log("erip")
+
   geneMatrix[geneIndex].domains[domainIndex].selected_option=option
 
   fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
@@ -439,7 +443,7 @@ let starterStatus=0
 }}
 
 }
-console.log(outputForRaichu)
+
 return [outputForRaichu,starterACP,geneMatrix]}
 function extractAntismashPredictionsFromRegionSJKS(details_data, region_index, geneMatrix){
     let outputForRaichu=[]
@@ -551,7 +555,7 @@ domainArray.push("DH","ER")
   }break}
 }}
 }
-console.log(geneMatrix)
+
 return [outputForRaichu,starterACP,geneMatrix]}
 
 function createGeneMatrix(BGC){
@@ -578,8 +582,58 @@ function createGeneMatrix(BGC){
   "options":["Test1","Test"],
   "domains":domains});
   }
+  addModulesGeneMatrix(geneMatrix)
   return geneMatrix
 }
+function addModulesGeneMatrix(geneMatrix){
+  region_index=regionName
+  //iterate through all domains to assign them to correct module
+  if (details_data.hasOwnProperty(cluster_type)){region=details_data[cluster_type][region_index];}
+ else{region=details_data[region_index];}
+       for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+  for (let orfIndex = 0;orfIndex< region.orfs.length; orfIndex++) {
+     if (geneMatrix[geneIndex].id==region.orfs[orfIndex].id){
+    let modules=[]
+    if (region.orfs[orfIndex].hasOwnProperty("modules")){
+
+      modules=JSON.parse(JSON.stringify(region.orfs[orfIndex].modules))
+    for (let moduleIndex=0; moduleIndex< modules.length; moduleIndex++){
+      module=modules[moduleIndex]
+      let domainArray=[]
+
+
+           geneMatrix[geneIndex]["modules"]=modules
+           nameModule=geneMatrix[geneIndex].id+"_"+moduleIndex
+           geneMatrix[geneIndex].modules[moduleIndex]["moduleIdentifier"]=nameModule
+
+           if ( geneMatrix[geneIndex].hasOwnProperty("domains")){
+
+           for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
+             if(module.end>=geneMatrix[geneIndex].domains[domainIndex].start&& geneMatrix[geneIndex].domains[domainIndex].start>= module.start||module.start>=geneMatrix[geneIndex].domains[domainIndex].start && geneMatrix[geneIndex].domains[domainIndex].start>= module.end){
+               domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
+               geneMatrix[geneIndex].domains[domainIndex]["module"]=nameModule;
+
+             }
+             if (module.end>geneMatrix[geneIndex].domains[domainIndex].start&& geneMatrix[geneIndex].domains[domainIndex].start< module.start&&!(geneMatrix[geneIndex].domains[domainIndex].hasOwnProperty("module"))){
+               domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
+               geneMatrix[geneIndex].domains[domainIndex]["module"]=nameModule;
+               geneMatrix[geneIndex].modules[moduleIndex]["start"]=geneMatrix[geneIndex].domains[domainIndex].start;
+             }
+             if (moduleIndex==modules.length-1&&domainIndex==geneMatrix[geneIndex].domains.length-1&&!(geneMatrix[geneIndex].domains[domainIndex].hasOwnProperty("module"))){
+               console.log("identifier",geneMatrix[geneIndex].domains[domainIndex].identifier)
+               domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
+               geneMatrix[geneIndex].domains[domainIndex]["module"]=nameModule;
+               geneMatrix[geneIndex].modules[moduleIndex]["end"]=geneMatrix[geneIndex].domains[domainIndex].end;
+             }
+    }
+     geneMatrix[geneIndex].modules[moduleIndex].domains=domainArray;
+      geneMatrix[geneIndex].modules[moduleIndex].numberOfDomains=domainArray.length;
+      geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation=0;
+}}}}}
+
+}
+console.log(geneMatrix)
+return geneMatrix;}
 function displayGenes(BGC){
   // display BGC in BGC explorer
   let BGCForDisplay= JSON.parse(JSON.stringify(BGC));
@@ -593,6 +647,7 @@ function displayGenes(BGC){
   return BGCForDisplay
 }
 function addArrowClick (geneMatrix){
+
   //add click event to every gene arrow
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
   arrow_id=("#"+geneMatrix[geneIndex].id+"_gene_arrow").replace(".","_")
@@ -604,7 +659,7 @@ function addArrowClick (geneMatrix){
   arrow.addEventListener (
      'click',
      function() {           // anonyme Funktion
-       console.log("test");
+
       setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow");addArrowClick(geneMatrix);
      },
      false
@@ -613,7 +668,6 @@ function addArrowClick (geneMatrix){
      'mouseenter',
      function() {           // anonyme Funktion
       displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein",geneIndex)
-      console.log("#"+geneMatrix[geneIndex].id+"_protein")
      },
      false
   );
@@ -628,7 +682,7 @@ function addArrowClick (geneMatrix){
   protein.addEventListener (
      'click',
      function() {           // anonyme Funktion
-       console.log("test");
+
       setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);updateProteins(geneMatrix); updateDomains(geneMatrix);changeColor("#"+geneMatrix[geneIndex].id+"_gene_arrow");addArrowClick(geneMatrix)
      },
      false
@@ -637,7 +691,7 @@ function addArrowClick (geneMatrix){
      'mouseenter',
      function() {           // anonyme Funktion
       displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex)
-      console.log("#"+geneMatrix[geneIndex].id+"_protein")
+
      },
      false
   );
@@ -662,7 +716,7 @@ function addArrowClick (geneMatrix){
           'mouseenter',
           function() {           // anonyme Funktion
            changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein",geneIndex);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex);
-           console.log("#"+geneMatrix[geneIndex].id+"_protein")
+
           },
           false
        );
@@ -685,7 +739,7 @@ function addArrowClick (geneMatrix){
              'mouseenter',
              function() {           // anonyme Funktion
               changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#"+geneMatrix[geneIndex].id+"_domain_"+geneMatrix[geneIndex].domains[domainIndex].sequence);changeDomainColor(geneMatrix[geneIndex].domains[domainIndex],"#domain"+geneMatrix[geneIndex].domains[domainIndex].identifier);displayTextInGeneExplorer(geneMatrix[geneIndex].id);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_protein",geneIndex);changeProteinColorON("#"+geneMatrix[geneIndex].id+"_gene_arrow",geneIndex);
-              console.log("#"+geneMatrix[geneIndex].id+"_protein")
+
              },
              false
           );
@@ -702,7 +756,7 @@ function addArrowClick (geneMatrix){
 }
 //create record for diplaying BGC in BGC explorer
 let regionNumber=selectRegion(recordData, regionName)
-console.log(regionNumber)
+
 let BGC = Object.keys(recordData[0].regions[regionNumber]).reduce(function(obj, k) {
   if (k== "start" || k== "end" || k=="orfs") obj[k] = recordData[0].regions[regionNumber][k];
   return obj;
@@ -733,8 +787,9 @@ else if (value_1.hasOwnProperty([regionName])){
 }
 geneMatrix=createGeneMatrix(BGC)
 BGCForDisplay=displayGenes(BGC)
-updateDomains(geneMatrix)
 updateProteins(geneMatrix)
+updateDomains(geneMatrix)
+
 addArrowClick (geneMatrix)
 
 fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
