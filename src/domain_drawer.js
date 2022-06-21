@@ -88,6 +88,8 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                 geneMatrix[geneIndex].modules.length; moduleIndex++
                             ) {
                                 let moduleLength = 0
+                                console.log(geneMatrix[geneIndex].modules[
+                                        moduleIndex])
                                 for (let domainIndex = 0; domainIndex <
                                     geneMatrix[geneIndex].modules[
                                         moduleIndex].domains.length; domainIndex++
@@ -96,10 +98,13 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                             moduleIndex].domains[
                                             domainIndex].start ==
                                         domain.start) {
+                                          console.log(geneMatrix[geneIndex].modules[
+                                                  moduleIndex].domains[domainIndex])
                                         domainIdentifier = geneMatrix[
                                             geneIndex].modules[
                                             moduleIndex].domains[
                                             domainIndex].identifier
+
                                         points = Domainer.getDomainPoints(
                                                 domain, orf, cluster,
                                                 height, scale)
@@ -412,7 +417,7 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
                     .fill("white")
                     .stroke("white")
                     .stroke({
-                        width: 10
+                        width: 20
                     })
                 dom.node.id = "module_" + moduleIndex
                 geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation =

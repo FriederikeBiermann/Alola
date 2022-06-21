@@ -193,7 +193,11 @@ function handleDrop(e) {
         geneMatrix.sort((a, b) => {
             return a.position - b.position;
         });
-        addModulesGeneMatrix(geneMatrix);
+        geneMatrix.sort((a, b) => {
+            return a.position - b.position;
+        });
+//addModulesGeneMatrix(geneMatrix);
+
         updateProteins(geneMatrix);
         updateDomains(geneMatrix);
         addArrowClick(geneMatrix);
