@@ -31,7 +31,7 @@ let aminoacids = {
 }
 let items = document.querySelectorAll('.test-container .box')
 var dragSrcEl = null;
-
+let cyclization = "None"
 function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { //fetching svg an displaying it
     let data = ""
     let starterACP = ""
@@ -47,7 +47,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
         starterACP = extractAntismashPredictionsFromRegionSJNRPS(details_data,
             regionName, geneMatrix)[1]
     }
-    cyclization = "O_11"
+
     let data_string = formatInputRaichuKS(data, cyclization)
     let url = "http://127.0.0.1:8000/api/alola?antismash_input=";
     let list_hanging_svg = []
@@ -72,6 +72,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
                         domain.domainOptions = data.atomsForCyclisation.replaceAll(
                                 "[", "")
                             .replaceAll("]", "")
+                            .replaceAll(" ", "")
                             .split(",");
                         console.log(domain.domainOptions);
                         domain.domainOptions.push("Linear product");
@@ -411,6 +412,15 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 
 function changeSelectedOption(geneMatrix, geneIndex, domainIndex, option) {
     geneMatrix[geneIndex].domains[domainIndex].selected_option = option
+    console.log(geneMatrix[geneIndex].domains[domainIndex].type)
+    if (geneMatrix[geneIndex].domains[domainIndex].abbreviation.includes("TE")){
+      if (option=="Linear product"){
+        cyclization="None"
+      }
+      else{cyclization=option}
+
+    }
+    console.log(cyclization)
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
 }
 
