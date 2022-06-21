@@ -71,14 +71,13 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                   points=Domainer.getDomainPoints(domain, orf, cluster, height, scale)
 
 //declare size of balls
-                  if (geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("ACP")||geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("PP")){
+                  if (geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("term")||geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("ACP")||geneMatrix[geneIndex].modules[moduleIndex].domains[domainIndex].type.includes("PP")){
         size=25;}
 
         else{abbreviation=domain.abbreviation}
         geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation+=size
         let cleanedLength=geneMatrix[geneIndex].modules[moduleIndex].domains.length
         let cleanedDomainIndex=domainIndex
-        console.log("domains",JSON.stringify(geneMatrix[geneIndex].modules[moduleIndex].domains))
         if (JSON.stringify(geneMatrix[geneIndex].modules[moduleIndex].domains).includes("Nterm")){
           cleanedLength--
           cleanedDomainIndex--
@@ -213,7 +212,7 @@ Domainer.drawModules=(function(geneMatrix,height,scale) {
   for (let geneIndex=0; geneIndex<geneMatrix.length;geneIndex++){
     if (geneMatrix[geneIndex].hasOwnProperty("modules")){
       for (let moduleIndex=0; moduleIndex<geneMatrix[geneIndex].modules.length;moduleIndex++){
-        console.log(geneIndex,geneMatrix[geneIndex].modules[moduleIndex],moduleIndex)
+
         var innerModuleContainer= document.createElement('div');
         innerModuleContainer.id="innerModuleContainer"+"_"+geneMatrix[geneIndex].id+"_"+moduleIndex
         document.getElementById('module_container').appendChild(innerModuleContainer);
