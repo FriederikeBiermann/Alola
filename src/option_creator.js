@@ -12,7 +12,11 @@ function createOptions(geneMatrix){
       else{domain.default_option="undetermined stereochemisty"}
       domain.domainOptions=['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
-    }}
+    }
+    //add substrate specifities
+ // add options to Dropdown
+
+  }
      }
    }
 

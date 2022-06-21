@@ -1,6 +1,6 @@
 
 regionName="r1c3"
-
+let fetching=false
 let cluster_type=  "nrpspks"
 
 let nameToStructure={"methylmalonylcoa":"CC(C(O)=O)C(S)=O", "propionylcoa":"CCC(S)=O","malonylcoa":"OC(=O)CC(S)=O"}
@@ -18,8 +18,8 @@ starterACP=extractAntismashPredictionsFromRegionSJKS(details_data, regionName,ge
 else{ data=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[0]
  starterACP=extractAntismashPredictionsFromRegionSJNRPS(details_data, regionName,geneMatrix)[1]
 }
-
-let data_string=formatInputRaichuKS(data)
+cyclization="O_11"
+let data_string=formatInputRaichuKS(data,cyclization)
 let url="http://127.0.0.1:8000/api/alola?antismash_input=";
 let list_hanging_svg=[]
 let container = document.getElementById("structure_container")
@@ -29,24 +29,53 @@ fetch(url+data_string)
 return thing})
       .then((data) => {let container = document.getElementById("structure_container");
       let smiles_container = document.getElementById("smiles_container");
+      //add options for cyclization
+      console.log("test")
+      for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
 
-      //list_hanging_svg=data.hanging_svg;
+        for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
+         let domain= geneMatrix[geneIndex].domains[domainIndex]
+         if (domain.abbreviation=="TE"){
+           domain.domainOptions=data.atomsForCyclisation.replaceAll("[","").replaceAll("]","").split(",");
+            console.log(domain.domainOptions);
+           domain.domainOptions.push("Linear product");
+           console.log(domain.domainOptions)
+           domain.default_option=["Linear product"]
+         }}}
+
+
       var url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(data.svg);
       document.getElementById("save_svg").href = url
       document.getElementById("save_svg").setAttribute("download", data.smiles+".svg");
       container.innerHTML = formatSVG(data.svg);
       smiles_container.innerHTML = data.smiles;
       acpList=obtainACPList(geneMatrix)
-      for (let intermediateIndex=0; intermediateIndex<data.hanging_svg.length;intermediateIndex++){
-        intermediate=data.hanging_svg[intermediateIndex]
-        let intermediate_container = document.getElementById('innerIntermediateContainer'+acpList[intermediateIndex+starterACP])
+      let intermediates=data.hanging_svg
+      console.log("test45")
+      return [geneMatrix,intermediates]
 
 
-        intermediate_container.innerHTML = formatSVG(intermediate);
+    })
+  .then((data)=> {
+   let  geneMatrix=data[0]
 
-      }
+    createOptions(geneMatrix);
+    addDragDrop();
+    console.log ("test");
+    updateDomains(geneMatrix);
+    updateProteins(geneMatrix);
+    addArrowClick (geneMatrix)
+     return data[1]})
 
-    })}
+    .then((intermediates)=> {    for (let intermediateIndex=0; intermediateIndex<intermediates.length;intermediateIndex++){
+          intermediate=intermediates[intermediateIndex]
+          let intermediate_container = document.getElementById('innerIntermediateContainer'+acpList[intermediateIndex+starterACP])
+          intermediate_container.innerHTML = formatSVG(intermediate);}
+
+
+    })
+
+  }
 function removeAllInstances(arr, item) {
    for (var i = arr.length; i--;) {
      if (arr[i] === item) arr.splice(i, 1);
@@ -352,7 +381,8 @@ function displayTextInGeneExplorer(geneId){
     gene_container.innerHTML =BGCForDisplay["orfs"][geneIndex].description
   }
 }
-function formatInputRaichuKS(data){
+function formatInputRaichuKS(data,cyclization){
+  data=[data,cyclization]
   string_data= JSON.stringify(data);
   trimmed_data=string_data.replaceAll(',"PKS_PP"',"").replaceAll(',"C"',"").replaceAll(',"ACP"',"").replaceAll(',"PCP"',"").replaceAll(',"KS"',"").replaceAll(',"T"',"").replaceAll(',"AT"',"").replaceAll(',"TE"',"").replaceAll(',"A"',"").replaceAll('"PKS_PP",',"").replaceAll('"C",',"").replaceAll(',"ACP"',"").replaceAll(',"T"',"").replaceAll(',"PCP"',"").replaceAll('"KS",',"").replaceAll('"AT",',"").replaceAll('"TE",',"").replaceAll('"PKS_PP",',"").replaceAll('"ACP"',"").replaceAll('"KS"',"").replaceAll('"AT"',"").replaceAll('"TE"',"").replaceAll('"C"',"").replaceAll('"A"',"").replaceAll('"ACP"',"").replaceAll('"T"',"")
 
@@ -793,8 +823,3 @@ updateDomains(geneMatrix)
 addArrowClick (geneMatrix)
 
 fetchFromRaichu(details_data, regionName,geneMatrix,cluster_type)
-createOptions(geneMatrix)
-addDragDrop()
-updateDomains(geneMatrix)
-updateProteins(geneMatrix)
-addArrowClick (geneMatrix)
