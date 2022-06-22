@@ -9,7 +9,7 @@ from raichu.find_central_chain import find_central_chain
 
 class RaichuDrawer(Drawer):
     def __init__(self, structure, options=None, save_png=None, dont_show=False,
-                 coords_only=False, dpi=100, save_svg = None, save_svg_string =None):
+                 coords_only=False, dpi=100, save_svg = None, save_svg_string =True):
         self.dont_show = dont_show
         self.dpi = dpi
         if options == None:

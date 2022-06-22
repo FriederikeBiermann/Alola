@@ -1,6 +1,6 @@
 regionName = "r1c3"
 let fetching = false
-let cluster_type = "nrpspks"
+let cluster_type = "nrps"
 let nameToStructure = {
     "methylmalonylcoa": "CC(C(O)=O)C(S)=O",
     "propionylcoa": "CCC(S)=O",
@@ -815,29 +815,16 @@ function addModulesGeneMatrix(geneMatrix) {
                                 }
                                 if (moduleIndex == modules.length - 1 &&
                                     domainIndex == geneMatrix[geneIndex].domains
-                                    .length - 1 && !(geneMatrix[geneIndex].domains[
-                                        domainIndex].hasOwnProperty(
-                                        "module"))) {
-                                    console.log("identifier", geneMatrix[
-                                            geneIndex].domains[domainIndex]
-                                        .identifier)
-                                    domainArray.push(geneMatrix[geneIndex].domains[
-                                        domainIndex]);
-                                    geneMatrix[geneIndex].domains[domainIndex][
-                                        "module"
-                                    ] = nameModule;
-                                    geneMatrix[geneIndex].modules[moduleIndex][
-                                        "end"
-                                    ] = geneMatrix[geneIndex].domains[
-                                        domainIndex].end;
+                                    .length - 1 && !(geneMatrix[geneIndex].domains[domainIndex].hasOwnProperty(  "module"))) {
+                                    console.log("identifier", geneMatrix[geneIndex].domains[domainIndex].identifier)
+                                    domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
+                                    geneMatrix[geneIndex].domains[domainIndex]["module"] = nameModule;
+                                    geneMatrix[geneIndex].modules[moduleIndex]["end"] = geneMatrix[geneIndex].domains[domainIndex].end;
                                 }
                             }
-                            geneMatrix[geneIndex].modules[moduleIndex].domains =
-                                domainArray;
-                            geneMatrix[geneIndex].modules[moduleIndex].numberOfDomains =
-                                domainArray.length;
-                            geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation =
-                                0;
+                            geneMatrix[geneIndex].modules[moduleIndex].domains =domainArray;
+                            geneMatrix[geneIndex].modules[moduleIndex].numberOfDomains =domainArray.length;
+                            geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation =  0;
                         }
                     }
                 }
