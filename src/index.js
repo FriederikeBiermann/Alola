@@ -301,7 +301,8 @@ function obtainACPList(geneMatrix) {
                 if (geneMatrix[geneIndex].domains[domainIndex].ko == false) {
                     if (geneMatrix[geneIndex].domains[domainIndex].type.includes(
                             "ACP") || geneMatrix[geneIndex].domains[domainIndex]
-                        .type.includes("PP")) {
+                        .type.includes("PP")|| geneMatrix[geneIndex].domains[domainIndex]
+                    .type.includes("PCP")) {
                         acpList.push(geneMatrix[geneIndex].domains[domainIndex]
                             .identifier)
                     }

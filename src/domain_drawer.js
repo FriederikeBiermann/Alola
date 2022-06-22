@@ -8,7 +8,13 @@ colour_fill_dict = {
     'PKS_DH': '#f7be81',
     'PKS_ER': '#81f7f3',
     'PKS_TE': '#f5c4f2',
-    'KR*': '#80f680'
+    "Thioesterase":'#f5c4f2',
+    'KR*': '#80f680',
+    'Condensation_LCL':'#5858b6',
+    'Condensation_DCL':'#5858b6',
+    'Condensation_Starter':'#5858b6',
+    'AMP-binding':'#bc7ff5', 'PCP':'#81bef7', 'Epimerization':'#8181f7',"TIGR01720":'#8181f7',
+    'nMT':'#dadada'
 }
 colour_outline_dict = {
     'PKS_ACP': '#3d79d6',
@@ -20,6 +26,7 @@ colour_outline_dict = {
     'PKS_TE': '#a25ba0',
     'KR*': '#5fbb87'
 }
+
 var Domainer = {
     version: "1.0.0",
     required: [
@@ -124,7 +131,11 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                                 geneIndex].modules[
                                                 moduleIndex].domains[
                                                 domainIndex].type.includes(
-                                                "PP")) {
+                                                "PP")|| geneMatrix[
+                                                geneIndex].modules[
+                                                moduleIndex].domains[
+                                                domainIndex].type.includes(
+                                                "PCP")) {
                                             size = 25;
                                         }
                                         else {
@@ -159,21 +170,25 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                             cleanedLength--
                                         }
                                         // declare indent for spaghetti diagram
-                                        if ((cleanedDomainIndex == 2 ||
-                                                cleanedDomainIndex ==
-                                                cleanedLength - 3) &&
-                                            cleanedLength > 3) {
-                                            indent = indentSteps
-                                        }
-                                        else if ((cleanedDomainIndex ==
-                                                3 || cleanedDomainIndex ==
-                                                cleanedLength - 4) &&
-                                            cleanedLength > 4) {
-                                            indent = indentSteps * 2
-                                        }
+                                        if (cluster_type != "nrps"){                                        if ((cleanedDomainIndex == 2 ||
+                                                                                        cleanedDomainIndex ==
+                                                                                        cleanedLength - 3) &&
+                                                                                    cleanedLength > 3) {
+                                                                                    indent = indentSteps
+                                                                                }
+                                                                                else if ((cleanedDomainIndex ==
+                                                                                        3 || cleanedDomainIndex ==
+                                                                                        cleanedLength - 4) &&
+                                                                                    cleanedLength > 4) {
+                                                                                    indent = indentSteps * 2
+                                                                                }
+                                                                                else {
+                                                                                    indent = 0
+                                                                                }}
                                         else {
                                             indent = 0
                                         }
+
                                         // add all the neccesary domain containers
                                         var innerContainer = document.createElement(
                                             'div');
