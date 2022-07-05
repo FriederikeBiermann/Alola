@@ -280,6 +280,7 @@ align: top;
 
 background-color: transparent;
 font-size: 16px;
+ text-transform: capitalize
 border: none;
 }
 
@@ -306,7 +307,8 @@ color: black;
 padding: 12px 10px;
 text-decoration: none;
 display: block;
-background-color: white
+background-color: white;
+ text-transform: capitalize;
 }
 
 /* Change color of dropdown links on hover */

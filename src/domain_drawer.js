@@ -284,7 +284,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
 
                                             let optionContent =
                                                 "<button  onclick='changeSelectedOption(geneMatrix," +
-                                                geneIndex + ',' +
+                                                geneIndex + ',' +moduleIndex+ ","+
                                                 domainIndex + ",\x22" +
                                                 geneMatrix[geneIndex].modules[
                                                     moduleIndex].domains[
@@ -306,7 +306,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                             ) {
                                                 optionContent =
                                                     "<button style= \x22background-color:light-grey; \x22 onclick='changeSelectedOption(geneMatrix," +
-                                                    geneIndex + ',' +
+                                                    geneIndex + ',' +moduleIndex+","+
                                                     domainIndex +
                                                     ",\x22" +
                                                     geneMatrix[geneIndex].modules[

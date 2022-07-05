@@ -415,17 +415,21 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
     }
 }
 
-function changeSelectedOption(geneMatrix, geneIndex, domainIndex, option) {
-    geneMatrix[geneIndex].domains[domainIndex].selected_option = option
-    console.log(geneMatrix[geneIndex].domains[domainIndex].type)
-    if (geneMatrix[geneIndex].domains[domainIndex].abbreviation.includes("TE")){
+function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, option) {
+  geneMatrix[geneIndex].modules[
+          moduleIndex].domains[
+          domainIndex].selected_option = option
+
+    if (geneMatrix[geneIndex].modules[
+            moduleIndex].domains[
+            domainIndex].abbreviation.includes("TE")){
       if (option=="Linear product"){
         cyclization="None"
       }
       else{cyclization=option}
 
     }
-    console.log(cyclization)
+
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
 }
 
@@ -540,7 +544,7 @@ function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index,
                                             substrate
                                         // overrule by user selected option
 
-                                        if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option[0]=="Test 3")){
+                                        if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length==0)){
                                           substrate=geneMatrix[geneIndex].domains[domainIndex].selected_option
                                         }
                                     }
@@ -622,8 +626,7 @@ function extractAntismashPredictionsFromRegionSJKS(details_data, region_index,
                                     domain.start >= startModule) {
                                     if (domain.abbreviation == "KR") {
                                         if (geneMatrix[geneIndex].domains[
-                                                domainIndex].selected_option ==
-                                            "Test 3") {
+                                                domainIndex].selected_option.length ==0 ){
                                             if (domain.predictions.length != 0) {
                                                 let domainActivity = domain.predictions[
                                                     0][1]
@@ -685,7 +688,7 @@ function extractAntismashPredictionsFromRegionSJKS(details_data, region_index,
                                             substrate
                                             // overrule by user selected option
 
-                                            if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option[0]=="Test 3")){
+                                            if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option==[])){
                                               substrate=geneMatrix[geneIndex].domains[domainIndex].selected_option}
                                     }
                                 }
@@ -744,9 +747,9 @@ function createGeneMatrix(BGC) {
                 domains[domainIndex]["identifier"] = BGC["orfs"][geneIndex].locus_tag +
                     "_" + (domainIndex + 1)
                     .toString()
-                domains[domainIndex]["domainOptions"] = ["Test 3", "Test 4"];
-                domains[domainIndex]["default_option"] = ["Test 3"];
-                domains[domainIndex]["selected_option"] = ["Test 3"];
+                domains[domainIndex]["domainOptions"] = [];
+                domains[domainIndex]["default_option"] = [];
+                domains[domainIndex]["selected_option"] = [];
                 domains[domainIndex]["ko"] = false;
             }
         }
@@ -759,9 +762,9 @@ function createGeneMatrix(BGC) {
             "position": geneIndex + 1,
             "ko": false,
             "displayed": true,
-            "default_option": "Test1",
-            "selected_option": "Test1",
-            "options": ["Test1", "Test"],
+            "default_option": [],
+            "selected_option":[] ,
+            "options": [],
             "domains": domains
         });
     }
