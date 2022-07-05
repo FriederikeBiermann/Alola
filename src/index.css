@@ -16,7 +16,15 @@ button{
 }
 
 a:visited {
- color: #E11839;
+ color: #E11839;}
+label{ color: black;
+
+font-size: 15px;
+padding: 2px 2px;
+text-align: left;
+ }
+input{
+
 }
 #menu_bar{
   border-radius:6px;
@@ -304,13 +312,17 @@ min-width: 100px
 .dropdown-content button {
   min-width: 100px
 color: black;
-padding: 12px 10px;
+padding: 3px 3px;
 text-decoration: none;
 display: block;
 background-color: white;
  text-transform: capitalize;
 }
+.dropdown-content button:active {
 
+background-color: #E11839;
+
+}
 /* Change color of dropdown links on hover */
 .dropdown-content button:hover {background-color: #E11839;}
 
@@ -321,5 +333,56 @@ background-color: white;
   background-color: grey;
 }
 
-/* Change the background color of the dropdown button when the dropdown content is shown */
-/*.dropdown:hover .dropbtn {background-color: #1F1F1F;}
+/* Everything to do with the wildcard dialog*/
+ * {
+      box-sizing: border-box;
+    }
+    .openBtn {
+      display: flex;
+      justify-content: left;
+    }
+    .openButton {
+      border: none;
+      border-radius: 5px;
+      background-color: #1c87c9;
+      color: white;
+      padding: 14px 20px;
+      cursor: pointer;
+      position: fixed;
+    }
+    .loginPopup {
+      position: relative;
+      text-align: center;
+      width: 100%;
+    }
+    .formPopup {
+      display: none;
+      position: fixed;
+      left: 45%;
+      top: 5%;
+      border: 3px solid #999999;
+      z-index: 9;
+    }
+    .formContainer {
+      max-width: 300px;
+      padding: 20px;
+      background-color: #fff;
+    }
+
+    .formContainer .btn {
+      padding: 12px 20px;
+      border: none;
+      background-color: #8ebf42;
+      color: #fff;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 15px;
+      opacity: 0.8;
+    }
+    .formContainer .cancel {
+      background-color: #cc0000;
+    }
+    .formContainer .btn:hover,
+    .openButton:hover {
+      opacity: 1;
+    }

@@ -14,12 +14,14 @@
 <div id="menu_bar">
   <!-- Rounded switch -->
 
-  <button type="button" id= "start_button" onclick="fetchFromRaichu(details_data, regionName,geneMatrix)"> Refresh structures</button>
-  <button type="button" id= "start_button" onclick="location.reload()"> Reset view</button>
+       <button  type="button" id= "start_button" onclick="openForm()"><strong>Add Module</strong></button>
+
+  <button type="button" id= "start_button" onclick="fetchFromRaichu(details_data, regionName,geneMatrix)"> <strong>Refresh structures</strong></button>
+  <button type="button" id= "start_button" onclick="location.reload()"><strong> Reset view</strong></button>
 
   <label class="switch">
 
-    <input type="checkbox">
+    <input id="real-time-button" type="checkbox">
     <span class="slider round"></span>
   </label>
     <div id= "fake_button" > Real time calculation</div>
@@ -65,6 +67,82 @@
 </div>
 </div>
 </div>
+
+
+   <div class="loginPopup">
+     <div class="formPopup" id="popupForm">
+       <form class="formContainer">
+
+         <button type="button" class="btn" onclick="openNRPSForm();closeForm()">NRPS</button>
+         <button type="button" class="btn" onclick="openPKSForm();closeForm()">PKS</button>
+         <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+       </form>
+     </div>
+   </div>
+   <div class="loginPopup">
+     <div class="formPopup" id="popupFormNRPS">
+       <form class="formContainer">
+         <div class="dropdown">
+         <button type="button" class="dropbtn" >Substrate</button>
+         <div class="dropdown-content">
+           <button type ="button" onclick="setWildcardSubstrate('alanine')">alanine </button>
+ <button type ="button" onclick="setWildcardSubstrate('cysteine')">cysteine </button>
+ <button type ="button" onclick="setWildcardSubstrate('asparticacid')">aspartic acid </button>
+ <button type ="button" onclick="setWildcardSubstrate('glutamicacid')">glutamic acid </button>
+ <button type ="button" onclick="setWildcardSubstrate('phenylalanine')">phenylalanine </button>
+ <button type ="button" onclick="setWildcardSubstrate('glycine')">glycine </button>
+ <button type ="button" onclick="setWildcardSubstrate('histidine')">histidine </button>
+ <button type ="button" onclick="setWildcardSubstrate('isoleucine')">isoleucine </button>
+ <button type ="button" onclick="setWildcardSubstrate('lysine')">lysine </button>
+ <button type ="button" onclick="setWildcardSubstrate('leucine')">leucine </button>
+ <button type ="button" onclick="setWildcardSubstrate('methionine')">methionine </button>
+ <button type ="button" onclick="setWildcardSubstrate('asparagine')">asparagine </button>
+ <button type ="button" onclick="setWildcardSubstrate('pyrrolysine')">pyrrolysine </button>
+ <button type ="button" onclick="setWildcardSubstrate('proline')">proline </button>
+ <button type ="button" onclick="setWildcardSubstrate('glutamine')">glutamine </button>
+ <button type ="button" onclick="setWildcardSubstrate('arginine')">arginine </button>
+ <button type ="button" onclick="setWildcardSubstrate('serine')">serine </button>
+ <button type ="button" onclick="setWildcardSubstrate('threonine')">threonine </button>
+ <button type ="button" onclick="setWildcardSubstrate('selenocysteine')">selenocysteine </button>
+ <button type ="button" onclick="setWildcardSubstrate('valine')">valine </button>
+ <button type ="button" onclick="setWildcardSubstrate('tryptophan')">tryptophan </button>
+ <button type ="button" onclick="setWildcardSubstrate('tyrosine')">tyrosine </button>
+
+         </div>
+       </div>
+       <div class="dropdown">
+       <button type="button" class="dropbtn" >Module Type</button>
+       <div class="dropdown-content">
+
+<button type ="button" onclick="setWildcardModule('starter_module_nrps')">Starter Module </button>
+<button type ="button" onclick="setWildcardModule('elongation_module_nrps')">Elongation Module </button>
+<button type ="button" onclick="setWildcardModule('terminator_module_nrps')">Terminator Module </button>
+
+       </div>
+     </div>
+     <input type="checkbox" id="wildcardcMT" name="wildcardcMT" value="true">
+  <label for="wildcardcMT"> Carbon Methyltransferase</label><br>
+  <input type="checkbox" id="wildcardE" name="wildcardE" value="true">
+<label for="wildcardE"> Epimerization</label><br>
+<input type="checkbox" id="wildcardnMT" name="wildcardnMT" value="true">
+<label for="wildcardnMT"> Nitrogen Methyltransferase</label><br>
+<input type="checkbox" id="wildcardoMT" name="wildcardoMT" value="true">
+<label for="wildcardoMT"> Oxygen Methyltransferase</label><br>
+         <button type="button" class="btn" onclick="addWildcard(geneMatrix);closeNRPSForm()">Submit</button>
+         <button type="button" class="btn cancel" onclick="closeNRPSForm()">Close</button>
+       </form>
+     </div>
+   </div>
+   <div class="loginPopup">
+     <div class="formPopup" id="popupFormPKS">
+       <form class="formContainer">
+
+         <button type="button" class="btn" onclick="openNRPSForm()">tesr</button>
+         <button type="button" class="btn" onclick="openPKSForm()">PKS</button>
+         <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+       </form>
+     </div>
+   </div>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.js"></script>
 <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>

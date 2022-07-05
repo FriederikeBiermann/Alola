@@ -32,6 +32,9 @@ let aminoacids = {
 let items = document.querySelectorAll('.test-container .box')
 var dragSrcEl = null;
 let cyclization = "None"
+let wildcardSubstrate="glycine"
+let wildcardModule="elongation_module_nrps"
+let nameWildcardModule="wildcardModule"
 function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { //fetching svg an displaying it
     let data = ""
     let starterACP = ""
@@ -47,7 +50,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
         starterACP = extractAntismashPredictionsFromRegionSJNRPS(details_data,
             regionName, geneMatrix)[1]
     }
-
+    console.log(data)
     let data_string = formatInputRaichuKS(data, cyclization)
     let url = "http://127.0.0.1:8000/api/alola?antismash_input=";
     let list_hanging_svg = []
@@ -199,7 +202,7 @@ function handleDrop(e) {
         updateProteins(geneMatrix);
         updateDomains(geneMatrix);
         addArrowClick(geneMatrix);
-        if (document.querySelector('input[type=checkbox]')
+if (document.getElementById("real-time-button")
             .checked) {
             fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
         }
@@ -482,6 +485,7 @@ function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index,
     else {
         region = details_data[region_index];
     }
+    console.log("region",region)
     geneMatrix.sort((a, b) => {
         return a.position - b.position;
     });
@@ -771,8 +775,9 @@ function createGeneMatrix(BGC) {
     addModulesGeneMatrix(geneMatrix)
     return geneMatrix
 }
-
+// adding modules+ opening the form to do so
 function addModulesGeneMatrix(geneMatrix) {
+  // add the moodules from region js to geneMatrix (not custom modules)
     region_index = regionName
         //iterate through all domains to assign them to correct module
     if (details_data.hasOwnProperty(cluster_type)) {
@@ -849,6 +854,24 @@ function addModulesGeneMatrix(geneMatrix) {
     console.log(geneMatrix)
     return geneMatrix;
 }
+function openForm() {
+       document.getElementById("popupForm").style.display = "block";
+     }
+function closeForm() {
+       document.getElementById("popupForm").style.display = "none";
+     }
+     function openNRPSForm() {
+            document.getElementById("popupFormNRPS").style.display = "block";
+          }
+     function closeNRPSForm() {
+            document.getElementById("popupFormNRPS").style.display = "none";
+          }
+          function openPKSForm() {
+                 document.getElementById("popupFormPKS").style.display = "block";
+               }
+          function closePKSForm() {
+                 document.getElementById("popupFormPKS").style.display = "none";
+               }
 
 function displayGenes(BGC) {
     // display BGC in BGC explorer
@@ -860,6 +883,240 @@ function displayGenes(BGC) {
         .html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
     return BGCForDisplay
 }
+function setWildcardSubstrate(substrate){
+  wildcardSubstrate=substrate
+
+  return wildcardSubstrate
+}
+function setWildcardModule(moduleType){
+wildcardModule=moduleType;
+
+  return wildcardModule
+}
+function addWildcard(geneMatrix){
+    nameWildcardModule+="I"
+
+  let defaultCDomain={
+  "type": "Condensation",
+  "start": 4,
+  "end": 302,
+  "predictions": [],
+  "napdoslink": "http://napdos.ucsd.edu/cgi-bin/process_request.cgi?query_type=aa&amp;ref_seq_file=all_C_public_12062011.faa&amp;Sequence=%3EC_domain_from_antiSMASH%0DFYPLTNAQKRIWYTEKFYPNTSISNLAGFGKLISEDGVQAHYVEKAIQEFVRRYESMRIRLRLDDEGEPVQYVSEYRPLSIGHTDIRQAGCSADELSKWGREEAGKPLALYDQDLFRFSVHTISENEVWFYANVHHIISDGISMTILGNAITDIYLELSGGTSEEQTEIPSFIEHVLTEQEYVQSKRFKKDRDFWNGQFETVPELVSLKRSQADAGLDAKRFSQEIPHDLYGRIHSFCEEHKVSVLSLFQSALITYLYKVTGRDDVVTGTFMGNRTNAKEKQMLGMFVSTVPVRTSVD",
+  "blastlink": "http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins&amp;PROGRAM=blastp&amp;BLAST_PROGRAMS=blastp&amp;QUERY=FYPLTNAQKRIWYTEKFYPNTSISNLAGFGKLISEDGVQAHYVEKAIQEFVRRYESMRIRLRLDDEGEPVQYVSEYRPLSIGHTDIRQAGCSADELSKWGREEAGKPLALYDQDLFRFSVHTISENEVWFYANVHHIISDGISMTILGNAITDIYLELSGGTSEEQTEIPSFIEHVLTEQEYVQSKRFKKDRDFWNGQFETVPELVSLKRSQADAGLDAKRFSQEIPHDLYGRIHSFCEEHKVSVLSLFQSALITYLYKVTGRDDVVTGTFMGNRTNAKEKQMLGMFVSTVPVRTSVD&amp;LINK_LOC=protein&amp;PAGE_TYPE=BlastSearch",
+  "sequence": "FYPLTNAQKRIWYTEKFYPNTSISNLAGFGKLISEDGVQAHYVEKAIQEFVRRYESMRIRLRLDDEGEPVQYVSEYRPLSIGHTDIRQAGCSADELSKWGREEAGKPLALYDQDLFRFSVHTISENEVWFYANVHHIISDGISMTILGNAITDIYLELSGGTSEEQTEIPSFIEHVLTEQEYVQSKRFKKDRDFWNGQFETVPELVSLKRSQADAGLDAKRFSQEIPHDLYGRIHSFCEEHKVSVLSLFQSALITYLYKVTGRDDVVTGTFMGNRTNAKEKQMLGMFVSTVPVRTSVD",
+  "dna_sequence": "ATG",
+  "abbreviation": "C",
+  "html_class": "jsdomain-condensation",
+  "identifier":nameWildcardModule+"_C" ,
+  "domainOptions": [],
+  "default_option": [],
+  "selected_option": [],
+  "ko": false,
+  "module": nameWildcardModule,
+  "function": "C"
+}
+let defaultADomain={
+  "type": "AMP-binding",
+  "start": 465,
+  "end": 867,
+  "predictions": [
+    [
+      "consensus",
+      Object.keys(aminoacids).find(key => aminoacids[key] === wildcardSubstrate)
+
+    ]
+  ],
+  "napdoslink": "",
+  "blastlink": "http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins&amp;PROGRAM=blastp&amp;BLAST_PROGRAMS=blastp&amp;QUERY=FEEKVKSLSDKPAVVYEGRTLSYRTLHEQSGRIAGRLLQAGISADSPVAVLLGRSERVIAAILGILKAGGAYVPIDPDFPADRIQYILEDSGAKAVLTEAGIQAPAADAERIDFNEAVQYETAADGVSTQSDRLAYIIYTSGTTGRPKGVMIEHRQVHHLVQSLQQEIYQCGEQTLRMALLAPFHFDASVKQIFASLLLGQTLYIVPKTTVTNGSALLDYYRQNRIEATDGTPAHLQMMVAAGDVSGIELRHMLIGGEGLSAAVAEQLMTLFHQSGRTPRLTNVYGPTETCVDASVHQMSADNGMNQQAAYVPIGKPLGNARLYILDKHQRLQPDGTAGELYIAGDGVGRGYLNLPDLTAEKFLQDPFNGNGRMYRTGDMARWLPDGTIEYIGREDDQVKVR&amp;LINK_LOC=protein&amp;PAGE_TYPE=BlastSearch",
+  "sequence": "FEE",
+  "dna_sequence": "ATGGTCATTCTCTCGAATTTCATGAAAGAACCATTCAATCGTTCAGTGACAGCTTTAAAGGGCACCTCTTGAAAATCATAGATCACTGCCTGGCCCAAGACGGACCTGAGCTTACGCCTAGCGATCTTGGCGATGATGATCTGACGCTTGATGAACTTGATAAATTAATGGAAATTCTCTAA",
+  "abbreviation": "A",
+  "html_class": "jsdomain-adenylation",
+  "identifier": nameWildcardModule+"_A",
+  "domainOptions": [
+    "arginine",
+    "histidine",
+    "lysine",
+    "asparticacid",
+    "glutamicacid",
+    "serine",
+    "threonine",
+    "asparagine",
+    "glutamine",
+    "cysteine",
+    "selenocysteine",
+    "glycine",
+    "proline",
+    "alanine",
+    "valine",
+    "isoleucine",
+    "leucine",
+    "methionine",
+    "phenylalanine",
+    "tyrosine",
+    "tryptophan"
+  ],
+  "default_option":wildcardSubstrate,
+  "selected_option": [],
+  "ko": false,
+  "module": nameWildcardModule,
+  "function": "A",
+  "substrate": "glutamicacid"
+}
+let defaultPCPDomain={
+  "type": "PCP",
+    "abbreviation": "PCP",
+  "start": 976,
+  "end": 1045,
+  "predictions": [],
+  "napdoslink": "",
+  "blastlink": "http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins&amp;PROGRAM=blastp&amp;BLAST_PROGRAMS=blastp&amp;QUERY=EETLAVIWQEVLGMDKAGIYDHFFESGGHSLKAMTLLTKIHKQMGVEIPLQYLFEHPTIAALADYAENR&amp;LINK_LOC=protein&amp;PAGE_TYPE=BlastSearch",
+  "sequence": "E",
+  "dna_sequence": "ATG",
+  "html_class": "jsdomain-transport",
+  "identifier": nameWildcardModule+"_PCP",
+  "domainOptions": [],
+  "default_option": [],
+  "selected_option": [],
+  "ko": false,
+  "module": nameWildcardModule,
+  "function": "PCP"
+}
+let defaultTEDomain={
+  "type": "Thioesterase",
+  "start": 1059,
+  "end": 1254,
+  "predictions": [],
+  "napdoslink": "",
+  "blastlink": "http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins&amp;PROGRAM=blastp&amp;BLAST_PROGRAMS=blastp&amp;QUERY=TLFAFPPVLGYGLMYQPLAKQLSGYKICAFDFIEEDNRIERYTELINQLQPEGPVKLFGYSAGCTLAFETAKRLEAGGREVERLIMVDSYKKQGVSDLEGRTVESDVQALMKVNRDNEALNNEAVKEGLAKKTNAFYSYFVHTVSTGRVNADIDLLTSEPDFAMPPWLASWEEATTGEYRVKKGCGTHAEMLQGE&amp;LINK_LOC=protein&amp;PAGE_TYPE=BlastSearch",
+  "sequence": "TLFAFPPVLGYGLMYQPLAKQLSGYKICAFDFIEEDNRIERYTELINQLQPEGPVKLFGYSAGCTLAFETAKRLEAGGREVERLIMVDSYKKQGVSDLEGRTVESDVQALMKVNRDNEALNNEAVKEGLAKKTNAFYSYFVHTVSTGRVNADIDLLTSEPDFAMPPWLASWEEATTGEYRVKKGCGTHAEMLQGE",
+  "dna_sequence": "",
+  "abbreviation": "TE",
+  "html_class": "jsdomain-terminal",
+  "identifier": nameWildcardModule+"_TE",
+  "domainOptions": [
+    "O_131",
+    "O_4",
+    "O_61",
+    "N_125",
+    "Linear product"
+  ],
+  "default_option": [
+    "Linear product"
+  ],
+  "selected_option": [],
+  "ko": false,
+  "module": nameWildcardModule,
+  "function": "TE",
+
+}
+let defaultEDomain={
+  "type": "Epimerization",
+  "start": 3122,
+  "end": 3421,
+  "predictions": [],
+  "napdoslink": "",
+  "blastlink": "http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins&amp;PROGRAM=blastp&amp;BLAST_PROGRAMS=blastp&amp;QUERY=EGEAALTPIQRWFFEKNFTDKHHWNQSVMLHAKDGFDPEITEKTLHVLTVHHDALRMIYREQKPYYRGLEDASVELNVFELNGPAEDHEDRIEREADRLQSSISLETGHLLKAGLFRAEDGDHLLLAIHHLVVDGVSWRILLEDFTSVYTQLKQGNEPALPPKTHSFAEFAERIKEYANTKAFLKEADYWRELEEKEVCTQLPKDRQSGDQRMRHTRTVSFSLTPEQTEQLTTNVHEAYHTEMNDILLTALGLALKEWTGEDTIGVHLEGHGREDILDGLNITRTVGWFTSMYPMILEM&amp;LINK_LOC=protein&amp;PAGE_TYPE=BlastSearch",
+  "sequence": "EGEAALTPIQRWFFEKNFTDKHHWNQSVMLHAKDGFDPEITEKTLHVLTVHHDALRMIYREQKPYYRGLEDASVELNVFELNGPAEDHEDRIEREADRLQSSISLETGHLLKAGLFRAEDGDHLLLAIHHLVVDGVSWRILLEDFTSVYTQLKQGNEPALPPKTHSFAEFAERIKEYANTKAFLKEADYWRELEEKEVCTQLPKDRQSGDQRMRHTRTVSFSLTPEQTEQLTTNVHEAYHTEMNDILLTALGLALKEWTGEDTIGVHLEGHGREDILDGLNITRTVGWFTSMYPMILEM",
+  "dna_sequence": "",
+    "abbreviation": "E",
+  "html_class": "jsdomain-epimerase",
+  "identifier": nameWildcardModule+"_E",
+  "domainOptions": [],
+  "default_option": [],
+  "selected_option": [],
+  "ko": false,
+  "module": nameWildcardModule,
+  "function": "E"
+}
+
+  let domainArray=[]
+  let longDomainArray=[]
+  console.log(wildcardModule)
+  if (wildcardModule=="starter_module_nrps"){
+    longDomainArray.push(defaultADomain,defaultCDomain)
+
+  }
+  if (wildcardModule=="elongation_module_nrps"){
+
+    longDomainArray.push(defaultADomain,defaultCDomain,defaultPCPDomain)
+  }
+  if (wildcardModule=="terminator_module_nrps"){
+  longDomainArray.push(defaultTEDomain)
+  }
+  console.log(longDomainArray)
+  if (wildcardModule=="starter_module_pks"){
+    wildcardModule=[nameWildcardModule,wildcardModule,nameToStructure[wildcardSubstrate]]
+  }
+  else{wildcardModule=[nameWildcardModule,wildcardModule,wildcardSubstrate]}
+console.log(wildcardModule)
+
+if (toString(wildcardModule).includes("nrps")){
+
+  if (document.getElementById("wildcardE")
+              .checked) {domainArraydomainArray.push(["E"])}
+  if (document.getElementById("wildcardnMT")
+                          .checked) {domainArray.push(["nMT"])}
+if (document.getElementById("wildcardoMT")
+          .checked) {domainArray.push(["oMT"])}
+  if (document.getElementById("wildcardcMT")
+  .checked) {domainArray.push(["cMT"])}}
+
+let wildcard_gene={
+  antismashArray:domainArray,
+  default_option:[],
+start:0,
+end:1254,
+locus_tag:nameWildcardModule,
+displayed: true,
+
+domains: longDomainArray,
+strand:1,
+description:"",
+id: nameWildcardModule,
+
+ko: false,
+
+options:[],
+
+position: geneMatrix.length+1,
+
+position_in_BGC: geneMatrix.length+1,
+
+selected_option:[],
+modules:[{
+  "start": 0,
+  "end": 3000,
+  "complete": true,
+  "iterative": false,
+  "monomer": wildcardSubstrate,
+  "moduleIdentifier": nameWildcardModule+"_0",
+  "domains":
+  longDomainArray
+  ,
+  "numberOfDomains": longDomainArray.length,
+  "lengthVisualisation": 0
+}]
+}
+console.log("genematrix",geneMatrix)
+geneMatrix.push(wildcard_gene)
+console.log("genematrix",geneMatrix)
+BGC.orfs.push(wildcard_gene)
+if (details_data.hasOwnProperty(cluster_type)) {
+    details_data[cluster_type][region_index].orfs.push(wildcard_gene)
+}
+else {
+    details_data[region_index].orfs.push(wildcard_gene)
+}
+console.log(BGC)
+displayGenes(BGC)
+ updateProteins(geneMatrix)
+ updateDomains(geneMatrix)
+ addArrowClick(geneMatrix)
+ fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+
+}
+
 
 function addArrowClick(geneMatrix) {
     //add click event to every gene arrow
@@ -880,7 +1137,7 @@ function addArrowClick(geneMatrix) {
                 updateDomains(geneMatrix);
                 changeColor("#" + geneMatrix[geneIndex].id + "_gene_arrow");
                 addArrowClick(geneMatrix);
-                if (document.querySelector('input[type=checkbox]')
+        if (document.getElementById("real-time-button")
                     .checked) {
                     fetchFromRaichu(details_data, regionName, geneMatrix,
                         cluster_type)
@@ -915,7 +1172,7 @@ function addArrowClick(geneMatrix) {
                     changeColor("#" + geneMatrix[geneIndex].id +
                         "_gene_arrow");
                     addArrowClick(geneMatrix);
-                    if (document.querySelector('input[type=checkbox]')
+            if (document.getElementById("real-time-button")
                         .checked) {
                         fetchFromRaichu(details_data, regionName,
                             geneMatrix, cluster_type)
@@ -1081,6 +1338,9 @@ for (const [key_1, value_1] of Object.entries(details_data)) {
 }
 geneMatrix = createGeneMatrix(BGC)
 BGCForDisplay = displayGenes(BGC)
+console.log(BGC)
+//remove all checkboxes
+$('input[type=checkbox]').removeAttr('checked');
 updateProteins(geneMatrix)
 updateDomains(geneMatrix)
 addArrowClick(geneMatrix)

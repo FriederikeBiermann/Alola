@@ -118,6 +118,9 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                                 moduleIndex].domains[
                                                 domainIndex].ko==true){color= "#E11839"}
                                             //declare size of balls
+                                          console.log(geneMatrix[geneIndex].modules[
+                                                  moduleIndex].domains[
+                                                  domainIndex])
                                         if (geneMatrix[geneIndex].modules[
                                                 moduleIndex].domains[
                                                 domainIndex].type.includes(
@@ -271,15 +274,13 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                                 "dropdown-content");
                                         innerDropdownContent.innerHTML =
                                             ""
-                                        console.log(domainIndex)
+
                                         for (let optionIndex = 0; optionIndex <
                                             geneMatrix[geneIndex].modules[
                                                 moduleIndex].domains[
                                                 domainIndex].domainOptions
                                             .length; optionIndex++) {
-                                              console.log(domainIndex,geneMatrix[geneIndex].modules[
-                                                  moduleIndex].domains[
-                                                  domainIndex].identifier, geneMatrix)
+
 
 
                                             let optionContent =
@@ -323,12 +324,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                             innerDropdownContent.innerHTML +=
                                                 optionContent
                                         }
-                                        console.log(innerDropdownContent.innerHTML, geneMatrix[geneIndex].modules[
-                                                moduleIndex].domains[
-                                                domainIndex].identifier,geneMatrix[geneIndex].modules[
-                                                        moduleIndex].domains[domainIndex].type,geneMatrix[geneIndex].domains[
-                                                            domainIndex].domainOptions
-                                  )
+
                                         break
 
                                     }
