@@ -17,10 +17,19 @@ function createOptions(geneMatrix){
       if (domain.abbreviation=="A") {
           domain.domainOptions=Object.values(aminoacids)
           domain.default_option=domain.substrate
+          console.log()
 
 
       }
+
     //add substrate specifities for PKS
+    if (domain.abbreviation=="AT") {
+        domain.domainOptions=Object.keys(nameToStructure)
+        domain.default_option=domain.substrate
+        console.log()
+
+
+    }
  // add options to Dropdown
 
   }

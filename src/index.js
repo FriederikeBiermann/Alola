@@ -539,7 +539,7 @@ function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index,
                                                 domainIndex].substrate =
                                             substrate
                                         // overrule by user selected option
-                      
+
                                         if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option[0]=="Test 3")){
                                           substrate=geneMatrix[geneIndex].domains[domainIndex].selected_option
                                         }
@@ -683,10 +683,15 @@ function extractAntismashPredictionsFromRegionSJKS(details_data, region_index,
                                         geneMatrix[geneIndex].domains[
                                                 domainIndex].substrate =
                                             substrate
+                                            // overrule by user selected option
+
+                                            if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option[0]=="Test 3")){
+                                              substrate=geneMatrix[geneIndex].domains[domainIndex].selected_option}
                                     }
                                 }
                             }
                         }
+
                         if (domainArray.includes("AT") && !(domainArray.includes(
                                 "KS")) && !(domainArray.includes("TE"))) {
                             typeModule = "starter_module_pks";
