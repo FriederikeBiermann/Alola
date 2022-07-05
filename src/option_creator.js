@@ -13,7 +13,14 @@ function createOptions(geneMatrix){
       domain.domainOptions=['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
     }
-    //add substrate specifities
+    //add substrate specifities for NRPS
+      if (domain.abbreviation=="A") {
+          domain.domainOptions=Object.values(aminoacids)
+          domain.default_option=domain.substrate
+
+
+      }
+    //add substrate specifities for PKS
  // add options to Dropdown
 
   }

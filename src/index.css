@@ -207,6 +207,11 @@ input:checked + .slider:before {
 #final_drawing{
   max-height: 100%;
 }
+#intermediate_drawing{
+
+max-width: 17000%;
+align: top;
+}
  .container {
 
    padding: 1%;
@@ -265,6 +270,7 @@ input:checked + .slider:before {
   position: relative;
   right: 53px;
   bottom: 30px;
+  width: 100%;
 }
 .box {
  cursor: move;

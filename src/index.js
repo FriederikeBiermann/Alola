@@ -60,10 +60,9 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
         })
         .then((data) => {
             let container = document.getElementById("structure_container");
-            let smiles_container = document.getElementById(
-                "smiles_container");
+            let smiles_container = document.getElementById("smiles_container");
             //add options for cyclization
-            console.log("test")
+
             for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                 for (let domainIndex = 0; domainIndex < geneMatrix[
                         geneIndex].domains.length; domainIndex++) {
@@ -89,9 +88,8 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
                 .setAttribute("download", data.smiles + ".svg");
             container.innerHTML = formatSVG(data.svg);
             smiles_container.innerHTML = data.smiles;
-            acpList = obtainACPList(geneMatrix)
-            let intermediates = data.hanging_svg
-            console.log("test45")
+            acpList = obtainACPList(geneMatrix);
+            let intermediates = data.hanging_svg;
             return [geneMatrix, intermediates]
         })
         .then((data) => {
@@ -216,6 +214,8 @@ function formatSVG(svg) {
         .replaceAll("<g transform='translate",
             "<g style='fill: #ffffff' transform='translate");
     svg = svg.toString()
+    .replaceAll("<!-- PCP -->    <g style='fill: #ffffff'",
+        "<!-- PCP -->    <g style='fill: transparent'")
         .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'",
             "<!-- ACP -->    <g style='fill: transparent'");
     return svg
@@ -504,6 +504,7 @@ function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index,
                             let starterACP = ""
                             if (geneMatrix[geneIndex].domains[domainIndex].ko ==
                                 false) {
+                                // checks if domain in module
                                 if (startModule >= domain.start && domain.start >=
                                     endModule || endModule >= domain.start &&
                                     domain.start >= startModule) {
@@ -537,6 +538,11 @@ function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index,
                                         geneMatrix[geneIndex].domains[
                                                 domainIndex].substrate =
                                             substrate
+                                        // overrule by user selected option
+                      
+                                        if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option[0]=="Test 3")){
+                                          substrate=geneMatrix[geneIndex].domains[domainIndex].selected_option
+                                        }
                                     }
                                 }
                             }

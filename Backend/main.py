@@ -58,6 +58,8 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     list_svgs=[]
     for drawing_list in list_drawings_per_module:
         for index_drawing,drawing in enumerate(drawing_list):
-            list_svgs+=[[drawing.svg_string.replace("\n","").replace("\"","'")]]
+            svg_drawing=drawing.svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing' viewBox='0 0 300 75' preserveAspectRatio='xMidYMin meet'")
+            list_svgs+=[[svg_drawing]]
+
     atoms_for_cyclisation=str(o_atoms_for_cyclisation+ n_atoms_for_cyclisation)
     return {"svg":svg, "hanging_svg": list_svgs[:-1], "smiles": smiles,  "atomsForCyclisation":atoms_for_cyclisation}
