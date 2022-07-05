@@ -1038,8 +1038,17 @@ let defaultEDomain={
 
   }
   if (wildcardModule=="elongation_module_nrps"){
+    if (document.getElementById("wildcardE")
+                .checked) {domainArray.push(["E"]);
+               longDomainArray.push(defaultADomain,defaultCDomain,defaultEDomain,defaultPCPDomain);}
+    if (document.getElementById("wildcardnMT")
+                            .checked) {domainArray.push(["nMT"])}
+  if (document.getElementById("wildcardoMT")
+            .checked) {domainArray.push(["oMT"])}
+    if (document.getElementById("wildcardcMT")
+    .checked) {domainArray.push(["cMT"])}
+    else{    longDomainArray.push(defaultADomain,defaultCDomain,defaultEDomain,defaultPCPDomain)}
 
-    longDomainArray.push(defaultADomain,defaultCDomain,defaultPCPDomain)
   }
   if (wildcardModule=="terminator_module_nrps"){
   longDomainArray.push(defaultTEDomain)
@@ -1049,18 +1058,9 @@ let defaultEDomain={
     wildcardModule=[nameWildcardModule,wildcardModule,nameToStructure[wildcardSubstrate]]
   }
   else{wildcardModule=[nameWildcardModule,wildcardModule,wildcardSubstrate]}
-console.log(wildcardModule)
+console.log("wildcard",JSON.stringify(wildcardModule))
 
-if (toString(wildcardModule).includes("nrps")){
 
-  if (document.getElementById("wildcardE")
-              .checked) {domainArraydomainArray.push(["E"])}
-  if (document.getElementById("wildcardnMT")
-                          .checked) {domainArray.push(["nMT"])}
-if (document.getElementById("wildcardoMT")
-          .checked) {domainArray.push(["oMT"])}
-  if (document.getElementById("wildcardcMT")
-  .checked) {domainArray.push(["cMT"])}}
 
 let wildcard_gene={
   antismashArray:domainArray,
