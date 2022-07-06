@@ -302,10 +302,11 @@ function obtainACPList(geneMatrix) {
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 if (geneMatrix[geneIndex].domains[domainIndex].ko == false) {
-                    if (geneMatrix[geneIndex].domains[domainIndex].type.includes(
+                    if ((geneMatrix[geneIndex].domains[domainIndex].type.includes(
                             "ACP") || geneMatrix[geneIndex].domains[domainIndex]
                         .type.includes("PP")|| geneMatrix[geneIndex].domains[domainIndex]
-                    .type.includes("PCP")) {
+                    .type.includes("PCP"))&&!(geneMatrix[geneIndex].domains[domainIndex]
+                .type.includes("ACPS"))) {
                         acpList.push(geneMatrix[geneIndex].domains[domainIndex]
                             .identifier)
                     }
@@ -1041,14 +1042,16 @@ let defaultEDomain={
     if (document.getElementById("wildcardE")
                 .checked) {domainArray.push(["E"]);
                longDomainArray.push(defaultADomain,defaultCDomain,defaultEDomain,defaultPCPDomain);}
+
+    else{    longDomainArray.push(defaultADomain,defaultCDomain,defaultEDomain,defaultPCPDomain)}
     if (document.getElementById("wildcardnMT")
                             .checked) {domainArray.push(["nMT"])}
   if (document.getElementById("wildcardoMT")
             .checked) {domainArray.push(["oMT"])}
     if (document.getElementById("wildcardcMT")
     .checked) {domainArray.push(["cMT"])}
-    else{    longDomainArray.push(defaultADomain,defaultCDomain,defaultEDomain,defaultPCPDomain)}
 
+console.log(longDomainArray)
   }
   if (wildcardModule=="terminator_module_nrps"){
   longDomainArray.push(defaultTEDomain)
