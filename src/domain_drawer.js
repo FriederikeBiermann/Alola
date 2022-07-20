@@ -346,14 +346,14 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                             var draw = SVG(innerDropdownButton)
                                 .size(String(size) + "px", height)
                                 .group();
-                            var dom = draw.rect(size, size)
+                            var dom = draw.rect(size-2, size-2)
                                 .x(0)
-                                .y(height - indent - (size))
+                                .y(height - indent - (size+2))
                                 .rx("200%")
                                 .ry("200%")
                                 .fill(color)
                                 .stroke({
-                                    width: 2
+                                    width: 2, color:"#2B2B2B"
                                 });
                             dom.node.id = "domain" + domainIdentifier
                             $(dom.node)
@@ -438,8 +438,8 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
                 var dom = draw.rect(size, height)
                     .x(0)
                     .y(height)
-                    .fill("white")
-                    .stroke("white")
+                    .fill("#2B2B2B")
+                    .stroke("#2B2B2B")
                     .stroke({
                         width: 20
                     })

@@ -13,6 +13,8 @@ button{
   background-color:white;
   color: black;
   padding: 12px 15px;
+  border-radius:3px;
+
 }
 
 a:visited {
@@ -46,7 +48,6 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   border-radius:6px;
   padding-left: 5%;
   padding-right: -8%;
-  padding-bottom: -20%;
   width: 90%;
   text-align: center;
   height: 390px;
@@ -64,14 +65,25 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
  #Protein_explorer{
    border-radius:6px;
+   margin-bottom: 10px;
 background-color:#1F1F1F;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 height: 305px;
 width: 75%;}
-#Domain_explorer{
+.Domain_explorer{
   border-radius:6px;
+  margin-bottom: 10px;
+background-color:#1F1F1F;
+float: left;
+
+box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+height: 550px;
+width: 75%;}
+.Domain_explorer_while_saving{
+  border-radius:6px;
+  margin-bottom: 10px;
 background-color:#1F1F1F;
 float: left;
 
@@ -92,17 +104,17 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 width: 24.5%;
 background-color:#1F1F1F;
 float: right;
-height: 505px;
-
+height: 515px;
+overflow-x: auto;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
 #start_button {
-
+    margin:3px;
   float: right;
   color: #2B2B2B;
   text-align: center;
   padding: 2px 2px;
   text-decoration: none;
-  font-size: 19px;
+  font-size: 17px;
 }
 #fake_button {
 
@@ -117,8 +129,9 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
 #start_button:hover {
   background-color: #E11839;
   color: black;
+
 }
-#save_button {
+.save_button {
 
   text-align: center;
   padding: 2px 2px;
@@ -126,7 +139,7 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
   font-size: 19px;
   margin-bottom: :40px;
 }
-#save_button:hover {
+.save_button:hover {
   background-color: #E11839;
   color: black;
 
@@ -200,7 +213,7 @@ input:checked + .slider:before {
 .slider.round:before {
  border-radius: 50%;
 }
-#save_svg {
+.save_button a {
   float: right;
   color: #2B2B2B;
   background-color=white;
@@ -220,6 +233,23 @@ input:checked + .slider:before {
 max-width: 17000%;
 align: top;
 }
+.outerDomainExplorer{
+  border-radius: 1%;
+  overflow: auto;
+  max-height:400px;
+  overflow-x: auto;
+  background-color:white;
+  max-width: 99%;
+
+}
+.outerDomainExplorer_while_saving{
+  overflow: auto;
+  max-height:400px;
+  max-width: 3000%;
+  overflow-x: auto;
+  overflow:visible;
+
+}
  .container {
 
    padding: 1%;
@@ -230,7 +260,7 @@ align: top;
 .contentWithPadding{
  margin:10px;
  width:100%;
- overflow: auto;;
+
 
 }
 .contentWithPaddingOverflow{
@@ -249,9 +279,7 @@ align: top;
  height: 170px;
  font-size: medium;
 }
-.outerDomainExplorer{
-   overflow-x: auto;
-}
+
 .domain-container {
  display: grid;
  grid-template-columns: repeat(100, 1fr);
@@ -300,6 +328,7 @@ display: inline-block;
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
+opacity: 0.9;
 display: none;
 position: absolute;
 background-color: white;
@@ -315,7 +344,7 @@ color: black;
 padding: 3px 3px;
 text-decoration: none;
 display: block;
-background-color: white;
+width:100%;
  text-transform: capitalize;
 }
 .dropdown-content button:active {
@@ -372,7 +401,7 @@ background-color: #E11839;
     .formContainer .btn {
       padding: 12px 20px;
       border: none;
-      background-color: #8ebf42;
+      background-color: #1F1F1F;
       color: #fff;
       cursor: pointer;
       width: 100%;
@@ -380,7 +409,7 @@ background-color: #E11839;
       opacity: 0.8;
     }
     .formContainer .cancel {
-      background-color: #cc0000;
+      background-color: #E11839;
     }
     .formContainer .btn:hover,
     .openButton:hover {

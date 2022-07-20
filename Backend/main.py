@@ -27,6 +27,7 @@ async def root():
 
 async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     # handle input data
+    print(antismash_input)
     antismash_input_transformed=ast.literal_eval(antismash_input)[0]
     cyclization=ast.literal_eval(antismash_input)[1]
     # get last intermediate
