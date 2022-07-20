@@ -8,6 +8,7 @@ colour_fill_dict = {
     'PKS_DH': '#f7be81',
     'PKS_ER': '#81f7f3',
     'PKS_TE': '#f5c4f2',
+    "PKS_PP":'#81bef7',
     'KR*': '#80f680'
 }
 colour_outline_dict = {

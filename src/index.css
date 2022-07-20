@@ -107,7 +107,7 @@ float: right;
 height: 515px;
 overflow-x: auto;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
-#start_button {
+.start_button {
     margin:3px;
   float: right;
   color: #2B2B2B;
@@ -126,18 +126,21 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
   padding-top:1px;
   font-size: 19px;
 }
-#start_button:hover {
+.start_button:hover {
   background-color: #E11839;
   color: black;
 
 }
 .save_button {
-
-  text-align: center;
-  padding: 2px 2px;
-  text-decoration: none;
-  font-size: 19px;
+  margin:3px;
+float: right;
+color: #2B2B2B;
+text-align: center;
+padding: 2px 5px;
+text-decoration: none;
+font-size: 17px;
   margin-bottom: :40px;
+    margin-right:20px;
 }
 .save_button:hover {
   background-color: #E11839;
@@ -219,8 +222,9 @@ input:checked + .slider:before {
   background-color=white;
   text-align: center;
   padding: 2px 2px;
+
   text-decoration: none;
-  font-size: 19px;
+
 }
 #smiles_container{
   font-size: 12px;
@@ -230,12 +234,12 @@ input:checked + .slider:before {
   max-width:100%;
 }
 .intermediate_drawing{
-position:absolute;
+position:relative;
 
 max-width: 100%;
 height: auto;
 
-
+bottom:15px;
 
 left:9%;
 
@@ -315,8 +319,8 @@ left:9%;
 .intermediateContainer{
   position: relative;
   right: 63px;
-  bottom: 50px;
-  width: 150px;
+
+
   height:800px;
 }
 .box {
@@ -335,6 +339,7 @@ border: none;
 .dropdown {
 position: relative;
 display: inline-block;
+
 }
 
 /* Dropdown Content (Hidden by Default) */
@@ -345,9 +350,13 @@ position: absolute;
 background-color: white;
 box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 z-index: 1;
-min-width: 100px
+min-width: 150px;
+margin-top:-20px;
 }
-
+svg text{
+  text-anchor: middle;
+  dominant-baseline: bottom;
+}
 /* Links inside the dropdown */
 .dropdown-content button {
   min-width: 100px

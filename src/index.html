@@ -16,10 +16,10 @@
 <div id="menu_bar">
   <!-- Rounded switch -->
 
-       <button  type="button" id= "start_button" onclick="openForm()"><strong>Add Module</strong></button>
+       <button  type="button" class= "start_button" onclick="openForm()"><strong>Add Module</strong></button>
 
-  <button type="button" id= "start_button" onclick="fetchFromRaichu(details_data, regionName,geneMatrix)"> <strong>Refresh structures</strong></button>
-  <button type="button" id= "start_button" onclick="location.reload()"><strong> Reset view</strong></button>
+  <button type="button" class= "start_button" onclick="fetchFromRaichu(details_data, regionName,geneMatrix)"> <strong>Refresh structures</strong></button>
+  <button type="button" class= "start_button" onclick="location.reload()"><strong> Reset view</strong></button>
 
   <label class="switch">
 
@@ -58,9 +58,10 @@
 <div id="Structure_explorer">   <div class= "contentWithPadding"> <div class= "heading-container"> Structure explorer</div>
 <div id= "structure_container"> </div>
 <div id= "smiles_container"> </div>
-<button type="button" class=save_button id= "save_button" > <a id= "save_svg"> Download SVG</a></button>
-<button type="button" class=save_button id= "Zoom_in_button" onclick="zoom_in()">  +</button>
-<button type="button" class=save_button id= "Zoom_out_button" onclick="zoom_out()"> -</button>
+<button type="button" class="save_button" id= "save_button" > <a id= "save_svg"><strong> Download SVG</strong></a></button>
+<button type="button" class="save_button" id= "Zoom_out_button" onclick="zoom_out()"><a><strong>Zoom in</strong></a></button>
+<button type="button" class="save_button" id= "Zoom_in_button" onclick="zoom_in()"><a><strong>Zoom out</strong></a></button>
+
 </div>
 </div>
 <div id="Domain_explorer" class="Domain_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Biosynthetic Model</div>
@@ -68,7 +69,7 @@
 <div class="module-container" id= "module_container"> </div>
 <div class="domain-container" id= "domain_container"> </div>
 </div>
-<button type="button" class=save_button id= "save_biosynthetic_model_button" onclick="PrintDiv()">Save Biosynthetic Model</button>
+<button type="button" class=save_button id= "save_biosynthetic_model_button" onclick="PrintDiv()"><strong>Save Biosynthetic Model</strong></button>
 </div>
 </div>
 

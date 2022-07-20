@@ -355,6 +355,9 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                 .stroke({
                                     width: 2, color:"#2B2B2B"
                                 });
+                            if (size>25){
+                              var text=draw.text(domain.abbreviation).x(size/2-1).y(height - indent - (size/2+1)-7)}
+
                             dom.node.id = "domain" + domainIdentifier
                             $(dom.node)
                                 .mouseover({
