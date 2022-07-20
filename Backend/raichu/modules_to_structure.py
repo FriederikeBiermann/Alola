@@ -26,7 +26,8 @@ ELONGATION_UNIT_TO_TEXT = {'malonylcoa': 'Malonyl-CoA',
                            'methylmalonylcoa': 'Methylmalonyl-CoA',
                            'methoxymalonylacp': 'Methoxymalonyl-ACP',
                            'ethylmalonylcoa': 'Ethylmalonyl-CoA',
-                           'pk': 'Unknown elongation unit'}
+                           'pk': 'Unknown elongation unit',
+                           "propionylcoa":"Propionyl-CoA"}
 
 TAILOR_DOMAIN_SHORT_TO_LONG = {'E': 'Epimerization', 'nMT' : 'N-methylation'}
 

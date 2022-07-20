@@ -11,7 +11,8 @@ PKS_SUBUNIT_TO_MONOMER = {'malonylcoa': ['CC=O', 0, 1],
                           'methylmalonylcoa': ['O=CCC', 2, 1],
                           'methoxymalonylacp': ['O=CCOC', 2, 1],
                           'ethylmalonylcoa': ['O=CCCC', 2, 1],
-                          'pk': ['O=CC*', 2, 1]}
+                          'pk': ['O=CC*', 2, 1],
+                          "propionylcoa":["CCC=O",1,2]}
 
 
 def pks_elongation(pk_chain, elongation_monomer):

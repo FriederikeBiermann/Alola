@@ -5,7 +5,11 @@ let cluster_type = "nrpspks"
 let nameToStructure = {
     "methylmalonylcoa": "CC(C(O)=O)C(S)=O",
     "propionylcoa": "CCC(S)=O",
-    "malonylcoa": "OC(=O)CC(S)=O"
+    "malonylcoa": "OC(=O)CC(S)=O",
+    'methoxymalonylacp':"SC(=O)C(C(=O)O)OC)O",
+    'ethylmalonylcoa':"CC(CC(O)=O)C(S)=O",
+
+
 }
 let aminoacids = {
     "arg": "arginine",
@@ -91,6 +95,9 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
             document.getElementById("save_svg")
                 .setAttribute("download", data.smiles + ".svg");
             container.innerHTML = formatSVG(data.svg);
+            drawing=document.getElementById("final_drawing")
+            drawing.style["max-width"]="100%"
+            drawing.style["max-height"]="100%"
             smiles_container.innerHTML = data.smiles;
             acpList = obtainACPList(geneMatrix);
             let intermediates = data.hanging_svg;
@@ -216,11 +223,11 @@ function formatSVG_intermediates(svg) {
         .replaceAll("#ffffff", "none")
       //  .replaceAll("#000000", "#ffffff")
         .replaceAll("<g transform='translate",
-            "<g style='fill: #ffffff' transform='translate");
+            "<g style='fill: black' transform='translate");
     svg = svg.toString()
-    .replaceAll("<!-- PCP -->    <g style='fill: #ffffff'",
+    .replaceAll("<!-- PCP -->    <g style='fill: black'",
         "<!-- PCP -->    <g style='fill: transparent'")
-        .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'",
+        .replaceAll("<!-- ACP -->    <g style='fill: black'",
             "<!-- ACP -->    <g style='fill: transparent'");
     return svg
 }
@@ -1333,7 +1340,41 @@ function downloadURI(uri, name) {
     //after creating link you should delete dynamic link
     //clearDynamicLink(link);
 }
+//functions for zooming
 
+function zoom_in(){
+  let drawing=document.getElementById("final_drawing")
+  let drawingStyles=window.getComputedStyle(drawing)
+  let height = drawingStyles.height;
+  let width = drawingStyles.width;
+  stringWidth=(parseInt(width)+30).toString()+"px"
+  stringHeight=(parseInt(height)+30).toString()+"px"
+
+  drawing.style["max-width"]=""
+  drawing.style["max-height"]=""
+  drawing.style["width"]=stringWidth
+  drawing.style["height"]=stringHeight
+
+
+
+}
+function zoom_out(){
+  let drawing=document.getElementById("final_drawing")
+  let drawingStyles=window.getComputedStyle(drawing)
+  let height = drawingStyles.height;
+  let width = drawingStyles.width;
+  stringWidth=(parseInt(width)-30).toString()+"px"
+  stringHeight=(parseInt(height)-30).toString()+"px"
+
+  drawing.style["max-width"]=""
+  drawing.style["max-height"]=""
+  drawing.style["width"]=stringWidth
+  drawing.style["height"]=stringHeight
+
+
+
+
+}
 function addArrowClick(geneMatrix) {
     //add click event to every gene arrow
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {

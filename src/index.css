@@ -51,6 +51,7 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   width: 90%;
   text-align: center;
   height: 390px;
+  overflow:auto;
 }
 #BGC_explorer{
 
@@ -84,7 +85,6 @@ width: 75%;}
 .Domain_explorer_while_saving{
   border-radius:6px;
   margin-bottom: 10px;
-background-color:#1F1F1F;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
@@ -225,24 +225,24 @@ input:checked + .slider:before {
 #smiles_container{
   font-size: 12px;
 }
-#final_drawing{
-  max-height: 100%;
-}
+
 #intermediate_drawing{
 
-max-width: 17000%;
+max-width: 150px;
 align: top;
 }
 .outerDomainExplorer{
-  border-radius: 1%;
+  border-radius: 0.5%;
   overflow: auto;
   max-height:400px;
   overflow-x: auto;
   background-color:white;
   max-width: 99%;
+  margin-top: 1%;
 
 }
 .outerDomainExplorer_while_saving{
+  background-color:white;
   overflow: auto;
   max-height:400px;
   max-width: 3000%;
@@ -253,7 +253,7 @@ align: top;
  .container {
 
    padding: 1%;
-   width: 95%;
+   width: 99%;
    overflow-x: auto;
    white-space: nowrap;
 }
@@ -273,19 +273,20 @@ align: top;
  grid-template-columns: repeat(100, 1fr);
  gap: 12px;
  padding: 1.5%;
- width: 95%;
+ width: 99%;
  overflow-x: auto;
  white-space: nowrap;
  height: 170px;
  font-size: medium;
 }
 
+
 .domain-container {
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap: 10px;
  padding: 0%;
- width: 97%;
+ width: 99%;
 
  white-space: nowrap;
  height: 450px;
