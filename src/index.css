@@ -232,10 +232,11 @@ input:checked + .slider:before {
 .intermediate_drawing{
 position:absolute;
 
-transform: translateY(78%);
-bottom:-10px;
 max-width: 100%;
-vertical-align: text-top;
+height: auto;
+
+
+
 left:9%;
 
 }
@@ -316,6 +317,7 @@ left:9%;
   right: 63px;
   bottom: 50px;
   width: 150px;
+  height:800px;
 }
 .box {
  cursor: move;

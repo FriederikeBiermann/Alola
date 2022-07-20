@@ -1,7 +1,7 @@
 
 regionName = "r1c3"
 let fetching = false
-let cluster_type = "nrps"
+let cluster_type = "nrpspks"
 let nameToStructure = {
     "methylmalonylcoa": "CC(C(O)=O)C(S)=O",
     "propionylcoa": "CCC(S)=O",
@@ -121,6 +121,14 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
                 'innerIntermediateContainer' + acpList[
                     intermediateIndex + starterACP])
             intermediate_container.innerHTML = formatSVG_intermediates(intermediate);
+            let intermediate_svg=document.getElementById("intermediate_drawing")
+            let bbox = intermediate_svg.getBBox();
+            console.log(bbox)
+            let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
+
+            intermediate_svg.setAttribute("viewBox",viewBox)
+            intermediate_svg.setAttribute('id', "intermediate_drawing"+intermediateIndex);
+            intermediate_svg.setAttribute('class', "intermediate_drawing");
         }
     })
 }
