@@ -20,10 +20,12 @@ colour_outline_dict = {
     'PKS_ACP': '#3d79d6',
     'PKS_AT': '#df5d5d',
     'PKS_KS': '#5fc65f',
+    'PKS_KS(Modular-KS)': '#5fc65f',
     'PKS_KR': '#5fbb87',
     'PKS_DH': '#ca9862',
     'PKS_ER': '#61bbad',
     'PKS_TE': '#a25ba0',
+    'Thioesterase': '#a25ba0',
     'KR*': '#5fbb87'
 }
 
@@ -36,7 +38,7 @@ var Domainer = {
     tooltip_id: "Domainer-tooltip-1234567890",
     tooltip_id_domain: "Domainer-tooltip-123"
 };
-Domainer.drawClusterSVG = (function(cluster, height = 75) {
+Domainer.drawClusterSVG = (function(cluster, height = 90) {
     var container = document.getElementById('domain_container')
     var line_svg = SVG(container)
         .size('100%', height)
@@ -73,9 +75,16 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                         else {
                             color = "#025699"
                         }
+                        if (colour_outline_dict.hasOwnProperty(domain.type)) {
+                            outline = colour_outline_dict[domain.type];
+                        }
+                        else {
+                            outline = "black";
+                        }
                     }
                     else {
-                        color = "#025699"
+                        color = "#025699";
+                          outline = "black"
                     }
                     let geneIndex = 0
                     let domainIdentifier = ""
@@ -173,13 +182,13 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                         // declare indent for spaghetti diagram
                                         if (cluster_type != "nrps"){                                        if ((cleanedDomainIndex == 2 ||
                                                                                         cleanedDomainIndex ==
-                                                                                        cleanedLength - 3) &&
-                                                                                    cleanedLength > 3) {
+                                                                                        cleanedLength - 2) &&
+                                                                                    cleanedLength > 4) {
                                                                                     indent = indentSteps
                                                                                 }
                                                                                 else if ((cleanedDomainIndex ==
                                                                                         3 || cleanedDomainIndex ==
-                                                                                        cleanedLength - 4) &&
+                                                                                        cleanedLength - 3) &&
                                                                                     cleanedLength > 4) {
                                                                                     indent = indentSteps * 2
                                                                                 }
@@ -353,7 +362,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                 .ry("200%")
                                 .fill(color)
                                 .stroke({
-                                    width: 2, color:"#2B2B2B"
+                                    width: 2, color:outline
                                 });
                             if (size>25){
                               var text=draw.text(domain.abbreviation).x(size/2-1).y(height - indent - (size/2+1)-7)}
@@ -386,7 +395,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 75) {
                                     $(handler.target)
                                         .css("stroke-width", "2px");
                                     $(handler.target)
-                                        .css("stroke", "black");
+                                        .css("stroke", outline);
                                     $("#" + Domainer.tooltip_id)
                                         .css("display", "none")
                                 });
