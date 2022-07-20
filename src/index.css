@@ -229,10 +229,14 @@ input:checked + .slider:before {
   max-height: 100%;
   max-width:100%;
 }
-#intermediate_drawing{
+.intermediate_drawing{
+position:absolute;
 
-max-width: 150px;
-align: top;
+transform: translateY(78%);
+bottom:-10px;
+max-width: 100%;
+vertical-align: text-top;
+left:9%;
 
 }
 .outerDomainExplorer{
@@ -309,9 +313,9 @@ align: top;
 }
 .intermediateContainer{
   position: relative;
-  right: 50px;
+  right: 63px;
   bottom: 50px;
-  width: 100%;
+  width: 150px;
 }
 .box {
  cursor: move;
