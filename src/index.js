@@ -1328,12 +1328,12 @@ function PrintDiv()
   let div= document.getElementById("outerDomainExplorer")
   let outer_div=document.getElementById("Domain_explorer")
   div.setAttribute("class", "outerDomainExplorer_while_saving");
-  //outer_div.setAttribute("class", "DomainExplorer_while_saving");
 
 
-  const canvas = await html2canvas(div)
+  const canvas = await html2canvas(div,{scale:5})
+
   div.setAttribute("class", "outerDomainExplorer");
-  //outer_div.setAttribute("class", "DomainExplorer");
+
   var myImage = canvas.toDataURL();
 
   downloadURI(myImage, "biosynthetic_model.png");
@@ -1530,7 +1530,7 @@ function addArrowClick(geneMatrix) {
                             geneIndex].domains[domainIndex].sequence);
                         changeDomainColor(geneMatrix[geneIndex].domains[
                             domainIndex], "#domain" + geneMatrix[
-                            geneIndex].domains[domainIndex].identifier);
+                            geneIndex].domains[domainIndex].identifier); scale: 2,
                         setKoStatus(geneIndex, domainIndex, geneMatrix)
                     },
                     false);

@@ -245,20 +245,20 @@ left:9%;
 
 }
 .outerDomainExplorer{
-  border-radius: 0.5%;
+  border-radius: 10px;
   overflow: auto;
   max-height:400px;
   overflow-x: auto;
   background-color:white;
-  max-width: 99%;
+  max-width: 95%;
   margin-top: 1%;
 
 }
 .outerDomainExplorer_while_saving{
   background-color:white;
   overflow: auto;
-  max-height:400px;
-  max-width: 3000%;
+  height : 1000px;
+  display : inline-block;
   overflow-x: auto;
   overflow:visible;
 
@@ -298,7 +298,7 @@ left:9%;
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap: 10px;
- padding: 0%;
+ padding: 0px;
  width: 99%;
 
  white-space: nowrap;
@@ -309,7 +309,7 @@ left:9%;
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap:3px;
- padding: 1%;
+ padding: 10px;
  width: 97%;
 
  white-space: nowrap;

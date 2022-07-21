@@ -386,16 +386,14 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                         handler);
                                     $(handler.target)
                                         .css("stroke-width", "3px");
-                                    $(handler.target)
-                                        .css("stroke", "#E11839");
+                              
                                     handler.stopPropagation();
                                 });
                             $(dom.node)
                                 .mouseleave(function(handler) {
                                     $(handler.target)
                                         .css("stroke-width", "2px");
-                                    $(handler.target)
-                                        .css("stroke", outline);
+
                                     $("#" + Domainer.tooltip_id)
                                         .css("display", "none")
                                 });
