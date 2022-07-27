@@ -884,13 +884,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                         else {
                                             substrate = malonylcoa
                                         }
-                                        geneMatrix[geneIndex].domains[
-                                                domainIndex].substrate =
-                                            substrate
-                                            // overrule by user selected option
 
-                                            if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length==0)){
-                                              substrate=geneMatrix[geneIndex].domains[domainIndex].selected_option}
                                     }
 
                                     domainArray.push(nameDomain)
@@ -968,7 +962,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 "TE")) && starterStatus == 1 && !("TD" in
                                 domainArray)) {
                             typeModule = "elongation_module_nrps";
-                            moduleArray.push(nameModule, typeModule, "alanine");
+                            moduleArray.push(nameModule, typeModule, substrate);
                             moduleArray.push(domainArray)
                         }
                         if (domainArray.includes("TE") && domainArray.includes("AT") ) {
@@ -1214,7 +1208,7 @@ function addWildcard(geneMatrix){
   "ko": false,
   "module": nameWildcardModule,
   "function": "A",
-  "substrate": "glutamicacid"
+  "substrate": wildcardSubstrate
   }
   let defaultPCPDomain={
   "type": "PCP",
@@ -1388,7 +1382,7 @@ function addWildcard(geneMatrix){
     "ko": false,
     "module":  nameWildcardModule,
     "function": "AT",
-    "substrate": "propionylcoa"
+    "substrate": wildcardSubstrate
   }
   let defaultKSDomain={
     "type": "PKS_KS(Modular-KS)",
@@ -1437,7 +1431,7 @@ function addWildcard(geneMatrix){
   let longDomainArray=[]
   console.log(wildcardModule)
   if (wildcardModule=="starter_module_nrps"){
-    longDomainArray.push(defaultADomain,defaultCDomain)
+    longDomainArray.push(defaultADomain,defaultPCPDomain)
 
   }
   if (wildcardModule=="elongation_module_nrps"){
