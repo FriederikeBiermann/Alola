@@ -15,10 +15,10 @@ if __name__ == "__main__":
                            ['module_6', 'elongation_module_pks', 'methylmalonylcoa', ['KR_A1']],
                            ['module_7', 'terminator_module_pks', 'methylmalonylcoa', ['KR_A1']]]
 
-    draw_cluster(erythromycin_cluster)
+    #draw_cluster(erythromycin_cluster)
 
     #Visualise PKS cluster (interactive mode)
-    draw_cluster(erythromycin_cluster, interactive=True)
+    #draw_cluster(erythromycin_cluster, interactive=True)
 
     #Visualise NRPS cluster
     nrps_cluster = [['NRPS module 1', 'starter_module_nrps', 'd-threonine'],
@@ -27,7 +27,7 @@ if __name__ == "__main__":
                     ['NRPS module 4', 'elongation_module_nrps', 'cysteine', ['E']],
                     ['NRPS module 5', 'elongation_module_nrps', 'glutamicacid', []],
                     ['NRPS module 6', 'elongation_module_nrps', 'alanine', ['E']],
-                    ['NRPS module 7', 'terminator_module_nrps', 'valine', []]]
+                    ['NRPS module 7', 'terminator_module_nrps', 'leucine', []]]
     draw_cluster(nrps_cluster)
 
     #Visualise hybrid PKS/NRPS cluster
@@ -38,4 +38,4 @@ if __name__ == "__main__":
                     ['NRPS module 5', 'elongation_module_nrps', 'glutamicacid', ['E', 'nMT']],
                     ['PKS module 6', 'elongation_module_pks', 'methoxymalonylacp', ['KR','DH','ER']],
                     ['NRPS module 7', 'terminator_module_nrps', 'valine', []]]
-    draw_cluster(hybrid, interactive=True)
+    #draw_cluster(hybrid, interactive=True)

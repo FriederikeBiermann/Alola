@@ -89,6 +89,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                     let geneIndex = 0
                     let domainIdentifier = ""
                     let size = 50
+                    let gene_size=0
                     let points = ""
                     let abbreviation = ""
                     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
@@ -356,7 +357,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                 .size(String(size) + "px", height)
                                 .group();
                             var dom = draw.rect(size-2, size-2)
-                                .x(0)
+                                .x(2)
                                 .y(height - indent - (size+2))
                                 .rx("200%")
                                 .ry("200%")
@@ -365,7 +366,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                     width: 2, color:outline
                                 });
                             if (size>25){
-                              var text=draw.text(domain.abbreviation).x(size/2-1).y(height - indent - (size/2+1)-7)}
+                              var text=draw.text(domain.abbreviation).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
 
                             dom.node.id = "domain" + domainIdentifier
                             $(dom.node)
@@ -386,7 +387,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                         handler);
                                     $(handler.target)
                                         .css("stroke-width", "3px");
-                              
+
                                     handler.stopPropagation();
                                 });
                             $(dom.node)
@@ -425,8 +426,50 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
         .find("svg")
         .attr("width", width + "px");
     Domainer.drawModules(geneMatrix, 20, scale)
+    Domainer.drawGenes(geneMatrix, 20, scale)
     return $(container)
         .find("svg")[0];
+});
+Domainer.drawGenes = (function(geneMatrix, height, scale) {
+    document.getElementById('model_gene_container')
+        .innerHTML = ""
+
+    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+        let gene_size=0
+        if (geneMatrix[geneIndex].hasOwnProperty("modules")) {
+            for (let moduleIndex = 0; moduleIndex < geneMatrix[
+                    geneIndex].modules.length; moduleIndex++) {
+
+                gene_size += geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation-2
+                geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation =
+                    0
+
+            }
+        }
+        console.log("siize",gene_size,geneIndex)
+        if (gene_size >0){
+          var innerModelGeneContainer = document.createElement('div');
+          innerModelGeneContainer.id = "innerModelGeneContainer" + "_" +
+              geneMatrix[geneIndex].id
+          document.getElementById('model_gene_container')
+              .appendChild(innerModelGeneContainer);
+          var draw = SVG(innerModelGeneContainer)
+              .size(String(gene_size) + "px", height)
+              .group();
+              console.log(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, height, scale)))
+              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 20, scale)))
+              .fill("white")
+              .stroke("#2B2B2B")
+              .stroke({
+                  width: 1
+              })
+
+
+
+          pol.node.id = "module_gene_" + geneIndex
+        }
+
+    }
 });
 Domainer.drawModules = (function(geneMatrix, height, scale) {
     document.getElementById('module_container')
@@ -454,43 +497,42 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
                         width: 20
                     })
                 dom.node.id = "module_" + moduleIndex
-                geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation =
-                    0
+
             }
         }
     }
 });
-Domainer.getOrfPoints = (function(orf, cluster, height, scale) {
-    var x_points = [
-        scale(orf.start),
-        (orf.strand === 0) ?
-        (scale(orf.start) + scale(orf.end - orf.start)) :
-        ((scale(orf.end - orf.start) > (height / 2)) ?
-            (scale(orf.start) + Math.max(scale(orf.end - orf.start -
-                ((orf.end - orf.start) / 4)), (scale(orf.end -
-                orf.start) - parseInt(height / 2)))) :
-            scale(orf.start)),
-        (scale(orf.start) + scale(orf.end - orf.start))
-    ];
-    var y_points = [
-        (orf.strand === 0) ?
-        ((height / 2) - (height / 3)) :
-        ((height / 2) - (height / 3)) - (height / 5),
-        ((height / 2) - (height / 3)),
-        (height / 2),
-        ((height / 2) + (height / 3)),
-        (orf.strand === 0) ?
-        ((height / 2) + (height / 3)) :
-        ((height / 2) + (height / 3)) + (height / 5)
-    ];
-    return {
-        x: x_points,
-        y: y_points
-    };
+Domainer.getOrfPoints = (function(start,end,  height, scale) {
+  let strand=1
+  var x_points = [
+    start,
+    (strand === 0) ?
+      start + (end - start)
+      : (((end - start) > (height / 2)) ?
+          start + Math.max(end - start - ((end - start) / 4), ((end - start) - parseInt(height / 2)))
+          : (start)),
+    start + (end - start)
+  ];
+  var y_points = [
+    (strand === 0) ?
+      ((height / 2) - (height / 3))
+      : ((height / 2) - (height / 3)) - (height / 5),
+    ((height / 2) - (height / 3)),
+    (height / 2),
+    ((height / 2) + (height / 3)),
+    (strand === 0) ?
+      ((height / 2) + (height / 3))
+      : ((height / 2) + (height / 3)) + (height / 5)
+  ];
+  console.log("orf_sra", strand,"x",x_points)
+  console.log("y",y_points)
+
+  return { x: x_points, y: y_points };
 });
-Domainer.getproteinPoints = (function(orf, cluster, height, scale) {
+Domainer.getArrowPoints = (function(orf,  height, scale) {
     var points = [];
-    var pts = Domainer.getOrfPoints(orf, cluster, height, scale);
+    var pts = Domainer.getOrfPoints(orf,height, scale);
+    console.log("pots",pts)
     points.push({ // blunt start
         x: pts.x[0],
         y: pts.y[1]
@@ -519,10 +561,7 @@ Domainer.getproteinPoints = (function(orf, cluster, height, scale) {
         x: pts.x[0],
         y: pts.y[3]
     });
-    if (orf.strand < 0) {
-        points = Domainer.flipHorizontal(points, scale(orf.start), (
-            scale(orf.start) + scale(orf.end - orf.start)));
-    }
+
     return points;
 });
 Domainer.getDomainPoints = (function(domain, orf, cluster, height, scale) {

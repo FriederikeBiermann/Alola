@@ -36,13 +36,13 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     o_atoms_for_cyclisation, n_atoms_for_cyclisation= find_all_o_n_atoms_for_cyclization(intermediate)
     # perform thioesterase reaction
     if cyclization=="None":
-        if "terminator_module_nrps" in str(antismash_input_transformed):
+        if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
             intermediate=attach_to_domain_nrp(intermediate, 'PCP')
         final_product = thioesterase_linear_product(intermediate)
 
 
     else:
-         if "terminator_module_nrps" in str(antismash_input_transformed):
+         if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
                     intermediate=attach_to_domain_nrp(intermediate, 'PCP')
          final_product =  thioesterase_circular_product(intermediate, cyclization)
 
@@ -54,13 +54,22 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     global global_final_polyketide_Drawer_object
     list_drawings_per_module = cluster_to_structure(antismash_input_transformed,
     attach_to_acp=True, draw_structures_per_module=True)
+    list_drawings_per_module_withoutACP = cluster_to_structure(antismash_input_transformed,
+    attach_to_acp=True, draw_structures_per_module=True)
+    list_intermediate_smiles=[]
+    # for drawing_list in list_drawings_per_module_withoutACP:
+    #     for index_drawing,drawing in enumerate(drawing_list):
+    #         list_intermediate_smiles+=structure_to_smiles(drawing, kekule=False)
 
 
     list_svgs=[]
+
     for drawing_list in list_drawings_per_module:
         for index_drawing,drawing in enumerate(drawing_list):
+
+            #drawing=RaichuDrawer(drawing,save_svg_string =True, dont_show=True)
             svg_drawing=drawing.svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
             list_svgs+=[[svg_drawing]]
 
     atoms_for_cyclisation=str(o_atoms_for_cyclisation+ n_atoms_for_cyclisation)
-    return {"svg":svg, "hanging_svg": list_svgs[:-1], "smiles": smiles,  "atomsForCyclisation":atoms_for_cyclisation}
+    return {"svg":svg, "hanging_svg": list_svgs, "smiles": smiles,  "atomsForCyclisation":atoms_for_cyclisation, "intermediate_smiles": list_intermediate_smiles}
