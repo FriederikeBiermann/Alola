@@ -1450,8 +1450,21 @@ function addWildcard(geneMatrix){
 console.log(longDomainArray)
   }
   if (wildcardModule=="terminator_module_nrps"){
-  longDomainArray.push(defaultTEDomain)
+    if (document.getElementById("wildcardE")
+                .checked) {domainArray.push(["E"]);
+               longDomainArray.push(defaultADomain,defaultCDomain,defaultEDomain,defaultPCPDomain,defaultTEDomain);}
+
+    else{    longDomainArray.push(defaultADomain,defaultCDomain,defaultPCPDomain,defaultTEDomain)}
+    if (document.getElementById("wildcardnMT")
+                            .checked) {domainArray.push(["nMT"])}
+  if (document.getElementById("wildcardoMT")
+            .checked) {domainArray.push(["oMT"])}
+    if (document.getElementById("wildcardcMT")
+    .checked) {domainArray.push(["cMT"])}
+
+console.log(longDomainArray)
   }
+
   console.log(longDomainArray)
   if (wildcardModule=="starter_module_pks"){
     longDomainArray.push(defaultATDomain,defaultACPDomain)
@@ -1473,6 +1486,25 @@ console.log(longDomainArray)
     }
 
 else{    longDomainArray.push(defaultATDomain,defaultKSDomain,defaultACPDomain)}
+console.log(longDomainArray)
+    wildcardModule=[nameWildcardModule,wildcardModule,nameToStructure[wildcardSubstrate]]
+  }
+  if (wildcardModule=="terminator_module_pks"){
+    if (document.getElementById("wildcardKR")
+                .checked) {domainArray.push(["KR"]);
+
+    if (document.getElementById("wildcardDH")
+                            .checked) {domainArray.push(["DH"])
+  if (document.getElementById("wildcardER")
+            .checked) {domainArray.push(["ER"])
+          longDomainArray.push(defaultATDomain,defaultKSDomain,defaultKRDomain,defaultDHDomain,defaultERDomain,defaultACPDomain,defaultTEDomain);}
+    else{longDomainArray.push(defaultATDomain,defaultKSDomain,defaultKRDomain,defaultDHDomain,defaultACPDomain,defaultTEDomain);}
+        }
+    else {longDomainArray.push(defaultATDomain,defaultKSDomain,defaultKRDomain,defaultACPDomain,defaultTEDomain);}
+
+    }
+
+else{    longDomainArray.push(defaultATDomain,defaultKSDomain,defaultACPDomain,defaultTEDomain)}
 console.log(longDomainArray)
     wildcardModule=[nameWildcardModule,wildcardModule,nameToStructure[wildcardSubstrate]]
   }
