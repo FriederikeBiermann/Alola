@@ -230,6 +230,7 @@ if (document.getElementById("real-time-button")
 function formatSVG_intermediates(svg) {
     svg = svg.toString()
         .replaceAll("#ffffff", "none")
+        .replaceAll("#ff00ff", "none")
       //  .replaceAll("#000000", "#ffffff")
         .replaceAll("<g transform='translate",
             "<g style='fill: black' transform='translate");
@@ -252,6 +253,27 @@ function formatSVG(svg) {
         .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'",
             "<!-- ACP -->    <g style='fill: transparent'");
     return svg
+}
+function highlight_atom_in_SVG(atom, color){
+  console.log(atom)
+
+  if (atom.length <5){  let links=document.querySelectorAll('a[*|href=\x22'+atom+'\x22]');
+  for (let linkIndex=0; linkIndex<links.length;linkIndex++){
+    let link =links[linkIndex]
+    console.log(link)
+
+      let text= link.childNodes[3]
+      console.log(text)
+      text.setAttribute('style', "fill:"+color)
+  }
+    }
+
+}
+function hover_in_atom(atom){
+  highlight_atom_in_SVG(atom, "#E11839")
+}
+function hover_out_atom(atom){
+  highlight_atom_in_SVG(atom, "black")
 }
 function handleDragEnd(e) {
     this.style.opacity = '1';

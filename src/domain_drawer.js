@@ -294,14 +294,21 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
 
 
                                             let optionContent =
-                                                "<button  onclick='changeSelectedOption(geneMatrix," +
+                                                "<button id="+geneIndex + '_' +moduleIndex+ "_"+
+                                                domainIndex + "_"+optionIndex+" onclick='changeSelectedOption(geneMatrix," +
                                                 geneIndex + ',' +moduleIndex+ ","+
                                                 domainIndex + ",\x22" +
                                                 geneMatrix[geneIndex].modules[
                                                     moduleIndex].domains[
                                                     domainIndex].domainOptions[
                                                     optionIndex] +
-                                                "\x22);'  >" +
+                                                "\x22);'  onmouseenter='hover_in_atom(\x22"+geneMatrix[geneIndex].modules[
+                                                    moduleIndex].domains[
+                                                    domainIndex].domainOptions[
+                                                    optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+geneMatrix[geneIndex].modules[
+                                                        moduleIndex].domains[
+                                                        domainIndex].domainOptions[
+                                                        optionIndex].toString() +"\x22);'>" +
                                                 geneMatrix[geneIndex].modules[
                                                     moduleIndex].domains[
                                                     domainIndex].domainOptions[
@@ -316,7 +323,8 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                     domainIndex].default_option
                                             ) {
                                                 optionContent =
-                                                    "<button style= \x22background-color:light-grey; \x22 onclick='changeSelectedOption(geneMatrix," +
+                                                    "<button id="+geneIndex + '_' +moduleIndex+ "_"+
+                                                    domainIndex + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOption(geneMatrix," +
                                                     geneIndex + ',' +moduleIndex+","+
                                                     domainIndex +
                                                     ",\x22" +
@@ -324,7 +332,13 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                         moduleIndex].domains[
                                                         domainIndex].domainOptions[
                                                         optionIndex] +
-                                                    "\x22);'  >" +
+                                                    "\x22);'   onmouseenter='hover_in_atom(\x22"+geneMatrix[geneIndex].modules[
+                                                        moduleIndex].domains[
+                                                        domainIndex].domainOptions[
+                                                        optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+geneMatrix[geneIndex].modules[
+                                                            moduleIndex].domains[
+                                                            domainIndex].domainOptions[
+                                                            optionIndex].toString() +"\x22);'>" +
                                                     geneMatrix[geneIndex].modules[
                                                         moduleIndex].domains[
                                                         domainIndex].domainOptions[
@@ -333,7 +347,28 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                             }
                                             innerDropdownContent.innerHTML +=
                                                 optionContent
+                                                // let option= geneMatrix[geneIndex].modules[
+                                                //             moduleIndex].domains[
+                                                //             domainIndex].domainOptions[
+                                                //             optionIndex]
+                                                // let optionIndex1 = optionIndex
+                                                // let optionButton= document.getElementById(geneIndex + '_' +moduleIndex+ "_"+domainIndex + "_"+optionIndex1)
+                                                // optionButton.addEventListener(
+                                                //     'mouseenter',
+                                                //     function() { // anonyme Funktion
+                                                //         hover_in_atom(option)
+                                                //     },
+                                                //     false
+                                                // );
+                                                // optionButton.addEventListener(
+                                                //     'mouseleave',
+                                                //     function() { // anonyme Funktion
+                                                //       hover_out_atom(option)
+                                                //     },
+                                                //     false
+                                                // );
                                         }
+
 
                                         break
 
