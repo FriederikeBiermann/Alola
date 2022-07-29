@@ -255,15 +255,14 @@ function formatSVG(svg) {
     return svg
 }
 function highlight_atom_in_SVG(atom, color){
-  console.log(atom)
 
-  if (atom.length <5){  let links=document.querySelectorAll('a[*|href=\x22'+atom+'\x22]');
+  if (atom.toString().includes("_")){  let links=document.querySelectorAll('a[*|href=\x22'+atom+'\x22]');
   for (let linkIndex=0; linkIndex<links.length;linkIndex++){
     let link =links[linkIndex]
-    console.log(link)
+
 
       let text= link.childNodes[3]
-      console.log(text)
+    
       text.setAttribute('style', "fill:"+color)
   }
     }
