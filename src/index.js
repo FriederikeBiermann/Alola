@@ -2,7 +2,7 @@
 regionName = "r1c3"
 let fetching = false
 let cluster_type = "nrpspks"
-let tailoringEnzymes=["p450","P450"]
+let tailoringEnzymes=["p450","P450","methyltransferase"]
 let nameToStructure = {
     "methylmalonylcoa": "CC(C(O)=O)C(S)=O",
     "propionylcoa": "CCC(S)=O",

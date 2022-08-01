@@ -462,7 +462,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
         .attr("width", width + "px");
     Domainer.drawModules(geneMatrix, 20, scale)
     Domainer.drawGenes(geneMatrix, 20, scale)
-  Domainer.drawTailoringEnzymes(cluster,geneMatrix,scale)
+  Domainer.drawTailoringEnzymes(cluster,geneMatrix,height,scale)
     return $(container)
         .find("svg")[0];
 });
@@ -470,7 +470,8 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
     var container = document.getElementById('domain_container')
     let size=50
     let indent=0
-    let color ="blue"
+    let color ="lightgrey"
+    let outline="black"
     var line_svg = SVG(container)
         .size('100%', 90)
         .group();
@@ -629,7 +630,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                 x = points["0"].x
                             }
                             var draw = SVG(innerDropdownButton)
-                                .size(String(size) + "px", 90)
+                                .size(String(size) + "px", height)
                                 .group();
                             var dom = draw.rect(size-2, size-2)
                                 .x(2)
