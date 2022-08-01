@@ -2,6 +2,7 @@
 regionName = "r1c3"
 let fetching = false
 let cluster_type = "nrpspks"
+let tailoringEnzymes=["p450","P450"]
 let nameToStructure = {
     "methylmalonylcoa": "CC(C(O)=O)C(S)=O",
     "propionylcoa": "CCC(S)=O",
@@ -262,7 +263,7 @@ function highlight_atom_in_SVG(atom, color){
 
 
       let text= link.childNodes[3]
-    
+
       text.setAttribute('style', "fill:"+color)
   }
     }
@@ -1029,8 +1030,14 @@ function createGeneMatrix(BGC) {
         else {
             domains = []
         }
+        let orfFunction = findFuctionOrf(BGC["orfs"][geneIndex].description)
+        let tailoringEnzymeStatus=findTailoringEnzymeStatus(orfFunction)
+
         geneMatrix.push({
             "id": BGC["orfs"][geneIndex].locus_tag,
+            "orffunction":orfFunction ,
+            "tailoringEnzymeStatus": tailoringEnzymeStatus[0],
+            "tailoringEnzymeType":tailoringEnzymeStatus[1],
             "position_in_BGC": geneIndex + 1,
             "position": geneIndex + 1,
             "ko": false,
@@ -1043,6 +1050,25 @@ function createGeneMatrix(BGC) {
     }
     addModulesGeneMatrix(geneMatrix)
     return geneMatrix
+}
+function findFuctionOrf(orfDescription){
+let  positionBegin= orfDescription.search("\n \n")+5;
+let  positionEnd=orfDescription.search("Locus tag")-14;
+let  orfFunction=orfDescription.slice(positionBegin,positionEnd);
+return orfFunction
+}
+function findTailoringEnzymeStatus(orfFunction){
+  let tailoringEnzymeStatus=false;
+  for (let tailoringEnzymesIndex =0; tailoringEnzymesIndex< tailoringEnzymes.length; tailoringEnzymesIndex++){
+   let  enzymeName=tailoringEnzymes[tailoringEnzymesIndex]
+  tailoringEnzymeStatus= orfFunction.search(enzymeName)==-1?
+   false:true;
+   if (tailoringEnzymeStatus==true){return [tailoringEnzymeStatus,enzymeName]
+}
+
+  }
+  return [tailoringEnzymeStatus, ""]
+
 }
 // adding modules+ opening the form to do so
 function addModulesGeneMatrix(geneMatrix) {
@@ -1122,6 +1148,9 @@ function addModulesGeneMatrix(geneMatrix) {
     }
     console.log(geneMatrix)
     return geneMatrix;
+}
+function addTailoiringEnzymes(geneMatrix){
+
 }
 function openForm() {
        document.getElementById("popupForm").style.display = "block";
