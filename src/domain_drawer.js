@@ -462,8 +462,192 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
         .attr("width", width + "px");
     Domainer.drawModules(geneMatrix, 20, scale)
     Domainer.drawGenes(geneMatrix, 20, scale)
+  Domainer.drawTailoringEnzymes(cluster,geneMatrix,scale)
     return $(container)
         .find("svg")[0];
+});
+Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
+    var container = document.getElementById('domain_container')
+    let size=50
+    let indent=0
+    let color ="blue"
+    var line_svg = SVG(container)
+        .size('100%', 90)
+        .group();
+
+
+
+                    for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+                      let gene= geneMatrix[geneIndex]
+                      if (gene.tailoringEnzymeStatus==true){console.log("trueee")
+                                            let domainIdentifier="tailoringEnzyme"+ geneMatrix[geneIndex].id
+
+                                      let  points = Domainer.getArrowPoints(
+                                                0,100,
+                                                90, scale)
+                                                // declare color if ko
+                                      console.log("pointstay",points)
+                                            let abbreviation = gene.tailoringEnzymeType
+
+                                        // add all the neccesary domain containers
+                                        var innerContainer = document.createElement(
+                                            'div');
+                                        innerContainer.id =
+                                            "innerdomainContainer" +
+                                            domainIdentifier
+                                        var innerDropdownContainer =
+                                            document.createElement(
+                                                'div');
+                                        innerDropdownContainer.id =
+                                            "innerDropdownContainer" +
+                                            domainIdentifier
+                                        var innerIntermediateContainer =
+                                            document.createElement(
+                                                'div');
+                                        innerIntermediateContainer.id =
+                                            "innerIntermediateContainer" +
+                                            domainIdentifier
+                                        var innerDropdownButton =
+                                            document.createElement(
+                                                'button');
+                                        innerDropdownButton.id =
+                                            "innerDropdownButton" +
+                                            domainIdentifier
+                                        var innerDropdownContent =
+                                            document.createElement(
+                                                'div');
+                                        innerDropdownContent.id =
+                                            "innerDropdownContent" +
+                                            domainIdentifier
+                                        innerContainer.style.width =
+                                            String(size - 10) + "px"
+                                        document.getElementById(
+                                                'domain_container')
+                                            .appendChild(innerContainer);
+                                        document.getElementById(
+                                                'innerdomainContainer' +
+                                                domainIdentifier)
+                                            .setAttribute("class",
+                                                "box");
+                                        document.getElementById(
+                                                'innerdomainContainer' +
+                                                domainIdentifier)
+                                            .appendChild(
+                                                innerDropdownContainer);
+                                        document.getElementById(
+                                                'innerdomainContainer' +
+                                                domainIdentifier)
+                                            .appendChild(
+                                                innerIntermediateContainer
+                                            );
+                                        document.getElementById(
+                                                "innerIntermediateContainer" +
+                                                domainIdentifier)
+                                            .setAttribute("class",
+                                                "intermediateContainer"
+                                            );
+                                        document.getElementById(
+                                                "innerDropdownContainer" +
+                                                domainIdentifier)
+                                            .setAttribute("class",
+                                                "dropdown");
+                                        document.getElementById(
+                                                'innerDropdownContainer' +
+                                                domainIdentifier)
+                                            .appendChild(
+                                                innerDropdownButton);
+                                        document.getElementById(
+                                                "innerDropdownButton" +
+                                                domainIdentifier)
+                                            .setAttribute("class",
+                                                "dropbtn");
+                                        document.getElementById(
+                                                'innerDropdownContainer' +
+                                                domainIdentifier)
+                                            .appendChild(
+                                                innerDropdownContent);
+                                        document.getElementById(
+                                                "innerDropdownContent" +
+                                                domainIdentifier)
+                                            .setAttribute("class",
+                                                "dropdown-content");
+                                        innerDropdownContent.innerHTML =
+                                            ""
+
+                                        for (let optionIndex = 0; optionIndex <
+                                            geneMatrix[geneIndex].options
+                                            .length; optionIndex++) {
+
+
+
+                                            let optionContent =
+                                                "<button id="+geneIndex + '_' +moduleIndex+ "_"+
+                                                domainIndex + "_"+optionIndex+" onclick='changeSelectedOption(geneMatrix," +
+                                                geneIndex + ',' +moduleIndex+ ","+
+                                                domainIndex + ",\x22" +
+                                                  geneMatrix[geneIndex].options[
+                                                    optionIndex] +
+                                                "\x22);'  onmouseenter='hover_in_atom(\x22"+geneMatrix[geneIndex].options[
+                                                    optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+  geneMatrix[geneIndex].options[
+                                                        optionIndex].toString() +"\x22);'>" +
+                                                geneMatrix[geneIndex].options[
+                                                    optionIndex] +
+                                                "</button>";
+                                            //format default option differently
+                                            if (  geneMatrix[geneIndex].options[
+                                                    optionIndex] ==
+                                                  geneMatrix[geneIndex].default_option
+                                            ) {
+                                                optionContent =
+                                                    "<button id="+geneIndex + '_' +moduleIndex+ "_"+
+                                                    domainIndex + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOption(geneMatrix," +
+                                                    geneIndex + ',' +moduleIndex+","+
+                                                    domainIndex +
+                                                    ",\x22" +
+                                                      geneMatrix[geneIndex].options[
+                                                        optionIndex] +
+                                                    "\x22);'   onmouseenter='hover_in_atom(\x22"+ geneMatrix[geneIndex].options[
+                                                        optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+  geneMatrix[geneIndex].options[
+                                                            optionIndex].toString() +"\x22);'>" +
+                                                      geneMatrix[geneIndex].options[
+                                                        optionIndex] +
+                                                    "</button>";
+                                            }
+                                            innerDropdownContent.innerHTML +=
+                                                optionContent
+
+                                        }
+
+
+
+
+                            let x = 0;
+                            if (points["0"].x > points["4"].x) {
+                                x = points["4"].x
+                            }
+                            else {
+                                x = points["0"].x
+                            }
+                            var draw = SVG(innerDropdownButton)
+                                .size(String(size) + "px", 90)
+                                .group();
+                            var dom = draw.rect(size-2, size-2)
+                                .x(2)
+                                .y(height - indent - (size+2))
+                                .rx("200%")
+                                .ry("200%")
+                                .fill(color)
+                                .stroke({
+                                    width: 2, color:outline
+                                });
+                            if (size>25){
+                              var text=draw.text(abbreviation).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
+
+                            dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
+
+                        }}
+
+
 });
 Domainer.drawGenes = (function(geneMatrix, height, scale) {
     document.getElementById('model_gene_container')
