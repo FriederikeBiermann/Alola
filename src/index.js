@@ -291,7 +291,7 @@ function formatSVG(svg) {
             "<!-- ACP -->    <g style='fill: transparent'");
     return svg
 }
-function highlight_atom_in_SVG(atom, color){
+function highlight_atom_in_SVG(atom, color,width){
 
   if (atom.toString().includes("_")){  let links=document.querySelectorAll('a[*|href=\x22'+atom+'\x22]');
   for (let linkIndex=0; linkIndex<links.length;linkIndex++){
@@ -300,16 +300,23 @@ function highlight_atom_in_SVG(atom, color){
 
       let text= link.childNodes[3]
 
-      text.setAttribute('style', "fill:"+color)
+      text.setAttribute('style', "fill:"+color +"; stroke:"+color+"; stroke-width:"+width)
+
   }
     }
 
 }
 function hover_in_atom(atom){
-  highlight_atom_in_SVG(atom, "#E11839")
+  highlight_atom_in_SVG(atom, "#E11839","5px")
 }
 function hover_out_atom(atom){
-  highlight_atom_in_SVG(atom, "black")
+  console.log(atom)
+  if (atom.indexOf("C")>=0){
+    console.log("test")
+    highlight_atom_in_SVG(atom, "none","0")
+  }
+  else{  highlight_atom_in_SVG(atom, "black","0")}
+
 }
 function handleDragEnd(e) {
     this.style.opacity = '1';
