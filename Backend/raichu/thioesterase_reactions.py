@@ -8,6 +8,7 @@ SH_BOND = BondDefiner('recent_elongation', 'SC(C)=O', 0, 1)
 CO_BOND = BondDefiner('recent_elongation', 'CO', 0, 1)
 N_AMINO = GroupDefiner('N_amino', 'CN', 1)
 O_OH = GroupDefiner('O_oh', 'CO', 1)
+C_CH=GroupDefiner("C_Ch","CC",0)
 O_BETAPROPRIOLACTONE = GroupDefiner('o_betapropriolactone', 'SC(CCO)=O', 4)
 
 
@@ -190,6 +191,30 @@ def find_all_o_n_atoms_for_cyclization(chain_intermediate):
     # reaction (distance -S and internal -OH group)
     o_not_to_use = find_o_betapropriolactone(chain_intermediate)
     return o_oh_atoms_filtered, amino_n_atoms_filtered
+def find_all_c_atoms_for_oxidation(chain_intermediate):
+        """Finds all C atoms that can be used for oxidation by p450
+
+         chain_intermediate: PIKAChU Structure object of a polyketide/NRP
+        """
+        # Perform first thioesterase reaction, generating linear polyketide/NRP
+        chain_intermediate.refresh_structure()
+        for atom in chain_intermediate.graph:
+            atom.hybridise()
+        chain_intermediate_copy = chain_intermediate.deepcopy()
+        #RaichuDrawer(thioesterase_linear_product(chain_intermediate_copy))
+
+        # Find OH groups in polyketide/NRP, perform cyclization for each -OH group
+        chain_intermediate_copy = chain_intermediate.deepcopy()
+        chain_intermediate_copy.refresh_structure()
+        chain_intermediate.set_connectivities()
+        chain_intermediate.set_atom_neighbours()
+        c_atoms = find_atoms(C_CH, chain_intermediate_copy)
+        c_atoms_filtered = []
+        for atom in c_atoms:
+            if atom not in c_atoms_filtered and any(neighbour.type == 'H' for neighbour in atom.neighbours):
+                c_atoms_filtered.append(atom)
+
+        return c_atoms_filtered
 
 def thioesterase_all_products(chain_intermediate, out_folder=None):
     """Performs all thioesterase reactions on the input chain_intermediate

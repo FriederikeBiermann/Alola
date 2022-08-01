@@ -582,10 +582,8 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
 
 
                                             let optionContent =
-                                                "<button id="+geneIndex + '_' +moduleIndex+ "_"+
-                                                domainIndex + "_"+optionIndex+" onclick='changeSelectedOption(geneMatrix," +
-                                                geneIndex + ',' +moduleIndex+ ","+
-                                                domainIndex + ",\x22" +
+                                                "<button id="+geneIndex + "_"+optionIndex+" onclick='changeSelectedOptionTailoring(geneMatrix," +
+                                                geneIndex + ",\x22" +
                                                   geneMatrix[geneIndex].options[
                                                     optionIndex] +
                                                 "\x22);'  onmouseenter='hover_in_atom(\x22"+geneMatrix[geneIndex].options[
@@ -600,10 +598,8 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                   geneMatrix[geneIndex].default_option
                                             ) {
                                                 optionContent =
-                                                    "<button id="+geneIndex + '_' +moduleIndex+ "_"+
-                                                    domainIndex + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOption(geneMatrix," +
-                                                    geneIndex + ',' +moduleIndex+","+
-                                                    domainIndex +
+                                                    "<button id="+geneIndex  + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
+                                                    geneIndex +
                                                     ",\x22" +
                                                       geneMatrix[geneIndex].options[
                                                         optionIndex] +

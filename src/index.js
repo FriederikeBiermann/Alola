@@ -57,7 +57,9 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
             regionName, geneMatrix)[1]
     }
     console.log(data)
-    let data_string = formatInputRaichuKS(data, cyclization)
+    // add tailoring reactions
+    let tailoringArray=findTailoringReactions(geneMatrix)
+    let data_string = formatInputRaichuKS(data, cyclization,tailoringArray)
     let url = "http://127.0.0.1:8000/api/alola?antismash_input=";
     let list_hanging_svg = []
     let container = document.getElementById("structure_container")
@@ -70,6 +72,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
         .then((data) => {
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
+            console.log("fetched")
             //add options for cyclization
 
             for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
@@ -82,13 +85,24 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
                             .replaceAll("]", "")
                             .replaceAll(" ", "")
                             .split(",");
-                        console.log(domain.domainOptions);
+
                         domain.domainOptions.push("Linear product");
-                        console.log(domain.domainOptions)
-                        domain.default_option = ["Linear product"]
+
+                        domain.default_option = ["Linear product"];
                     }
                 }
-            }
+                  if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+                    if (geneMatrix[geneIndex].tailoringEnzymeType=="p450"||geneMatrix[geneIndex].tailoringEnzymeType=="P450"){
+                      geneMatrix[geneIndex].options=data.c_atoms_for_oxidation.replaceAll(
+                              "[", "")
+                          .replaceAll("]", "")
+                          .replaceAll(" ", "")
+                          .split(",");
+
+                      geneMatrix[geneIndex].options.push("No oxidation")
+                      geneMatrix[geneIndex].default_option=("No oxidation")
+                  }
+            }}
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(data.svg);
             document.getElementById("save_svg")
@@ -134,7 +148,29 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
         }
     })
 }
+function findTailoringReactions(geneMatrix){
+    tailoringArray=[]
+      for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+        if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+          let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType.toLowerCase()
+          let enzymeArray;
+          if (tailoringArray.length>0){
 
+            for ( const enzyme of tailoringArray ){
+
+                enzymeArray = enzyme.find( item => item.name == enzymeType )
+                if ( enzymeArray ) break
+        }}
+        if (!enzymeArray){ tailoringArray.push([enzymeType,geneMatrix[geneIndex].selected_option]);
+
+        }
+        else { enzymeArray[1].push(geneMatrix[geneIndex].selected_option);
+
+        }
+      }
+}
+return tailoringArray
+}
 function removeAllInstances(arr, item) {
     for (var i = arr.length; i--;) {
         if (arr[i] === item) arr.splice(i, 1);
@@ -485,7 +521,23 @@ function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, op
 
     }
 
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+    if (document.querySelector('input[type=checkbox]')
+        .checked) {
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+    }
+}
+function changeSelectedOptionTailoring(geneMatrix, geneIndex, option){
+  // adds or removes selected option to gene matrix, more than one option can be possible)
+ if (geneMatrix[geneIndex].selected_option.includes(option)){
+var optionArray= geneMatrix[geneIndex].selected_option.filter((item) => item!== option);
+geneMatrix[geneIndex].selected_option=optionArray
+ }
+ else{  geneMatrix[geneIndex].selected_option.push(option)}
+ if (document.querySelector('input[type=checkbox]')
+     .checked) {
+     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+ }
+
 }
 
 function displayTextInGeneExplorer(geneId) {
@@ -495,8 +547,8 @@ function displayTextInGeneExplorer(geneId) {
         }
 }
 
-function formatInputRaichuKS(data, cyclization) {
-    data = [data, cyclization]
+function formatInputRaichuKS(data, cyclization, tailoringArray) {
+    data = [data, cyclization, tailoringArray]
     string_data = JSON.stringify(data);
     trimmed_data = string_data.replaceAll(',"PKS_PP"', "")
         .replaceAll(',"C"', "")
@@ -1149,9 +1201,7 @@ function addModulesGeneMatrix(geneMatrix) {
     console.log(geneMatrix)
     return geneMatrix;
 }
-function addTailoiringEnzymes(geneMatrix){
 
-}
 function openForm() {
        document.getElementById("popupForm").style.display = "block";
      }
