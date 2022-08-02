@@ -638,7 +638,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                     width: 2, color:outline
                                 });
                             if (size>25){
-                              var text=draw.text(abbreviation).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
+                              var text=draw.text(abbreviation.replaceAll("methyltransferase","MT")).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
 
                             dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
 

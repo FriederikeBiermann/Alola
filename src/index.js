@@ -2,7 +2,7 @@
 regionName = "r1c3"
 let fetching = false
 let cluster_type = "nrpspks"
-let tailoringEnzymes=["p450","P450","methyltransferase"]
+let tailoringEnzymes=["p450"," methyltransferase","n-methyltransferase","c-methyltransferase","o-methyltransferase"]
 let nameToStructure = {
     "methylmalonylcoa": "CC(C(O)=O)C(S)=O",
     "propionylcoa": "CCC(S)=O",
@@ -1162,7 +1162,7 @@ function createGeneMatrix(BGC) {
 function findFuctionOrf(orfDescription){
 let  positionBegin= orfDescription.search("\n \n")+5;
 let  positionEnd=orfDescription.search("Locus tag")-14;
-let  orfFunction=orfDescription.slice(positionBegin,positionEnd);
+let  orfFunction=orfDescription.slice(positionBegin,positionEnd).toLowerCase();
 return orfFunction
 }
 function findTailoringEnzymeStatus(orfFunction){
