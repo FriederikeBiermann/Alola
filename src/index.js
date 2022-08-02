@@ -132,7 +132,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
                 geneMatrix[geneIndex].options.push("No methylation")
                 geneMatrix[geneIndex].default_option=("No methylation")
             }
-            if (geneMatrix[geneIndex].tailoringEnzymeType=="methyltransferase"){
+            if (geneMatrix[geneIndex].tailoringEnzymeType==" methyltransferase"){
               geneMatrix[geneIndex].options=data.o_atoms_for_methylation.replaceAll(
                       "[", "")
                   .replaceAll("]", "")

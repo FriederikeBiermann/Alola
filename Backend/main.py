@@ -49,7 +49,7 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
                         except :
                             target_atom_string=target_atom_string.split('_')[0]+"_"+str(int(target_atom_string.split('_')[1])+1)
                             print("new",target_atom_string)
-        if "methylation" in reaction[0]:
+        if "methyltransferase" in reaction[0]:
             for target_atom_string in reaction[1]:
                 for atom in intermediate.atoms.values():
 
