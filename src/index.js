@@ -102,6 +102,55 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
                       geneMatrix[geneIndex].options.push("No oxidation")
                       geneMatrix[geneIndex].default_option=("No oxidation")
                   }
+                  if (geneMatrix[geneIndex].tailoringEnzymeType=="n-methyltransferase"){
+                    geneMatrix[geneIndex].options=data.n_atoms_for_methylation.replaceAll(
+                            "[", "")
+                        .replaceAll("]", "")
+                        .replaceAll(" ", "")
+                        .split(",");
+
+                    geneMatrix[geneIndex].options.push("No methylation")
+                    geneMatrix[geneIndex].default_option=("No methylation")
+                }
+                if (geneMatrix[geneIndex].tailoringEnzymeType=="c-methyltransferase"){
+                  geneMatrix[geneIndex].options=data.c_atoms_for_oxidation.replaceAll(
+                          "[", "")
+                      .replaceAll("]", "")
+                      .replaceAll(" ", "")
+                      .split(",");
+
+                  geneMatrix[geneIndex].options.push("No methylation")
+                  geneMatrix[geneIndex].default_option=("No methylation")
+              }
+              if (geneMatrix[geneIndex].tailoringEnzymeType=="o-methyltransferase"){
+                geneMatrix[geneIndex].options=data.o_atoms_for_methylation.replaceAll(
+                        "[", "")
+                    .replaceAll("]", "")
+                    .replaceAll(" ", "")
+                    .split(",");
+
+                geneMatrix[geneIndex].options.push("No methylation")
+                geneMatrix[geneIndex].default_option=("No methylation")
+            }
+            if (geneMatrix[geneIndex].tailoringEnzymeType=="methyltransferase"){
+              geneMatrix[geneIndex].options=data.o_atoms_for_methylation.replaceAll(
+                      "[", "")
+                  .replaceAll("]", "")
+                  .replaceAll(" ", "")
+                  .split(",");
+              geneMatrix[geneIndex].options=geneMatrix[geneIndex].options.concat(data.c_atoms_for_oxidation.replaceAll(
+                      "[", "")
+                  .replaceAll("]", "")
+                  .replaceAll(" ", "")
+                  .split(","));
+              geneMatrix[geneIndex].options=geneMatrix[geneIndex].options.concat(data.n_atoms_for_methylation.replaceAll(
+                          "[", "")
+                      .replaceAll("]", "")
+                      .replaceAll(" ", "")
+                      .split(","));
+              geneMatrix[geneIndex].options.push("No methylation")
+              geneMatrix[geneIndex].default_option=("No methylation")
+          }
             }}
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(data.svg);
