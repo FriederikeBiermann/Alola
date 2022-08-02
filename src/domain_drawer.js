@@ -649,7 +649,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
 Domainer.drawGenes = (function(geneMatrix, height, scale) {
     document.getElementById('model_gene_container')
         .innerHTML = ""
-
+        height=40
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size=0
         if (geneMatrix[geneIndex].hasOwnProperty("modules")) {
@@ -662,7 +662,7 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
 
             }
         }
-        console.log("siize",gene_size,geneIndex)
+
         if (gene_size >0){
           var innerModelGeneContainer = document.createElement('div');
           innerModelGeneContainer.id = "innerModelGeneContainer" + "_" +
@@ -672,14 +672,16 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
           var draw = SVG(innerModelGeneContainer)
               .size(String(gene_size) + "px", height)
               .group();
-              console.log(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, height, scale)))
-              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 20, scale)))
+
+              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 40, scale)))
               .fill("white")
+
               .stroke("#2B2B2B")
               .stroke({
                   width: 1
               })
-
+                if (gene_size<50){var text=draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size/2).y(height/2-7)}
+                else{var text=draw.text(geneMatrix[geneIndex].id).x(gene_size/2).y(height/2-7)}
 
 
           pol.node.id = "module_gene_" + geneIndex
