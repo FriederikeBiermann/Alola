@@ -677,4 +677,3 @@ def draw_structures(drawer_objects, fig, ax, height):
                          horizontalalignment=horizontal_alignment,
                          verticalalignment='center',
                          color=atom.draw.colour, zorder = 1)
-

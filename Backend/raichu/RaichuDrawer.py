@@ -9,7 +9,7 @@ from raichu.find_central_chain import find_central_chain
 
 class RaichuDrawer(Drawer):
     def __init__(self, structure, options=None, save_png=None, dont_show=False,
-                 coords_only=False, dpi=100, save_svg = None, save_svg_string =True):
+                 coords_only=False, dpi=100, save_svg = None, save_svg_string =True, mark_c=True):
         self.dont_show = dont_show
         self.dpi = dpi
         if options == None:
@@ -22,6 +22,10 @@ class RaichuDrawer(Drawer):
             # Check if filename is valid
             assert save_png.endswith('.png')
             self.save_png = save_png
+        if mark_c == False:
+            self.mark_c = False
+        if mark_c == True:
+            self.mark_c = True
         if save_svg_string == None:
             self.save_svg_string = None
         if save_svg == None:
@@ -313,8 +317,11 @@ class RaichuDrawer(Drawer):
             if atom.type == '*' and not atom.annotations.unknown_index:
                 atom.annotations.unknown_index = 1
         for atom in self.structure.graph:
-            if atom.type != 'C' and atom.draw.positioned:
-                text = atom.type
+            color="black"
+            if atom.draw.positioned:
+                if atom.type != 'C':
+                        text = atom.type
+
                 if atom.annotations.domain_type:
                     text = atom.annotations.domain_type
                 horizontal_alignment = 'center'
@@ -358,12 +365,17 @@ class RaichuDrawer(Drawer):
                                 text = f'{atom.type}H'
                                 horizontal_alignment = 'left'
                                 atom.draw.position.x -= 3
+                if atom.type == 'C' and self.mark_c==True:
+
+                        color="magenta"
+                if atom.type == 'C' and self.mark_c==False:
+                        continue
 
                 plt.text(atom.draw.position.x, atom.draw.position.y,
-                         text,
+                         text,url=str(atom),
                          horizontalalignment=horizontal_alignment,
                          verticalalignment='center',
-                         color=atom.draw.colour)
+                         color=color)
         if self.save_svg_string:
                 svg_string = StringIO()
                 plt.savefig(svg_string, format='svg')

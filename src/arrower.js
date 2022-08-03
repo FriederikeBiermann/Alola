@@ -26,6 +26,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
       if (orf.hasOwnProperty("color")) {
         orf_color = orf.color;
       }
+      console.log("Arrow",(Arrower.toPointString(Arrower.getArrowPoints(orf, cluster, height, scale))))
       var pol = draw.polygon(Arrower.toPointString(Arrower.getArrowPoints(orf, cluster, height, scale)))
 
                   .fill(orf_color)
@@ -57,6 +58,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
           if (domain.hasOwnProperty("color")) {
             color = domain.color;
           }
+          console.log("arrow",Arrower.toPointString(Arrower.getArrowPoints(0,gene_size, height, scale)))
           var dom = draw.polygon(Arrower.toPointString(Arrower.getDomainPoints(domain, orf, cluster, height, scale)))
                       .fill(color)
                       .stroke({width: 0})
@@ -116,6 +118,8 @@ Arrower.getOrfPoints = (function(orf, cluster, height, scale){
       ((height / 2) + (height / 3))
       : ((height / 2) + (height / 3)) + (height / 5)
   ];
+  console.log("orf_sra", orf.strand,"x",x_points)
+  console.log("y",y_points)
 
   return { x: x_points, y: y_points };
 

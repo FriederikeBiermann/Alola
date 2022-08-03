@@ -3,4 +3,4 @@ ATTRIBUTES = ['in_central_chain', 'KR_ep_target', 'KR_red_target',
               'ER_target', 'domain_type', 'unknown_index', 'chiral_c_ep',
               'n_atom_nmeth']
 ALL_PKS_ELONGATION_UNITS = ['malonylcoa', 'methylmalonylcoa',
-                            'methoxymalonylacp', 'ethylmalonylcoa', 'pk']
+                            'methoxymalonylacp', 'ethylmalonylcoa', 'pk',"propionylcoa"]

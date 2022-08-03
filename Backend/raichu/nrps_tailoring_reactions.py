@@ -31,7 +31,34 @@ def nrps_epimerization(nrp):
 
     return nrp
 
+def hydroxylation(target_atom, structure):
 
+
+    hydroxyl_group = read_smiles('o')
+    hydroxyl_group.add_attributes(ATTRIBUTES, boolean=True)
+    oxygen = hydroxyl_group.atoms[0]
+    hydrogen_1 = hydroxyl_group.atoms[1]
+    bond_1 = oxygen.get_bond(hydrogen_1)
+    print(target_atom,target_atom.neighbours)
+    hydrogen_2 = target_atom.get_neighbour('H')
+    if not hydrogen_2:
+        raise Exception("Can't oxidate this atom!")
+
+    bond_2 = target_atom.get_bond(hydrogen_2)
+
+    hydroxylated_structure = combine_structures([structure, hydroxyl_group])
+
+    hydroxylated_structure.break_bond(bond_1)
+    hydroxylated_structure.break_bond(bond_2)
+
+    hydroxylated_structure.make_bond(oxygen, target_atom, hydroxylated_structure.find_next_bond_nr())
+    hydroxylated_structure.make_bond(hydrogen_1, hydrogen_2,hydroxylated_structure.find_next_bond_nr())
+
+    structures = hydroxylated_structure.split_disconnected_structures()
+
+    for s in structures:
+        if oxygen.nr in s.atoms:
+            return s
 def methylation(target_atom, structure):
 
     methyl_group = read_smiles('C')
@@ -90,8 +117,3 @@ if __name__ == "__main__":
     target_atom = s.atoms[4]
     structure = methylation(target_atom, s)
     draw_structure(structure)
-
-
-
-
-

@@ -13,6 +13,8 @@ button{
   background-color:white;
   color: black;
   padding: 12px 15px;
+  border-radius:3px;
+
 }
 
 a:visited {
@@ -46,10 +48,10 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   border-radius:6px;
   padding-left: 5%;
   padding-right: -8%;
-  padding-bottom: -20%;
   width: 90%;
   text-align: center;
   height: 390px;
+  overflow:auto;
 }
 #BGC_explorer{
 
@@ -64,15 +66,25 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
  #Protein_explorer{
    border-radius:6px;
+   margin-bottom: 10px;
 background-color:#1F1F1F;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 height: 305px;
 width: 75%;}
-#Domain_explorer{
+.Domain_explorer{
   border-radius:6px;
+  margin-bottom: 10px;
 background-color:#1F1F1F;
+float: left;
+
+box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+height: 550px;
+width: 75%;}
+.Domain_explorer_while_saving{
+  border-radius:6px;
+  margin-bottom: 10px;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
@@ -92,17 +104,17 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 width: 24.5%;
 background-color:#1F1F1F;
 float: right;
-height: 505px;
-
+height: 515px;
+overflow-x: auto;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
-#start_button {
-
+.start_button {
+    margin:3px;
   float: right;
   color: #2B2B2B;
   text-align: center;
   padding: 2px 2px;
   text-decoration: none;
-  font-size: 19px;
+  font-size: 17px;
 }
 #fake_button {
 
@@ -114,19 +126,23 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
   padding-top:1px;
   font-size: 19px;
 }
-#start_button:hover {
+.start_button:hover {
   background-color: #E11839;
   color: black;
-}
-#save_button {
 
-  text-align: center;
-  padding: 2px 2px;
-  text-decoration: none;
-  font-size: 19px;
-  margin-bottom: :40px;
 }
-#save_button:hover {
+.save_button {
+  margin:3px;
+float: right;
+color: #2B2B2B;
+text-align: center;
+padding: 2px 5px;
+text-decoration: none;
+font-size: 17px;
+  margin-bottom: :40px;
+    margin-right:20px;
+}
+.save_button:hover {
   background-color: #E11839;
   color: black;
 
@@ -200,37 +216,64 @@ input:checked + .slider:before {
 .slider.round:before {
  border-radius: 50%;
 }
-#save_svg {
+.save_button a {
   float: right;
   color: #2B2B2B;
   background-color=white;
   text-align: center;
   padding: 2px 2px;
+
   text-decoration: none;
-  font-size: 19px;
+
 }
 #smiles_container{
   font-size: 12px;
 }
-#final_drawing{
+.final_drawing{
   max-height: 100%;
+  max-width:100%;
 }
-#intermediate_drawing{
+.intermediate_drawing{
+position:relative;
 
-max-width: 17000%;
-align: top;
+max-width: 100%;
+height: auto;
+
+bottom:15px;
+
+left:9%;
+
+}
+.outerDomainExplorer{
+  border-radius: 10px;
+  overflow: auto;
+  max-height:400px;
+  overflow-x: auto;
+  background-color:white;
+  max-width: 95%;
+  margin-top: 1%;
+
+}
+.outerDomainExplorer_while_saving{
+  background-color:white;
+  overflow: auto;
+  height : 1000px;
+  display : inline-block;
+  overflow-x: auto;
+  overflow:visible;
+
 }
  .container {
 
    padding: 1%;
-   width: 95%;
+   width: 99%;
    overflow-x: auto;
    white-space: nowrap;
 }
 .contentWithPadding{
  margin:10px;
  width:100%;
- overflow: auto;;
+
 
 }
 .contentWithPaddingOverflow{
@@ -243,21 +286,20 @@ align: top;
  grid-template-columns: repeat(100, 1fr);
  gap: 12px;
  padding: 1.5%;
- width: 95%;
+ width: 99%;
  overflow-x: auto;
  white-space: nowrap;
  height: 170px;
  font-size: medium;
 }
-.outerDomainExplorer{
-   overflow-x: auto;
-}
+
+
 .domain-container {
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap: 10px;
- padding: 0%;
- width: 97%;
+ padding: 0px;
+ width: 99%;
 
  white-space: nowrap;
  height: 450px;
@@ -267,7 +309,7 @@ align: top;
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap:3px;
- padding: 1%;
+ padding: 10px;
  width: 97%;
 
  white-space: nowrap;
@@ -276,9 +318,10 @@ align: top;
 }
 .intermediateContainer{
   position: relative;
-  right: 53px;
-  bottom: 30px;
-  width: 100%;
+  right: 67px;
+
+
+  height:800px;
 }
 .box {
  cursor: move;
@@ -296,18 +339,24 @@ border: none;
 .dropdown {
 position: relative;
 display: inline-block;
+
 }
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
+opacity: 0.9;
 display: none;
 position: absolute;
 background-color: white;
 box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
 z-index: 1;
-min-width: 100px
+min-width: 150px;
+margin-top:-20px;
 }
-
+svg text{
+  text-anchor: middle;
+  dominant-baseline: bottom;
+}
 /* Links inside the dropdown */
 .dropdown-content button {
   min-width: 100px
@@ -315,7 +364,7 @@ color: black;
 padding: 3px 3px;
 text-decoration: none;
 display: block;
-background-color: white;
+width:100%;
  text-transform: capitalize;
 }
 .dropdown-content button:active {
@@ -372,7 +421,7 @@ background-color: #E11839;
     .formContainer .btn {
       padding: 12px 20px;
       border: none;
-      background-color: #8ebf42;
+      background-color: #1F1F1F;
       color: #fff;
       cursor: pointer;
       width: 100%;
@@ -380,7 +429,7 @@ background-color: #E11839;
       opacity: 0.8;
     }
     .formContainer .cancel {
-      background-color: #cc0000;
+      background-color: #E11839;
     }
     .formContainer .btn:hover,
     .openButton:hover {

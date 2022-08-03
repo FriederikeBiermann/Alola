@@ -8,16 +8,18 @@
  <body>
    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.7.1/svg.min.js"></script>
  	<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<script type="text/javascript" src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.js"></script>
  	<script type="text/javascript" src="./arrower.js"></script>
    	<script type="text/javascript" src="./protein_drawer.js"></script>
     <!-- <script type="text/javascript" src="./regions-test.js"></script> -->
 <div id="menu_bar">
   <!-- Rounded switch -->
 
-       <button  type="button" id= "start_button" onclick="openForm()"><strong>Add Module</strong></button>
+       <button  type="button" class= "start_button" onclick="openForm()"><strong>Add Module</strong></button>
 
-  <button type="button" id= "start_button" onclick="fetchFromRaichu(details_data, regionName,geneMatrix)"> <strong>Refresh structures</strong></button>
-  <button type="button" id= "start_button" onclick="location.reload()"><strong> Reset view</strong></button>
+  <button type="button" class= "start_button" onclick="fetchFromRaichu(details_data, regionName,geneMatrix)"> <strong>Refresh structures</strong></button>
+  <button type="button" class= "start_button" onclick="location.reload()"><strong> Reset view</strong></button>
 
   <label class="switch">
 
@@ -40,10 +42,10 @@
 
 </div>
   <div class= "contentWithPadding">
-<div class= "contentWithPaddingOverflow">
+
 <div id= "gene_container">
 
-</div>
+
 </div></div></div>
 
 </div>
@@ -52,21 +54,30 @@
 </div>
 </div>
 </div>
+    <div id="Structure_explorer">   <div class= "contentWithPadding"> <div class= "heading-container"> Structure explorer</div>
+    <div id= "structure_container"> </div>
 
-<div id="Structure_explorer">   <div class= "contentWithPadding"> <div class= "heading-container"> Structure explorer</div>
-<div id= "structure_container"> </div>
-<div id= "smiles_container"> </div>
-<button type="button" id= "save_button" > <a id= "save_svg"> Download SVG</a></button>
+    <div> </div>
+    <button type="button" class="save_button" id= "save_button" > <a id= "save_svg"><strong> Download SVG</strong></a></button>
+    <button type="button" class="save_button" id= "Zoom_out_button" onclick="zoom_in()"><a><strong>Zoom in</strong></a></button>
+    <button type="button" class="save_button" id= "Zoom_in_button" onclick="zoom_out()"><a><strong>Zoom out</strong></a></button>
+<div id= "smiles_container"></div>
+    </div>
+    </div>
+    <div id="Domain_explorer" class="Domain_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Biosynthetic model</div>
+    <div id="outerDomainExplorer" class="outerDomainExplorer">
 
-</div>
-</div>
-<div id="Domain_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Biosynthetic Model</div>
-<div id=outerDomainExplorer>
-<div class="module-container" id= "module_container"> </div>
-<div class="domain-container" id= "domain_container"> </div>
-</div>
-</div>
-</div>
+    <div class="module-container" id= "model_gene_container"> </div>
+      <div class="module-container" id= "module_container"> </div>
+    <div class="domain-container" id= "domain_container"> </div>
+    </div>
+    <button type="button" class=save_button id= "save_biosynthetic_model_button" onclick="PrintDiv()"><strong>Save biosynthetic model</strong></button>
+<div id= "smiles_container_intermediates"></div>
+    </div>
+    </div>
+
+
+
 
 
    <div class="loginPopup">
@@ -76,6 +87,40 @@
          <button type="button" class="btn" onclick="openNRPSForm();closeForm()">NRPS</button>
          <button type="button" class="btn" onclick="openPKSForm();closeForm()">PKS</button>
          <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+       </form>
+     </div>
+   </div>
+   <div class="loginPopup">
+     <div class="formPopup" id="popupFormPKS">
+       <form class="formContainer">
+         <div class="dropdown">
+         <button type="button" class="dropbtn" >Substrate</button>
+         <div class="dropdown-content">
+           <button type ="button" onclick="setWildcardSubstrate('malonylcoa')">Malonylcoa </button>
+ <button type ="button" onclick="setWildcardSubstrate('methylmalonylcoa')">Methylmalonylcoa </button>
+ <button type ="button" onclick="setWildcardSubstrate('ethylmalonylcoa')">Ethylmalonylcoa</button>
+ <button type ="button" onclick="setWildcardSubstrate('methoxymalonylacp')">Methoxymalonylacp</button>
+         </div>
+       </div>
+       <div class="dropdown">
+       <button type="button" class="dropbtn" >Module Type</button>
+       <div class="dropdown-content">
+
+<button type ="button" onclick="setWildcardModule('starter_module_pks')">Starter Module </button>
+<button type ="button" onclick="setWildcardModule('elongation_module_pks')">Elongation Module </button>
+<button type ="button" onclick="setWildcardModule('terminator_module_pks')">Terminator Module </button>
+
+       </div>
+     </div>
+
+<input type="checkbox" id="wildcardKR" name="wildcardKR" value="true">
+<label for="wildcardKR">  	Ketoreductase domain</label><br>
+<input type="checkbox" id="wildcardDH" name="wildcardDH" value="true">
+<label for="wildcardDH"> Dehydratase domain</label><br>
+<input type="checkbox" id="wildcardER" name="wildcardER" value="true">
+<label for="wildcardER"> Enoylreductase domain</label><br>
+         <button type="button" class="btn" onclick="addWildcard(geneMatrix);closePKSForm()">Submit</button>
+         <button type="button" class="btn cancel" onclick="closePKSForm()">Close</button>
        </form>
      </div>
    </div>
@@ -147,8 +192,8 @@
 <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 
-<script type="text/javascript" src="./regions_nrps.js"></script>
-
+<script type="text/javascript" src="./regions.js"></script>
+<script type="text/javascript" src="./default_domains.js"></script>
 <script type="text/javascript" src="./protein_drawer.js"></script>
 <script type="text/javascript" src="./domain_drawer.js"></script>
 <script type="text/javascript" src="./option_creator.js"></script>
