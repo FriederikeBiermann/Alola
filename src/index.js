@@ -165,7 +165,8 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
             smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('"+data.smiles+"')>"+"<strong> Copy SMILES to clipboard </strong>"+"</button>";
             acpList = obtainACPList(geneMatrix);
             let intermediates = data.hanging_svg;
-            return [geneMatrix, intermediates]
+
+            return [geneMatrix, intermediates,data]
         })
         .then((data) => {
             let geneMatrix = data[0]
@@ -175,9 +176,29 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
             updateDomains(geneMatrix);
             updateProteins(geneMatrix);
             addArrowClick(geneMatrix)
-            return data[1]
+
+            return [data[1],data[2]];
+
         })
-    .then((intermediates) => {
+    .then((data2) => {
+        intermediates=data2[0]
+        data=data2[1]
+        if ((typeof(document.getElementById("innerIntermediateContainer_tailoring_enzymes")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") != null)){
+          let tailoringEnzymes_intermediate=document.getElementById("innerIntermediateContainer_tailoring_enzymes");
+          tailoringEnzymes_intermediate.setAttribute("style","width:150px")
+          console.log("svg",data.structure_for_tailoring)
+          tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(data.structure_for_tailoring);
+          let intermediate_svg=document.getElementById("intermediate_drawing")
+          let bbox = intermediate_svg.getBBox();
+          console.log(bbox)
+          let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
+
+          intermediate_svg.setAttribute("viewBox",viewBox)
+          intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
+          intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
+
+
+        }
         for (let intermediateIndex = 0; intermediateIndex <
             intermediates.length; intermediateIndex++) {
             intermediate = intermediates[intermediateIndex]
@@ -194,7 +215,9 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
             intermediate_svg.setAttribute("viewBox",viewBox)
             intermediate_svg.setAttribute('id', "intermediate_drawing"+intermediateIndex);
             intermediate_svg.setAttribute('class', "intermediate_drawing");
+
         }
+
     })
 }
 function findTailoringReactions(geneMatrix){

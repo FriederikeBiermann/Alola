@@ -435,3 +435,13 @@ background-color: #E11839;
     .openButton:hover {
       opacity: 1;
     }
+.intermediate_drawing_tailoring{
+  position:relative;
+
+  max-width: 100%;
+  height: auto;
+
+  bottom:0px;
+
+  left:50%;
+}
