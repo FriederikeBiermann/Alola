@@ -693,6 +693,34 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
         }
 
     }
+    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+        let gene_size=50
+
+        if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+          var innerModelGeneContainer = document.createElement('div');
+          innerModelGeneContainer.id = "innerModelGeneContainer" + "_" +
+              geneMatrix[geneIndex].id
+          document.getElementById('model_gene_container')
+              .appendChild(innerModelGeneContainer);
+          var draw = SVG(innerModelGeneContainer)
+              .size(String(gene_size) + "px", height)
+              .group();
+
+              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 40, scale)))
+              .fill("white")
+
+              .stroke("#2B2B2B")
+              .stroke({
+                  width: 1
+              })
+                if (gene_size<70){var text=draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size/2).y(height/2-7)}
+                else{var text=draw.text(geneMatrix[geneIndex].id).x(gene_size/2).y(height/2-7)}
+
+
+          pol.node.id = "module_gene_" + geneIndex
+        }
+
+    }
 });
 Domainer.drawModules = (function(geneMatrix, height, scale) {
     document.getElementById('module_container')
