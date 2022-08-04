@@ -284,6 +284,11 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                 "dropdown-content");
                                         innerDropdownContent.innerHTML =
                                             ""
+                                            geneMatrix[geneIndex].modules[
+                                                moduleIndex].domains[
+                                                domainIndex].domainOptions = geneMatrix[geneIndex].modules[
+                                                    moduleIndex].domains[
+                                                    domainIndex].domainOptions.sort((a, b) => a.localeCompare(b));
 
                                         for (let optionIndex = 0; optionIndex <
                                             geneMatrix[geneIndex].modules[
