@@ -723,12 +723,15 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
     }
 });
 Domainer.drawModules = (function(geneMatrix, height, scale) {
+   height=30
     document.getElementById('module_container')
         .innerHTML = ""
+    let completeModuleIndex=0
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].hasOwnProperty("modules")) {
             for (let moduleIndex = 0; moduleIndex < geneMatrix[
                     geneIndex].modules.length; moduleIndex++) {
+
                 var innerModuleContainer = document.createElement('div');
                 innerModuleContainer.id = "innerModuleContainer" + "_" +
                     geneMatrix[geneIndex].id + "_" + moduleIndex
@@ -741,13 +744,18 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
                     .group();
                 var dom = draw.rect(size, height)
                     .x(0)
-                    .y(height)
+                    .y(0)
                     .fill("#2B2B2B")
                     .stroke("#2B2B2B")
                     .stroke({
-                        width: 20
+                        width: 2
                     })
                 dom.node.id = "module_" + moduleIndex
+                if (size>=70){
+                  completeModuleIndex++
+                  var text_module=draw.text("Module " + completeModuleIndex).x(size/2).y(height/2-7)
+                  .fill("white")
+                }
 
             }
         }
