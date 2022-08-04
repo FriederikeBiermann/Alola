@@ -444,7 +444,7 @@ function obtainACPList(geneMatrix) {
             0) {
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
-                if (geneMatrix[geneIndex].domains[domainIndex].ko == false) {
+                if (geneMatrix[geneIndex].domains[domainIndex].ko == false||geneMatrix[geneIndex].domains[domainIndex].ko=="None") {
                     if ((geneMatrix[geneIndex].domains[domainIndex].type.includes(
                             "ACP") || geneMatrix[geneIndex].domains[domainIndex]
                         .type.includes("PP")|| geneMatrix[geneIndex].domains[domainIndex]
@@ -481,7 +481,7 @@ function updateDomains(geneMatrix) {
 }
 
 function setKoStatus(geneIndex, domainIndex, geneMatrix) {
-    if (geneMatrix[geneIndex].domains[domainIndex].ko === false) {
+    if (geneMatrix[geneIndex].domains[domainIndex].ko === false||geneMatrix[geneIndex].domains[domainIndex].ko=="") {
         geneMatrix[geneIndex].domains[domainIndex].ko = true;
     }
     else {
@@ -945,7 +945,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                             let domain = orf.domains[domainIndex];
                             let starterACP = ""
                             if (geneMatrix[geneIndex].domains[domainIndex].ko ==
-                                false) {
+                                false||geneMatrix[geneIndex].domains[domainIndex].ko =="None") {
                                 // checks if domain in module
                                 if (startModule >= domain.start && domain.start >=
                                     endModule || endModule >= domain.start &&
@@ -960,9 +960,11 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                             if (domain.predictions.length != 0) {
                                                 let domainActivity = domain.predictions[
                                                     0][1]
-                                                if (domainActivity ==
-                                                    "inactive") {
-                                                    continue
+                                              if (domainActivity ==
+                                                    "inactive"&&(geneMatrix[geneIndex].domains[domainIndex].ko ==
+                                                        true||geneMatrix[geneIndex].domains[domainIndex].ko =="None")) {
+                                                      geneMatrix[geneIndex].domains[domainIndex].ko =true;
+                                                    continue;
                                                 }
                                                 if (domain.predictions[1][1] !=
                                                     "(unknown)") {
@@ -1132,7 +1134,7 @@ function createGeneMatrix(BGC) {
                 domains[domainIndex]["domainOptions"] = [];
                 domains[domainIndex]["default_option"] = [];
                 domains[domainIndex]["selected_option"] = [];
-                domains[domainIndex]["ko"] = false;
+                domains[domainIndex]["ko"] = "None";
             }
         }
         else {
