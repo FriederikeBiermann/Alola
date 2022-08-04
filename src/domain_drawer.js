@@ -288,7 +288,9 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                 moduleIndex].domains[
                                                 domainIndex].domainOptions = geneMatrix[geneIndex].modules[
                                                     moduleIndex].domains[
-                                                    domainIndex].domainOptions.sort((a, b) => a.localeCompare(b));
+                                                    domainIndex].domainOptions.sort((a, b) => a.localeCompare(b)).sort(function (a, b) {
+  return a.length - b.length;
+});
 
                                         for (let optionIndex = 0; optionIndex <
                                             geneMatrix[geneIndex].modules[
@@ -634,8 +636,8 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                 .size(String(size) + "px", height)
                                 .group();
                             var dom = draw.rect(size-2, size-2)
-                                .x(2)
-                                .y(height - indent - (size+2))
+                                .x(1)
+                                .y(height - indent - (size+3))
                                 .rx("200%")
                                 .ry("200%")
                                 .fill(color)
@@ -760,6 +762,29 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
             }
         }
     }
+    //tailoring enzyme
+    var innerModuleContainer = document.createElement('div');
+    innerModuleContainer.id = "innerModuleContainer" + "_" +
+        "tailoringEnzyme"
+    document.getElementById('module_container')
+        .appendChild(innerModuleContainer);
+    size = 300
+    var draw = SVG(innerModuleContainer)
+        .size(String(size) + "px", height)
+        .group();
+    var dom = draw.rect(size, height)
+        .x(0)
+        .y(0)
+        .fill("white")
+        .stroke("white")
+        .stroke({
+            width: 2
+        })
+    dom.node.id = "module_" + "tailoringEnzyme"
+
+      var text_module=draw.text("Tailoring enzymes:").x(size/3.5).y(height/2-7)
+      .fill("black")
+      .stroke({width:1})
 });
 Domainer.getOrfPoints = (function(start,end,  height, scale) {
   let strand=1
