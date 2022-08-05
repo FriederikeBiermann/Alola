@@ -221,6 +221,12 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
     })
 }
 function findTailoringReactions(geneMatrix){
+  /**
+ * Format an array of all tailoring Arrays of a gene cluster -> just formats all genes already annotated as tailoring enzymes.
+ * @fires   fetchFromRaichu
+ * @input geneMatrix
+ * @output array of all tayloring enzymes and their corresponding genes
+ */
     tailoringArray=[]
       for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
@@ -244,12 +250,27 @@ function findTailoringReactions(geneMatrix){
 return tailoringArray
 }
 function removeAllInstances(arr, item) {
+  /**
+ * Removes all instances of an item in array.
+
+ * @input array and item that needs to be removed
+ * @yield cleaned up array
+ */
     for (var i = arr.length; i--;) {
         if (arr[i] === item) arr.splice(i, 1);
     }
 }
 
 function handleDragStart(e) {
+  /**
+ * Handles the drag start.
+ * Makes Item transparent, makes it movable.
+
+ * @input element thats grabbed
+ * @fire fires when element is grabbed
+ */
+
+
     this.style.opacity = '0.4';
     dragSrcEl = this;
     e.dataTransfer.effectAllowed = 'move';
@@ -257,6 +278,10 @@ function handleDragStart(e) {
 }
 
 function handleDragOver(e) {
+  /**
+ * Handles the drag /drop
+
+ */
     if (e.preventDefault) {
         e.preventDefault();
     }
@@ -264,15 +289,27 @@ function handleDragOver(e) {
     return false;
 }
 
-function handleDragEnter(e) {
+function handleDragEnter(e) {  /**
+ * Handles the drag /drop
+
+ */
     this.classList.add('over');
 }
 
 function handleDragLeave(e) {
+  /**
+ * Handles the drag /drop
+
+ */
     this.classList.remove('over');
 }
 
 function handleDrop(e) {
+  /**
+ * Handles the drag /drop
+* after the drop, the position of the genes are exchanged in the geneMAtrix, then all visualisations are done again. That way, not only the visualisation is changed, but also everything
+* requested from the backend. If the "Real time calculation button is checked, it will be automatically fetched from Raichu again."
+ */
     if (e.stopPropagation) {
         e.stopPropagation(); // stops the browser from redirecting.
     }
@@ -337,9 +374,15 @@ if (document.getElementById("real-time-button")
 }
 
 function formatSVG_intermediates(svg) {
+  /**
+ * formats the SVGs of spaghetti diagram to look nice + remove the ACP
+
+ */
     svg = svg.toString()
         .replaceAll("#ffffff", "none")
         .replaceAll("#ff00ff", "none")
+        .replaceAll("#ff0000", "#000000")
+        .replaceAll("#00ff00", "#000000")
       //  .replaceAll("#000000", "#ffffff")
         .replaceAll("<g transform='translate",
             "<g style='fill: black' transform='translate");
@@ -351,9 +394,14 @@ function formatSVG_intermediates(svg) {
     return svg
 }
 function formatSVG(svg) {
+  /**
+ * formats the SVG to look nice
+
+ */
     svg = svg.toString()
         .replaceAll("#ffffff", "none")
         .replaceAll("#000000", "#ffffff")
+        .replaceAll("stroke: #ffffff", "stroke: #ffffff; fill: #ffffff")
         .replaceAll("<g transform='translate",
             "<g style='fill: #ffffff' transform='translate");
     svg = svg.toString()
