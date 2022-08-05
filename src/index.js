@@ -518,6 +518,10 @@ function removeSpaceBetweenProteins(BGC) {
 }
 
 function updateProteins(geneMatrix) {
+  /**
+ * update Proteins to geneMAtrix to remove for instance ko genes and then calls the proteiner to draw the proteins
+ *@input BGC,geneMatrix
+ */
     let proteinsForDisplay = JSON.parse(JSON.stringify(BGC));
     delete proteinsForDisplay.orfs
     proteinsForDisplay.orfs = []
@@ -535,8 +539,12 @@ function updateProteins(geneMatrix) {
             removeSpaceBetweenProteins(proteinsForDisplay))));
     addDragDrop();
 }
-
 function obtainACPList(geneMatrix) {
+  /**
+ * Get list of ACP/PCP to attach the intermediates to it.
+ *@input geneMatrix
+ * @output acp List
+ */
     let acpList = []
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
