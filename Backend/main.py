@@ -66,10 +66,14 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     o_atoms_for_cyclisation=str(o_atoms_for_cyclisation)
     n_atoms_for_cyclisation=str(n_atoms_for_cyclisation)
     c_atoms_for_oxidation=str(find_all_c_atoms_for_oxidation(intermediate))
-    raichu_svg=RaichuDrawer(intermediate,dont_show=True).svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
-    # perform thioesterase reaction
+    linear_product=intermediate
+
+    raichu_svg=RaichuDrawer(linear_product,dont_show=True).svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
+    #perform thioesterase reaction
     if cyclization=="None":
+        print (intermediate)
         intermediate = thioesterase_linear_product(intermediate)
+        print (intermediate)
 
     else:
          intermediate =  thioesterase_circular_product(intermediate, cyclization)

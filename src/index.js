@@ -1751,6 +1751,12 @@ displayGenes(BGC)
 // fuctions to save svg of biosynthetic model
 function PrintDiv()
 {
+  /**
+ * Download biosynthetic_model
+ * Transforms biosynthetic_model div to remove hidden areas, transforms it to canvas, and download a png of it
+
+ * @fires   save_biosynthetic_model_button
+ */
 (async () => {
   let div= document.getElementById("outerDomainExplorer")
   let outer_div=document.getElementById("Domain_explorer")
@@ -1768,6 +1774,14 @@ function PrintDiv()
 }
 
 function downloadURI(uri, name) {
+  /**
+ * Creates a link to download the png
+ *
+
+ * @fires   PrintDIV
+
+
+ */
     var link = document.createElement("a");
 
     link.download = name;
@@ -1775,11 +1789,17 @@ function downloadURI(uri, name) {
     document.body.appendChild(link);
     link.click();
     //after creating link you should delete dynamic link
-    //clearDynamicLink(link);
+    clearDynamicLink(link);
 }
 //functions for zooming
 
 function zoom_in(){
+  /**
+ * Zooms into structure in structure explorer.
+ *
+ * gets actual dimensions, removes the automatic sizing and then resizes the svg.
+ * @fires   onclick-> zoom button
+ */
   let drawing=document.getElementById("final_drawing")
   let drawingStyles=window.getComputedStyle(drawing)
   let height = drawingStyles.height;
@@ -1796,6 +1816,15 @@ function zoom_in(){
 
 }
 function zoom_out(){
+  /**
+ * Zooms out of structure in structure explorer.
+ *
+ * gets actual dimensions, removes the automatic sizing and then resizes the svg.
+
+ * @fires   onclick-> zoom button
+
+
+ */
   let drawing=document.getElementById("final_drawing")
   let drawingStyles=window.getComputedStyle(drawing)
   let height = drawingStyles.height;
