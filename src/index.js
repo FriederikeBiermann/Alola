@@ -372,6 +372,32 @@ if (document.getElementById("real-time-button")
     }
     return false;
 }
+function handleDragEnd(e) {
+  /**
+ * Handles the drag /drop
+
+ */
+    this.style.opacity = '1';
+    items.forEach(function(item) {
+        item.classList.remove('over');
+    });
+}
+
+function addDragDrop() {
+  /**
+ * Handles the drag /drop
+
+ */
+    items = document.querySelectorAll('.protein-container .box');
+    items.forEach(function(item) {
+        item.addEventListener('dragstart', handleDragStart, false);
+        item.addEventListener('dragenter', handleDragEnter, false);
+        item.addEventListener('dragover', handleDragOver, false);
+        item.addEventListener('dragleave', handleDragLeave, false);
+        item.addEventListener('drop', handleDrop, false);
+        item.addEventListener('dragend', handleDragEnd, false);
+    });
+}
 
 function formatSVG_intermediates(svg) {
   /**
@@ -412,6 +438,11 @@ function formatSVG(svg) {
     return svg
 }
 function highlight_atom_in_SVG(atom, color,width){
+  /**
+ * finds atom in svg, if selected option is atom selector and highlights it with given colouring
+ * @parameters color: desired color, atom: atom selector, width: width for stroke to highlight even more
+* @fire hoverin/out_atom
+ */
 
   if (atom.toString().includes("_")){  let links=document.querySelectorAll('a[*|href=\x22'+atom+'\x22]');
   for (let linkIndex=0; linkIndex<links.length;linkIndex++){
@@ -427,37 +458,31 @@ function highlight_atom_in_SVG(atom, color,width){
 
 }
 function hover_in_atom(atom){
-  highlight_atom_in_SVG(atom, "#E11839","5px")
+  /**
+ * highlights atom in svg red
+
+ */
+  highlight_atom_in_SVG(atom, "#E11839","5")
 }
 function hover_out_atom(atom){
-  console.log(atom)
+  /**
+ * mkaes c atoms transparent, other atoms back to black.
+
+ */
+
   if (atom.indexOf("C")>=0){
-    console.log("test")
     highlight_atom_in_SVG(atom, "none","0")
   }
   else{  highlight_atom_in_SVG(atom, "black","0")}
 
 }
-function handleDragEnd(e) {
-    this.style.opacity = '1';
-    items.forEach(function(item) {
-        item.classList.remove('over');
-    });
-}
-
-function addDragDrop() {
-    items = document.querySelectorAll('.protein-container .box');
-    items.forEach(function(item) {
-        item.addEventListener('dragstart', handleDragStart, false);
-        item.addEventListener('dragenter', handleDragEnter, false);
-        item.addEventListener('dragover', handleDragOver, false);
-        item.addEventListener('dragleave', handleDragLeave, false);
-        item.addEventListener('drop', handleDrop, false);
-        item.addEventListener('dragend', handleDragEnd, false);
-    });
-}
-
 function removePaddingBGC(BGC) {
+  /**
+ * removes the space before the first orf and after last orf
+ *@input BGC
+ *@output BGC withour padding
+
+ */
     let BGC_with_padding = JSON.parse(JSON.stringify(BGC));
     if (BGC_with_padding.orfs.length != 0) {
         if (BGC_with_padding.orfs[0].start != 0) {
@@ -473,6 +498,12 @@ function removePaddingBGC(BGC) {
 }
 
 function removeSpaceBetweenProteins(BGC) {
+  /**
+ * removes the space between orfs
+ *@input BGC
+ *@output BGC withour padding
+
+ */
     let margin = 100;
     let BGC_without_space = JSON.parse(JSON.stringify(BGC));
     for (let orfIndex = 0; orfIndex < BGC_without_space.orfs.length; orfIndex++) {
@@ -481,10 +512,7 @@ function removeSpaceBetweenProteins(BGC) {
         BGC_without_space.orfs[orfIndex].start = 0
         BGC_without_space.orfs[orfIndex].end = BGC_without_space.orfs[orfIndex]
             .start + orf_length
-            // if (orfIndex==0){BGC_without_space.orfs[orfIndex].start=0;
-            // BGC_without_space.orfs[orfIndex].end=BGC_without_space.orfs[orfIndex].start+orf_length}
-            // if (orfIndex!=0){BGC_without_space.orfs[orfIndex].start=BGC_without_space.orfs[orfIndex-1].end + margin
-            // BGC_without_space.orfs[orfIndex].end=BGC_without_space.orfs[orfIndex].start+ margin+ orf_length}
+
     }
     return BGC_without_space;
 }
