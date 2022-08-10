@@ -593,6 +593,7 @@ function updateDomains(geneMatrix) {
 
 function setKoStatus(geneIndex, domainIndex, geneMatrix) {
   /**
+  * Knocks out domains.
  * @fires clickondomain
  *@input geneIndex, domainIndex, geneMatrix -> gene matrix+ indices
  *@yield changes status in gene matrix + if the real time calculation is checked also fetch from raichu to update structures
@@ -610,6 +611,12 @@ function setKoStatus(geneIndex, domainIndex, geneMatrix) {
 }
 
 function setDisplayedStatus(id, geneMatrix) {
+  /**
+  * knocks out genes.
+ * @fires clickongene
+ *@input id of gene, gene matrix
+ *@yield changes status in gene matrix + if the real time calculation is checked also fetch from raichu to update structures
+ */
     id.slice(-11, -1);
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].id === id) {
@@ -626,6 +633,12 @@ function setDisplayedStatus(id, geneMatrix) {
 }
 
 function selectRegion(recordData, regionName) {
+  /**
+  * Select the index of region from name
+ * @fires fetchFromRaichu
+ *@input name of region
+ *@output index of region
+ */
     for (let region_index = 0; region_index < recordData[0].regions.length; region_index++) {
         if (recordData[0].regions[region_index].anchor == regionName) {
             return region_index
@@ -634,6 +647,12 @@ function selectRegion(recordData, regionName) {
 }
 
 function changeColor(arrowId) {
+  /**
+  * Change color of an arrow.
+ * @fires hoverArrow
+ *@input arrowID
+ *@yield other color of arrow
+ */
     const arrow = document.querySelector(arrowId);
     if (arrow.getAttribute("fill") == "#E11838") {
         arrow.setAttribute('fill', '#ffffff');
@@ -644,6 +663,12 @@ function changeColor(arrowId) {
 }
 
 function changeDomainColor(domain, domainId) {
+  /**
+  * Change color of domain.
+ * @fires domainArrow
+ *@input domain, domainId -> the domain is needed to change the color back to right domain
+ *@yield other color of arrow
+ */
     const domainObject = document.querySelector(domainId);
     if (domainObject.getAttribute("fill") == "#E11839") {
         if (domain.hasOwnProperty("type")) {
@@ -665,6 +690,12 @@ function changeDomainColor(domain, domainId) {
 }
 
 function changeProteinColorON(ProteinId, geneIndex) {
+  /**
+  * Change color of protein.
+ * @fires arrowclick
+ *@input ProteinId, geneIndex -> find the protein svg as well as corresponding gene
+ *@yield other color of protein
+ */
     if (geneMatrix[geneIndex].displayed === true) {
         const arrow = document.querySelector(ProteinId);
         arrow.setAttribute('fill', "#E11839");
@@ -672,6 +703,12 @@ function changeProteinColorON(ProteinId, geneIndex) {
 }
 
 function changeProteinColorOFF(ProteinId, geneIndex) {
+  /**
+  * Change color of protein.
+ * @fires arrowclick
+ *@input ProteinId, geneIndex -> find the protein svg as well as corresponding gene
+ *@yield other color of protein
+ */
     if (geneMatrix[geneIndex].displayed === true) {
         const arrow = document.querySelector(ProteinId);
         arrow.setAttribute('fill', '#ffffff');
@@ -679,6 +716,12 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 }
 
 function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, option) {
+  /**
+  * Change the option in geneMatrix.
+ * @fires clickondomaindropdown
+ *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
+ *@yield Selected option correct+ cyclization option correct.
+ */
   geneMatrix[geneIndex].modules[
           moduleIndex].domains[
           domainIndex].selected_option = option
@@ -699,7 +742,12 @@ function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, op
     }
 }
 function changeSelectedOptionTailoring(geneMatrix, geneIndex, option){
-  // adds or removes selected option to gene matrix, more than one option can be possible)
+  /**
+  * Change the option in geneMatrix -> more than one option can be selected
+ * @fires clickondomaindropdown
+ *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
+ *@yield Selected option correct+ cyclization option correct.
+ */e)
  if (geneMatrix[geneIndex].selected_option.includes(option)){
 var optionArray= geneMatrix[geneIndex].selected_option.filter((item) => item!== option);
 geneMatrix[geneIndex].selected_option=optionArray
