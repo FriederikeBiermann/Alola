@@ -9,8 +9,6 @@ let nameToStructure = {
     "malonylcoa": "OC(=O)CC(S)=O",
     'methoxymalonylacp':"SC(=O)C(C(=O)O)OC)O",
     'ethylmalonylcoa':"CC(CC(O)=O)C(S)=O",
-
-
 }
 let aminoacids = {
     "arg": "arginine",
@@ -41,7 +39,14 @@ let cyclization = "None"
 let wildcardSubstrate="glycine"
 let wildcardModule="elongation_module_nrps"
 let nameWildcardModule="wildcardModule"
-function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { //fetching svg an displaying it
+function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
+  /**
+ *Transforms and transfers all needed data through the api to the backend (raichu) and handles the output.
+ * @fires   refresh_structure or if real time calculation is enabled every time the input data is altered
+ * @input details_data: input from regions.js file,, regionName: "e.g. r1c3 -> region and cluster number", geneMatrix : THE collection on data of the different genes, cluster_type: type of cluster for extraction from gene name
+ * @yield Adds all SVGs  of intermediates+ final structure+ tailoring enzyme structure + adds all different options for regiospecific things + redraws everything to produce right containers
+ */
+  //
     let data = ""
     let starterACP = ""
     if (cluster_type == "pks" || cluster_type == "nrpspks") {
@@ -165,7 +170,6 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
             smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('"+data.smiles+"')>"+"<strong> Copy SMILES to clipboard </strong>"+"</button>";
             acpList = obtainACPList(geneMatrix);
             let intermediates = data.hanging_svg;
-
             return [geneMatrix, intermediates,data]
         })
         .then((data) => {
@@ -176,9 +180,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
             updateDomains(geneMatrix);
             updateProteins(geneMatrix);
             addArrowClick(geneMatrix)
-
             return [data[1],data[2]];
-
         })
     .then((data2) => {
         intermediates=data2[0]
@@ -196,8 +198,6 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) { /
           intermediate_svg.setAttribute("viewBox",viewBox)
           intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
           intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
-
-
         }
         for (let intermediateIndex = 0; intermediateIndex <
             intermediates.length; intermediateIndex++) {
@@ -568,6 +568,10 @@ function obtainACPList(geneMatrix) {
 }
 // only display proteins with domains in domain explorer
 function updateDomains(geneMatrix) {
+  /**
+ * update Proteins to geneMAtrix to remove for instance ko genes and paint ko domains red and then calls the domainer to draw the domains
+ *@input BGC,geneMatrix
+ */
     let domainsForDisplay = JSON.parse(JSON.stringify(BGC));
     delete domainsForDisplay.orfs
     domainsForDisplay.orfs = []
@@ -588,6 +592,11 @@ function updateDomains(geneMatrix) {
 }
 
 function setKoStatus(geneIndex, domainIndex, geneMatrix) {
+  /**
+ * @fires clickondomain
+ *@input geneIndex, domainIndex, geneMatrix -> gene matrix+ indices
+ *@yield changes status in gene matrix + if the real time calculation is checked also fetch from raichu to update structures
+ */
     if (geneMatrix[geneIndex].domains[domainIndex].ko === false||geneMatrix[geneIndex].domains[domainIndex].ko=="") {
         geneMatrix[geneIndex].domains[domainIndex].ko = true;
     }
@@ -741,6 +750,8 @@ function formatInputRaichuKS(data, cyclization, tailoringArray) {
         .replaceAll('"T"', "")
         .replaceAll('"",','')
         .replaceAll('""','')
+        .replaceAll("[,","[")
+        .replaceAll(",]","]")
 
 
     console.log(trimmed_data)
