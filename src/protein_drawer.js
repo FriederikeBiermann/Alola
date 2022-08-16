@@ -48,6 +48,9 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
             if (orf.hasOwnProperty("color")) {
                 orf_color = orf.color;
             }
+            if (orf.hasOwnProperty("type")) {
+              orf_color = type_colors[orf.type]
+            }
             var innerContainer = document.createElement('div');
             innerContainer.id = "innerProteinContainer" + orf.locus_tag
             var innerDropdownContainer = document.createElement('div');
