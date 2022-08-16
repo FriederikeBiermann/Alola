@@ -2,6 +2,7 @@
 //Colour dicts to match antiSMASH domain colouring
 colour_fill_dict = {
     'ACP': '#81bef7',
+    "PKS_PP":'#81bef7',
     'PKS_AT': '#f78181',
     'PKS_KS(Modular-KS)': '#81f781',
     'PKS_KR': '#80f680',
@@ -17,7 +18,8 @@ colour_fill_dict = {
     'nMT':'#dadada'
 }
 colour_outline_dict = {
-    'PKS_ACP': '#3d79d6',
+    'ACP': '#3d79d6',
+    'PKS_PP': '#3d79d6',
     'PKS_AT': '#df5d5d',
     'PKS_KS': '#5fc65f',
     'PKS_KS(Modular-KS)': '#5fc65f',
@@ -148,6 +150,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                 domainIndex].type.includes(
                                                 "PCP")) {
                                             size = 25;
+
                                         }
                                         else {
                                             abbreviation = domain.abbreviation
@@ -354,26 +357,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                             }
                                             innerDropdownContent.innerHTML +=
                                                 optionContent
-                                                // let option= geneMatrix[geneIndex].modules[
-                                                //             moduleIndex].domains[
-                                                //             domainIndex].domainOptions[
-                                                //             optionIndex]
-                                                // let optionIndex1 = optionIndex
-                                                // let optionButton= document.getElementById(geneIndex + '_' +moduleIndex+ "_"+domainIndex + "_"+optionIndex1)
-                                                // optionButton.addEventListener(
-                                                //     'mouseenter',
-                                                //     function() { // anonyme Funktion
-                                                //         hover_in_atom(option)
-                                                //     },
-                                                //     false
-                                                // );
-                                                // optionButton.addEventListener(
-                                                //     'mouseleave',
-                                                //     function() { // anonyme Funktion
-                                                //       hover_out_atom(option)
-                                                //     },
-                                                //     false
-                                                // );
+
                                         }
 
 
