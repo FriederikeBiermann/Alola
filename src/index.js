@@ -38,7 +38,7 @@ var dragSrcEl = null;
 let cyclization = "None"
 let wildcardSubstrate="glycine"
 let wildcardModule="elongation_module_nrps"
-let nameWildcardModule="wildcardModule"
+let nameWildcardModule="Custom_gene_"
 
 function removeAllInstances(arr, item) {
   /**

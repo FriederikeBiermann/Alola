@@ -331,7 +331,8 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                     optionIndex] ==
                                                 geneMatrix[geneIndex].domains[
                                                     domainIndex].default_option
-                                            ) {
+                                            ) { console.log("default",geneMatrix[geneIndex].domains[
+                                                domainIndex].default_option)
                                                 optionContent =
                                                     "<button id="+geneIndex + '_' +moduleIndex+ "_"+
                                                     domainIndex + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOption(geneMatrix," +
