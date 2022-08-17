@@ -33,8 +33,7 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     tailoringReactions=ast.literal_eval(antismash_input)[2]
     # get last intermediate
     intermediate=cluster_to_structure(antismash_input_transformed)
-    if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
-                    intermediate=attach_to_domain_nrp(intermediate, 'PCP')
+
     # find cyclisation sites
     for reaction in tailoringReactions:
         if reaction[0]=="p450":
@@ -66,8 +65,9 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     o_atoms_for_cyclisation=str(o_atoms_for_cyclisation)
     n_atoms_for_cyclisation=str(n_atoms_for_cyclisation)
     c_atoms_for_oxidation=str(find_all_c_atoms_for_oxidation(intermediate))
-    linear_product=intermediate
-
+    linear_product= intermediate
+    if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
+                        intermediate=attach_to_domain_nrp(intermediate, 'PCP')
     raichu_svg=RaichuDrawer(linear_product,dont_show=True).svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
     #perform thioesterase reaction
     if cyclization=="None":

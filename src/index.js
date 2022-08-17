@@ -3,6 +3,7 @@ regionName = "r1c3"
 let fetching = false
 let cluster_type = "nrpspks"
 let tailoringEnzymes=["p450"," methyltransferase","n-methyltransferase","c-methyltransferase","o-methyltransferase"]
+
 let nameToStructure = {
     "methylmalonylcoa": "CC(C(O)=O)C(S)=O",
     "propionylcoa": "CCC(S)=O",
@@ -40,6 +41,20 @@ let wildcardSubstrate="glycine"
 let wildcardModule="elongation_module_nrps"
 let nameWildcardModule="Custom_gene_"
 
+function addStringToArray(string,array){
+  /**
+ * Adds a string in front of every instance of the array
+
+ * @input array and string that need to be attached
+ * @yield new array
+ */
+
+
+ let new_array=array.map(function(value, index, array){
+   return string+value;
+ });
+ return new_array
+}
 function removeAllInstances(arr, item) {
   /**
  * Removes all instances of an item in array.
@@ -665,11 +680,11 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
                         geneIndex].domains.length; domainIndex++) {
                     let domain = geneMatrix[geneIndex].domains[domainIndex]
                     if (domain.abbreviation == "TE") {
-                        domain.domainOptions = data.atomsForCyclisation.replaceAll(
+                        domain.domainOptions = addStringToArray("Cyclization at ",data.atomsForCyclisation.replaceAll(
                                 "[", "")
                             .replaceAll("]", "")
                             .replaceAll(" ", "")
-                            .split(",");
+                            .split(","));
 
                         domain.domainOptions.push("Linear product");
 
@@ -678,41 +693,41 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
                 }
                   if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
                     if (geneMatrix[geneIndex].tailoringEnzymeType=="p450"||geneMatrix[geneIndex].tailoringEnzymeType=="P450"){
-                      geneMatrix[geneIndex].options=data.c_atoms_for_oxidation.replaceAll(
+                      geneMatrix[geneIndex].options=addStringToArray("Hydroxylation at ",data.c_atoms_for_oxidation.replaceAll(
                               "[", "")
                           .replaceAll("]", "")
                           .replaceAll(" ", "")
-                          .split(",");
+                          .split(","));
 
                       geneMatrix[geneIndex].options.push("No oxidation")
                       geneMatrix[geneIndex].default_option=("No oxidation")
                   }
                   if (geneMatrix[geneIndex].tailoringEnzymeType=="n-methyltransferase"){
-                    geneMatrix[geneIndex].options=data.n_atoms_for_methylation.replaceAll(
+                    geneMatrix[geneIndex].options=addStringToArray("Methylation at ",data.n_atoms_for_methylation.replaceAll(
                             "[", "")
                         .replaceAll("]", "")
                         .replaceAll(" ", "")
-                        .split(",");
+                        .split(","));
 
                     geneMatrix[geneIndex].options.push("No methylation")
                     geneMatrix[geneIndex].default_option=("No methylation")
                 }
                 if (geneMatrix[geneIndex].tailoringEnzymeType=="c-methyltransferase"){
-                  geneMatrix[geneIndex].options=data.c_atoms_for_oxidation.replaceAll(
+                  geneMatrix[geneIndex].options=addStringToArray("Methylation at ",data.c_atoms_for_oxidation.replaceAll(
                           "[", "")
                       .replaceAll("]", "")
                       .replaceAll(" ", "")
-                      .split(",");
+                      .split(","));
 
                   geneMatrix[geneIndex].options.push("No methylation")
                   geneMatrix[geneIndex].default_option=("No methylation")
               }
               if (geneMatrix[geneIndex].tailoringEnzymeType=="o-methyltransferase"){
-                geneMatrix[geneIndex].options=data.o_atoms_for_methylation.replaceAll(
+                geneMatrix[geneIndex].options=addStringToArray("Methylation at ",data.o_atoms_for_methylation.replaceAll(
                         "[", "")
                     .replaceAll("]", "")
                     .replaceAll(" ", "")
-                    .split(",");
+                    .split(","));
 
                 geneMatrix[geneIndex].options.push("No methylation")
                 geneMatrix[geneIndex].default_option=("No methylation")
@@ -728,11 +743,11 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
                   .replaceAll("]", "")
                   .replaceAll(" ", "")
                   .split(","));
-              geneMatrix[geneIndex].options=geneMatrix[geneIndex].options.concat(data.n_atoms_for_methylation.replaceAll(
+              geneMatrix[geneIndex].options=addStringToArray("Methylation at ",geneMatrix[geneIndex].options.concat(data.n_atoms_for_methylation.replaceAll(
                           "[", "")
                       .replaceAll("]", "")
                       .replaceAll(" ", "")
-                      .split(","));
+                      .split(",")));
               geneMatrix[geneIndex].options.push("No methylation")
               geneMatrix[geneIndex].default_option=("No methylation")
           }
@@ -1477,6 +1492,7 @@ function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, op
  *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
  *@yield Selected option correct+ cyclization option correct.
  */
+ console.log("option",option)
   geneMatrix[geneIndex].modules[
           moduleIndex].domains[
           domainIndex].selected_option = option

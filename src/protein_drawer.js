@@ -87,7 +87,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                         let optionContent =
                             "<button  onclick='changeSelectedpProteinOption(geneMatrix," +
                             geneIndex + ",\x22" + geneMatrix[geneIndex]
-                            .options[optionIndex] + "\x22);'  >" +
+                            .options[optionIndex].split(" ")[-1] + "\x22);'  >" +
                             geneMatrix[geneIndex].options[optionIndex] +
                             "</button>";
                         innerDropdownContent.innerHTML += optionContent
