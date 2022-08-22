@@ -1,7 +1,7 @@
 
 regionName = "r1c3"
 let fetching = false
-let cluster_type = "nrps"
+let cluster_type = "nrpspks"
 let tailoringEnzymes=["p450"," methyltransferase","n-methyltransferase","c-methyltransferase","o-methyltransferase"]
 
 let nameToStructure = {
@@ -1520,11 +1520,15 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, option){
  *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
  *@yield Selected option correct+ cyclization option correct.
  */
+ console.log(geneIndex  + "_"+option)
+ let button= document.getElementById(geneIndex  + "_"+option)
  if (geneMatrix[geneIndex].selected_option.includes(option)){
+   button.setAttribute("style", "background-color: white")
 var optionArray= geneMatrix[geneIndex].selected_option.filter((item) => item!== option);
-geneMatrix[geneIndex].selected_option=optionArray
+geneMatrix[geneIndex].selected_option=optionArray;
  }
- else{  geneMatrix[geneIndex].selected_option.push(option)}
+ else{  geneMatrix[geneIndex].selected_option.push(option);
+ button.setAttribute("style", "background-color: #E11839")}
  if (document.querySelector('input[type=checkbox]')
      .checked) {
      fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)

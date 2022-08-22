@@ -578,7 +578,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                             console.log("options",option, short_option )
 
                                             let optionContent =
-                                                "<button id="+geneIndex + "_"+optionIndex+" onclick='changeSelectedOptionTailoring(geneMatrix," +
+                                                "<button id="+geneIndex + "_"+short_option+" onclick='changeSelectedOptionTailoring(geneMatrix," +
                                                 geneIndex + ",\x22" +
                                                   short_option +
                                                 "\x22);'  onmouseenter='hover_in_atom(\x22"+short_option +"\x22);' onmouseout='hover_out_atom(\x22"+  short_option +"\x22);'>" +
@@ -590,7 +590,21 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                   geneMatrix[geneIndex].default_option
                                             ) {
                                                 optionContent =
-                                                    "<button id="+geneIndex  + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
+                                                    "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
+                                                    geneIndex +
+                                                    ",\x22" +
+                                                      short_option+
+                                                    "\x22);'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
+                                                      option +
+                                                    "</button>";
+                                            }
+                                            //format active option differently
+                                            console.log("selected_option",geneMatrix[geneIndex].selected_option,short_option,toString(geneMatrix[geneIndex].selected_option).includes(short_option))
+                                            
+                                            if (  toString(geneMatrix[geneIndex].selected_option).includes(short_option)
+                                            ) {
+                                                optionContent =
+                                                    "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:#E11839; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
                                                     geneIndex +
                                                     ",\x22" +
                                                       short_option+
