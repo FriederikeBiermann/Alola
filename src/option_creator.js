@@ -10,7 +10,7 @@ function createOptions(geneMatrix){
         domain.default_option=domain.function.slice(3)
       }
       else{domain.default_option="undetermined stereochemisty"}
-      domain.domainOptions=['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+      domain.domainOptions=['Stereoselectivity: A1', 'Stereoselectivity: A2', 'Stereoselectivity: B1', 'Stereoselectivity: B2', 'Stereoselectivity: C1', 'Stereoselectivity: C2']
 
     }
 

@@ -61,7 +61,7 @@ background-color:#1F1F1F
 margin-bottom: 10px;
 float: left;
 width:75%;
-height: 200px;
+height: 175px;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
  #Protein_explorer{
@@ -71,7 +71,7 @@ background-color:#1F1F1F;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-height: 305px;
+height: 200px;
 width: 75%;}
 .Domain_explorer{
   border-radius:6px;
@@ -80,7 +80,7 @@ background-color:#1F1F1F;
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-height: 550px;
+height: 680px;
 width: 75%;}
 .Domain_explorer_while_saving{
   border-radius:6px;
@@ -88,7 +88,7 @@ width: 75%;}
 float: left;
 
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
-height: 550px;
+height: 680px;
 width: 75%;}
  #Structure_explorer{
    border-radius:6px;
@@ -247,10 +247,10 @@ left:9%;
 .outerDomainExplorer{
   border-radius: 10px;
   overflow: auto;
-  max-height:400px;
+  max-height:550px;
   overflow-x: auto;
   background-color:white;
-  max-width: 95%;
+  max-width: 99%;
   margin-top: 1%;
 
 }
@@ -285,11 +285,11 @@ left:9%;
  display: grid;
  grid-template-columns: repeat(100, 1fr);
  gap: 12px;
- padding: 1.5%;
+ padding: 0.5%;
  width: 99%;
  overflow-x: auto;
  white-space: nowrap;
- height: 170px;
+ height: 120px;
  font-size: medium;
 }
 
@@ -302,7 +302,7 @@ left:9%;
  width: 99%;
 
  white-space: nowrap;
- height: 450px;
+ height: 550px;
  font-size: medium;
 }
 .module-container {
@@ -435,3 +435,13 @@ background-color: #E11839;
     .openButton:hover {
       opacity: 1;
     }
+.intermediate_drawing_tailoring{
+  position:relative;
+
+  max-width: 100%;
+  height: auto;
+
+  bottom:0px;
+
+  left:50%;
+}

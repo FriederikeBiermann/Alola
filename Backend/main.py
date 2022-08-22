@@ -33,8 +33,7 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
     tailoringReactions=ast.literal_eval(antismash_input)[2]
     # get last intermediate
     intermediate=cluster_to_structure(antismash_input_transformed)
-    if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
-                    intermediate=attach_to_domain_nrp(intermediate, 'PCP')
+
     # find cyclisation sites
     for reaction in tailoringReactions:
         if reaction[0]=="p450":
@@ -49,7 +48,7 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
                         except :
                             target_atom_string=target_atom_string.split('_')[0]+"_"+str(int(target_atom_string.split('_')[1])+1)
                             print("new",target_atom_string)
-        if "methylation" in reaction[0]:
+        if "methyltransferase" in reaction[0]:
             for target_atom_string in reaction[1]:
                 for atom in intermediate.atoms.values():
 
@@ -61,19 +60,25 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
                         except :
                             target_atom_string=target_atom_string.split('_')[0]+"_"+str(int(target_atom_string.split('_')[1])+1)
                             print("new",target_atom_string)
-    # perform thioesterase reaction
+
+    o_atoms_for_cyclisation, n_atoms_for_cyclisation= find_all_o_n_atoms_for_cyclization(intermediate)
+    o_atoms_for_cyclisation=str(o_atoms_for_cyclisation)
+    n_atoms_for_cyclisation=str(n_atoms_for_cyclisation)
+    c_atoms_for_oxidation=str(find_all_c_atoms_for_oxidation(intermediate))
+    linear_product= intermediate
+    if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
+                        intermediate=attach_to_domain_nrp(intermediate, 'PCP')
+    raichu_svg=RaichuDrawer(linear_product,dont_show=True).svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
+    #perform thioesterase reaction
     if cyclization=="None":
+        print (intermediate)
         intermediate = thioesterase_linear_product(intermediate)
+        print (intermediate)
 
     else:
          intermediate =  thioesterase_circular_product(intermediate, cyclization)
 
     smiles=structure_to_smiles(intermediate, kekule=False)
-    o_atoms_for_cyclisation, n_atoms_for_cyclisation= find_all_o_n_atoms_for_cyclization(intermediate)
-    o_atoms_for_cyclisation=str(o_atoms_for_cyclisation)
-    n_atoms_for_cyclisation=str(n_atoms_for_cyclisation)
-    c_atoms_for_oxidation=str(find_all_c_atoms_for_oxidation(intermediate))
-
     svg=svg_string_from_structure(intermediate).replace("\n","").replace("\"","'").replace("<svg"," <svg id='final_drawing'")
 
 
@@ -95,4 +100,4 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
             list_svgs+=[[svg_drawing]]
 
     atoms_for_cyclisation=str(o_atoms_for_cyclisation+ n_atoms_for_cyclisation)
-    return {"svg":svg, "hanging_svg": list_svgs, "smiles": smiles,  "atomsForCyclisation":atoms_for_cyclisation,"c_atoms_for_oxidation":c_atoms_for_oxidation,"n_atoms_for_methylation": n_atoms_for_cyclisation,"o_atoms_for_methylation":  o_atoms_for_cyclisation, "intermediate_smiles": list_intermediate_smiles}
+    return {"svg":svg, "hanging_svg": list_svgs, "smiles": smiles,  "atomsForCyclisation":atoms_for_cyclisation,"c_atoms_for_oxidation":c_atoms_for_oxidation,"n_atoms_for_methylation": n_atoms_for_cyclisation,"o_atoms_for_methylation":  o_atoms_for_cyclisation, "intermediate_smiles": list_intermediate_smiles, "structure_for_tailoring":raichu_svg}

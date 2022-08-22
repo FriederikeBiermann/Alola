@@ -2,6 +2,7 @@
 //Colour dicts to match antiSMASH domain colouring
 colour_fill_dict = {
     'ACP': '#81bef7',
+    "PKS_PP":'#81bef7',
     'PKS_AT': '#f78181',
     'PKS_KS(Modular-KS)': '#81f781',
     'PKS_KR': '#80f680',
@@ -17,7 +18,8 @@ colour_fill_dict = {
     'nMT':'#dadada'
 }
 colour_outline_dict = {
-    'PKS_ACP': '#3d79d6',
+    'ACP': '#3d79d6',
+    'PKS_PP': '#3d79d6',
     'PKS_AT': '#df5d5d',
     'PKS_KS': '#5fc65f',
     'PKS_KS(Modular-KS)': '#5fc65f',
@@ -28,7 +30,11 @@ colour_outline_dict = {
     'Thioesterase': '#a25ba0',
     'KR*': '#5fbb87'
 }
-
+function hasNumbers(t)
+{
+var regex = /\d/g;
+return regex.test(t);
+}
 var Domainer = {
     version: "1.0.0",
     required: [
@@ -148,6 +154,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                 domainIndex].type.includes(
                                                 "PCP")) {
                                             size = 25;
+
                                         }
                                         else {
                                             abbreviation = domain.abbreviation
@@ -284,13 +291,31 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                 "dropdown-content");
                                         innerDropdownContent.innerHTML =
                                             ""
+                                            geneMatrix[geneIndex].modules[
+                                                moduleIndex].domains[
+                                                domainIndex].domainOptions = geneMatrix[geneIndex].modules[
+                                                    moduleIndex].domains[
+                                                    domainIndex].domainOptions.sort((a, b) => a.localeCompare(b)).sort(function (a, b) {
+  return a.length - b.length;
+});
 
                                         for (let optionIndex = 0; optionIndex <
                                             geneMatrix[geneIndex].modules[
                                                 moduleIndex].domains[
                                                 domainIndex].domainOptions
                                             .length; optionIndex++) {
+                                              let option=geneMatrix[geneIndex].modules[
+                                                  moduleIndex].domains[
+                                                  domainIndex].domainOptions[
+                                                  optionIndex].toString();
+                                              if (hasNumbers(option)==true){
+                                                short_option=option.split(" ")[option.split(" ").length-1]
+                                              }
+                                              else{
+                                                short_option=option
+                                              }
 
+                                              console.log("options",option, short_option )
 
 
                                             let optionContent =
@@ -298,21 +323,9 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                 domainIndex + "_"+optionIndex+" onclick='changeSelectedOption(geneMatrix," +
                                                 geneIndex + ',' +moduleIndex+ ","+
                                                 domainIndex + ",\x22" +
-                                                geneMatrix[geneIndex].modules[
-                                                    moduleIndex].domains[
-                                                    domainIndex].domainOptions[
-                                                    optionIndex] +
-                                                "\x22);'  onmouseenter='hover_in_atom(\x22"+geneMatrix[geneIndex].modules[
-                                                    moduleIndex].domains[
-                                                    domainIndex].domainOptions[
-                                                    optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+geneMatrix[geneIndex].modules[
-                                                        moduleIndex].domains[
-                                                        domainIndex].domainOptions[
-                                                        optionIndex].toString() +"\x22);'>" +
-                                                geneMatrix[geneIndex].modules[
-                                                    moduleIndex].domains[
-                                                    domainIndex].domainOptions[
-                                                    optionIndex] +
+                                                short_option +
+                                                "\x22);'  onmouseenter='hover_in_atom(\x22"+short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
+                                                option +
                                                 "</button>";
                                             //format default option differently
                                             if (geneMatrix[geneIndex].modules[
@@ -321,52 +334,22 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                     optionIndex] ==
                                                 geneMatrix[geneIndex].domains[
                                                     domainIndex].default_option
-                                            ) {
+                                            ) { console.log("default",geneMatrix[geneIndex].domains[
+                                                domainIndex].default_option)
                                                 optionContent =
                                                     "<button id="+geneIndex + '_' +moduleIndex+ "_"+
                                                     domainIndex + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOption(geneMatrix," +
                                                     geneIndex + ',' +moduleIndex+","+
                                                     domainIndex +
                                                     ",\x22" +
-                                                    geneMatrix[geneIndex].modules[
-                                                        moduleIndex].domains[
-                                                        domainIndex].domainOptions[
-                                                        optionIndex] +
-                                                    "\x22);'   onmouseenter='hover_in_atom(\x22"+geneMatrix[geneIndex].modules[
-                                                        moduleIndex].domains[
-                                                        domainIndex].domainOptions[
-                                                        optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+geneMatrix[geneIndex].modules[
-                                                            moduleIndex].domains[
-                                                            domainIndex].domainOptions[
-                                                            optionIndex].toString() +"\x22);'>" +
-                                                    geneMatrix[geneIndex].modules[
-                                                        moduleIndex].domains[
-                                                        domainIndex].domainOptions[
-                                                        optionIndex] +
+                                                    short_option +
+                                                    "\x22);'   onmouseenter='hover_in_atom(\x22"+short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
+                                                    option +
                                                     "</button>";
                                             }
                                             innerDropdownContent.innerHTML +=
                                                 optionContent
-                                                // let option= geneMatrix[geneIndex].modules[
-                                                //             moduleIndex].domains[
-                                                //             domainIndex].domainOptions[
-                                                //             optionIndex]
-                                                // let optionIndex1 = optionIndex
-                                                // let optionButton= document.getElementById(geneIndex + '_' +moduleIndex+ "_"+domainIndex + "_"+optionIndex1)
-                                                // optionButton.addEventListener(
-                                                //     'mouseenter',
-                                                //     function() { // anonyme Funktion
-                                                //         hover_in_atom(option)
-                                                //     },
-                                                //     false
-                                                // );
-                                                // optionButton.addEventListener(
-                                                //     'mouseleave',
-                                                //     function() { // anonyme Funktion
-                                                //       hover_out_atom(option)
-                                                //     },
-                                                //     false
-                                                // );
+
                                         }
 
 
@@ -475,12 +458,13 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
     var line_svg = SVG(container)
         .size('100%', 90)
         .group();
+    let begin=1
 
 
 
                     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                       let gene= geneMatrix[geneIndex]
-                      if (gene.tailoringEnzymeStatus==true){console.log("trueee")
+                      if (gene.tailoringEnzymeStatus==true){
                                             let domainIdentifier="tailoringEnzyme"+ geneMatrix[geneIndex].id
 
                                       let  points = Domainer.getArrowPoints(
@@ -502,12 +486,12 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                         innerDropdownContainer.id =
                                             "innerDropdownContainer" +
                                             domainIdentifier
+
                                         var innerIntermediateContainer =
                                             document.createElement(
                                                 'div');
                                         innerIntermediateContainer.id =
-                                            "innerIntermediateContainer" +
-                                            domainIdentifier
+                                            "innerIntermediateContainer_tailoring_enzymes"
                                         var innerDropdownButton =
                                             document.createElement(
                                                 'button');
@@ -535,6 +519,8 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 domainIdentifier)
                                             .appendChild(
                                                 innerDropdownContainer);
+
+                                        if (begin==1){
                                         document.getElementById(
                                                 'innerdomainContainer' +
                                                 domainIdentifier)
@@ -542,11 +528,10 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 innerIntermediateContainer
                                             );
                                         document.getElementById(
-                                                "innerIntermediateContainer" +
-                                                domainIdentifier)
+                                                "innerIntermediateContainer_tailoring_enzymes")
                                             .setAttribute("class",
                                                 "intermediateContainer"
-                                            );
+                                            );}
                                         document.getElementById(
                                                 "innerDropdownContainer" +
                                                 domainIdentifier)
@@ -574,23 +559,30 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 "dropdown-content");
                                         innerDropdownContent.innerHTML =
                                             ""
+                                            geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.sort((a, b) => a.localeCompare(b)).sort(function (a, b) {
+  return a.length - b.length;
+});
 
                                         for (let optionIndex = 0; optionIndex <
                                             geneMatrix[geneIndex].options
                                             .length; optionIndex++) {
+                                            let option=geneMatrix[geneIndex].options[
+                                                optionIndex].toString();
+                                            if (hasNumbers(option)==true){
+                                              short_option=option.split(" ")[option.split(" ").length-1]
+                                            }
+                                            else{
+                                              short_option=option
+                                            }
 
-
+                                            console.log("options",option, short_option )
 
                                             let optionContent =
                                                 "<button id="+geneIndex + "_"+optionIndex+" onclick='changeSelectedOptionTailoring(geneMatrix," +
                                                 geneIndex + ",\x22" +
-                                                  geneMatrix[geneIndex].options[
-                                                    optionIndex] +
-                                                "\x22);'  onmouseenter='hover_in_atom(\x22"+geneMatrix[geneIndex].options[
-                                                    optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+  geneMatrix[geneIndex].options[
-                                                        optionIndex].toString() +"\x22);'>" +
-                                                geneMatrix[geneIndex].options[
-                                                    optionIndex] +
+                                                  short_option +
+                                                "\x22);'  onmouseenter='hover_in_atom(\x22"+short_option +"\x22);' onmouseout='hover_out_atom(\x22"+  short_option +"\x22);'>" +
+                                                option +
                                                 "</button>";
                                             //format default option differently
                                             if (  geneMatrix[geneIndex].options[
@@ -601,13 +593,9 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                     "<button id="+geneIndex  + "_"+optionIndex+" style= \x22background-color:light-grey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
                                                     geneIndex +
                                                     ",\x22" +
-                                                      geneMatrix[geneIndex].options[
-                                                        optionIndex] +
-                                                    "\x22);'   onmouseenter='hover_in_atom(\x22"+ geneMatrix[geneIndex].options[
-                                                        optionIndex].toString() +"\x22);' onmouseout='hover_out_atom(\x22"+  geneMatrix[geneIndex].options[
-                                                            optionIndex].toString() +"\x22);'>" +
-                                                      geneMatrix[geneIndex].options[
-                                                        optionIndex] +
+                                                      short_option+
+                                                    "\x22);'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
+                                                      option +
                                                     "</button>";
                                             }
                                             innerDropdownContent.innerHTML +=
@@ -629,8 +617,8 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                 .size(String(size) + "px", height)
                                 .group();
                             var dom = draw.rect(size-2, size-2)
-                                .x(2)
-                                .y(height - indent - (size+2))
+                                .x(1)
+                                .y(height - indent - (size+3))
                                 .rx("200%")
                                 .ry("200%")
                                 .fill(color)
@@ -638,9 +626,10 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                     width: 2, color:outline
                                 });
                             if (size>25){
-                              var text=draw.text(abbreviation).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
+                              var text=draw.text(abbreviation.replaceAll("methyltransferase","MT")).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
 
                             dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
+                            begin++
 
                         }}
 
@@ -649,7 +638,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
 Domainer.drawGenes = (function(geneMatrix, height, scale) {
     document.getElementById('model_gene_container')
         .innerHTML = ""
-
+        height=40
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size=0
         if (geneMatrix[geneIndex].hasOwnProperty("modules")) {
@@ -662,7 +651,7 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
 
             }
         }
-        console.log("siize",gene_size,geneIndex)
+
         if (gene_size >0){
           var innerModelGeneContainer = document.createElement('div');
           innerModelGeneContainer.id = "innerModelGeneContainer" + "_" +
@@ -672,14 +661,44 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
           var draw = SVG(innerModelGeneContainer)
               .size(String(gene_size) + "px", height)
               .group();
-              console.log(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, height, scale)))
-              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 20, scale)))
+
+              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 40, scale)))
               .fill("white")
+
               .stroke("#2B2B2B")
               .stroke({
                   width: 1
               })
+                if (gene_size<50){var text=draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size/2).y(height/2-7)}
+                else{var text=draw.text(geneMatrix[geneIndex].id).x(gene_size/2).y(height/2-7)}
 
+
+          pol.node.id = "module_gene_" + geneIndex
+        }
+
+    }
+    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+        let gene_size=50
+
+        if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+          var innerModelGeneContainer = document.createElement('div');
+          innerModelGeneContainer.id = "innerModelGeneContainer" + "_" +
+              geneMatrix[geneIndex].id
+          document.getElementById('model_gene_container')
+              .appendChild(innerModelGeneContainer);
+          var draw = SVG(innerModelGeneContainer)
+              .size(String(gene_size) + "px", height)
+              .group();
+
+              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 40, scale)))
+              .fill("white")
+
+              .stroke("#2B2B2B")
+              .stroke({
+                  width: 1
+              })
+                if (gene_size<70){var text=draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size/2).y(height/2-7)}
+                else{var text=draw.text(geneMatrix[geneIndex].id).x(gene_size/2).y(height/2-7)}
 
 
           pol.node.id = "module_gene_" + geneIndex
@@ -688,12 +707,15 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
     }
 });
 Domainer.drawModules = (function(geneMatrix, height, scale) {
+   height=30
     document.getElementById('module_container')
         .innerHTML = ""
+    let completeModuleIndex=0
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].hasOwnProperty("modules")) {
             for (let moduleIndex = 0; moduleIndex < geneMatrix[
                     geneIndex].modules.length; moduleIndex++) {
+
                 var innerModuleContainer = document.createElement('div');
                 innerModuleContainer.id = "innerModuleContainer" + "_" +
                     geneMatrix[geneIndex].id + "_" + moduleIndex
@@ -706,17 +728,45 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
                     .group();
                 var dom = draw.rect(size, height)
                     .x(0)
-                    .y(height)
+                    .y(0)
                     .fill("#2B2B2B")
                     .stroke("#2B2B2B")
                     .stroke({
-                        width: 20
+                        width: 2
                     })
                 dom.node.id = "module_" + moduleIndex
+                if (size>=70){
+                  completeModuleIndex++
+                  var text_module=draw.text("Module " + completeModuleIndex).x(size/2).y(height/2-7)
+                  .fill("white")
+                }
 
             }
         }
     }
+    //tailoring enzyme
+    var innerModuleContainer = document.createElement('div');
+    innerModuleContainer.id = "innerModuleContainer" + "_" +
+        "tailoringEnzyme"
+    document.getElementById('module_container')
+        .appendChild(innerModuleContainer);
+    size = 300
+    var draw = SVG(innerModuleContainer)
+        .size(String(size) + "px", height)
+        .group();
+    var dom = draw.rect(size, height)
+        .x(0)
+        .y(0)
+        .fill("white")
+        .stroke("white")
+        .stroke({
+            width: 2
+        })
+    dom.node.id = "module_" + "tailoringEnzyme"
+
+      var text_module=draw.text("Tailoring enzymes:").x(size/3.5).y(height/2-7)
+      .fill("black")
+      .stroke({width:1})
 });
 Domainer.getOrfPoints = (function(start,end,  height, scale) {
   let strand=1
