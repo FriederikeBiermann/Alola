@@ -656,7 +656,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
         starterACP = extractAntismashPredictionsFromRegion(details_data,
             regionName, geneMatrix)[1]
     }
-    console.log(data)
+    console.log(starterACP, "starterACP ")
     // add tailoring reactions
     let tailoringArray=findTailoringReactions(geneMatrix)
     let data_string = formatInputRaichuKS(data, cyclization,tailoringArray)
@@ -794,6 +794,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
           intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
           intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
         }
+        console.log(acpList,"acpList")
         for (let intermediateIndex = 0; intermediateIndex <
             intermediates.length; intermediateIndex++) {
             intermediate = intermediates[intermediateIndex]
@@ -2000,7 +2001,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     geneMatrix.sort((a, b) => {
         return a.position - b.position;
     });
-    let acpCounter = -1
+    let acpCounter = 0
     let starterStatus = 0
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false) {
@@ -2069,11 +2070,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     }
 
                                     if (domain.type.includes("ACP") || domain.type
-                                        .includes("PP")) {
-                                        acpCounter += 1;
-                                    }
-                                    if (domain.type.includes("PCP") || domain.type
-                                        .includes("PP")) {
+                                        .includes("PP")||domain.type.includes("PCP")) {
                                         acpCounter += 1;
                                     }
 
@@ -2131,6 +2128,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 }
                             }
                         }
+                        console.log(acpCounter,"acpCounter")
                         if (domainArray.includes("AT") && !(domainArray.includes(
                                 "KS")) && !(domainArray.includes("TE"))) {
                             typeModule = "starter_module_pks";
