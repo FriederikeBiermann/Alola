@@ -1622,7 +1622,7 @@ displayGenes(BGC)
 
 }
 
-function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, option) {
+function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, option,optionIndex) {
   /**
   * Change the option in geneMatrix.
  * @fires clickondomaindropdown
@@ -1633,7 +1633,9 @@ function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, op
   geneMatrix[geneIndex].modules[
           moduleIndex].domains[
           domainIndex].selected_option = option
-
+    $('[id^=\x22'+geneIndex+'_'+ moduleIndex+'_'+domainIndex+'\x22]').removeAttr('style');
+    let button= document.getElementById(geneIndex+'_'+ moduleIndex+'_'+domainIndex+ "_"+optionIndex)
+    button.setAttribute("style", "background-color: #E11839")
     if (geneMatrix[geneIndex].modules[
             moduleIndex].domains[
             domainIndex].abbreviation.includes("TE")){
