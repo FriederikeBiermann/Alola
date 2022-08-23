@@ -456,6 +456,59 @@ function addArrowClick(geneMatrix) {
                 },
                 false
             );
+            if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+            const  tailoringEnzymeObject=document.querySelector("#tailoringEnzyme_"+geneMatrix[geneIndex].id)
+            arrow.addEventListener(
+                'mouseenter',
+                function() { // anonyme Funktion
+
+                    changeProteinColorON("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+            arrow.addEventListener(
+                'mouseleave',
+                function() { // anonyme Funktion
+                    changeProteinColorOFF("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+            protein.addEventListener(
+                'mouseenter',
+                function() { // anonyme Funktion
+
+                    changeProteinColorON("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+            protein.addEventListener(
+                'mouseleave',
+                function() { // anonyme Funktion
+                    changeProteinColorOFF("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+
+            tailoringEnzymeObject.addEventListener(
+                'mouseenter',
+                function() { // anonyme Funktion
+
+                    changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                        "_gene_arrow", geneIndex);changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                            "_protein", geneIndex)
+                },
+                false
+            );
+            tailoringEnzymeObject.addEventListener(
+                'mouseleave',
+                function() { // anonyme Funktion
+                    changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                        "_gene_arrow", geneIndex);changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                            "_protein", geneIndex)
+                },
+                false
+            );
+            }
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
@@ -617,7 +670,7 @@ function changeProteinColorON(ProteinId, geneIndex) {
  */
     if (geneMatrix[geneIndex].displayed === true) {
         const arrow = document.querySelector(ProteinId);
-        arrow.setAttribute('fill', "#E11839");
+        arrow.setAttribute('style', "fill: #E11839");
     }
 }
 
@@ -630,7 +683,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
  */
     if (geneMatrix[geneIndex].displayed === true) {
         const arrow = document.querySelector(ProteinId);
-        arrow.setAttribute('fill', '#ffffff');
+        arrow.removeAttribute("style");
     }
 }
 
@@ -658,7 +711,10 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
     }
     console.log(starterACP, "starterACP ")
     // add tailoring reactions
-    let tailoringArray=findTailoringReactions(geneMatrix)
+    let originalTailoringArray=findTailoringReactions(geneMatrix)
+    let originalTailoringArraySafe=[...originalTailoringArray]
+
+    tailoringArray=updateOptionArray(originalTailoringArray,0)
     let data_string = formatInputRaichuKS(data, cyclization,tailoringArray)
     let url = "http://127.0.0.1:8000/api/alola?antismash_input=";
     let list_hanging_svg = []
@@ -815,6 +871,86 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
         }
 
     })
+    console.log(originalTailoringArraySafe,"originalTailoringArraySafe")
+    updateSelectedOptionsAfterTailoring(originalTailoringArraySafe, geneMatrix,1)
+}
+function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix,index){
+  /**
+  * Change color of domain.
+ * @fires fetchFromRaichu
+ *@input optionArray-> an array of the selected options
+ *@output corrected option array after transformation
+ */
+
+ let position_array=[]
+ console.log(optionArray)
+ for (let tailoringEnzyme of optionArray){
+   position_array=position_array.concat(tailoringEnzyme[1])
+ }
+
+ position_array.sort(function(a, b) {
+  return Number(a.split("_")[1]) - Number(b.split("_")[1]) ;
+
+ });
+  let updated_positon_array=[]
+  for (let option of position_array){
+    let splittedOption=option.split("_")
+    let position=Number(splittedOption[1])
+    let atom=splittedOption[0]
+    updated_positon_array.push(atom+"_"+(position+index).toString());
+    index++
+  }
+  let mappingDictionary={};
+  position_array.forEach((key,i)=>mappingDictionary[key] = updated_positon_array[i])
+  for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+    if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+      for (let option of geneMatrix[geneIndex].selected_option){
+      console.log(mappingDictionary,option, "new option")
+    option=mappingDictionary[option]
+    console.log(option, "new option")}
+      console.log("optionsss",geneMatrix[geneIndex].selected_option)
+  }
+}
+return geneMatrix}
+function updateOptionArray(optionArray,index){
+  /**
+  * Change color of domain.
+ * @fires fetchFromRaichu
+ *@input optionArray-> an array of the selected options, index= how much the options should be moved forwards
+ *@output corrected option array for transformation
+
+ */
+ let position_array=[]
+ for (let tailoringEnzyme of optionArray){
+   position_array=position_array.concat(tailoringEnzyme[1])
+ }
+
+ position_array.sort(function(a, b) {
+  return Number(a.split("_")[1]) - Number(b.split("_")[1]) ;
+
+});
+  let updated_positon_array=[]
+  for (let option of position_array){
+    let splittedOption=option.split("_")
+    let position=Number(splittedOption[1])
+    let atom=splittedOption[0]
+    updated_positon_array.push(atom+"_"+(position+index).toString())
+    index++}
+  let mappingDictionary={};
+  position_array.forEach((key,i)=>mappingDictionary[key] = updated_positon_array[i])
+  for (let tailoringEnzyme of optionArray){
+    let positions=tailoringEnzyme[1]
+    let new_positions=[]
+    for (let position of positions){
+      new_positions.push(mappingDictionary[position])
+
+    }
+    tailoringEnzyme.pop()
+    tailoringEnzyme.push(new_positions)
+  }
+  console.log("new op", mappingDictionary)
+
+  return optionArray
 }
 function findTailoringReactions(geneMatrix){
   /**
