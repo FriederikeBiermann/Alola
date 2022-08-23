@@ -40,6 +40,14 @@ let cyclization = "None"
 let wildcardSubstrate="glycine"
 let wildcardModule="elongation_module_nrps"
 let nameWildcardModule="Custom_gene_"
+function findButtonbyTextContent(text) {
+  var buttons = document.querySelectorAll('button');
+  for (var i=0, l=buttons.length; i<l; i++) {
+    console.log(buttons[i].firstChild.nodeValue,"/",text)
+    if (buttons[i].firstChild.nodeValue == text)
+      return buttons[i];
+  }
+}
 
 function addStringToArray(string,array){
   /**
@@ -1179,10 +1187,22 @@ function displayGenes(BGC) {
         .html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
     return BGCForDisplay
 }
+function setColorOfDropDown( button){
+  let targets= document.getElementsByClassName("wildcardsubstrate");
+  for (let index=0; index<targets.length; index++){
+
+    let target=targets[index]
+    console.log(typeof(target))
+    target.removeAttribute("style");
+  }
+  button.setAttribute("style", "background-color: #E11839")
+}
 //everything to do with the wildcard modules
 function setWildcardSubstrate(substrate){
-  wildcardSubstrate=substrate
-
+  let wildcardSubstrate=substrate
+  let button=findButtonbyTextContent(substrate)
+  console.log(button)
+  setColorOfDropDown(button)
   return wildcardSubstrate
 }
 function setWildcardModule(moduleType){
