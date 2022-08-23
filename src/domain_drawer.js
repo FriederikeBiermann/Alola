@@ -544,7 +544,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 "innerDropdownContainer" +
                                                 domainIdentifier)
                                             .setAttribute("class",
-                                                "dropdown");
+                                                "dropdown-tailoring");
                                         document.getElementById(
                                                 'innerDropdownContainer' +
                                                 domainIdentifier)
@@ -554,7 +554,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 "innerDropdownButton" +
                                                 domainIdentifier)
                                             .setAttribute("class",
-                                                "dropbtn");
+                                                "dropbtn-tailoring");
                                         document.getElementById(
                                                 'innerDropdownContainer' +
                                                 domainIdentifier)
@@ -564,7 +564,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 "innerDropdownContent" +
                                                 domainIdentifier)
                                             .setAttribute("class",
-                                                "dropdown-content");
+                                                "dropdown-content-tailoring");
                                         innerDropdownContent.innerHTML =
                                             ""
                                             geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.sort((a, b) => a.localeCompare(b)).sort(function (a, b) {

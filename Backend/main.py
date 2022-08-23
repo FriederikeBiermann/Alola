@@ -61,10 +61,8 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
                             target_atom_string=target_atom_string.split('_')[0]+"_"+str(int(target_atom_string.split('_')[1])+1)
                             print("new",target_atom_string)
 
-    o_atoms_for_cyclisation, n_atoms_for_cyclisation= find_all_o_n_atoms_for_cyclization(intermediate)
-    o_atoms_for_cyclisation=o_atoms_for_cyclisation
-    n_atoms_for_cyclisation=n_atoms_for_cyclisation
-    c_atoms_for_oxidation=find_all_c_atoms_for_oxidation(intermediate)
+    o_atoms_for_cyclisation, n_atoms_for_cyclisation= find_all_o_n_atoms_for_cyclization(linear_product)
+    c_atoms_for_oxidation=find_all_c_atoms_for_oxidation(linear_product)
     linear_product= intermediate
     if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
                         intermediate=attach_to_domain_nrp(intermediate, 'PCP')

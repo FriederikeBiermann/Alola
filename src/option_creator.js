@@ -20,7 +20,7 @@ console.log(domain.identifier)
 //add substrate specifities for NRPS
 if (domain.abbreviation=="A") {
   domain.domainOptions=Object.values(aminoacids)
-  domain.default_option=domain.domain.predictions[0][1].replace(
+  domain.default_option=domain.predictions[0][1].replace(
   "-", '')
   .toLowerCase()
   console.log(domain)

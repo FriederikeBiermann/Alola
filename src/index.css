@@ -378,6 +378,66 @@ background-color: #E11839;
 
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {display: block;}
+.dropbtn-tailoring {
+  position:relative;
+
+  left:150%;
+background-color: transparent;
+font-size: 16px;
+ text-transform: capitalize
+border: none;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown-tailoring {
+  position:relative;
+
+  left:150%;
+position: relative;
+display: inline-block;
+
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content-tailoring {
+  position:relative;
+
+  left:150%;
+opacity: 0.9;
+display: none;
+position: absolute;
+background-color: white;
+box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+z-index: 1;
+min-width: 150px;
+margin-top:-20px;
+}
+svg text{
+  text-anchor: middle;
+  dominant-baseline: bottom;
+}
+/* Links inside the dropdown */
+.dropdown-content-tailoring button {
+
+  min-width: 100px
+color: black;
+padding: 3px 3px;
+text-decoration: none;
+display: block;
+width:100%;
+ text-transform: capitalize;
+}
+.dropdown-content-tailoring button:active {
+
+background-color: #E11839;
+
+}
+/* Change color of dropdown links on hover */
+.dropdown-content-tailoring button:hover {background-color: #E11839;}
+
+
+/* Show the dropdown menu on hover */
+.dropdown-tailoring:hover .dropdown-content-tailoring {display: block;}
 .default_option_button{
   background-color: grey;
 }
