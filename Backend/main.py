@@ -60,10 +60,10 @@ async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
                         except :
                             target_atom_string=target_atom_string.split('_')[0]+"_"+str(int(target_atom_string.split('_')[1])+1)
                             print("new",target_atom_string)
-
+    linear_product= intermediate
     o_atoms_for_cyclisation, n_atoms_for_cyclisation= find_all_o_n_atoms_for_cyclization(linear_product)
     c_atoms_for_oxidation=find_all_c_atoms_for_oxidation(linear_product)
-    linear_product= intermediate
+
     if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
                         intermediate=attach_to_domain_nrp(intermediate, 'PCP')
     raichu_svg=RaichuDrawer(linear_product,dont_show=True).svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
