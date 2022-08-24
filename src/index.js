@@ -217,12 +217,10 @@ function highlight_atom_in_SVG(atom, color,width){
   if (atom.toString().includes("_")){  let links=document.querySelectorAll('a[*|href=\x22'+atom+'\x22]');
   for (let linkIndex=0; linkIndex<links.length;linkIndex++){
     let link =links[linkIndex]
-
-
+    if (link.parentElement.parentElement.parentElement.parentElement==document.getElementById("intermediate_drawing_tailoring")){
       let text= link.childNodes[3]
-
       text.setAttribute('style', "fill:"+color +"; stroke:"+color+"; stroke-width:"+width)
-
+    }
   }
     }
 
@@ -855,6 +853,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
           let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
 
           intermediate_svg.setAttribute("viewBox",viewBox)
+
           intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
           intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
         }
