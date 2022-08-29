@@ -20,7 +20,9 @@ console.log(domain.identifier)
 //add substrate specifities for NRPS
 if (domain.abbreviation=="A") {
   domain.domainOptions=Object.values(aminoacids)
-  domain.default_option=domain.substrate
+  domain.default_option=domain.predictions[0][1].replace(
+  "-", '')
+  .toLowerCase()
   console.log(domain)
 
 
@@ -30,8 +32,9 @@ if (domain.abbreviation=="A") {
 
 if (domain.abbreviation=="AT") {
 domain.domainOptions=Object.keys(nameToStructure)
-domain.default_option=domain.substrate
-
+domain.default_option=domain.predictions[1][1].replace(
+"-", '')
+.toLowerCase()
 
 
 }

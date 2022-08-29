@@ -1,7 +1,7 @@
 
 regionName = "r1c3"
 let fetching = false
-let cluster_type = "nrpspks"
+let cluster_type = "nrps"
 let tailoringEnzymes=["p450"," methyltransferase","n-methyltransferase","c-methyltransferase","o-methyltransferase"]
 
 let nameToStructure = {
@@ -40,6 +40,14 @@ let cyclization = "None"
 let wildcardSubstrate="glycine"
 let wildcardModule="elongation_module_nrps"
 let nameWildcardModule="Custom_gene_"
+function findButtonbyTextContent(text) {
+  var buttons = document.querySelectorAll('button');
+  for (var i=0, l=buttons.length; i<l; i++) {
+    console.log(buttons[i].firstChild.nodeValue,"/",text)
+    if (buttons[i].firstChild.nodeValue == text)
+      return buttons[i];
+  }
+}
 
 function addStringToArray(string,array){
   /**
@@ -209,12 +217,10 @@ function highlight_atom_in_SVG(atom, color,width){
   if (atom.toString().includes("_")){  let links=document.querySelectorAll('a[*|href=\x22'+atom+'\x22]');
   for (let linkIndex=0; linkIndex<links.length;linkIndex++){
     let link =links[linkIndex]
-
-
+    if (link.parentElement.parentElement.parentElement.parentElement==document.getElementById("intermediate_drawing_tailoring")){
       let text= link.childNodes[3]
-
       text.setAttribute('style', "fill:"+color +"; stroke:"+color+"; stroke-width:"+width)
-
+    }
   }
     }
 
@@ -456,6 +462,59 @@ function addArrowClick(geneMatrix) {
                 },
                 false
             );
+            if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+            const  tailoringEnzymeObject=document.querySelector("#tailoringEnzyme_"+geneMatrix[geneIndex].id)
+            arrow.addEventListener(
+                'mouseenter',
+                function() { // anonyme Funktion
+
+                    changeProteinColorON("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+            arrow.addEventListener(
+                'mouseleave',
+                function() { // anonyme Funktion
+                    changeProteinColorOFF("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+            protein.addEventListener(
+                'mouseenter',
+                function() { // anonyme Funktion
+
+                    changeProteinColorON("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+            protein.addEventListener(
+                'mouseleave',
+                function() { // anonyme Funktion
+                    changeProteinColorOFF("#tailoringEnzyme_"+geneMatrix[geneIndex].id, geneIndex)
+                },
+                false
+            );
+
+            tailoringEnzymeObject.addEventListener(
+                'mouseenter',
+                function() { // anonyme Funktion
+
+                    changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                        "_gene_arrow", geneIndex);changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                            "_protein", geneIndex)
+                },
+                false
+            );
+            tailoringEnzymeObject.addEventListener(
+                'mouseleave',
+                function() { // anonyme Funktion
+                    changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                        "_gene_arrow", geneIndex);changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                            "_protein", geneIndex)
+                },
+                false
+            );
+            }
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
@@ -617,7 +676,7 @@ function changeProteinColorON(ProteinId, geneIndex) {
  */
     if (geneMatrix[geneIndex].displayed === true) {
         const arrow = document.querySelector(ProteinId);
-        arrow.setAttribute('fill', "#E11839");
+        arrow.setAttribute('style', "fill: #E11839");
     }
 }
 
@@ -630,7 +689,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
  */
     if (geneMatrix[geneIndex].displayed === true) {
         const arrow = document.querySelector(ProteinId);
-        arrow.setAttribute('fill', '#ffffff');
+        arrow.removeAttribute("style");
     }
 }
 
@@ -656,9 +715,12 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
         starterACP = extractAntismashPredictionsFromRegion(details_data,
             regionName, geneMatrix)[1]
     }
-    console.log(data)
+    console.log(starterACP, "starterACP ")
     // add tailoring reactions
-    let tailoringArray=findTailoringReactions(geneMatrix)
+    let originalTailoringArray=findTailoringReactions(geneMatrix)
+    let originalTailoringArraySafe=[...originalTailoringArray]
+
+    tailoringArray=updateOptionArray(originalTailoringArray,0)
     let data_string = formatInputRaichuKS(data, cyclization,tailoringArray)
     let url = "http://127.0.0.1:8000/api/alola?antismash_input=";
     let list_hanging_svg = []
@@ -791,9 +853,11 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
           let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
 
           intermediate_svg.setAttribute("viewBox",viewBox)
+
           intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
           intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
         }
+        console.log(acpList,"acpList")
         for (let intermediateIndex = 0; intermediateIndex <
             intermediates.length; intermediateIndex++) {
             intermediate = intermediates[intermediateIndex]
@@ -814,6 +878,86 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
         }
 
     })
+    console.log(originalTailoringArraySafe,"originalTailoringArraySafe")
+    updateSelectedOptionsAfterTailoring(originalTailoringArraySafe, geneMatrix,1)
+}
+function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix,index){
+  /**
+  * Change color of domain.
+ * @fires fetchFromRaichu
+ *@input optionArray-> an array of the selected options
+ *@output corrected option array after transformation
+ */
+
+ let position_array=[]
+ console.log(optionArray)
+ for (let tailoringEnzyme of optionArray){
+   position_array=position_array.concat(tailoringEnzyme[1])
+ }
+
+ position_array.sort(function(a, b) {
+  return Number(a.split("_")[1]) - Number(b.split("_")[1]) ;
+
+ });
+  let updated_positon_array=[]
+  for (let option of position_array){
+    let splittedOption=option.split("_")
+    let position=Number(splittedOption[1])
+    let atom=splittedOption[0]
+    updated_positon_array.push(atom+"_"+(position+index).toString());
+    index++
+  }
+  let mappingDictionary={};
+  position_array.forEach((key,i)=>mappingDictionary[key] = updated_positon_array[i])
+  for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+    if (geneMatrix[geneIndex].tailoringEnzymeStatus==true){
+      for (let option of geneMatrix[geneIndex].selected_option){
+      console.log(mappingDictionary,option, "new option")
+    option=mappingDictionary[option]
+    console.log(option, "new option")}
+      console.log("optionsss",geneMatrix[geneIndex].selected_option)
+  }
+}
+return geneMatrix}
+function updateOptionArray(optionArray,index){
+  /**
+  * Change color of domain.
+ * @fires fetchFromRaichu
+ *@input optionArray-> an array of the selected options, index= how much the options should be moved forwards
+ *@output corrected option array for transformation
+
+ */
+ let position_array=[]
+ for (let tailoringEnzyme of optionArray){
+   position_array=position_array.concat(tailoringEnzyme[1])
+ }
+
+ position_array.sort(function(a, b) {
+  return Number(a.split("_")[1]) - Number(b.split("_")[1]) ;
+
+});
+  let updated_positon_array=[]
+  for (let option of position_array){
+    let splittedOption=option.split("_")
+    let position=Number(splittedOption[1])
+    let atom=splittedOption[0]
+    updated_positon_array.push(atom+"_"+(position+index).toString())
+    index++}
+  let mappingDictionary={};
+  position_array.forEach((key,i)=>mappingDictionary[key] = updated_positon_array[i])
+  for (let tailoringEnzyme of optionArray){
+    let positions=tailoringEnzyme[1]
+    let new_positions=[]
+    for (let position of positions){
+      new_positions.push(mappingDictionary[position])
+
+    }
+    tailoringEnzyme.pop()
+    tailoringEnzyme.push(new_positions)
+  }
+  console.log("new op", mappingDictionary)
+
+  return optionArray
 }
 function findTailoringReactions(geneMatrix){
   /**
@@ -1042,10 +1186,22 @@ function displayGenes(BGC) {
         .html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
     return BGCForDisplay
 }
+function setColorOfDropDown( button){
+  let targets= document.getElementsByClassName("wildcardsubstrate");
+  for (let index=0; index<targets.length; index++){
+
+    let target=targets[index]
+    console.log(typeof(target))
+    target.removeAttribute("style");
+  }
+  button.setAttribute("style", "background-color: #E11839")
+}
 //everything to do with the wildcard modules
 function setWildcardSubstrate(substrate){
-  wildcardSubstrate=substrate
-
+  let wildcardSubstrate=substrate
+  let button=findButtonbyTextContent(substrate)
+  console.log(button)
+  setColorOfDropDown(button)
   return wildcardSubstrate
 }
 function setWildcardModule(moduleType){
@@ -1485,7 +1641,7 @@ displayGenes(BGC)
 
 }
 
-function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, option) {
+function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, option,optionIndex) {
   /**
   * Change the option in geneMatrix.
  * @fires clickondomaindropdown
@@ -1496,7 +1652,9 @@ function changeSelectedOption(geneMatrix, geneIndex,moduleIndex, domainIndex, op
   geneMatrix[geneIndex].modules[
           moduleIndex].domains[
           domainIndex].selected_option = option
-
+    $('[id^=\x22'+geneIndex+'_'+ moduleIndex+'_'+domainIndex+'\x22]').removeAttr('style');
+    let button= document.getElementById(geneIndex+'_'+ moduleIndex+'_'+domainIndex+ "_"+optionIndex)
+    button.setAttribute("style", "background-color: #E11839")
     if (geneMatrix[geneIndex].modules[
             moduleIndex].domains[
             domainIndex].abbreviation.includes("TE")){
@@ -1519,11 +1677,15 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, option){
  *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
  *@yield Selected option correct+ cyclization option correct.
  */
+ console.log(geneIndex  + "_"+option)
+ let button= document.getElementById(geneIndex  + "_"+option)
  if (geneMatrix[geneIndex].selected_option.includes(option)){
+   button.setAttribute("style", "background-color: white")
 var optionArray= geneMatrix[geneIndex].selected_option.filter((item) => item!== option);
-geneMatrix[geneIndex].selected_option=optionArray
+geneMatrix[geneIndex].selected_option=optionArray;
  }
- else{  geneMatrix[geneIndex].selected_option.push(option)}
+ else{  geneMatrix[geneIndex].selected_option.push(option);
+ button.setAttribute("style", "background-color: #E11839")}
  if (document.querySelector('input[type=checkbox]')
      .checked) {
      fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
@@ -2000,7 +2162,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     geneMatrix.sort((a, b) => {
         return a.position - b.position;
     });
-    let acpCounter = -1
+    let acpCounter = 0
     let starterStatus = 0
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false) {
@@ -2069,11 +2231,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     }
 
                                     if (domain.type.includes("ACP") || domain.type
-                                        .includes("PP")) {
-                                        acpCounter += 1;
-                                    }
-                                    if (domain.type.includes("PCP") || domain.type
-                                        .includes("PP")) {
+                                        .includes("PP")||domain.type.includes("PCP")) {
                                         acpCounter += 1;
                                     }
 
@@ -2131,6 +2289,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 }
                             }
                         }
+                        console.log(acpCounter,"acpCounter")
                         if (domainArray.includes("AT") && !(domainArray.includes(
                                 "KS")) && !(domainArray.includes("TE"))) {
                             typeModule = "starter_module_pks";
