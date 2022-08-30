@@ -1,7 +1,7 @@
 
 regionName = "r1c3"
 let fetching = false
-let cluster_type = "nrps"
+let cluster_type = "nrpspks"
 let tailoringEnzymes=["p450"," methyltransferase","n-methyltransferase","c-methyltransferase","o-methyltransferase"]
 
 let nameToStructure = {
@@ -2248,9 +2248,12 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                                 }
                                             }
                                         }
+
                                         else {
                                             substrate = malonylcoa
                                         }
+                                        if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length==0)){
+                                          substrate=geneMatrix[geneIndex].domains[domainIndex].selected_option}
 
                                     }
 
