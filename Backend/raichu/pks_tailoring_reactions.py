@@ -1,5 +1,5 @@
-from pikachu.reactions.functional_groups import BondDefiner
-
+from pikachu.reactions.basic_reactions import condensation, hydrolysis
+from pikachu.reactions.functional_groups import find_bonds, BondDefiner, GroupDefiner, find_atoms
 from raichu.attach_to_domain import *
 RECENT_ELONGATION = BondDefiner('recent_elongation', 'O=CCC(=O)S', 0, 1)
 RECENT_REDUCTION_COH = BondDefiner('recent_reduction_C-OH', 'OCCC(=O)S', 0, 1)
@@ -8,7 +8,10 @@ RECENT_REDUCTION_CC = BondDefiner('recent_reduction_C-C', 'OCCC(=O)S', 1, 2)
 RECENT_REDUCTION_CC_SHIFTED = BondDefiner('recent_reduction_C-C_shifted', 'CC(O)CC(S)=O', 0, 1)
 RECENT_DEHYDRATION = BondDefiner('recent_dehydration', 'SC(C=CC)=O', 2, 3)
 RECENT_EONYL_REDUCTION=BondDefiner('recent_eonyl_reduction',"CCCC(S)=O",2,3)
+HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA=BondDefiner("hydroxyl_group_two_module_upstream_alpha","OCCCCCC(S)=O",0,1)
+HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA=BondDefiner("hydroxyl_group_two_module_upstream_beta","OCCCCCCC(S)=O",0,1)
 KR_DOMAIN_TYPES = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+
 S_KR = GroupDefiner('C1 atom before KR reaction', 'SC(C)=O', 0)
 
 
@@ -512,7 +515,23 @@ def find_cc_dh(structure):
 
     return bonds
 
+def find_O_H(structure):
+    """
+    Returns the Bond between the beta -hydroxygroup that needs to be split
 
+    structure: PIKAChU Structure object
+    """
+    locations = structure.find_substructures(RECENT_REDUCTION_COH .structure)
+    bonds = []
+    for match in locations:
+        atom_1 = match.atoms[RECENT_REDUCTION_CC.atom_1]
+        for neighbour in atom_1.neighbours:
+            if neighbour.type=="H":
+                atom_2=neighbour
+        bond = structure.bond_lookup[atom_1][atom_2]
+        bonds.append(bond)
+
+    return bonds
 def enoylreductase(chain_intermediate):
     """
     Performs the enoylreductase reaction on the PKS chain intermediate, returns
@@ -671,13 +690,20 @@ def find_alpha_c(structure):
         locations = structure.find_substructures(MOST_RECENT_ELONGATION.structure)
         if len(locations)==0:
             locations = structure.find_substructures(MOST_RECENT_REDUCTION.structure)
+            for match in locations:
+                atom_1 = match.atoms[MOST_RECENT_REDUCTION.atom_2]
         if len(locations)==0:
             locations = structure.find_substructures(MOST_RECENT_DEHYDRATION.structure)
+            for match in locations:
+                atom_1 = match.atoms[MOST_RECENT_DEHYDRATION.atom_2]
         if len(locations)==0:
             locations = structure.find_substructures(MOST_RECENT_EONYL_REDUCTION.structure)
-        for match in locations:
-            atom_2 = match.atoms[MOST_RECENT_ELONGATION.atom_2]
-        return atom_2
+            for match in locations:
+                atom_1 = match.atoms[MOST_RECENT_EONYL_REDUCTION.atom_2]
+        else:
+                        for match in locations:
+                            atom_1 = match.atoms[MOST_RECENT_ELONGATION.atom_2]
+        return atom_1
 def find_beta_c(structure):
         """
         Returns the atom that is the current beta c atom
@@ -685,24 +711,54 @@ def find_beta_c(structure):
         locations = structure.find_substructures(MOST_RECENT_ELONGATION.structure)
         if len(locations)==0:
             locations = structure.find_substructures(MOST_RECENT_REDUCTION.structure)
+            for match in locations:
+                atom_1 = match.atoms[MOST_RECENT_REDUCTION.atom_1]
         if len(locations)==0:
             locations = structure.find_substructures(MOST_RECENT_DEHYDRATION.structure)
+            for match in locations:
+                atom_1 = match.atoms[MOST_RECENT_DEHYDRATION.atom_1]
         if len(locations)==0:
             locations = structure.find_substructures(MOST_RECENT_EONYL_REDUCTION.structure)
-        for match in locations:
-            atom_1 = match.atoms[MOST_RECENT_ELONGATION.atom_1]
+            for match in locations:
+                atom_1 = match.atoms[MOST_RECENT_EONYL_REDUCTION.atom_1]
+        else:
+                        for match in locations:
+                            atom_1 = match.atoms[MOST_RECENT_ELONGATION.atom_1]
         return atom_1
 def find_beta_c_oh(structure):
         """
-        Returns the atom that is the current beta c atom
+        Returns the O atom that is on the current beta c atom
         """
         locations = structure.find_substructures(RECENT_REDUCTION_COH.structure)
         for match in locations:
-            atom_1 = match.atoms[MOST_RECENT_ELONGATION.atom_1]
+            atom_1 = match.atoms[RECENT_REDUCTION_COH..atom_1]
         return atom_1
+def find_OH_two_modules_upstream(structure):
+        """
+        Returns the O atom that is connected to the first hydroxygroup two modules upstream
+        """
+        locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA.structure)
+        if len(locations)==0:
+            locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.structure)
+            for match in locations:
+                atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.atom_1]
+                atom_2 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.atom_2]
+                bond = structure.bond_lookup[atom_1][atom_2]
+                bonds.append(bond)
+
+
+            return bonds
+        else:
+                    atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA.atom_1]
+                    atom_2 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA.atom_2]
+                    bond = structure.bond_lookup[atom_1][atom_2]
+                    bonds.append(bond)
+
+
+                return bonds
 def find_cc_dh_gamma_beta(structure):
     """
-    Returns the Bond between the two C's that needs to be doubled
+    Returns the Bond between the two C's that needs to be doubled for shifted double bonds
 
     structure: PIKAChU Structure object
     """
@@ -714,7 +770,16 @@ def find_cc_dh_gamma_beta(structure):
         bond = structure.bond_lookup[atom_1][atom_2]
         bonds.append(bond)
 
+
     return bonds
+def smallest_cyclisation(structure):
+    #reduce Ketogroup first
+    structure=ketoreductase(structure)
+    oh_bond=find_OH_two_modules_upstream(structure)
+    h_bond=find_O_H(structure)
+    internal_condensation(structure, oh_bond, h_bond)
+    return structure
+
 
 def alpha_methyl_transferase(structure):
     #find atom to add methylgroup
@@ -746,7 +811,7 @@ def alpha_L_methyl_transferase(structure):
         return methylated_structure
 def gamma_beta_dehydratase(chain_intermediate):
     """
-    Performs the dehydratase reaction on the PKS chain intermediate, returns
+    Performs the dehydratase reaction on the PKS chain intermediate wuth shifted double bonds, returns
     the reaction product as a PIKAChU Structure object
 
     chain_intermediate: PIKAChU Structure object, PKS chain intermediate where
