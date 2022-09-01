@@ -20,18 +20,19 @@ example_cluster=  [['module_1', 'starter_module_trans_at_pks',"malonylcoa"],
 example_cluster=  [['module_1', 'starter_module_trans_at_pks',"malonylcoa"],
                            ['module_2', 'elongation_module_trans_at_pks', 'Clade_13', ['KR_B2']],
                            ['module_3', 'elongation_module_trans_at_pks', 'Clade_96', ['KR_A1']],
-                           ['module_4', 'elongation_module_nrps', 'alanine', []],
-                           ['module_5', 'elongation_module_trans_at_pks', 'Clade_36', ['KR', 'DH', 'ER']],
-                           ['module_6', 'elongation_module_pks', 'methoxymalonylacp', ['KR_A1']],
-                           ['module_7', 'terminator_module_trans_at_pks', 'Clade_60', ['KR_A1']]]
+                           ['module_4', 'elongation_module_trans_at_pks', 'Clade_78', ['KR_A1']],
+                           ['module_5', 'elongation_module_trans_at_pks', 'Clade_78', ['KR_A1']],
+                           ['module_6', 'elongation_module_trans_at_pks', 'Clade_38', ['KR_A1']],
+                           ['module_7', 'elongation_module_nrps', 'alanine', []],
+                           ['module_8', 'elongation_module_trans_at_pks', 'Clade_36', ['KR', 'DH']],
+                           ['module_9', 'elongation_module_pks', 'methoxymalonylacp', ['KR_A1']],
+                           ['module_10', 'terminator_module_trans_at_pks', 'Clade_60', ['KR_A1']]]
 def translate_trans_at_pks_cluster_to_cis_at_pks(trans_at_pks_cluster):
     cis_at_pks_cluster=[]
     #translates transator input into transpact clades
     for index, trans_at_module in enumerate(trans_at_pks_cluster):
             if "Clade" in str(trans_at_module):
-                print(trans_at_module)
                 trans_at_module[2]=transator_clade_to_transpact_clade[trans_at_module[2]]
-                print(trans_at_module)
     for index, trans_at_module in enumerate(trans_at_pks_cluster):
         cis_at_module=[]
         if index<len(trans_at_pks_cluster)-1:

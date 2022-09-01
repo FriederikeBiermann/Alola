@@ -60,7 +60,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
     'elongation_monomer', ['KR', 'DH', 'ER']] or ['module name',
     'terminator_module_nrps', 'amino acid'],
     """
-    print("zest!")
+
     last_module_nrps = False
     # Check if last module is an NRPS module:
     if modules[-1][1] == 'elongation_module_nrps' or \
@@ -105,7 +105,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
             chain_intermediate = starter_unit
         if draw_structures_per_module:
             drawing = RaichuDrawer(chain_intermediate, dont_show=True, save_svg_string=True)
-            print(drawing)
+
 
 
             list_drawings_per_module.append([drawing])
@@ -246,7 +246,23 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                                 display_reactions(['1.png', '2.png', '3.png','4.png'],
                                                   list_domains, elongation_unit,
                                                   module_name, draw_mechanism_per_module)
+                if domain == 'SC':
+                    executable = True
+                    if executable:
+                        new_chain_intermediate = smallest_cyclisation(chain_intermediate)
 
+
+                        chain_intermediate = new_chain_intermediate
+                        if visualization_mechanism:
+                            if path.exists('4.png'):
+                                os.remove('4.png')
+                            RaichuDrawer(chain_intermediate, save_png='4.png', dpi=500)
+                            list_filenames.append('4.png')
+                            if 'ER' not in list_domains:
+                                display_reactions(['1.png', '2.png', '3.png','4.png'],
+                                                  list_domains, elongation_unit,
+                                                  module_name, draw_mechanism_per_module)
+                draw_structure(chain_intermediate)
                 if domain == 'ER':
                     assert any(domain.startswith('KR') for domain in list_domains)
                     assert 'DH' in list_domains or 'GDH' in list_domains
@@ -468,8 +484,10 @@ def cluster_to_structure(modules, visualization_mechanism=False,
             chain_intermediate.find_cycles()
             RaichuDrawer(chain_intermediate)
         else:
+            pass
             # chain_intermediate.find_cycles()
-            RaichuDrawer(chain_intermediate,dont_show=True)
+
+            #RaichuDrawer(chain_intermediate,dont_show=True)
 
     # Remove all intermediate structure files
     for i in range(1, 6):

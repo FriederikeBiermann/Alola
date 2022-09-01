@@ -1,6 +1,7 @@
-from pikachu.reactions.basic_reactions import condensation, hydrolysis
+from pikachu.reactions.basic_reactions import condensation, hydrolysis, internal_condensation
 from pikachu.reactions.functional_groups import find_bonds, BondDefiner, GroupDefiner, find_atoms
 from raichu.attach_to_domain import *
+from pikachu.general import *
 RECENT_ELONGATION = BondDefiner('recent_elongation', 'O=CCC(=O)S', 0, 1)
 RECENT_REDUCTION_COH = BondDefiner('recent_reduction_C-OH', 'OCCC(=O)S', 0, 1)
 RECENT_REDUCTION_MMAL_CHIRAL_C = GroupDefiner('recent_reduction_mmal_chiral_c', 'CCC(C(=O)S)C', 2)
@@ -524,7 +525,7 @@ def find_O_H(structure):
     locations = structure.find_substructures(RECENT_REDUCTION_COH .structure)
     bonds = []
     for match in locations:
-        atom_1 = match.atoms[RECENT_REDUCTION_CC.atom_1]
+        atom_1 = match.atoms[RECENT_REDUCTION_COH.atom_1]
         for neighbour in atom_1.neighbours:
             if neighbour.type=="H":
                 atom_2=neighbour
@@ -636,7 +637,6 @@ def hydroxylation(target_atom, structure):
     oxygen = hydroxyl_group.atoms[0]
     hydrogen_1 = hydroxyl_group.atoms[1]
     bond_1 = oxygen.get_bond(hydrogen_1)
-    print(target_atom,target_atom.neighbours)
     hydrogen_2 = target_atom.get_neighbour('H')
     if not hydrogen_2:
         raise Exception("Can't oxidate this atom!")
@@ -738,6 +738,7 @@ def find_OH_two_modules_upstream(structure):
         Returns the O atom that is connected to the first hydroxygroup two modules upstream
         """
         locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA.structure)
+        bonds=[]
         if len(locations)==0:
             locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.structure)
             for match in locations:
@@ -776,9 +777,13 @@ def find_cc_dh_gamma_beta(structure):
 def smallest_cyclisation(structure):
     #reduce Ketogroup first
     structure=ketoreductase(structure)
-    oh_bond=find_OH_two_modules_upstream(structure)
-    h_bond=find_O_H(structure)
-    internal_condensation(structure, oh_bond, h_bond)
+    oh_bond=find_OH_two_modules_upstream(structure)[0]
+
+    h_bond=find_O_H(structure)[0]
+
+    structure=internal_condensation(structure, oh_bond, h_bond)[0]
+    draw_structure(structure)
+
     return structure
 
 
