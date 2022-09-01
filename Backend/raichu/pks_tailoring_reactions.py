@@ -907,7 +907,7 @@ def gamma_beta_dehydratase(chain_intermediate):
             for bond in atom.bonds:
                 for neighbour in bond.neighbours:
                     if neighbour == c1:
-                        the_bond = bond1
+                        the_bond = bond
     for atom in the_bond.neighbours:
         atom.draw.colour = 'blue'
 

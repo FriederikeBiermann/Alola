@@ -34,7 +34,7 @@ TAILOR_DOMAIN_SHORT_TO_LONG = {'E': 'Epimerization', 'nMT' : 'N-methylation'}
 TAILOR_DOMAIN_TO_COLOUR = {'KR' : 'red', 'KR_inactive' : 'red', 'KR*' : 'red',
                            'KR_A1' : 'red', 'KR_A2' : 'red', 'KR_B1' : 'red',
                            'KR_B2' : 'red', 'KR_C1' : 'red', 'KR_C2' : 'red',
-                           'DH' : 'blue', 'ER' : 'green'}
+                           'DH' : 'blue', 'ER' : 'green',"GDH":'blue'}
 
 
 def cluster_to_structure(modules, visualization_mechanism=False,
@@ -60,6 +60,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
     'elongation_monomer', ['KR', 'DH', 'ER']] or ['module name',
     'terminator_module_nrps', 'amino acid'],
     """
+    print("zest!")
     last_module_nrps = False
     # Check if last module is an NRPS module:
     if modules[-1][1] == 'elongation_module_nrps' or \
@@ -197,7 +198,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                         RaichuDrawer(chain_intermediate, save_png='3.png', dpi=500)
                         list_filenames.append('3.png')
                         # Check if the module also contains a DH domain
-                        if 'DH' not in list_domains:
+                        if 'DH' not in list_domains and 'GDH' not in list_domains:
                             display_reactions(['1.png', '2.png', '3.png'],
                                               list_domains, elongation_unit,
                                               module_name,
@@ -227,10 +228,28 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                                 display_reactions(['1.png', '2.png', '3.png','4.png'],
                                                   list_domains, elongation_unit,
                                                   module_name, draw_mechanism_per_module)
+                if domain == 'GDH':
+                    assert any(domain.startswith('KR') for domain in list_domains)
+                    executable = True
+                    for domain_type in list_domains:
+                        if domain_type in KR_NO_KETOREDUCTASE_ACTIVITY:
+                            executable = False
+                    if executable:
+                        new_chain_intermediate = gamma_beta_dehydratase(chain_intermediate)
+                        chain_intermediate = new_chain_intermediate
+                        if visualization_mechanism:
+                            if path.exists('4.png'):
+                                os.remove('4.png')
+                            RaichuDrawer(chain_intermediate, save_png='4.png', dpi=500)
+                            list_filenames.append('4.png')
+                            if 'ER' not in list_domains:
+                                display_reactions(['1.png', '2.png', '3.png','4.png'],
+                                                  list_domains, elongation_unit,
+                                                  module_name, draw_mechanism_per_module)
 
                 if domain == 'ER':
                     assert any(domain.startswith('KR') for domain in list_domains)
-                    assert 'DH' in list_domains
+                    assert 'DH' in list_domains or 'GDH' in list_domains
                     executable = True
                     for domain_type in list_domains:
                         if domain_type in KR_NO_KETOREDUCTASE_ACTIVITY:
