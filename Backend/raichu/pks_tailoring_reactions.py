@@ -731,7 +731,7 @@ def find_beta_c_oh(structure):
         """
         locations = structure.find_substructures(RECENT_REDUCTION_COH.structure)
         for match in locations:
-            atom_1 = match.atoms[RECENT_REDUCTION_COH..atom_1]
+            atom_1 = match.atoms[RECENT_REDUCTION_COH.atom_1]
         return atom_1
 def find_OH_two_modules_upstream(structure):
         """
@@ -749,6 +749,7 @@ def find_OH_two_modules_upstream(structure):
 
             return bonds
         else:
+                for match in locations:
                     atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA.atom_1]
                     atom_2 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA.atom_2]
                     bond = structure.bond_lookup[atom_1][atom_2]

@@ -11,14 +11,14 @@ clade_to_starter_substrate={'Clade_33': 'OC(=O)CC(S)=O', 'Clade_73': 'OC(=O)CC(S
 
 example_cluster=  [['module_1', 'starter_module_trans_at_pks',"malonylcoa"],
                            ['module_2', 'elongation_module_trans_at_pks', 'Clade_13', ['KR_B2']],
-                           ['module_3', 'elongation_module_trans_at_pks', 'Clade_116', ['KR_A1']],
+                           ['module_3', 'elongation_module_trans_at_pks', 'Clade_134', ['KR_A1']],
                            ['module_4', 'elongation_module_NRPS', 'lysine', []],
                            ['module_5', 'elongation_module_trans_at_pks', 'Clade_36', ['KR', 'DH', 'ER']],
                            ['module_6', 'elongation_module_pks', 'CC(C(O)=O)C(S)=O', ['KR_A1']],
                            ['module_7', 'terminator_module_trans_at_pks', 'Clade_60', ['KR_A1']]]
 example_cluster=  [['module_1', 'starter_module_trans_at_pks',"malonylcoa"],
                            ['module_2', 'elongation_module_trans_at_pks', 'Clade_13', ['KR_B2']],
-                           ['module_3', 'elongation_module_trans_at_pks', 'Clade_116', ['KR_A1']],
+                           ['module_3', 'elongation_module_trans_at_pks', 'Clade_134', ['KR_A1']],
                            ['module_4', 'elongation_module_NRPS', 'lysine', []],
                            ['module_5', 'elongation_module_trans_at_pks', 'Clade_36', ['KR', 'DH', 'ER']],
                            ['module_6', 'elongation_module_pks', 'methoxymalonylacp', ['KR_A1']],
@@ -65,8 +65,8 @@ def translate_trans_at_pks_cluster_to_cis_at_pks(trans_at_pks_cluster):
         cis_at_pks_cluster+=[cis_at_module]
     return cis_at_pks_cluster
 if __name__ == "__main__":
+    print(example_cluster)
     cis_at_pks_cluster=translate_trans_at_pks_cluster_to_cis_at_pks(example_cluster)
     print(cis_at_pks_cluster)
     cis_at_pks_cluster=ast.literal_eval(str(cis_at_pks_cluster).replace("OC(=O)CC(S)=O","malonylcoa"))
     print(cis_at_pks_cluster)
-    draw_cluster(cis_at_pks_cluster)
