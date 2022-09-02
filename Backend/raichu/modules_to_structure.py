@@ -262,7 +262,7 @@ def cluster_to_structure(modules, visualization_mechanism=False,
                                 display_reactions(['1.png', '2.png', '3.png','4.png'],
                                                   list_domains, elongation_unit,
                                                   module_name, draw_mechanism_per_module)
-                draw_structure(chain_intermediate)
+                
                 if domain == 'ER':
                     assert any(domain.startswith('KR') for domain in list_domains)
                     assert 'DH' in list_domains or 'GDH' in list_domains
