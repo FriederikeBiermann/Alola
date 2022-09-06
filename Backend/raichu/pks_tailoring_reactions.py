@@ -634,7 +634,12 @@ def find_double_cc(structure):
 
 #trans-AT-PKS tailoringReactions
 def hydroxylation(target_atom, structure):
+        """
+        Returns the hydroxylated structure thats hydroxylated at the target atom.
 
+        structure: PIKAChU Structure object
+        target_atom:  PIKAChU atom object
+        """
 
     hydroxyl_group = read_smiles('o')
     hydroxyl_group.add_attributes(ATTRIBUTES, boolean=True)
@@ -661,6 +666,13 @@ def hydroxylation(target_atom, structure):
         if oxygen.nr in s.atoms:
             return s
 def methylation(target_atom, structure):
+            """
+            Returns the structure thats methylated at the target atom.
+
+            structure: PIKAChU Structure object
+            target_atom:  PIKAChU atom object
+            """
+
 
     methyl_group = read_smiles('C')
     methyl_group.add_attributes(ATTRIBUTES, boolean=True)
@@ -690,6 +702,7 @@ def methylation(target_atom, structure):
 def find_alpha_c(structure):
         """
         Returns the atom that is the current alpha c atom
+        structure: PIKAChU Structure object
         """
         locations = structure.find_substructures(MOST_RECENT_ELONGATION.structure)
         if len(locations)==0:
@@ -711,6 +724,7 @@ def find_alpha_c(structure):
 def find_beta_c(structure):
         """
         Returns the atom that is the current beta c atom
+        structure: PIKAChU Structure object
         """
         locations = structure.find_substructures(MOST_RECENT_ELONGATION.structure)
         if len(locations)==0:
@@ -732,6 +746,7 @@ def find_beta_c(structure):
 def find_beta_c_oh(structure):
         """
         Returns the O atom that is on the current beta c atom
+        structure: PIKAChU Structure object
         """
         locations = structure.find_substructures(RECENT_REDUCTION_COH.structure)
         for match in locations:
@@ -739,15 +754,16 @@ def find_beta_c_oh(structure):
         return atom_1
 def find_OH_two_modules_upstream(structure):
         """
-        Returns the O atom that is connected to the first hydroxygroup two modules upstream
+        Returns the O atom that is connected to the first hydroxygroup two modules upstream (also if chain contains double bonds)
+        structure: PIKAChU Structure object
         """
         locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA.structure)
         bonds=[]
         if len(locations)==0:
-            locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.structure)
+            locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA_WITH_DOUBLE_BOND_SHIFTED.structure)
             for match in locations:
-                atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.atom_1]
-                atom_2 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.atom_2]
+                atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA_WITH_DOUBLE_BOND_SHIFTED.atom_1]
+                atom_2 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA_WITH_DOUBLE_BOND_SHIFTED.atom_2]
                 bond = structure.bond_lookup[atom_1][atom_2]
                 bonds.append(bond)
 
@@ -764,6 +780,17 @@ def find_OH_two_modules_upstream(structure):
 
             return bonds
         if len(locations)==0:
+            locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.structure)
+            for match in locations:
+                atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.atom_1]
+                atom_2 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA.atom_2]
+                bond = structure.bond_lookup[atom_1][atom_2]
+                bonds.append(bond)
+
+
+            return bonds
+
+        if len(locations)==0:
             locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA_WITH_DOUBLE_BOND.structure)
             for match in locations:
                 atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA_WITH_DOUBLE_BOND.atom_1]
@@ -773,16 +800,7 @@ def find_OH_two_modules_upstream(structure):
 
 
             return bonds
-        if len(locations)==0:
-            locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA_WITH_DOUBLE_BOND_SHIFTED.structure)
-            for match in locations:
-                atom_1 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA_WITH_DOUBLE_BOND_SHIFTED.atom_1]
-                atom_2 = match.atoms[HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_ALPHA_WITH_DOUBLE_BOND_SHIFTED.atom_2]
-                bond = structure.bond_lookup[atom_1][atom_2]
-                bonds.append(bond)
 
-
-            return bonds
         if len(locations)==0:
             locations = structure.find_substructures(HYDROXYL_GROUP_TWO_MODULES_UPSTREAM_BETA_WITH_DOUBLE_BOND_SHIFTED.structure)
             for match in locations:
@@ -819,10 +837,16 @@ def find_cc_dh_gamma_beta(structure):
 
     return bonds
 def smallest_cyclisation(structure):
+    """
+    Cyclises with the OH group two modules upstream to the smalles possible ring
+
+    structure: PIKAChU Structure object
+    """
     #reduce Ketogroup first
     structure=ketoreductase(structure)
-    oh_bond=find_OH_two_modules_upstream(structure)[0]
-
+    oh_bond=find_OH_two_modules_upstream(structure)
+    assert len(oh_bond)>0, "No hydroxy group two modules upstream availiable"
+    oh_bond=oh_bond[0]
     h_bond=find_O_H(structure)[0]
 
     structure=internal_condensation(structure, oh_bond, h_bond)[0]
@@ -832,26 +856,56 @@ def smallest_cyclisation(structure):
 
 
 def alpha_methyl_transferase(structure):
+    """
+    Returns the structure thats methylated at the alpha-c.
+
+    structure: PIKAChU Structure object
+    target_atom:  PIKAChU atom object
+    """
     #find atom to add methylgroup
         alpha_c=find_alpha_c(structure)
         structure=methylation(alpha_c,structure)
         return structure
 def beta_methyl_transferase(structure):
+    """
+    Returns the structure thats methylated at the beta-c.
+
+    structure: PIKAChU Structure object
+    target_atom:  PIKAChU atom object
+    """
     #find atom to add methylgroup
         beta_c=find_beta_c(structure)
         structure=methylation(beta_c,structure)
         return structure
 def beta_hydroxy_methyl_transferase(structure):
+        """
+        Returns the structure thats methylated at the beta-oh-goup.
+
+        structure: PIKAChU Structure object
+        target_atom:  PIKAChU atom object
+        """
     #find atom to add methylgroup
         beta_c_oh=find_beta_c_oh(structure)
         structure=methylation(beta_c_oh,structure)
         return structure
 def alpha_hydroxylase(structure):
+        """
+        Returns the structure thats hydroxylated at the alpha-c.
+
+        structure: PIKAChU Structure object
+        target_atom:  PIKAChU atom object
+        """
     #find atom to add methylgroup
         alpha_c=find_alpha_c(structure)
         structure=hydroxylation(alpha_c,structure)
         return structure
 def alpha_L_methyl_transferase(structure):
+        """
+        Returns the structure thats methylated at the alpha- c in L configuration.
+
+        structure: PIKAChU Structure object
+        target_atom:  PIKAChU atom object
+        """
     #find atom to add methylgroup
         alpha_c=find_alpha_c(structure)
         structure=methylation(alpha_c,structure)

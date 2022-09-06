@@ -28,6 +28,12 @@ example_cluster=  [['module_1', 'starter_module_trans_at_pks',"malonylcoa"],
                            ['module_9', 'elongation_module_pks', 'methoxymalonylacp', ['KR_A1']],
                            ['module_10', 'terminator_module_trans_at_pks', 'Clade_60', ['KR_A1']]]
 def translate_trans_at_pks_cluster_to_cis_at_pks(trans_at_pks_cluster):
+            """
+            Returns the cis_at_pks_cluster corresponding to  thats methylated at the beta-oh-goup.
+
+            structure: PIKAChU Structure object
+            target_atom:  PIKAChU atom object
+            """
     cis_at_pks_cluster=[]
     #translates transator input into transpact clades
     for index, trans_at_module in enumerate(trans_at_pks_cluster):
