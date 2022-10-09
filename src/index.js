@@ -1,7 +1,7 @@
-
-regionName = "r1c3"
+^
+regionName = "r1c2"
 let fetching = false
-let cluster_type = "nrpspks"
+let cluster_type = "transAT-PKS"
 let tailoringEnzymes=["p450"," methyltransferase","n-methyltransferase","c-methyltransferase","o-methyltransferase"]
 
 let nameToStructure = {
@@ -861,6 +861,9 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
         for (let intermediateIndex = 0; intermediateIndex <
             intermediates.length; intermediateIndex++) {
             intermediate = intermediates[intermediateIndex]
+            if (starterACP<1){
+              starterACP=1
+            }
             let intermediate_container = document.getElementById(
                 'innerIntermediateContainer' + acpList[
                     intermediateIndex + starterACP-1])
@@ -2108,6 +2111,9 @@ function extractAntismashPredictionsFromRegionSJKS(details_data, region_index,
 
                             starterACP = acpCounter;
                             starterStatus = 1
+                            console.log(starterACP,"starter")
+
+                            console.log(starterACP,"starter")
                         }
                         if (domainArray.includes("KS") && !(domainArray.includes(
                                 "TE")) && starterStatus == 1) {
@@ -2169,6 +2175,9 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
                 let orf = region.orfs[orfIndex];
                 if (geneMatrix[geneIndex].id == orf.id) {
+                    // acp stat helps connecting modules that are within the same module but on different genes
+                    let acpStat=0;
+                    let domainArray=[]
                     for (let moduleIndex = 0; moduleIndex < orf.modules.length; moduleIndex++) {
                         let module = orf.modules[moduleIndex];
                         let moduleArray = [];
@@ -2177,7 +2186,9 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                         let nameModule = "module_" + orfIndex + "_" +
                             moduleIndex
                         let nameDomain = "n"
-                        let domainArray = [];
+                        if (acpStat==1){
+                           domainArray = [];}
+                        acpStat=0
                         let typeModule = "";
                         let substrate = ""
                         for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
@@ -2233,6 +2244,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     if (domain.type.includes("ACP") || domain.type
                                         .includes("PP")||domain.type.includes("PCP")) {
                                         acpCounter += 1;
+                                        acpStat=1;
                                     }
 
                                     if (domain.abbreviation == "AT") {
@@ -2293,6 +2305,10 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                             }
                         }
                         console.log(acpCounter,"acpCounter")
+                        if (substrate.length==0){
+                          substrate="malonylcoa"
+                        }
+                        console.log("substrate",substrate);
                         if (domainArray.includes("AT") && !(domainArray.includes(
                                 "KS")) && !(domainArray.includes("TE"))) {
                             typeModule = "starter_module_pks";
@@ -2307,6 +2323,8 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                         }
                         if (domainArray.includes("KS") && !(domainArray.includes(
                                 "TE")) && starterStatus == 1) {
+
+
                             typeModule = "elongation_module_pks";
                             moduleArray.push(nameModule, typeModule, substrate);
                             if (domainArray.includes("DH") && domainArray.includes(
@@ -2318,6 +2336,10 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                             else if (domainArray.includes("DH")) {
                                 removeAllInstances(domainArray, "DH");
                                 domainArray.push("DH");
+                            }
+                            if ((domainArray.includes("DH")||domainArray.includes("ER"))&& !(domainArray.includes("KR"))){
+                              removeAllInstances(domainArray, "DH");
+                              removeAllInstances(domainArray, "ER");
                             }
                             moduleArray.push(domainArray)
                         }

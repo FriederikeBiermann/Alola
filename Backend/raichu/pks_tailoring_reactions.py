@@ -634,12 +634,12 @@ def find_double_cc(structure):
 
 #trans-AT-PKS tailoringReactions
 def hydroxylation(target_atom, structure):
-        """
-        Returns the hydroxylated structure thats hydroxylated at the target atom.
+    """
+    Returns the hydroxylated structure thats hydroxylated at the target atom.
 
-        structure: PIKAChU Structure object
-        target_atom:  PIKAChU atom object
-        """
+    structure: PIKAChU Structure object
+    target_atom:  PIKAChU atom object
+    """
 
     hydroxyl_group = read_smiles('o')
     hydroxyl_group.add_attributes(ATTRIBUTES, boolean=True)
@@ -666,12 +666,12 @@ def hydroxylation(target_atom, structure):
         if oxygen.nr in s.atoms:
             return s
 def methylation(target_atom, structure):
-            """
-            Returns the structure thats methylated at the target atom.
+    """
+    Returns the structure thats methylated at the target atom.
 
-            structure: PIKAChU Structure object
-            target_atom:  PIKAChU atom object
-            """
+    structure: PIKAChU Structure object
+    target_atom:  PIKAChU atom object
+    """
 
 
     methyl_group = read_smiles('C')
@@ -863,9 +863,9 @@ def alpha_methyl_transferase(structure):
     target_atom:  PIKAChU atom object
     """
     #find atom to add methylgroup
-        alpha_c=find_alpha_c(structure)
-        structure=methylation(alpha_c,structure)
-        return structure
+    alpha_c=find_alpha_c(structure)
+    structure=methylation(alpha_c,structure)
+    return structure
 def beta_methyl_transferase(structure):
     """
     Returns the structure thats methylated at the beta-c.
@@ -874,9 +874,9 @@ def beta_methyl_transferase(structure):
     target_atom:  PIKAChU atom object
     """
     #find atom to add methylgroup
-        beta_c=find_beta_c(structure)
-        structure=methylation(beta_c,structure)
-        return structure
+    beta_c=find_beta_c(structure)
+    structure=methylation(beta_c,structure)
+    return structure
 def beta_hydroxy_methyl_transferase(structure):
         """
         Returns the structure thats methylated at the beta-oh-goup.
