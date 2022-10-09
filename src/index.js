@@ -1,4 +1,4 @@
-^
+
 regionName = "r1c2"
 let fetching = false
 let cluster_type = "transAT-PKS"
@@ -1889,6 +1889,7 @@ function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index,
     });
     let acpCounter = -1
     let starterStatus = 0
+
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false) {
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
@@ -1905,9 +1906,10 @@ function extractAntismashPredictionsFromRegionSJNRPS(details_data, region_index,
                         let domainArray = [];
                         let typeModule = "starter_module_nrps";
                         let substrate = "glycine"
+
                         for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
                             let domain = orf.domains[domainIndex];
-                            let starterACP = ""
+
                             if (geneMatrix[geneIndex].domains[domainIndex].ko ==
                                 false) {
                                 // checks if domain in module
@@ -2170,30 +2172,37 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     });
     let acpCounter = 0
     let starterStatus = 0
+    let starterACP = 1
+    let typeModule = "";
+    let substrate = "";
+
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false) {
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
                 let orf = region.orfs[orfIndex];
                 if (geneMatrix[geneIndex].id == orf.id) {
                     // acp stat helps connecting modules that are within the same module but on different genes
-                    let acpStat=0;
+                    let acpStat=1;
                     let domainArray=[]
+                    let moduleArray = [];
                     for (let moduleIndex = 0; moduleIndex < orf.modules.length; moduleIndex++) {
                         let module = orf.modules[moduleIndex];
-                        let moduleArray = [];
+
                         let startModule = module.start;
                         let endModule = module.end;
                         let nameModule = "module_" + orfIndex + "_" +
                             moduleIndex
                         let nameDomain = "n"
                         if (acpStat==1){
-                           domainArray = [];}
+                           domainArray = []
+                          moduleArray = [];
+                        typeModule = "";
+                      substrate = "";}
+
                         acpStat=0
-                        let typeModule = "";
-                        let substrate = ""
+
                         for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
                             let domain = orf.domains[domainIndex];
-                            let starterACP = ""
                             if (geneMatrix[geneIndex].domains[domainIndex].ko ==
                                 false||geneMatrix[geneIndex].domains[domainIndex].ko =="None") {
                                 // checks if domain in module
@@ -2308,7 +2317,8 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                         if (substrate.length==0){
                           substrate="malonylcoa"
                         }
-                        console.log("substrate",substrate);
+                        // create module arrays
+                        if (acpStat==1){
                         if (domainArray.includes("AT") && !(domainArray.includes(
                                 "KS")) && !(domainArray.includes("TE"))) {
                             typeModule = "starter_module_pks";
@@ -2372,7 +2382,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
 
                         if (moduleArray.length != 0) {
                             outputForRaichu.push(moduleArray)
-                        }
+                        }}
                     }
                     break
                 }
