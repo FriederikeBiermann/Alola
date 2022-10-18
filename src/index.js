@@ -1050,6 +1050,7 @@ function obtainACPList(geneMatrix) {
  * @output acp List
  */
     let acpList = []
+    last_domain_status=0
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
             0) {
@@ -1060,10 +1061,14 @@ function obtainACPList(geneMatrix) {
                             "ACP") || geneMatrix[geneIndex].domains[domainIndex]
                         .type.includes("PP")|| geneMatrix[geneIndex].domains[domainIndex]
                     .type.includes("PCP"))&&!(geneMatrix[geneIndex].domains[domainIndex]
-                .type.includes("ACPS"))) {
+                .type.includes("ACPS"))&&last_domain_status==0) {
                         acpList.push(geneMatrix[geneIndex].domains[domainIndex]
                             .identifier)
+                            last_domain_status=1
+
                     }
+                    else{last_domain_status=0;}
+
                 }
             }
         }
