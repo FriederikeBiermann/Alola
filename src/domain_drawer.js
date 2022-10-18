@@ -762,11 +762,11 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
                     })
                 dom.node.id = "module_" + moduleIndex
                 if (size>=70){
-                  completeModuleIndex++
                   var text_module=draw.text("Module " + completeModuleIndex).x(size/2).y(height/2-7)
                   .fill("white")
                 }
-
+                else{var text_module=draw.text(String(completeModuleIndex)).x(size/2).y(height/2-7).fill("white")}
+                completeModuleIndex++
             }
         }
     }
