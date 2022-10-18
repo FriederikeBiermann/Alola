@@ -1532,15 +1532,27 @@ console.log(longDomainArray)
             .checked) {domainArray.push(["oMT"])}
     if (document.getElementById("wildcardcMT")
     .checked) {domainArray.push(["cMT"])}
-
-console.log(longDomainArray)
   }
 
-  console.log(longDomainArray)
+
   if (wildcardModule=="starter_module_pks"){
-    longDomainArray.push(defaultATDomain,defaultACPDomain)
+    if (document.getElementById("wildcardKR")
+                .checked) {domainArray.push(["KR"]);
+
+    if (document.getElementById("wildcardDH")
+                            .checked) {domainArray.push(["DH"])
+  if (document.getElementById("wildcardER")
+            .checked) {domainArray.push(["ER"])
+          longDomainArray.push(defaultATDomain,defaultKRDomain,defaultDHDomain,defaultERDomain,defaultACPDomain);}
+    else{longDomainArray.push(defaultATDomain,defaultKRDomain,defaultDHDomain,defaultACPDomain);}
+        }
+    else {longDomainArray.push(defaultATDomain,defaultKRDomain,defaultACPDomain);}
+    }
+else{    longDomainArray.push(defaultATDomain,defaultACPDomain)}
+
     wildcardModule=[nameWildcardModule,wildcardModule,nameToStructure[wildcardSubstrate]]
   }
+
   if (wildcardModule=="elongation_module_pks"){
     if (document.getElementById("wildcardKR")
                 .checked) {domainArray.push(["KR"]);
