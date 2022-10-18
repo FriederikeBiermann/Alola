@@ -1754,6 +1754,70 @@ let  positionEnd=orfDescription.search("Locus tag")-14;
 let  orfFunction=orfDescription.slice(positionBegin,positionEnd).toLowerCase();
 return orfFunction
 }
+function determine_module_type(domainArray,substrate,starterStatus,acpCounter){
+  moduleArray=[]
+  if ( !(domainArray.includes(
+          "KS")) && !(domainArray.includes("TE"))) {
+      typeModule = "starter_module_pks";
+      console.log(substrate)
+      starterSubstrate = nameToStructure[substrate];
+      console.log(starterSubstrate)
+      moduleArray.push(nameModule, typeModule,
+          starterSubstrate)
+
+      starterACP = acpCounter;
+      starterStatus = 1
+  }
+if (domainArray.includes("KS") && !(domainArray.includes(
+        "TE")) && starterStatus == 1) {
+
+
+    typeModule = "elongation_module_pks";
+    moduleArray.push(nameModule, typeModule, substrate);
+    if (domainArray.includes("DH") && domainArray.includes(
+            "ER")) {
+        removeAllInstances(domainArray, "DH")
+        removeAllInstances(domainArray, "ER");
+        domainArray.push("DH", "ER")
+    }
+    else if (domainArray.includes("DH")) {
+        removeAllInstances(domainArray, "DH");
+        domainArray.push("DH");
+    }
+    if ((domainArray.includes("DH")||domainArray.includes("ER"))&& !(domainArray.includes("KR"))){
+      removeAllInstances(domainArray, "DH");
+      removeAllInstances(domainArray, "ER");
+    }
+    moduleArray.push(domainArray)
+}
+
+if (domainArray.includes("A") && !("TE" in domainArray) &&
+    !("TD" in domainArray) && starterStatus == 0) {
+    typeModule = "starter_module_nrps";
+    moduleArray.push(nameModule, typeModule, substrate)
+    starterACP = acpCounter;
+    starterStatus = 1
+}
+else if (domainArray.includes("C") && !(domainArray.includes(
+        "TE")) && starterStatus == 1 && !("TD" in
+        domainArray)) {
+    typeModule = "elongation_module_nrps";
+    moduleArray.push(nameModule, typeModule, substrate);
+    moduleArray.push(domainArray)
+}
+if (domainArray.includes("TE") && domainArray.includes("AT") ) {
+    typeModule = "terminator_module_pks";
+    moduleArray.push(nameModule, typeModule, substrate);
+    moduleArray.push(domainArray)
+}
+if (domainArray.includes("TE") && domainArray.includes("A") ) {
+    typeModule = "terminator_module_nrps";
+    moduleArray.push(nameModule, typeModule, substrate);
+    moduleArray.push(domainArray)
+}
+return [moduleArray,starterStatus];
+}
+
 function findTailoringEnzymeStatus(orfFunction){
   /**
   *checks if annotated function is associated with tailoring enzyme
@@ -2017,13 +2081,14 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                         }
                         // create module arrays
                         if (acpStat==1){
-
-                        moduleArray=determine_module_type(domainArray,substrate,starterStatus)
-                        legth=moduleArray.length;
+                        module_type_calculation=determine_module_type(domainArray,substrate,starterStatus,acpCounter)
+                        moduleArray=module_type_calculation[0]
+                        starterStatus=module_type_calculation[1]
                         if (moduleArray.length != 0) {
                             outputForRaichu.push(moduleArray)
                         }
                       domainArray=[];                      }
+
                     }
                     break
                 }
@@ -2031,69 +2096,6 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
         }
     }
     return [outputForRaichu, starterACP, geneMatrix]
-}
-function determine_module_type(domainArray,substrate,starterStatus){
-  moduleArray=[]
-  if (domainArray.includes("AT") && !(domainArray.includes(
-          "KS")) && !(domainArray.includes("TE"))) {
-      typeModule = "starter_module_pks";
-      console.log(substrate)
-      starterSubstrate = nameToStructure[substrate];
-      console.log(starterSubstrate)
-      moduleArray.push(nameModule, typeModule,
-          starterSubstrate)
-
-      starterACP = acpCounter;
-      starterStatus = 1
-  }
-if (domainArray.includes("KS") && !(domainArray.includes(
-        "TE")) && starterStatus == 1) {
-
-
-    typeModule = "elongation_module_pks";
-    moduleArray.push(nameModule, typeModule, substrate);
-    if (domainArray.includes("DH") && domainArray.includes(
-            "ER")) {
-        removeAllInstances(domainArray, "DH")
-        removeAllInstances(domainArray, "ER");
-        domainArray.push("DH", "ER")
-    }
-    else if (domainArray.includes("DH")) {
-        removeAllInstances(domainArray, "DH");
-        domainArray.push("DH");
-    }
-    if ((domainArray.includes("DH")||domainArray.includes("ER"))&& !(domainArray.includes("KR"))){
-      removeAllInstances(domainArray, "DH");
-      removeAllInstances(domainArray, "ER");
-    }
-    moduleArray.push(domainArray)
-}
-
-if (domainArray.includes("A") && !("TE" in domainArray) &&
-    !("TD" in domainArray) && starterStatus == 0) {
-    typeModule = "starter_module_nrps";
-    moduleArray.push(nameModule, typeModule, substrate)
-    starterACP = acpCounter;
-    starterStatus = 1
-}
-else if (domainArray.includes("C") && !(domainArray.includes(
-        "TE")) && starterStatus == 1 && !("TD" in
-        domainArray)) {
-    typeModule = "elongation_module_nrps";
-    moduleArray.push(nameModule, typeModule, substrate);
-    moduleArray.push(domainArray)
-}
-if (domainArray.includes("TE") && domainArray.includes("AT") ) {
-    typeModule = "terminator_module_pks";
-    moduleArray.push(nameModule, typeModule, substrate);
-    moduleArray.push(domainArray)
-}
-if (domainArray.includes("TE") && domainArray.includes("A") ) {
-    typeModule = "terminator_module_nrps";
-    moduleArray.push(nameModule, typeModule, substrate);
-    moduleArray.push(domainArray)
-}
-return moduleArray;
 }
 
 function formatInputRaichuKS(data, cyclization, tailoringArray) {
