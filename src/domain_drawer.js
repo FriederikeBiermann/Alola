@@ -20,6 +20,8 @@ colour_fill_dict = {
     'nMT':'#dadada'
 }
 colour_outline_dict = {
+  'PKS_DH2': '#ca9862',
+      'PKS_KS(Trans-AT-KS)': '#5fc65f',
     'ACP': '#3d79d6',
     'PKS_PP': '#3d79d6',
     'PKS_AT': '#df5d5d',
