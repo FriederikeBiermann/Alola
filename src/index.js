@@ -1,7 +1,7 @@
 
-regionName = "r1c2"
+regionName = "r1c3"
 let fetching = false
-let cluster_type = "transAT-PKS"
+let cluster_type = "nrpspks"
 let tailoringEnzymes=["p450"," methyltransferase","n-methyltransferase","c-methyltransferase","o-methyltransferase"]
 
 let nameToStructure = {
@@ -1773,8 +1773,10 @@ return orfFunction
 }
 function determine_module_type(domainArray,substrate,starterStatus,acpCounter){
   moduleArray=[]
-  if ( !(domainArray.includes(
-          "KS")) && !(domainArray.includes("TE"))) {
+  starterStatus_new = starterStatus
+  console.log(starterStatus,"starter")
+  if ( starterStatus == 0 && !(domainArray.includes(
+          "KS")) && !(domainArray.includes("TE")) && (domainArray.includes("AT"))) {
       typeModule = "starter_module_pks";
       console.log(substrate)
       starterSubstrate = nameToStructure[substrate];
@@ -1783,9 +1785,9 @@ function determine_module_type(domainArray,substrate,starterStatus,acpCounter){
           starterSubstrate)
 
       starterACP = acpCounter;
-      starterStatus = 1
+      starterStatus_new = 1
   }
-if (domainArray.includes("KS") && !(domainArray.includes(
+else if (domainArray.includes("KS") && !(domainArray.includes(
         "TE")) && starterStatus == 1) {
 
 
@@ -1808,12 +1810,12 @@ if (domainArray.includes("KS") && !(domainArray.includes(
     moduleArray.push(domainArray)
 }
 
-if (domainArray.includes("A") && !("TE" in domainArray) &&
-    !("TD" in domainArray) && starterStatus == 0) {
+if (domainArray.includes("A") && !(domainArray.includes("TE")) &&
+    !(domainArray.includes("TD")) && starterStatus == 0) {
     typeModule = "starter_module_nrps";
     moduleArray.push(nameModule, typeModule, substrate)
     starterACP = acpCounter;
-    starterStatus = 1
+    starterStatus_new = 1
 }
 else if (domainArray.includes("C") && !(domainArray.includes(
         "TE")) && starterStatus == 1 && !("TD" in
@@ -1832,7 +1834,7 @@ if (domainArray.includes("TE") && domainArray.includes("A") ) {
     moduleArray.push(nameModule, typeModule, substrate);
     moduleArray.push(domainArray)
 }
-return [moduleArray,starterStatus];
+return [moduleArray,starterStatus_new];
 }
 
 function findTailoringEnzymeStatus(orfFunction){
@@ -2098,10 +2100,13 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                         }
                         // create module arrays
                         if (acpStat==1){
+                        console.log("module_3",domainArray)
                         module_type_calculation=determine_module_type(domainArray,substrate,starterStatus,acpCounter)
                         moduleArray=module_type_calculation[0]
                         starterStatus=module_type_calculation[1]
+                        console.log("module",moduleArray)
                         if (moduleArray.length != 0) {
+                            console.log("module",moduleArray)
                             outputForRaichu.push(moduleArray)
                         }
                       domainArray=[];                      }
@@ -2112,6 +2117,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
             }
         }
     }
+    console.log("output", outputForRaichu)
     return [outputForRaichu, starterACP, geneMatrix]
 }
 
