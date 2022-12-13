@@ -457,10 +457,21 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
         .attr("width", width + "px");
     Domainer.drawModules(geneMatrix, 20, scale)
     Domainer.drawGenes(geneMatrix, 20, scale)
+    Domainer.leaveSpaceForTailoring(150, scale)
   Domainer.drawTailoringEnzymes(cluster,geneMatrix,height,scale)
     return $(container)
         .find("svg")[0];
 });
+Domainer.leaveSpaceForTailoring=(function(width,scale) {
+  var innerIntermediateContainer =document.createElement('div');
+  var innerContainer = document.createElement('div');
+  innerContainer.id ='innerTailoringContainer'
+innerIntermediateContainer.id = "innerIntermediateContainer_tailoring_enzymes"
+innerIntermediateContainer.setAttribute("class","intermediateContainerTailoring")
+document.getElementById('domain_container').appendChild(innerContainer);
+innerContainer.appendChild(innerIntermediateContainer);
+    innerContainer.style.width =String(width) + "px";})
+
 Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
     var container = document.getElementById('domain_container')
     let size=50
@@ -470,17 +481,13 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
     var line_svg = SVG(container)
         .size('100%', 90)
         .group();
-    let begin=1
-
-
-
                     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                       let gene= geneMatrix[geneIndex]
                       if (gene.tailoringEnzymeStatus==true){
                                             let domainIdentifier="tailoringEnzyme"+ geneMatrix[geneIndex].id
 
                                       let  points = Domainer.getArrowPoints(
-                                                0,100,
+                                                15,100,
                                                 90, scale)
                                                 // declare color if ko
                                       console.log("pointstay",points)
@@ -531,19 +538,6 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 domainIdentifier)
                                             .appendChild(
                                                 innerDropdownContainer);
-
-                                        if (begin==1){
-                                        document.getElementById(
-                                                'innerdomainContainer' +
-                                                domainIdentifier)
-                                            .appendChild(
-                                                innerIntermediateContainer
-                                            );
-                                        document.getElementById(
-                                                "innerIntermediateContainer_tailoring_enzymes")
-                                            .setAttribute("class",
-                                                "intermediateContainer"
-                                            );}
                                         document.getElementById(
                                                 "innerDropdownContainer" +
                                                 domainIdentifier)
@@ -655,7 +649,6 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                               var text=draw.text(abbreviation.replaceAll("methyltransferase","MT")).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
 
                             dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
-                            begin++
 
                         }}
 

@@ -323,6 +323,13 @@ left:9%;
 
   height:800px;
 }
+.intermediateContainerTailoring{
+  position: relative;
+  right: 67px;
+  top: 10%;
+
+  height:800px;
+}
 .box {
  cursor: move;
 }
@@ -381,7 +388,6 @@ background-color: #E11839;
 .dropbtn-tailoring {
   position:relative;
 
-  left:150%;
 background-color: transparent;
 font-size: 16px;
  text-transform: capitalize
@@ -391,8 +397,6 @@ border: none;
 /* The container <div> - needed to position the dropdown content */
 .dropdown-tailoring {
   position:relative;
-
-  left:150%;
 position: relative;
 display: inline-block;
 
@@ -402,7 +406,6 @@ display: inline-block;
 .dropdown-content-tailoring {
   position:relative;
 
-  left:150%;
 opacity: 0.9;
 display: none;
 position: absolute;
