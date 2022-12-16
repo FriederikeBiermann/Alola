@@ -1,109 +1,96 @@
-from pikachu.general import *
+from pikachu.chem.structure import Structure
+from pikachu.general import structure_to_smiles, svg_string_from_structure
 from fastapi import FastAPI, Query
 from typing import List
 import ast
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
-from raichu.modules_to_structure import *
-from raichu.thioesterase_reactions import *
-from raichu.nrps_tailoring_reactions import *
-from raichu.run_raichu import ModuleRepresentation, DomainRepresentation, ClusterRepresentation, get_spaghettis
-#Allow cross origin requests
+from raichu.run_raichu import ModuleRepresentation, DomainRepresentation, ClusterRepresentation, TailoringRepresentation, get_spaghettis, build_cluster
+from raichu.reactions.general_tailoring_reactions import find_all_o_n_atoms_for_cyclization, find_atoms_for_tailoring
+from raichu.drawing.drawer import RaichuDrawer
+
+# Allow cross origin requests
 from starlette.middleware import Middleware
 app = FastAPI()
 origins = ["http://localhost:3000",
-    "localhost:3000"]
+           "localhost:3000"]
 middleware = [Middleware(CORSMiddleware, allow_origins=origins)]
 app = FastAPI(middleware=middleware)
 
-def build_cluster(raw_cluster: List) -> ClusterRepresentation:
+
+def format_cluster(raw_cluster: List, tailoring_reactions: TailoringRepresentation) -> ClusterRepresentation:
     formatted_modules = []
     for module in raw_cluster:
         formatted_domains = []
         for domain in module[3]:
-            formatted_domains += DomainRepresentation(*domain)
-        formatted_modules += ModuleRepresentation(module[0], module[1], module[2], formatted_domains)
-    return ClusterRepresentation(formatted_modules)
+            domain = map(lambda x: x if x != 'None' else None, domain)
+            domain = map(lambda x: x if x != "True" else True, domain)
+            domain = map(lambda x: x if x != "False" else False, domain)
+            formatted_domains += [DomainRepresentation(*domain)]
+        formatted_modules += [ModuleRepresentation(
+            module[0], module[1], module[2], formatted_domains)]
+    return ClusterRepresentation(formatted_modules, tailoring_reactions)
+
 
 @app.get("/")
 async def root():
-  return {"message":"This is the first Version of the Alola Api for integrating Alola into the web",
-          "input":"antismash output file",
-          "state":"state of dropdown-menus, if none== default",
-        "output": "SVGs for intermediates+ SVG of final product"
-      }
+    return {"message": "This is the first Version of the Alola Api for integrating Alola into the web",
+            "input": "antismash output file",
+            "state": "state of dropdown-menus, if none== default",
+            "output": "SVGs for intermediates+ SVG of final product"
+            }
 
-@app.get ("/api/alola/")
 
-async def alola(antismash_input:str, state:Optional[List[int]] = Query(None)):
+@app.get("/api/alola/")
+async def alola(antismash_input: str, state: Optional[List[int]] = Query(None)):
     # handle input data
-    antismash_input_transformed=ast.literal_eval(antismash_input)
-    raichu_input = build_cluster(antismash_input_transformed[1])
+    antismash_input_transformed = ast.literal_eval(antismash_input)
+    tailoringReactions = []
+    for enzyme in antismash_input_transformed[2]:
+        tailoringReactions += [TailoringRepresentation(*enzyme)]
+    raw_cluster_representation = antismash_input_transformed[0]
+    raichu_input = format_cluster(
+        raw_cluster_representation, tailoringReactions)
     cyclization = antismash_input_transformed[1]
-    tailoringReactions = antismash_input_transformed[2]
-    cluster = build_cluster(cluster_repr)
+    cluster = build_cluster(raichu_input)
     cluster.compute_structures(compute_cyclic_products=False)
     cluster_svg = cluster.draw_cluster()
-    spaghettis = cluster.draw_spaghettis()
-    if cyclization !== "None":
-        cluster.cyclise(cyclization)
-    intermediate=cluster.chain_intermediate
+    spaghettis = [spaghetti.replace("\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
+                  for spaghetti in cluster.draw_spaghettis()]
+    linear_intermediate = cluster.linear_product
+    if cyclization != "None":
+        # try to find atom for atom for cyclisation before the tailoring occurs
+        atom_cyclisation = [atom for atom in linear_intermediate.atoms.values() if str(
+            atom) == cyclization][0]
+    cluster.do_tailoring()
+    tailored_product = cluster.linear_product
+    final_product = tailored_product
+    if cyclization != "None":
+        if len(atom_cyclisation) == 0:
+            atom_cyclisation = [
+                atom for atom in final_product.atoms.values() if str(atom) == cyclization][0]
+        atom_cyclisation = get_atom(atom_cyclisation)
+        cluster.cyclise(atom_cyclisation)
+        final_product = cluster.cyclised_product
+    smiles = structure_to_smiles(final_product, kekule=False)
+    atoms_for_cyclisation = str(
+        find_all_o_n_atoms_for_cyclization(tailored_product))
+    n_atoms_for_tailoring = str(
+        find_atoms_for_tailoring(tailored_product, "N"))
+    o_atoms_for_tailoring = str(
+        find_atoms_for_tailoring(tailored_product, "O"))
+    c_atoms_for_tailoring = str(
+        find_atoms_for_tailoring(tailored_product, "C"))
 
-    # find cyclisation sites
-    # for reaction in tailoringReactions:
-    #     if reaction[0]=="p450":
-    #         for target_atom_string in reaction[1]:
-    #             for atom in intermediate.atoms.values():
-    #
-    #                 if str(atom)==target_atom_string:
-    #                     try:
-    #                         print (target_atom_string)
-    #                         target_atom=atom
-    #                         intermediate=hydroxylation(target_atom,intermediate)
-    #                     except :
-    #                         target_atom_string=target_atom_string.split('_')[0]+"_"+str(int(target_atom_string.split('_')[1])+1)
-    #                         print("new",target_atom_string)
-    #     if "methyltransferase" in reaction[0]:
-    #         for target_atom_string in reaction[1]:
-    #             for atom in intermediate.atoms.values():
-    #
-    #                 if str(atom)==target_atom_string:
-    #                     try:
-    #                         print (target_atom_string)
-    #                         target_atom=atom
-    #                         intermediate=methylation(target_atom,intermediate)
-    #                     except :
-    #                         target_atom_string=target_atom_string.split('_')[0]+"_"+str(int(target_atom_string.split('_')[1])+1)
-    #                         print("new",target_atom_string)
-    # linear_product= copy.deepcopy(intermediate)
-    # o_atoms_for_cyclisation, n_atoms_for_cyclisation= find_all_o_n_atoms_for_cyclization(linear_product)
-    # c_atoms_for_oxidation=find_all_c_atoms_for_oxidation(linear_product)
-    #
-    # if "terminator_module_nrps" in str(antismash_input_transformed) or "nrps" in str(antismash_input_transformed[-1]):
-    #                     intermediate=attach_to_domain_nrp(intermediate, 'PCP')
-    raichu_svg=RaichuDrawer(linear_product,dont_show=True).svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
-    #perform thioesterase reaction
+    structure_for_tailoring = RaichuDrawer(
+        tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True)
+    structure_for_tailoring.draw_structure()
+    svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
+        "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
+    svg = svg_string_from_structure(final_product).replace("\n", "").replace(
+        "\"", "'").replace("<svg", " <svg id='final_drawing'")
 
-
-    smiles=structure_to_smiles(intermediate, kekule=False)
-    svg=svg_string_from_structure(intermediate).replace("\n","").replace("\"","'").replace("<svg"," <svg id='final_drawing'")
-
-
-    global global_final_polyketide_Drawer_object
-    list_drawings_per_module = cluster_to_structure(antismash_input_transformed,
-    attach_to_acp=True, draw_structures_per_module=True)
-
-    list_intermediate_smiles=[]
-
-
-
-    list_svgs=[]
-
-    for drawing_list in list_drawings_per_module:
-        for index_drawing,drawing in enumerate(drawing_list):
-
-            svg_drawing=drawing.svg_string.replace("\n","").replace("\"","'").replace("<svg"," <svg id='intermediate_drawing'")
-            list_svgs+=[[svg_drawing]]
-    print (o_atoms_for_cyclisation+ n_atoms_for_cyclisation)
-    atoms_for_cyclisation=str(o_atoms_for_cyclisation+ n_atoms_for_cyclisation)
-    return {"svg":svg, "hanging_svg": spaghettis, "smiles": smiles,  "atomsForCyclisation":str(atoms_for_cyclisation),"c_atoms_for_oxidation":str(c_atoms_for_oxidation),"n_atoms_for_methylation": str(n_atoms_for_cyclisation),"o_atoms_for_methylation": str( o_atoms_for_cyclisation), "intermediate_smiles": list_intermediate_smiles, "structure_for_tailoring":raichu_svg}
+    return {"svg": svg, "hanging_svg": spaghettis, "smiles": smiles,  "atomsForCyclisation": atoms_for_cyclisation,
+            "c_atoms_for_tailoring": c_atoms_for_tailoring, "n_atoms_for_tailoring": n_atoms_for_tailoring,
+            "o_atoms_for_tailoring": o_atoms_for_tailoring, "complete_cluster_svg": cluster_svg,
+            "structure_for_tailoring": svg_structure_for_tailoring}
