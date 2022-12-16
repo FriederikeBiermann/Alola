@@ -1986,15 +1986,13 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
 
                     for (let moduleIndex = 0; moduleIndex < orf.modules.length; moduleIndex++) {
                         let module = orf.modules[moduleIndex];
-
                         let startModule = module.start;
                         let endModule = module.end;
                         let nameModule = "module_" + orfIndex + "_" +
-                            moduleIndex
-                        acpStat = 0
-
+                            moduleIndex;
+                        acpStat = 0;
                         let moduleType = "PKS";
-                        let moduleSubtype = "PKS_TRANS"
+                        let moduleSubtype = "PKS_TRANS";
                         for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
                             let domain = orf.domains[domainIndex];
                             if (geneMatrix[geneIndex].domains[domainIndex].ko ==
@@ -2009,7 +2007,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 if (startModule >= domain.start && domain.start >=
                                     endModule || endModule >= domain.start &&
                                     domain.start >= startModule) {
-                                    type = domain.abbreviation
+                                    type = domain.abbreviation;
                                     if (domain.abbreviation == "") {
                                         type = domain.type
                                     }
@@ -2066,12 +2064,11 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                         else {
                                             substrate = malonylcoa
                                         }
+                                        if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
+                                            substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option
+                                        }
                                     }
-                                    if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
-                                        substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option
-                                    }
-
-
+                                    
                                     geneMatrix[geneIndex].domains[domainIndex].function = type
                                     if (domain.abbreviation == "A") {
                                         if (domain.hasOwnProperty("predictions")) {

@@ -23,12 +23,13 @@ def format_cluster(raw_cluster: List, tailoring_reactions: TailoringRepresentati
     for module in raw_cluster:
         formatted_domains = []
         for domain in module[3]:
+            #Format fake booleans
             domain = map(lambda x: x if x != 'None' else None, domain)
             domain = map(lambda x: x if x != "True" else True, domain)
             domain = map(lambda x: x if x != "False" else False, domain)
             formatted_domains += [DomainRepresentation(*domain)]
         formatted_modules += [ModuleRepresentation(
-            module[0], module[1], module[2], formatted_domains)]
+            module[0], None if module[1] == 'None' else module[1], module[2], formatted_domains)]
     return ClusterRepresentation(formatted_modules, tailoring_reactions)
 
 
@@ -43,12 +44,15 @@ async def root():
 
 @app.get("/api/alola/")
 async def alola(antismash_input: str, state: Optional[List[int]] = Query(None)):
+    assert antismash_input
+    print(antismash_input)
     # handle input data
     antismash_input_transformed = ast.literal_eval(antismash_input)
     tailoringReactions = []
     for enzyme in antismash_input_transformed[2]:
         tailoringReactions += [TailoringRepresentation(*enzyme)]
     raw_cluster_representation = antismash_input_transformed[0]
+    #Format fake booleans
     raichu_input = format_cluster(
         raw_cluster_representation, tailoringReactions)
     cyclization = antismash_input_transformed[1]
