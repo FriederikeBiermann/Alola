@@ -6,10 +6,9 @@ let tailoringEnzymes = ["p450", " methyltransferase", "n-methyltransferase", "c-
 
 let nameToStructure = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
-    "propionyl_coa": "CCC(S)=O",
     "malonyl_coa": "OC(=O)CC(S)=O",
-    'methoxymalonylacp': "SC(=O)C(C(=O)O)OC)O",
-    'ethylmalonylcoa': "CC(CC(O)=O)C(S)=O",
+    'methoxymalonyl_acp': "SC(=O)C(C(=O)O)OC)O",
+    'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
 }
 let aminoacids = {
     "arg": "arginine",
@@ -2065,7 +2064,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                             substrate = malonylcoa
                                         }
                                         if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
-                                            substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option
+                                            substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option.toUpperCase()
                                         }
                                     }
                                     
