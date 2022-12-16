@@ -1842,7 +1842,6 @@ function determine_module_type(domainArray, substrate, starterStatus, acpCounter
     }
     return [moduleArray, starterStatus_new];
 }
-
 function findTailoringEnzymeStatus(orfFunction) {
     /**
     *checks if annotated function is associated with tailoring enzyme

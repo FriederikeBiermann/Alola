@@ -67,18 +67,19 @@ async def alola(antismash_input: str, state: Optional[List[int]] = Query(None)):
         atom_cyclisation = [atom for atom in linear_intermediate.atoms.values() if str(
             atom) == cyclization][0]
     cluster.do_tailoring()
-    tailored_product = cluster.linear_product
-    final_product = tailored_product
+    tailored_product = cluster.linear_product.deepcopy()
+    final_product = cluster.linear_product
     if cyclization != "None":
-        if len(atom_cyclisation) == 0:
+        if not atom_cyclisation:
             atom_cyclisation = [
                 atom for atom in final_product.atoms.values() if str(atom) == cyclization][0]
-        atom_cyclisation = get_atom(atom_cyclisation)
+        atom_cyclisation = final_product.get_atom(atom_cyclisation)
         cluster.cyclise(atom_cyclisation)
         final_product = cluster.cyclised_product
     smiles = structure_to_smiles(final_product, kekule=False)
     atoms_for_cyclisation = str(
         find_all_o_n_atoms_for_cyclization(tailored_product))
+    print(atoms_for_cyclisation)
     n_atoms_for_tailoring = str(
         find_atoms_for_tailoring(tailored_product, "N"))
     o_atoms_for_tailoring = str(
