@@ -281,6 +281,9 @@ function formatSVG(svg) {
     return svg
 }
 // fuctions to save svg of biosynthetic model
+function PrintSVGCluster(){
+
+}
 function PrintDiv() {
     /**
    * Download biosynthetic_model
@@ -789,6 +792,12 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
                     }
                 }
             }
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(data.complete_cluster_svg);
+            document.getElementById("save_complete_cluster_svg")
+                .href = url
+            document.getElementById("save_complete_cluster_svg")
+                .setAttribute("download", data.smiles + "_cluster.svg");
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(data.svg);
             document.getElementById("save_svg")

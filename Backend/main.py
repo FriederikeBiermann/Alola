@@ -45,7 +45,6 @@ async def root():
 @app.get("/api/alola/")
 async def alola(antismash_input: str, state: Optional[List[int]] = Query(None)):
     assert antismash_input
-    print(antismash_input)
     # handle input data
     antismash_input_transformed = ast.literal_eval(antismash_input)
     tailoringReactions = []
@@ -79,7 +78,6 @@ async def alola(antismash_input: str, state: Optional[List[int]] = Query(None)):
     smiles = structure_to_smiles(final_product, kekule=False)
     atoms_for_cyclisation = str(
         find_all_o_n_atoms_for_cyclization(tailored_product))
-    print(atoms_for_cyclisation)
     n_atoms_for_tailoring = str(
         find_atoms_for_tailoring(tailored_product, "N"))
     o_atoms_for_tailoring = str(
