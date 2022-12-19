@@ -39,13 +39,19 @@ height: 35px;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
 #regionsBar{
+  display: grid;
+  grid-template-columns: repeat(100, 1fr);
+  gap: 12px;
+  padding: 0.5%;
+  overflow-x: auto;
+  white-space: nowrap;
   border-radius:6px;
 background-color:#1F1F1F
 ;
 margin-bottom: 10px;
 float: left;
 width:100%;
-overflow-x: scroll;
+height: 80px;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
 
@@ -134,6 +140,8 @@ box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
   padding: 2px 2px;
   text-decoration: none;
   font-size: 17px;
+  text-transform: capitalize;
+  text-align: center;
 }
 #fake_button {
 
@@ -171,6 +179,7 @@ font-size: 17px;
   border-radius:6px;
   padding-left: 5%;
   width: 92%;
+  overflow-x: auto;
 }
 /* The switch - the box around the slider */
 .switch {

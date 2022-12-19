@@ -128,7 +128,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                         domainIdentifier = geneMatrix[
                                             geneIndex].modules[
                                             moduleIndex].domains[
-                                            domainIndex].identifier
+                                            domainIndex].identifier.replace(".","_")
 
                                         points = Domainer.getDomainPoints(
                                                 domain, orf, cluster,
@@ -395,7 +395,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                             if (size>25){
                               var text=draw.text(domain.abbreviation).x(size/2-1+2).y(height - indent - (size/2+1)-7)}
 
-                            dom.node.id = "domain" + domainIdentifier
+                            dom.node.id = "domain" + domainIdentifier.replace(".","_")
                             $(dom.node)
                                 .mouseover({
                                     domain: domain
@@ -479,7 +479,7 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                       let gene= geneMatrix[geneIndex]
                       if (gene.tailoringEnzymeStatus==true){
-                                            let domainIdentifier="tailoringEnzyme"+ geneMatrix[geneIndex].id
+                                            let domainIdentifier="tailoringEnzyme"+ geneMatrix[geneIndex].id.replace(".","_")
 
                                       let  points = Domainer.getArrowPoints(
                                                 15,100,
@@ -680,8 +680,8 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
               .stroke({
                   width: 1
               })
-                if (gene_size<50){var text=draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size/2).y(height/2-7)}
-                else{var text=draw.text(geneMatrix[geneIndex].id).x(gene_size/2).y(height/2-7)}
+                if (gene_size<50){var text=draw.text(geneMatrix[geneIndex].id.replace(".","_") .split("_")[1]).x(gene_size/2).y(height/2-7)}
+                else{var text=draw.text(geneMatrix[geneIndex].id.replace(".","_")).x(gene_size/2).y(height/2-7)}
 
 
           pol.node.id = "module_gene_" + geneIndex

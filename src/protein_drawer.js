@@ -110,7 +110,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                     width: 2
                 })
                 .addClass("Proteiner-orf");
-            pol.node.id = orf["locus_tag"] + "_protein";
+            pol.node.id = orf["locus_tag"].replace(".", "_") + "_protein";
             $(pol.node)
                 .mouseover({
                     orf: orf
@@ -171,7 +171,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                             width: 2
                         })
                         .addClass("Proteiner-domain");
-                    dom.node.id = orf["locus_tag"] + "_domain_" +
+                    dom.node.id = orf["locus_tag"].replace(".", "_") + "_domain_" +
                         domain.sequence;
                     $(dom.node)
                         .mouseover({

@@ -375,9 +375,9 @@ function addArrowClick(geneMatrix) {
     //
 
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        arrow_id = ("#" + geneMatrix[geneIndex].id + "_gene_arrow")
+        arrow_id = ("#" + geneMatrix[geneIndex].id.replace(".","_")+ "_gene_arrow")
             .replace(".", "_")
-        protein_id = ("#" + geneMatrix[geneIndex].id + "_protein")
+        protein_id = ("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein")
             .replace(".", "_")
         let arrow_1 = document.querySelector(arrow_id);
         arrow_1.replaceWith(arrow_1.cloneNode(true));
@@ -389,7 +389,7 @@ function addArrowClick(geneMatrix) {
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                 updateProteins(geneMatrix, BGC);
                 updateDomains(geneMatrix, BGC);
-                changeColor("#" + geneMatrix[geneIndex].id + "_gene_arrow");
+                changeColor("#" + geneMatrix[geneIndex].id.replace(".","_") + "_gene_arrow");
                 addArrowClick(geneMatrix);
                 if (document.getElementById("real-time-button")
                     .checked) {
@@ -403,7 +403,7 @@ function addArrowClick(geneMatrix) {
             'mouseenter',
             function () { // anonyme Funktion
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                     "_protein", geneIndex)
             },
             false
@@ -411,7 +411,7 @@ function addArrowClick(geneMatrix) {
         arrow.addEventListener(
             'mouseleave',
             function () { // anonyme Funktion
-                changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                     "_protein", geneIndex)
             },
             false
@@ -423,7 +423,7 @@ function addArrowClick(geneMatrix) {
                     setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                     updateProteins(geneMatrix, BGC);
                     updateDomains(geneMatrix, BGC);
-                    changeColor("#" + geneMatrix[geneIndex].id +
+                    changeColor("#" + geneMatrix[geneIndex].id.replace(".","_") +
                         "_gene_arrow");
                     addArrowClick(geneMatrix);
                     if (document.getElementById("real-time-button")
@@ -438,7 +438,7 @@ function addArrowClick(geneMatrix) {
                 'mouseenter',
                 function () { // anonyme Funktion
                     displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                    changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                    changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                         "_gene_arrow", geneIndex)
                 },
                 false
@@ -446,7 +446,7 @@ function addArrowClick(geneMatrix) {
             protein.addEventListener(
                 'mouseleave',
                 function () { // anonyme Funktion
-                    changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                    changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                         "_gene_arrow", geneIndex)
                 },
                 false
@@ -488,8 +488,8 @@ function addArrowClick(geneMatrix) {
                     'mouseenter',
                     function () { // anonyme Funktion
 
-                        changeProteinColorON("#" + geneMatrix[geneIndex].id +
-                            "_gene_arrow", geneIndex); changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
+                            "_gene_arrow", geneIndex); changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                                 "_protein", geneIndex)
                     },
                     false
@@ -497,8 +497,8 @@ function addArrowClick(geneMatrix) {
                 tailoringEnzymeObject.addEventListener(
                     'mouseleave',
                     function () { // anonyme Funktion
-                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
-                            "_gene_arrow", geneIndex); changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
+                            "_gene_arrow", geneIndex); changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                                 "_protein", geneIndex)
                     },
                     false
@@ -507,7 +507,7 @@ function addArrowClick(geneMatrix) {
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
-                domainId = "#" + geneMatrix[geneIndex].id + "_domain_" + domain
+                domainId = "#" + geneMatrix[geneIndex].id.replace(".","_") + "_domain_" + domain
                     .sequence;
                 const domainObject = document.querySelector(domainId);
                 domainObject.addEventListener(
@@ -534,9 +534,9 @@ function addArrowClick(geneMatrix) {
                             domainIndex], "#domain" + geneMatrix[
                                 geneIndex].domains[domainIndex].identifier);
                         displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                        changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_protein", geneIndex);
-                        changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_gene_arrow", geneIndex);
                     },
                     false
@@ -551,15 +551,15 @@ function addArrowClick(geneMatrix) {
                         changeDomainColor(geneMatrix[geneIndex].domains[
                             domainIndex], "#domain" + geneMatrix[
                                 geneIndex].domains[domainIndex].identifier);
-                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_gene_arrow", geneIndex);
-                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_protein", geneIndex)
                     },
                     false
                 );
                 domainId = "#domain" + geneMatrix[geneIndex].domains[
-                    domainIndex].identifier
+                    domainIndex].identifier.replace(".", "_")
                 const domainObject_2 = document.querySelector(domainId);
                 domainObject_2.addEventListener(
                     'click',
@@ -585,9 +585,9 @@ function addArrowClick(geneMatrix) {
                             domainIndex], "#domain" + geneMatrix[
                                 geneIndex].domains[domainIndex].identifier);
                         displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                        changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_protein", geneIndex);
-                        changeProteinColorON("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_gene_arrow", geneIndex);
                     },
                     false
@@ -602,9 +602,9 @@ function addArrowClick(geneMatrix) {
                         changeDomainColor(geneMatrix[geneIndex].domains[
                             domainIndex], "#domain" + geneMatrix[
                                 geneIndex].domains[domainIndex].identifier);
-                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_gene_arrow", geneIndex);
-                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id +
+                        changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_protein", geneIndex)
                     },
                     false
@@ -844,7 +844,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
                 }
                 let intermediate_container = document.getElementById(
                     'innerIntermediateContainer' + acpList[
-                    intermediateIndex + starterACP - 1])
+                    intermediateIndex + starterACP - 1].replace(".","_") )
                 intermediate_container.setAttribute("style", "width:150px")
                 intermediate_container.innerHTML = formatSVG_intermediates(intermediate);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
@@ -1124,14 +1124,17 @@ function setDisplayedStatus(id, geneMatrix) {
 }
 function createButtonsForEachRegion(){
   let listRegions = []
+  let listTypes = []
   for (index = 0; index < recordData[0].regions.length; index++){
-    listRegions.push(recordData[0].regions[index].anchor)
+    listRegions.push(recordData[0].regions[index].anchor);
+      listTypes.push(recordData[0].regions[index].type);
   }
   let regionsBar = document.getElementById("regionsBar")
   let innerHTML = ""
   for (index = 0; index < listRegions.length; index++){
     region = listRegions[index]
-    innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=changeRegionTo("${region}")><strong>${region.toUpperCase()}</strong></button>`
+    type = listTypes[index]
+    innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=changeRegionTo("${region}")><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`
   regionsBar.innerHTML = innerHTML
      }
 }
@@ -1812,7 +1815,7 @@ function findTailoringEnzymeStatus(orfFunction) {
 function runAlola(regionIndex, details_data, recordData){
   regionName = getRegionName(regionIndex)
   cluster_type = getClusterType(regionIndex)
-  document.getElementById("BGCHeading").innerHTML = `Biosynthetic gene cluster explorer: ${regionName.toUpperCase()} - ${cluster_type} BGC`
+  document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${cluster_type} BGC`
   BGC = Object.keys(recordData[0].regions[regionIndex])
       .reduce(function (obj, k) {
           if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
@@ -2015,6 +2018,23 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                                 }
                                             }
                                             else { subtype = "None" }
+                                        }
+                                        else {
+                                            subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
+                                        }
+                                    }
+                                    if (domain.abbreviation == "KS") {
+                                        if (geneMatrix[geneIndex].domains[
+                                            domainIndex].selected_option.length == 0) {
+                                            if (domain.predictions.length != 0) {
+
+
+                                                if (domain.predictions[0][1] !=
+                                                    "unknown") {
+                                                    subtype = domain.predictions[0][1].toUpperCase().replaceAll("-","_");
+                                                }
+                                            }
+                                            else { subtype = "MISCELLANEOUS" }
                                         }
                                         else {
                                             subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
