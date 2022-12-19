@@ -138,9 +138,6 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
                                                 moduleIndex].domains[
                                                 domainIndex].ko==true){color= "#E11839"}
                                             //declare size of balls
-                                          console.log(geneMatrix[geneIndex].modules[
-                                                  moduleIndex].domains[
-                                                  domainIndex])
                                         if (geneMatrix[geneIndex].modules[
                                                 moduleIndex].domains[
                                                 domainIndex].type.includes(
@@ -434,8 +431,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
             }
         }
     }
-    $(draw.node)
-        .parent()
+    $(line_svg)
         .mouseover({
             domain: domain
         }, function(handler) {
@@ -446,8 +442,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
             }
             Domainer.showToolTip(bgc_desc, handler);
         });
-    $(draw.node)
-        .parent()
+    $(line_svg)
         .mouseleave(function(handler) {
             $("#" + Domainer.tooltip_id)
                 .css("display", "none");
@@ -490,7 +485,6 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                 15,100,
                                                 90, scale)
                                                 // declare color if ko
-                                      console.log("pointstay",points)
                                             let abbreviation = gene.tailoringEnzymeType
 
                                         // add all the neccesary domain containers
@@ -581,7 +575,6 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                               short_option=option
                                             }
 
-                                            console.log("options",option, short_option )
 
                                             let optionContent =
                                                 "<button id="+geneIndex + "_"+short_option+" onclick='changeSelectedOptionTailoring(geneMatrix," +
@@ -605,7 +598,6 @@ Domainer.drawTailoringEnzymes=(function(cluster,geneMatrix, height = 90,scale) {
                                                     "</button>";
                                             }
                                             //format active option differently
-                                            console.log("selected_option",geneMatrix[geneIndex].selected_option,short_option,toString(geneMatrix[geneIndex].selected_option).includes(short_option))
 
                                             if (  toString(geneMatrix[geneIndex].selected_option).includes(short_option)
                                             ) {
@@ -809,15 +801,13 @@ Domainer.getOrfPoints = (function(start,end,  height, scale) {
       ((height / 2) + (height / 3))
       : ((height / 2) + (height / 3)) + (height / 5)
   ];
-  console.log("orf_sra", strand,"x",x_points)
-  console.log("y",y_points)
+
 
   return { x: x_points, y: y_points };
 });
 Domainer.getArrowPoints = (function(orf,  height, scale) {
     var points = [];
     var pts = Domainer.getOrfPoints(orf,height, scale);
-    console.log("pots",pts)
     points.push({ // blunt start
         x: pts.x[0],
         y: pts.y[1]
@@ -901,10 +891,7 @@ Domainer.flipHorizontal = (function(points, leftBound, rightBound) {
     var new_points = [];
     for (var i in points) {
         var point = points[i];
-        if ((point.x < leftBound) || (point.x > rightBound)) {
-            console.log("Error flipping points : " + (point.x + " " +
-                leftBound + " " + rightBound));
-        }
+        if ((point.x < leftBound) || (point.x > rightBound)) {}
         else {
             new_points.push({
                 x: rightBound - (point.x - leftBound),

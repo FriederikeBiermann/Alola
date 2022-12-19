@@ -59,7 +59,7 @@ async def alola(antismash_input: str, state: Optional[List[int]] = Query(None)):
     cluster.compute_structures(compute_cyclic_products=False)
     cluster_svg = cluster.draw_cluster()
     spaghettis = [spaghetti.replace("\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
-                  for spaghetti in cluster.draw_spaghettis()]
+                  for spaghetti in cluster.draw_spaghettis()][:-1]
     linear_intermediate = cluster.linear_product
     if cyclization != "None":
         # try to find atom for atom for cyclisation before the tailoring occurs

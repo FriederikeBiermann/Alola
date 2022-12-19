@@ -1,9 +1,9 @@
-
-regionName = "r1c3"
+let regionIndex = 0
+let regionName = ""
+let BGC ={}
 let fetching = false
-let cluster_type = "nrpspks"
 let tailoringEnzymes = ["p450", " methyltransferase", "n-methyltransferase", "c-methyltransferase", "o-methyltransferase"]
-
+let cluster_type = "nrpspks"
 let nameToStructure = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
     "malonyl_coa": "OC(=O)CC(S)=O",
@@ -42,7 +42,6 @@ let nameWildcardModule = "Custom_gene_"
 function findButtonbyTextContent(text) {
     var buttons = document.querySelectorAll('button');
     for (var i = 0, l = buttons.length; i < l; i++) {
-        console.log(buttons[i].firstChild.nodeValue, "/", text)
         if (buttons[i].firstChild.nodeValue == text)
             return buttons[i];
     }
@@ -50,7 +49,7 @@ function findButtonbyTextContent(text) {
 function addStringToArray(string, array) {
     /**
    * Adds a string in front of every instance of the array
-  
+
    * @input array and string that need to be attached
    * @yield new array
    */
@@ -64,7 +63,7 @@ function addStringToArray(string, array) {
 function removeAllInstances(arr, item) {
     /**
    * Removes all instances of an item in array.
-  
+
    * @input array and item that needs to be removed
    * @yield cleaned up array
    */
@@ -76,7 +75,7 @@ function handleDragStart(e) {
     /**
    * Handles the drag start.
    * Makes Item transparent, makes it movable.
-  
+
    * @input element thats grabbed
    * @fire fires when element is grabbed
    */
@@ -90,7 +89,7 @@ function handleDragStart(e) {
 function handleDragOver(e) {
     /**
    * Handles the drag /drop
-  
+
    */
     if (e.preventDefault) {
         e.preventDefault();
@@ -107,7 +106,7 @@ function handleDragEnter(e) {  /**
 function handleDragLeave(e) {
     /**
    * Handles the drag /drop
-  
+
    */
     this.classList.remove('over');
 }
@@ -167,14 +166,12 @@ function handleDrop(e) {
         geneMatrix.sort((a, b) => {
             return a.position - b.position;
         });
-        //addModulesGeneMatrix(geneMatrix);
-
-        updateProteins(geneMatrix);
-        updateDomains(geneMatrix);
+        updateProteins(geneMatrix, BGC);
+        updateDomains(geneMatrix, BGC);
         addArrowClick(geneMatrix);
         if (document.getElementById("real-time-button")
             .checked) {
-            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
         }
     }
     return false;
@@ -182,7 +179,7 @@ function handleDrop(e) {
 function handleDragEnd(e) {
     /**
    * Handles the drag /drop
-  
+
    */
     this.style.opacity = '1';
     items.forEach(function (item) {
@@ -192,7 +189,7 @@ function handleDragEnd(e) {
 function addDragDrop() {
     /**
    * Handles the drag /drop
-  
+
    */
     items = document.querySelectorAll('.protein-container .box');
     items.forEach(function (item) {
@@ -226,14 +223,14 @@ function highlight_atom_in_SVG(atom, color, width) {
 function hover_in_atom(atom) {
     /**
    * highlights atom in svg red
-  
+
    */
     highlight_atom_in_SVG(atom, "#E11839", "5")
 }
 function hover_out_atom(atom) {
     /**
    * mkaes c atoms transparent, other atoms back to black.
-  
+
    */
 
     if (atom.indexOf("C") >= 0) {
@@ -245,7 +242,7 @@ function hover_out_atom(atom) {
 function formatSVG_intermediates(svg) {
     /**
    * formats the SVGs of spaghetti diagram to look nice + remove the ACP
-  
+
    */
     svg = svg.toString()
         .replaceAll("#ffffff", "none")
@@ -265,7 +262,7 @@ function formatSVG_intermediates(svg) {
 function formatSVG(svg) {
     /**
    * formats the SVG to look nice
-  
+
    */
     svg = svg.toString()
         .replaceAll("#ffffff", "none")
@@ -346,10 +343,10 @@ function zoom_out() {
    * Zooms out of structure in structure explorer.
    *
    * gets actual dimensions, removes the automatic sizing and then resizes the svg.
-  
+
    * @fires   onclick-> zoom button
-  
-  
+
+
    */
     let drawing = document.getElementById("final_drawing")
     let drawingStyles = window.getComputedStyle(drawing)
@@ -389,8 +386,8 @@ function addArrowClick(geneMatrix) {
             'click',
             function () { // anonyme Funktion
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
-                updateProteins(geneMatrix);
-                updateDomains(geneMatrix);
+                updateProteins(geneMatrix, BGC);
+                updateDomains(geneMatrix, BGC);
                 changeColor("#" + geneMatrix[geneIndex].id + "_gene_arrow");
                 addArrowClick(geneMatrix);
                 if (document.getElementById("real-time-button")
@@ -423,8 +420,8 @@ function addArrowClick(geneMatrix) {
                 'click',
                 function () { // anonyme Funktion
                     setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
-                    updateProteins(geneMatrix);
-                    updateDomains(geneMatrix);
+                    updateProteins(geneMatrix, BGC);
+                    updateDomains(geneMatrix, BGC);
                     changeColor("#" + geneMatrix[geneIndex].id +
                         "_gene_arrow");
                     addArrowClick(geneMatrix);
@@ -680,7 +677,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
         arrow.removeAttribute("style");
     }
 }
-function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
+function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
    *Transforms and transfers all needed data through the api to the backend (raichu) and handles the output.
    * @fires   refresh_structure or if real time calculation is enabled every time the input data is altered
@@ -690,7 +687,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
     //
     let data = ""
     let starterACP = ""
-
+    if (details_data.nrpspks.hasOwnProperty(regionName)){
     let extracted_results = extractAntismashPredictionsFromRegion(details_data,
         regionName, geneMatrix)
     data = extracted_results[0]
@@ -711,7 +708,6 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
         .then((data) => {
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
-            console.log("fetched")
             //add options for cyclization
 
             for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
@@ -817,9 +813,8 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
             let geneMatrix = data[0]
             createOptions(geneMatrix);
             addDragDrop();
-            console.log("test");
-            updateDomains(geneMatrix);
-            updateProteins(geneMatrix);
+            updateDomains(geneMatrix, BGC);
+            updateProteins(geneMatrix, BGC);
             addArrowClick(geneMatrix)
             return [data[1], data[2]];
         })
@@ -829,11 +824,9 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
                 tailoringEnzymes_intermediate.setAttribute("style", "width:150px")
-                console.log("svg", data.structure_for_tailoring)
                 tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(data.structure_for_tailoring);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
-                console.log(bbox)
                 let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
 
                 intermediate_svg.setAttribute("viewBox", viewBox)
@@ -841,7 +834,6 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
                 intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
                 intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
             }
-            console.log(acpList, "acpList")
             for (let intermediateIndex = 0; intermediateIndex <
                 intermediates.length; intermediateIndex++) {
                 intermediate = intermediates[intermediateIndex]
@@ -855,7 +847,6 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
                 intermediate_container.innerHTML = formatSVG_intermediates(intermediate);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
-                console.log(bbox)
                 let viewBox = [bbox.x, bbox.y + 38, bbox.width, bbox.height].join(" ");
 
                 intermediate_svg.setAttribute("viewBox", viewBox)
@@ -865,8 +856,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type) {
             }
 
         })
-    //updateSelectedOptionsAfterTailoring(tailoringArray, geneMatrix,1)
-}
+}}
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     /**
     * Change color of domain.
@@ -897,11 +887,8 @@ function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
             for (let option of geneMatrix[geneIndex].selected_option) {
-                console.log(mappingDictionary, option, "new option")
                 option = mappingDictionary[option]
-                console.log(option, "new option")
             }
-            console.log("optionsss", geneMatrix[geneIndex].selected_option)
         }
     }
     return geneMatrix
@@ -912,13 +899,12 @@ function updateOptionArray(optionArray, index) {
    * @fires fetchFromRaichu
    *@input optionArray-> an array of the selected options, index= how much the options should be moved forwards
    *@output corrected option array for transformation
-  
+
    */
     let position_array = []
     for (let tailoringEnzyme of optionArray) {
         position_array = position_array.concat(tailoringEnzyme[1])
     }
-    console.log(position_array)
     position_array.sort(function (a, b) {
         return Number(a.split("_")[1]) - Number(b.split("_")[1]);
 
@@ -943,7 +929,6 @@ function updateOptionArray(optionArray, index) {
         tailoringEnzyme.pop()
         tailoringEnzyme.push(new_positions)
     }
-    console.log("new op", mappingDictionary)
 
     return optionArray
 }
@@ -984,7 +969,7 @@ function removePaddingBGC(BGC) {
    * removes the space before the first orf and after last orf
    *@input BGC
    *@output BGC withour padding
-  
+
    */
     let BGC_with_padding = JSON.parse(JSON.stringify(BGC));
     if (BGC_with_padding.orfs.length != 0) {
@@ -1004,7 +989,7 @@ function removeSpaceBetweenProteins(BGC) {
    * removes the space between orfs
    *@input BGC
    *@output BGC withour padding
-  
+
    */
     let margin = 100;
     let BGC_without_space = JSON.parse(JSON.stringify(BGC));
@@ -1018,7 +1003,7 @@ function removeSpaceBetweenProteins(BGC) {
     }
     return BGC_without_space;
 }
-function updateProteins(geneMatrix) {
+function updateProteins(geneMatrix, BGC) {
     /**
    * update Proteins to geneMAtrix to remove for instance ko genes and then calls the proteiner to draw the proteins
    *@input BGC,geneMatrix
@@ -1073,7 +1058,7 @@ function obtainACPList(geneMatrix) {
     return acpList;
 }
 // only display proteins with domains in domain explorer
-function updateDomains(geneMatrix) {
+function updateDomains(geneMatrix, BGC) {
     /**
    * update Proteins to geneMAtrix to remove for instance ko genes and paint ko domains red and then calls the domainer to draw the domains
    *@input BGC,geneMatrix
@@ -1111,7 +1096,7 @@ function setKoStatus(geneIndex, domainIndex, geneMatrix) {
     }
     if (document.querySelector('input[type=checkbox]')
         .checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
     }
 }
 function setDisplayedStatus(id, geneMatrix) {
@@ -1135,6 +1120,33 @@ function setDisplayedStatus(id, geneMatrix) {
         }
     }
 }
+function createButtonsForEachRegion(){
+  let listRegions = []
+  for (index = 0; index < recordData[0].regions.length; index++){
+    listRegions.push(recordData[0].regions[index].anchor)
+  }
+  let regionsBar = document.getElementById("regionsBar")
+  let innerHTML = ""
+  for (index = 0; index < listRegions.length; index++){
+    region = listRegions[index]
+    innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=changeRegionTo("${region}")><strong>${region.toUpperCase()}</strong></button>`
+  regionsBar.innerHTML = innerHTML
+     }
+}
+function getClusterType(regionIndex){
+  return recordData[0].regions[regionIndex].type
+}
+function getRegionName(regionIndex){
+    return recordData[0].regions[regionIndex].anchor
+}
+function changeRegion(direction){
+  regionIndex += direction
+  runAlola(regionIndex, details_data, recordData)
+}
+function changeRegionTo(regionName){
+  regionIndex = selectRegion(recordData, regionName)
+  runAlola(regionIndex, details_data, recordData)
+}
 function selectRegion(recordData, regionName) {
     /**
     * Select the index of region from name
@@ -1151,7 +1163,7 @@ function selectRegion(recordData, regionName) {
 function openForm() {
     /**
     *opens wildcard dialog
-  
+
    */
     //
     document.getElementById("popupForm").style.display = "block";
@@ -1186,7 +1198,6 @@ function setColorOfDropDown(button) {
     for (let index = 0; index < targets.length; index++) {
 
         let target = targets[index]
-        console.log(typeof (target))
         target.removeAttribute("style");
     }
     button.setAttribute("style", "background-color: #E11839")
@@ -1195,7 +1206,6 @@ function setColorOfDropDown(button) {
 function setWildcardSubstrate(substrate) {
     let wildcardSubstrate = substrate
     let button = findButtonbyTextContent(substrate)
-    console.log(button)
     setColorOfDropDown(button)
     return wildcardSubstrate
 }
@@ -1497,7 +1507,6 @@ function addWildcard(geneMatrix) {
 
     let domainArray = []
     let longDomainArray = []
-    console.log(wildcardModule)
     if (wildcardModule == "starter_module_nrps") {
         longDomainArray.push(defaultADomain, defaultPCPDomain)
 
@@ -1516,8 +1525,6 @@ function addWildcard(geneMatrix) {
             .checked) { domainArray.push(["oMT"]) }
         if (document.getElementById("wildcardcMT")
             .checked) { domainArray.push(["cMT"]) }
-
-        console.log(longDomainArray)
     }
     if (wildcardModule == "terminator_module_nrps") {
         if (document.getElementById("wildcardE")
@@ -1578,7 +1585,6 @@ function addWildcard(geneMatrix) {
         }
 
         else { longDomainArray.push(defaultATDomain, defaultKSDomain, defaultACPDomain) }
-        console.log(longDomainArray)
         wildcardModule = [nameWildcardModule, wildcardModule, nameToStructure[wildcardSubstrate]]
     }
     if (wildcardModule == "terminator_module_pks") {
@@ -1601,11 +1607,11 @@ function addWildcard(geneMatrix) {
         }
 
         else { longDomainArray.push(defaultATDomain, defaultKSDomain, defaultACPDomain, defaultTEDomain) }
-        console.log(longDomainArray)
+
         wildcardModule = [nameWildcardModule, wildcardModule, nameToStructure[wildcardSubstrate]]
     }
     else { wildcardModule = [nameWildcardModule, wildcardModule, wildcardSubstrate] }
-    console.log("wildcard", JSON.stringify(wildcardModule))
+
 
 
 
@@ -1645,9 +1651,7 @@ function addWildcard(geneMatrix) {
             "lengthVisualisation": 0
         }]
     }
-    console.log("genematrix", geneMatrix)
     geneMatrix.push(wildcard_gene)
-    console.log("genematrix", geneMatrix)
     BGC.orfs.push(wildcard_gene)
     if (details_data.hasOwnProperty(cluster_type)) {
         details_data[cluster_type][region_index].orfs.push(wildcard_gene)
@@ -1655,12 +1659,11 @@ function addWildcard(geneMatrix) {
     else {
         details_data[region_index].orfs.push(wildcard_gene)
     }
-    console.log(BGC)
     displayGenes(BGC)
-    updateProteins(geneMatrix)
-    updateDomains(geneMatrix)
+    updateProteins(geneMatrix, BGC)
+    updateDomains(geneMatrix, BGC)
     addArrowClick(geneMatrix)
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 
 }
 function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, option, optionIndex) {
@@ -1670,7 +1673,6 @@ function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, o
    *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
    *@yield Selected option correct+ cyclization option correct.
    */
-    console.log("option", option)
     geneMatrix[geneIndex].modules[
         moduleIndex].domains[
         domainIndex].selected_option = option
@@ -1689,7 +1691,7 @@ function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, o
 
     if (document.querySelector('input[type=checkbox]')
         .checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
     }
 }
 function changeSelectedOptionTailoring(geneMatrix, geneIndex, option) {
@@ -1699,7 +1701,6 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, option) {
    *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
    *@yield Selected option correct+ cyclization option correct.
    */
-    console.log(geneIndex + "_" + option)
     let button = document.getElementById(geneIndex + "_" + option)
     if (geneMatrix[geneIndex].selected_option.includes(option)) {
         button.setAttribute("style", "background-color: white")
@@ -1712,7 +1713,7 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, option) {
     }
     if (document.querySelector('input[type=checkbox]')
         .checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
     }
 
 }
@@ -1728,7 +1729,7 @@ function displayTextInGeneExplorer(geneId) {
             gene_container.innerHTML = BGCForDisplay["orfs"][geneIndex].description
         }
 }
-function createGeneMatrix(BGC) {
+function createGeneMatrix(BGC, regionName) {
     /**
     * extract the information and predictions from region.js+ creates a easier to handle matrix (object) from it that can be modified easier
    * @fires onpageload
@@ -1771,7 +1772,7 @@ function createGeneMatrix(BGC) {
             "domains": domains
         });
     }
-    addModulesGeneMatrix(geneMatrix)
+    addModulesGeneMatrix(geneMatrix, regionName)
     return geneMatrix
 }
 function findFuctionOrf(orfDescription) {
@@ -1785,71 +1786,6 @@ function findFuctionOrf(orfDescription) {
     let positionEnd = orfDescription.search("Locus tag") - 14;
     let orfFunction = orfDescription.slice(positionBegin, positionEnd).toLowerCase();
     return orfFunction
-}
-function determine_module_type(domainArray, substrate, starterStatus, acpCounter) {
-    moduleArray = []
-    starterStatus_new = starterStatus
-    console.log(starterStatus, "starter")
-    if (starterStatus == 0 && !(domainArray.includes(
-        "KS")) && !(domainArray.includes("TE")) && (domainArray.includes("AT"))) {
-        typeModule = "starter_module_pks";
-        console.log(substrate)
-        starterSubstrate = nameToStructure[substrate];
-        console.log(starterSubstrate)
-        moduleArray.push(nameModule, typeModule,
-            starterSubstrate)
-
-        starterACP = acpCounter;
-        starterStatus_new = 1
-    }
-    else if (domainArray.includes("KS") && !(domainArray.includes(
-        "TE")) && starterStatus == 1) {
-
-
-        typeModule = "elongation_module_pks";
-        moduleArray.push(nameModule, typeModule, substrate);
-        if (domainArray.includes("DH") && domainArray.includes(
-            "ER")) {
-            removeAllInstances(domainArray, "DH")
-            removeAllInstances(domainArray, "ER");
-            domainArray.push("DH", "ER")
-        }
-        else if (domainArray.includes("DH")) {
-            removeAllInstances(domainArray, "DH");
-            domainArray.push("DH");
-        }
-        if ((domainArray.includes("DH") || domainArray.includes("ER")) && !(domainArray.includes("KR"))) {
-            removeAllInstances(domainArray, "DH");
-            removeAllInstances(domainArray, "ER");
-        }
-        moduleArray.push(domainArray)
-    }
-
-    if (domainArray.includes("A") && !(domainArray.includes("TE")) &&
-        !(domainArray.includes("TD")) && starterStatus == 0) {
-        typeModule = "starter_module_nrps";
-        moduleArray.push(nameModule, typeModule, substrate)
-        starterACP = acpCounter;
-        starterStatus_new = 1
-    }
-    else if (domainArray.includes("C") && !(domainArray.includes(
-        "TE")) && starterStatus == 1 && !("TD" in
-            domainArray)) {
-        typeModule = "elongation_module_nrps";
-        moduleArray.push(nameModule, typeModule, substrate);
-        moduleArray.push(domainArray)
-    }
-    if (domainArray.includes("TE") && domainArray.includes("AT")) {
-        typeModule = "terminator_module_pks";
-        moduleArray.push(nameModule, typeModule, substrate);
-        moduleArray.push(domainArray)
-    }
-    if (domainArray.includes("TE") && domainArray.includes("A")) {
-        typeModule = "terminator_module_nrps";
-        moduleArray.push(nameModule, typeModule, substrate);
-        moduleArray.push(domainArray)
-    }
-    return [moduleArray, starterStatus_new];
 }
 function findTailoringEnzymeStatus(orfFunction) {
     /**
@@ -1871,8 +1807,48 @@ function findTailoringEnzymeStatus(orfFunction) {
     return [tailoringEnzymeStatus, ""]
 
 }
+function runAlola(regionIndex, details_data, recordData){
+  regionName = getRegionName(regionIndex)
+  cluster_type = getClusterType(regionIndex)
+  BGC = Object.keys(recordData[0].regions[regionIndex])
+      .reduce(function (obj, k) {
+          if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
+              0].regions[regionIndex][k];
+          return obj;
+      }, {});
+  for (const [key_1, value_1] of Object.entries(details_data)) {
+      if (value_1.id == regionName) {
+          for (let orf_index = 0; orf_index < value_1.orfs.length; orf_index++) {
+              orf = value_1.orfs[orf_index]
+              for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
+                  if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
+                      BGC.orfs[BGC_orf_index]["domains"] = orf.domains
+                  }
+              }
+          }
+      }
+      else if (value_1.hasOwnProperty([regionName])) {
+          for (let orf_index = 0; orf_index < value_1[regionName].orfs.length; orf_index++) {
+              orf = value_1[regionName].orfs[orf_index]
+              for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
+                  if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
+                      BGC.orfs[BGC_orf_index]["domains"] = orf.domains
+                  }
+              }
+          }
+      }
+  }
+  geneMatrix = createGeneMatrix(BGC, regionName)
+  BGCForDisplay = displayGenes(BGC)
+  //remove all checkboxes
+  $('input[type=checkbox]').removeAttr('checked');
+  updateProteins(geneMatrix, BGC)
+  updateDomains(geneMatrix, BGC)
+  addArrowClick(geneMatrix)
+  fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+}
 // adding modules+ opening the form to do so
-function addModulesGeneMatrix(geneMatrix) {
+function addModulesGeneMatrix(geneMatrix, regionName) {
     /**
     *add the moodules from region js to geneMatrix (not custom modules)
    * @fires createGeneMatrix
@@ -1882,12 +1858,13 @@ function addModulesGeneMatrix(geneMatrix) {
     //
     region_index = regionName
     //iterate through all domains to assign them to correct module
-    if (details_data.hasOwnProperty(cluster_type)) {
-        region = details_data[cluster_type][region_index];
+    if (details_data.hasOwnProperty("nrpspks")) {
+        region = details_data.nrpspks[region_index];
     }
     else {
         region = details_data[region_index];
     }
+    if (region){
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
             if (geneMatrix[geneIndex].id == region.orfs[orfIndex].id) {
@@ -1938,7 +1915,6 @@ function addModulesGeneMatrix(geneMatrix) {
                                 if (moduleIndex == modules.length - 1 &&
                                     domainIndex == geneMatrix[geneIndex].domains
                                         .length - 1 && !(geneMatrix[geneIndex].domains[domainIndex].hasOwnProperty("module"))) {
-                                    console.log("identifier", geneMatrix[geneIndex].domains[domainIndex].identifier)
                                     domainArray.push(geneMatrix[geneIndex].domains[domainIndex]);
                                     geneMatrix[geneIndex].domains[domainIndex]["module"] = nameModule;
                                     geneMatrix[geneIndex].modules[moduleIndex]["end"] = geneMatrix[geneIndex].domains[domainIndex].end;
@@ -1952,8 +1928,7 @@ function addModulesGeneMatrix(geneMatrix) {
                 }
             }
         }
-    }
-    console.log(geneMatrix)
+    }}
     return geneMatrix;
 }
 function extractAntismashPredictionsFromRegion(details_data, region_index,
@@ -1967,13 +1942,12 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
    */
     let outputForRaichu = []
     let region = []
-    if (details_data.hasOwnProperty(cluster_type)) {
-        region = details_data[cluster_type][region_index];
+    if (details_data.hasOwnProperty("nrpspks")) {
+        region = details_data.nrpspks[region_index];
     }
     else {
         region = details_data[region_index];
     }
-    console.log("region", region)
     geneMatrix.sort((a, b) => {
         return a.position - b.position;
     });
@@ -2046,7 +2020,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                         acpCounter += 1;
                                         acpStat = 1;
                                     }
-                                    if (domain.type.includes("PKS_PP")) {
+                                    if (domain.type.includes("PKS_PP") || domain.type.includes("PP-binding")) {
                                         type = "ACP"
                                     }
                                     if (domain.type.includes("ACP") || domain.type.includes("PKS_PP")) {
@@ -2055,30 +2029,32 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     if (domain.abbreviation == "AT") {
                                         moduleType = "PKS"
                                         moduleSubtype = "PKS_CIS"
-                                        console.log(moduleSubtype)
                                         if (domain.hasOwnProperty("predictions")) {
                                             if (domain.predictions.length != 0) {
                                                 if (domain.predictions[1][1] !=
-                                                    "unknown") {
+                                                    "(unknown)") {
                                                     substrate = domain.predictions[
                                                         1][1].replace("-",
                                                             '_')
                                                         .toUpperCase()
-                                                    console.log(substrate)
+                                                }
+                                                else {
+                                                    substrate = "malonyl_coa".toUpperCase()
                                                 }
                                             }
                                         }
                                         else {
-                                            substrate = malonylcoa
+                                            substrate = "malonyl_coa".toUpperCase()
                                         }
                                         if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
                                             substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option.toUpperCase()
                                         }
                                     }
-                                    
+
                                     geneMatrix[geneIndex].domains[domainIndex].function = type
                                     if (domain.abbreviation == "A") {
                                         if (domain.hasOwnProperty("predictions")) {
+                                            console.log(domain.predictions)
                                             if (domain.predictions.length != 0) {
                                                 if (domain.predictions[0][1] !=
                                                     "unknown") {
@@ -2088,6 +2064,9 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                                                 "-", '')
                                                             .toLowerCase()]
                                                 }
+                                            }
+                                            else {
+                                                substrate = "glycine"
                                             }
                                         }
                                         else {
@@ -2101,15 +2080,19 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                         }
                                         moduleType = "NRPS"
                                         moduleSubtype = "None"
+                                        console.log(substrate)
                                     }
 
                                     domainArray.push([gene, type, subtype, "None", active, used])
                                 }
-                                console.log(domainArray)
                             }
                         }
-                        if (substrate.length == 0) {
+                        console.log(substrate)
+                        if (substrate.length == 0 && moduleType == "PKS") {
                             substrate = "MALONYL_COA"
+                        }
+                        if (substrate.length == 0 && moduleType == "NRPS") {
+                            substrate = "glycine"
                         }
                         // create module arrays
                         if (acpStat == 1) {
@@ -2126,45 +2109,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
             }
         }
     }
-    console.log("raichuaoutput", outputForRaichu)
     return [outputForRaichu, starterACP, geneMatrix]
 }
-//create record for diplaying BGC in BGC explorer
-let regionNumber = selectRegion(recordData, regionName)
-let BGC = Object.keys(recordData[0].regions[regionNumber])
-    .reduce(function (obj, k) {
-        if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
-            0].regions[regionNumber][k];
-        return obj;
-    }, {});
-for (const [key_1, value_1] of Object.entries(details_data)) {
-    if (value_1.id == regionName) {
-        for (let orf_index = 0; orf_index < value_1.orfs.length; orf_index++) {
-            orf = value_1.orfs[orf_index]
-            for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
-                if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
-                    BGC.orfs[BGC_orf_index]["domains"] = orf.domains
-                }
-            }
-        }
-    }
-    else if (value_1.hasOwnProperty([regionName])) {
-        for (let orf_index = 0; orf_index < value_1[regionName].orfs.length; orf_index++) {
-            orf = value_1[regionName].orfs[orf_index]
-            for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
-                if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
-                    BGC.orfs[BGC_orf_index]["domains"] = orf.domains
-                }
-            }
-        }
-    }
-}
-geneMatrix = createGeneMatrix(BGC)
-BGCForDisplay = displayGenes(BGC)
-console.log(BGC)
-//remove all checkboxes
-$('input[type=checkbox]').removeAttr('checked');
-updateProteins(geneMatrix)
-updateDomains(geneMatrix)
-addArrowClick(geneMatrix)
-fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type)
+createButtonsForEachRegion()
+runAlola(regionIndex, details_data, recordData)
