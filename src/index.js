@@ -1957,6 +1957,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     let typeModule = "";
     let substrate = "";
     let domainArray = [];
+    let typesInModule = [];
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false) {
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
@@ -2057,12 +2058,15 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                             console.log(domain.predictions)
                                             if (domain.predictions.length != 0) {
                                                 if (domain.predictions[0][1] !=
-                                                    "unknown") {
+                                                    "unknown" && domain.predictions[0][1] !="X") {
                                                     substrate = aminoacids[
                                                         domain.predictions[
                                                             0][1].replace(
                                                                 "-", '')
                                                             .toLowerCase()]
+                                                }
+                                                else {
+                                                    substrate = "glycine"
                                                 }
                                             }
                                             else {
@@ -2082,8 +2086,13 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                         moduleSubtype = "None"
                                         console.log(substrate)
                                     }
-
-                                    domainArray.push([gene, type, subtype, "None", active, used])
+                                    // to avoid duplicate domains
+                                    console.log(typesInModule)
+                                    if (typesInModule.includes(type)){
+                                      active = "False";
+                                      geneMatrix[geneIndex].domains[domainIndex].ko = true};
+                                    domainArray.push([gene, type, subtype, "None", active, used]);
+                                    typesInModule.push (type);
                                 }
                             }
                         }
@@ -2101,6 +2110,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 outputForRaichu.push(moduleArray)
                             }
                             domainArray = [];
+                            typesInModule = [];
                         }
 
                     }
