@@ -55,7 +55,7 @@ async def alola(antismash_input: str, state: Optional[List[int]] = Query(None)):
     raichu_input = format_cluster(
         raw_cluster_representation, tailoringReactions)
     cyclization = antismash_input_transformed[1]
-    cluster = build_cluster(raichu_input)
+    cluster = build_cluster(raichu_input, strict = False)
     cluster.compute_structures(compute_cyclic_products=False)
     cluster_svg = cluster.draw_cluster()
     spaghettis = [spaghetti.replace("\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
