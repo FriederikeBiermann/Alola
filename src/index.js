@@ -1812,6 +1812,7 @@ function findTailoringEnzymeStatus(orfFunction) {
 function runAlola(regionIndex, details_data, recordData){
   regionName = getRegionName(regionIndex)
   cluster_type = getClusterType(regionIndex)
+  document.getElementById("BGCHeading").innerHTML = `Biosynthetic gene cluster explorer: ${regionName.toUpperCase()} - ${cluster_type} BGC`
   BGC = Object.keys(recordData[0].regions[regionIndex])
       .reduce(function (obj, k) {
           if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[

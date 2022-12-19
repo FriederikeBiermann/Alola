@@ -45,6 +45,7 @@ background-color:#1F1F1F
 margin-bottom: 10px;
 float: left;
 width:100%;
+overflow-x: scroll;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
 }
 
@@ -117,6 +118,15 @@ height: 515px;
 overflow-x: auto;
 box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);}
 .start_button {
+    margin:3px;
+  float: right;
+  color: #2B2B2B;
+  text-align: center;
+  padding: 2px 2px;
+  text-decoration: none;
+  font-size: 17px;
+}
+.regionButton {
     margin:3px;
   float: right;
   color: #2B2B2B;
