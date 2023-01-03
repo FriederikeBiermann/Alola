@@ -56,7 +56,9 @@
 </div>
 </div>
 
-    <div id="Domain_explorer" class="Domain_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Biosynthetic model</div>
+    <div id="Domain_explorer" class="Domain_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Biosynthetic model 
+      <button type="button" class=save_button id= "ripp_button" onclick="openRiPPForm()">><strong><a> RiPP BGC </a></strong></button></div>
+  
     <div id="outerDomainExplorer" class="outerDomainExplorer">
 
     <div class="module-container" id= "model_gene_container"> </div>
@@ -182,21 +184,32 @@
        </form>
      </div>
    </div>
-   <div class="loginPopup">
-     <div class="formPopup" id="popupFormPKS">
-       <form class="formContainer">
 
-         <button type="button" class="btn" onclick="openNRPSForm()">tesr</button>
-         <button type="button" class="btn" onclick="openPKSForm()">PKS</button>
-         <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
-       </form>
-     </div>
-   </div>
+
+    <div class="formPopup" id="popupFormRiPP">
+      <form class="formContainer">
+        <div class="dropdown">
+          <button type="button" class="dropbtn">RiPP precursor</button>
+          <div class="dropdown-content" id = "ripp_precursor_selection">
+          </div>
+        </div>
+      <br>
+        <input type="checkbox" id="wildcardProtease" name="wildcardProtease" value="true">
+        <label for="wildcardProtease"> Add Protease</label><br>
+        <input type="checkbox" id="wildcardCyclase" name="wildcardCyclase" value="true">
+        <label for="wildcardCyclase"> Add Cyclase</label><br>
+        
+        <button type="button" class="btn" onclick="addRiPP(geneMatrix);closeRiPPForm()">Submit</button>
+        <button type="button" class="btn cancel" onclick="closeRiPPForm()">Close</button>
+      </form>
+    </div>
+
+
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.js"></script>
 <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
 
-<script type="text/javascript" src="./regions_trans_at.js"></script>
+<script type="text/javascript" src="./regions.js"></script>
 <script type="text/javascript" src="./default_domains.js"></script>
 <script type="text/javascript" src="./protein_drawer.js"></script>
 <script type="text/javascript" src="./domain_drawer.js"></script>
