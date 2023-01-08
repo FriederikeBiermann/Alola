@@ -8,6 +8,7 @@ let RiPPStatus = 0
 let rippPrecursor = ""
 let rippPrecursorGene = 0
 let cleavageSites = []
+let proteaseOptions = []
 let nameToStructure = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
     "malonyl_coa": "OC(=O)CC(S)=O",
@@ -173,7 +174,8 @@ function handleDrop(e) {
             return a.position - b.position;
         });
         updateProteins(geneMatrix, BGC);
-        updateDomains(geneMatrix, BGC);
+        if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}
+        else{ updateRiPPs(geneMatrix, BGC)};
         addArrowClick(geneMatrix);
         if (document.getElementById("real-time-button")
             .checked) {
@@ -393,7 +395,7 @@ function addArrowClick(geneMatrix) {
             function () { // anonyme Funktion
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                 updateProteins(geneMatrix, BGC);
-                updateDomains(geneMatrix, BGC);
+                if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
                 changeColor("#" + geneMatrix[geneIndex].id.replace(".","_") + "_gene_arrow");
                 addArrowClick(geneMatrix);
                 if (document.getElementById("real-time-button")
@@ -444,7 +446,7 @@ function addArrowClick(geneMatrix) {
                 function () { // anonyme Funktion
                     setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                     updateProteins(geneMatrix, BGC);
-                    updateDomains(geneMatrix, BGC);
+                    if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
                     changeColor("#" + geneMatrix[geneIndex].id.replace(".","_") +
                         "_gene_arrow");
                     addArrowClick(geneMatrix);
@@ -526,6 +528,7 @@ function addArrowClick(geneMatrix) {
                     false
                 );
             }
+            if (RiPPStatus == 0){ // there are no typical domains in ripp clusters
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
@@ -631,7 +634,7 @@ function addArrowClick(geneMatrix) {
                     },
                     false
                 );
-            }
+            }}
         }
     }
 }
@@ -702,7 +705,8 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 }
 
 function fetchFromRaichuRiPP(){
-    let inputForRaichu = data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites])
+    updateRiPPs(geneMatrix, BGC)
+    let inputForRaichu = data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene])
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
@@ -711,7 +715,129 @@ function fetchFromRaichuRiPP(){
             const thing = response.json();
             return thing
         })
+        .then((data) => {
+            console.log(data)
+            let container = document.getElementById("structure_container");
+            let smiles_container = document.getElementById("smiles_container");
+            //add options for cyclization
 
+            for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+                if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
+                    if (geneMatrix[geneIndex].tailoringEnzymeType == "p450" || geneMatrix[geneIndex].tailoringEnzymeType == "P450") {
+                        geneMatrix[geneIndex].options = addStringToArray("Hydroxylation at ", data.c_atoms_for_tailoring.replaceAll(
+                            "[", "")
+                            .replaceAll("]", "")
+                            .replaceAll(" ", "")
+                            .split(","));
+
+                        geneMatrix[geneIndex].options.push("No oxidation")
+                        geneMatrix[geneIndex].default_option = ("No oxidation")
+                    }
+                    if (geneMatrix[geneIndex].tailoringEnzymeType == "n-methyltransferase") {
+                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.n_atoms_for_tailoring.replaceAll(
+                            "[", "")
+                            .replaceAll("]", "")
+                            .replaceAll(" ", "")
+                            .split(","));
+
+                        geneMatrix[geneIndex].options.push("No methylation")
+                        geneMatrix[geneIndex].default_option = ("No methylation")
+                    }
+                    if (geneMatrix[geneIndex].tailoringEnzymeType == "c-methyltransferase") {
+                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.c_atoms_for_tailoring.replaceAll(
+                            "[", "")
+                            .replaceAll("]", "")
+                            .replaceAll(" ", "")
+                            .split(","));
+
+                        geneMatrix[geneIndex].options.push("No methylation")
+                        geneMatrix[geneIndex].default_option = ("No methylation")
+                    }
+                    if (geneMatrix[geneIndex].tailoringEnzymeType == "o-methyltransferase") {
+                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.o_atoms_for_tailoring.replaceAll(
+                            "[", "")
+                            .replaceAll("]", "")
+                            .replaceAll(" ", "")
+                            .split(","));
+
+                        geneMatrix[geneIndex].options.push("No methylation")
+                        geneMatrix[geneIndex].default_option = ("No methylation")
+                    }
+                    if (geneMatrix[geneIndex].tailoringEnzymeType == " methyltransferase") {
+                        geneMatrix[geneIndex].options = data.o_atoms_for_tailoring.replaceAll(
+                            "[", "")
+                            .replaceAll("]", "")
+                            .replaceAll(" ", "")
+                            .split(",");
+                        geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.concat(data.c_atoms_for_tailoring.replaceAll(
+                            "[", "")
+                            .replaceAll("]", "")
+                            .replaceAll(" ", "")
+                            .split(","));
+                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", geneMatrix[geneIndex].options.concat(data.n_atoms_for_tailoring.replaceAll(
+                            "[", "")
+                            .replaceAll("]", "")
+                            .replaceAll(" ", "")
+                            .split(",")));
+                        geneMatrix[geneIndex].options.push("No methylation")
+                        geneMatrix[geneIndex].default_option = ("No methylation")
+                    }
+                }
+            }
+            
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(data.svg);
+            document.getElementById("save_svg")
+                .href = url
+            document.getElementById("save_svg")
+                .setAttribute("download", data.smiles + ".svg");
+            container.innerHTML = formatSVG(data.svg);
+            drawing = document.getElementById("final_drawing")
+            drawing.style["max-width"] = "100%"
+            drawing.style["max-height"] = "100%"
+            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + data.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
+
+            return [geneMatrix, data]
+        })
+        .then((data) => {
+            let geneMatrix = data[0]
+            createOptions(geneMatrix);
+            addDragDrop();
+            if (RiPPStatus == 0) { updateDomains(geneMatrix, BGC) }
+            else { updateRiPPs(geneMatrix, BGC) };
+            updateProteins(geneMatrix, BGC);
+            addArrowClick(geneMatrix)
+            return [data[1]];
+        })
+        .then((data2) => {
+            data = data2[0]
+            console.log("test")
+            if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
+                let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
+                tailoringEnzymes_intermediate.setAttribute("style", "width:300px")
+                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(data.structure_for_tailoring);
+                let intermediate_svg = document.getElementById("intermediate_drawing")
+                let bbox = intermediate_svg.getBBox();
+                let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
+
+                intermediate_svg.setAttribute("viewBox", viewBox)
+
+                intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
+                intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
+                let precursor = document.getElementById("innerIntermediateContainer_precursor");
+                precursor.setAttribute("style", "width:300px")
+                precursor.innerHTML = formatSVG_intermediates(data.raw_peptide_chain);
+                let precursor_svg = document.getElementById("precursor_drawing")
+                let precursor_bbox = intermediate_svg.getBBox();
+                let precursor_viewBox = [precursor_bbox.x, precursor_bbox.y, precursor_bbox.width, precursor_bbox.height].join(" ");
+
+                precursor_svg.setAttribute("viewBox", precursor_viewBox)
+
+                precursor_svg.setAttribute('id', "intermediate_drawing_precursor");
+                precursor_svg.setAttribute('class', "intermediate_drawing_tailoring");
+            }
+            
+        })
 
 
 
@@ -728,22 +854,21 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
         fetchFromRaichuRiPP()
     }
     else {
-    let data = ""
-    let starterACP = ""
-    console.log(BGC)
+    let data = "";
+    let starterACP = "";
     if (details_data.nrpspks.hasOwnProperty(regionName)){
     let extracted_results = extractAntismashPredictionsFromRegion(details_data,
-        regionName, geneMatrix)
-    data = extracted_results[0]
-    starterACP = extracted_results[1]
+        regionName, geneMatrix);
+    data = extracted_results[0];
+    starterACP = extracted_results[1];
     // add tailoring reactions
-    let tailoringArray = findTailoringReactions(geneMatrix)
+    let tailoringArray = findTailoringReactions(geneMatrix);
 
-    let data_string = JSON.stringify([data, cyclization, tailoringArray])
+    let data_string = JSON.stringify([data, cyclization, tailoringArray]);
     let url = "http://127.0.0.1:8000/api/alola/nrps_pks?antismash_input=";
-    let list_hanging_svg = []
-    let container = document.getElementById("structure_container")
-    container.innerHTML = ""
+    let list_hanging_svg = [];
+    let container = document.getElementById("structure_container");
+    container.innerHTML = "";
     fetch(url + data_string)
         .then(response => {
             const thing = response.json();
@@ -857,7 +982,8 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             let geneMatrix = data[0]
             createOptions(geneMatrix);
             addDragDrop();
-            updateDomains(geneMatrix, BGC);
+            if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)} 
+            else{ updateRiPPs(geneMatrix, BGC)};
             updateProteins(geneMatrix, BGC);
             addArrowClick(geneMatrix)
             return [data[1], data[2]];
@@ -1125,6 +1251,28 @@ function updateDomains(geneMatrix, BGC) {
             removeSpaceBetweenProteins(domainsForDisplay))));
     addDragDrop();
 }
+function updateRiPPs(geneMatrix, BGC) {
+    /**
+   * update Proteins to geneMAtrix to remove for instance ko genes and paint ko domains red and then calls the domainer to draw the domains
+   *@input BGC,geneMatrix
+   */
+    let genesForDisplay = JSON.parse(JSON.stringify(BGC));
+    delete genesForDisplay.orfs
+    genesForDisplay.orfs = []
+    geneMatrix.sort((a, b) => {
+        return a.position - b.position;
+    });
+    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+        if (geneMatrix[geneIndex].displayed == true && geneMatrix[geneIndex].domains
+            .length != 0) {
+            genesForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC -
+                1]);
+        }
+    }
+    $("#Domain_container")
+        .html(RiPPer.drawCluster(genesForDisplay, geneMatrix));
+    addDragDrop();
+}
 function setKoStatus(geneIndex, domainIndex, geneMatrix) {
     /**
     * Knocks out domains.
@@ -1249,7 +1397,7 @@ function addRiPP(geneMatrix,){
     var translationSearch = regExString.exec(BGCForDisplay["orfs"][geneIndex].description);
 
     let translation = translationSearch[1]; //is the matched group if found
-    rippPrecursor = translation.slice(-50); // default only last 50 amino acids
+    rippPrecursor = translation.slice(-5); // default only last 50 amino acids
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
 function setRiPPPrecursor(geneIndex){
@@ -1739,7 +1887,7 @@ function addWildcard(geneMatrix) {
     }
     displayGenes(BGC)
     updateProteins(geneMatrix, BGC)
-    updateDomains(geneMatrix, BGC)
+    if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)}
     addArrowClick(geneMatrix)
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 
@@ -1925,10 +2073,11 @@ function runAlola(regionIndex, details_data, recordData){
   addRiPPPrecursorOptions(geneMatrix)
   //remove all checkboxes
   $('input[type=checkbox]').removeAttr('checked');
-  updateProteins(geneMatrix, BGC)
-  updateDomains(geneMatrix, BGC)
-  addArrowClick(geneMatrix)
-  fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    updateProteins(geneMatrix, BGC)
+  if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)} 
+  else { updateRiPPs(geneMatrix, BGC)}
+    addArrowClick(geneMatrix)
+    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 }
 // adding modules+ opening the form to do so
 function addModulesGeneMatrix(geneMatrix, regionName) {

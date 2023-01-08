@@ -110,31 +110,45 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
     cleavage_sites = []
     amino_acid_sequence = antismash_input_transformed[0]
     gene_name_precursor = antismash_input_transformed[4]
-    for cyclization in antismash_input_transformed[1]:
-        macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
+    if antismash_input_transformed[1] != "None":
+        for cyclization in antismash_input_transformed[1]:
+            if len(cyclization)>0:
+                macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
     for enzyme in antismash_input_transformed[2]:
-        tailoringReactions += [TailoringRepresentation(*enzyme)]
+        if len(enzyme)>0:
+            tailoringReactions += [TailoringRepresentation(*enzyme)]
     for cleavage_site in antismash_input_transformed[3]:
-        cleavage_sites += [CleavageSiteRepresentation(*cleavage_site)]
+        if len(cleavage_site)>0:
+            cleavage_sites += [CleavageSiteRepresentation(*cleavage_site)]
     ripp_cluster = RiPP_Cluster(gene_name_precursor, amino_acid_sequence, cleavage_sites=cleavage_sites,
                                 tailoring_enzymes_representation=tailoringReactions)
     ripp_cluster.make_peptide()
     peptide_svg = ripp_cluster.draw_product(as_string=True).replace(
-        "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
-    ripp_cluster.do_tailoring()
-    ripp_cluster.do_macrocyclization()
-    cyclised_product_svg = ripp_cluster.draw_product(as_string=True).replace(
-        "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
-    ripp_cluster.do_proteolytic_claevage()
-    cleaved_ripp_svg = ripp_cluster.draw_product(as_string=True).replace("\n", "").replace(
-        "\"", "'").replace("<svg", " <svg id='final_drawing'")
-    tailored_product = ripp_cluster.tailored_product
-    final_product =ripp_cluster.final_product
-    smiles = structure_to_smiles(final_product, kekule=False)
+        "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")
+    if len(tailoringReactions)>0:
+        ripp_cluster.do_tailoring()
+        tailored_product = ripp_cluster.tailored_product
+    else:
+        tailored_product = ripp_cluster.linear_product
     structure_for_tailoring = RaichuDrawer(
-        tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True)
+    tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True)
+    structure_for_tailoring.draw_structure()
     svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
+    
+    if len(macrocyclisations)>0:
+        ripp_cluster.do_macrocyclization()
+    cyclised_product_svg = ripp_cluster.draw_product(as_string=True).replace(
+        "\n", "").replace("\"", "'").replace("<svg", " <svg id='cyclised_drawing'")
+    
+    if len(cleavage_sites)>0:
+        ripp_cluster.do_proteolytic_claevage()
+    cleaved_ripp_svg = ripp_cluster.draw_product(as_string=True).replace("\n", "").replace(
+        "\"", "'").replace("<svg", " <svg id='final_drawing'")
+    
+    final_product = ripp_cluster.chain_intermediate
+    smiles = structure_to_smiles(final_product, kekule=False)
+   
     atoms_for_cyclisation = str(
         find_all_o_n_atoms_for_cyclization(tailored_product))
     n_atoms_for_tailoring = str(
