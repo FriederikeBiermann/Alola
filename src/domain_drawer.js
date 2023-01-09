@@ -450,7 +450,7 @@ Domainer.drawClusterSVG = (function(cluster, height = 90) {
     $(container)
         .find("svg")
         .attr("width", width + "px");
-    Domainer.drawModules(geneMatrix, 20, scale)
+    Domainer.drawModules(moduleMatrix, 20, scale)
     Domainer.drawGenes(geneMatrix, 20, scale)
     Domainer.leaveSpaceForTailoring(150, scale)
   Domainer.drawTailoringEnzymes(cluster,geneMatrix,height,scale)
@@ -651,43 +651,56 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
         .innerHTML = ""
         height=40
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        let gene_size=0
-        if (geneMatrix[geneIndex].hasOwnProperty("modules")) {
-            for (let moduleIndex = 0; moduleIndex < geneMatrix[
-                    geneIndex].modules.length; moduleIndex++) {
-
-                gene_size += geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation-2
-                geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation =
-                    0
-
+        let geneSize=0
+        let lengthVisualisation = 0
+        if (geneMatrix[geneIndex].hasOwnProperty("domains")) {
+            for (let domainIndex = 0; domainIndex < geneMatrix[
+                    geneIndex].domains.length; domainIndex++) {
+                domain = geneMatrix[
+                    geneIndex].domains[domainIndex].type
+                if (domain.includes(
+                    "term") || domain.includes(
+                        "ACP") || domain.includes(
+                            "PP") || domain.includes("PCP")) {
+                    bubble_size = 25;
+                }
+                else {
+                    bubble_size = 50;
+                }
+                lengthVisualisation += bubble_size
+            };
+            geneSize = lengthVisualisation - 3
             }
-        }
+    
 
-        if (gene_size >0){
+        if (geneSize >0){
           var innerModelGeneContainer = document.createElement('div');
           innerModelGeneContainer.id = "innerModelGeneContainer" + "_" +
               geneMatrix[geneIndex].id
           document.getElementById('model_gene_container')
               .appendChild(innerModelGeneContainer);
           var draw = SVG(innerModelGeneContainer)
-              .size(String(gene_size) + "px", height)
+              .size(String(geneSize) + "px", height)
               .group();
 
-              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,gene_size, 40, scale)))
+              var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0,geneSize, 40, scale)))
               .fill("white")
 
               .stroke("#2B2B2B")
               .stroke({
                   width: 1
               })
-                if (gene_size<50){var text=draw.text(geneMatrix[geneIndex].id.replace(".","_") .split("_")[1]).x(gene_size/2).y(height/2-7)}
-                else{var text=draw.text(geneMatrix[geneIndex].id.replace(".","_")).x(gene_size/2).y(height/2-7)}
+            if (geneSize < 50) {
+                var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_")).x(geneSize / 2).y(height / 2 - 7)
+}
+
+                else{var text=draw.text(geneMatrix[geneIndex].id.replace(".","_")).x(geneSize/2).y(height/2-7)}
 
 
           pol.node.id = "module_gene_" + geneIndex
-        }
+        }}
 
-    }
+    
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size=50
 
@@ -717,23 +730,33 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
 
     }
 });
-Domainer.drawModules = (function(geneMatrix, height, scale) {
+Domainer.drawModules = (function(moduleMatrix, height, scale) {
    height=30
     document.getElementById('module_container')
         .innerHTML = ""
-    let completeModuleIndex=0
-    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        if (geneMatrix[geneIndex].hasOwnProperty("modules")) {
-            for (let moduleIndex = 0; moduleIndex < geneMatrix[
-                    geneIndex].modules.length; moduleIndex++) {
-
-                var innerModuleContainer = document.createElement('div');
-                innerModuleContainer.id = "innerModuleContainer" + "_" +
-                    geneMatrix[geneIndex].id + "_" + moduleIndex
-                document.getElementById('module_container')
-                    .appendChild(innerModuleContainer);
-                size = geneMatrix[geneIndex].modules[moduleIndex].lengthVisualisation -
-                    3
+    for (let moduleIndex = 0; moduleIndex < moduleMatrix.length; moduleIndex++) {
+            
+                let lengthVisualisation = 0
+                
+                domains = moduleMatrix[moduleIndex].domains
+                for (domainIndex in domains){
+                    domain = domains[domainIndex]
+                    if (domain.includes(
+                        "term") || domain.includes(
+                            "ACP") || domain.includes(
+                                "PP") ||domain.includes("PCP")) {
+                        bubble_size = 25;
+                    }
+                    else {
+                        bubble_size = 50;
+                    }
+                    lengthVisualisation += bubble_size};
+                size = lengthVisualisation - 3
+                if (size > 0){
+        var innerModuleContainer = document.createElement('div');
+        innerModuleContainer.id = "innerModuleContainer" + "_" + moduleIndex
+        document.getElementById('module_container')
+            .appendChild(innerModuleContainer);
                 var draw = SVG(innerModuleContainer)
                     .size(String(size) + "px", height)
                     .group();
@@ -747,14 +770,10 @@ Domainer.drawModules = (function(geneMatrix, height, scale) {
                     })
                 dom.node.id = "module_" + moduleIndex
                 if (size>=70){
-                  var text_module=draw.text("Module " + completeModuleIndex).x(size/2).y(height/2-7)
-                  .fill("white")
+                    var text_module = draw.text("Module " + String(moduleIndex)).x(size/2).y(height/2-7).fill("white")
                 }
-                else{var text_module=draw.text(String(completeModuleIndex)).x(size/2).y(height/2-7).fill("white")}
-                completeModuleIndex++
-            }
-        }
-    }
+                else { var text_module = draw.text(String(moduleIndex)).x(size/2).y(height/2-7).fill("white")}
+            }}
     //tailoring enzyme
     var innerModuleContainer = document.createElement('div');
     innerModuleContainer.id = "innerModuleContainer" + "_" +
