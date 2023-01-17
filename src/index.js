@@ -894,7 +894,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
         .then((data) => {
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
-            OptionCreator.createOptionsDomains(geneMatrix, cyclization = data.atomsForCyclisation)
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = data.atomsForCyclisation)
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(data.complete_cluster_svg);
             document.getElementById("save_complete_cluster_svg")
@@ -917,13 +917,12 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             return [geneMatrix, intermediates, data]
         })
         .then((data) => {
-            let geneMatrix = data[0]
-            createOptions(geneMatrix);
+            let geneMatrix = data[0];
             if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)} 
             else{ updateRiPPs(geneMatrix, BGC)};
             updateProteins(geneMatrix, BGC);
             addDragDrop();
-            addArrowClick(geneMatrix)
+            addArrowClick(geneMatrix);
             return [data[1], data[2]];
         })
         .then((data2) => {

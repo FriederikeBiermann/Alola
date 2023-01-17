@@ -1,9 +1,7 @@
-let tailoringEnzymes = ["p450", "reductase", "protease"]
-
 var OptionCreator = {
   version: "1.0.0"
 };
-OptionCreator.createOptionsDomains(function (geneMatrix, cyclization = none){
+OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none){
    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
      for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
       let domain= geneMatrix[geneIndex].domains[domainIndex]
@@ -32,15 +30,19 @@ domain.default_option=domain.predictions[1][1].replace(
 }
 //add cyclisation options
        if (domain.abbreviation == "TE") {
-         domain.domainOptions = atomsForCyclisation;
+         domain.domainOptions = addStringToArray("Cyclization at ", atomsForCyclisation.replaceAll(
+           "[", "")
+           .replaceAll("]", "")
+           .replaceAll(" ", "")
+           .split(","));
          domain.domainOptions.push("Linear product");
-         domain.default_option = none;
+         domain.default_option = null;
        }
      }
    }
 
 })
-OptionCreator.createOptionsTailoringEnzymes(function (geneMatrix, c_atoms = none, n_atoms = none, o_atoms = none, double_CC_bond = none, peptide_bonds = none){
+OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, c_atoms = none, n_atoms = none, o_atoms = none, double_CC_bond = none, peptide_bonds = none){
   let tailoringEnzymes_Reactions = {
     "p450": {
       "Hydroxylation": c_atoms,
@@ -66,6 +68,6 @@ OptionCreator.createOptionsTailoringEnzymes(function (geneMatrix, c_atoms = none
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
     if (geneMatrix[geneIndex].tailoringEnzymeStatus == true){
       geneMatrix[geneIndex].options = tailoringEnzymes_Reactions[geneMatrix[geneIndex].tailoringEnzymeType];
-      geneMatrix[geneIndex].default_option = none
+      geneMatrix[geneIndex].default_option = null;
     }
 }})
