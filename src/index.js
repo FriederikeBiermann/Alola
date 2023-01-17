@@ -785,7 +785,11 @@ function fetchFromRaichuRiPP(){
                     }
                 }
             }
-            
+            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(data.aminoAcidsForCleavage.replaceAll(
+                "[", "")
+                .replaceAll("]", "")
+                .replaceAll(" ", "")
+                .split(",")));
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(data.svg);
             document.getElementById("save_svg")
@@ -824,7 +828,8 @@ function fetchFromRaichuRiPP(){
                 intermediate_svg.setAttribute("viewBox", viewBox)
 
                 intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
-                intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
+                intermediate_svg.setAttribute('class', "intermediate_drawing_protease");
+                // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
                 precursor.setAttribute("style", "width:300px")
                 precursor.innerHTML = formatSVG_intermediates(data.raw_peptide_chain);
@@ -835,7 +840,19 @@ function fetchFromRaichuRiPP(){
                 precursor_svg.setAttribute("viewBox", precursor_viewBox)
 
                 precursor_svg.setAttribute('id', "intermediate_drawing_precursor");
-                precursor_svg.setAttribute('class', "intermediate_drawing_tailoring");
+                precursor_svg.setAttribute('class', "intermediate_drawing_precursor");
+                //add cleavage
+                let cleavage = document.getElementById("innerIntermediateContainer_cleavedProduct");
+                cleavage.setAttribute("style", "width:300px")
+                cleavage.innerHTML = formatSVG_intermediates(data.svg);
+                let cleavage_svg = document.getElementById("cleavedProduct")
+                let cleavage_bbox = intermediate_svg.getBBox();
+                let cleavage_viewBox = [cleavage_bbox.x, cleavage_bbox.y, cleavage_bbox.width, cleavage_bbox.height].join(" ");
+
+                cleavage_svg.setAttribute("viewBox", cleavage_viewBox)
+
+                cleavage_svg.setAttribute('id', "intermediate_drawing_cleavage");
+                cleavage_svg.setAttribute('class', "intermediate_drawing_cleavage");
             }
             
         })
@@ -864,7 +881,6 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
     starterACP = extracted_results[1];
     // add tailoring reactions
     let tailoringArray = findTailoringReactions(geneMatrix);
-
     let data_string = JSON.stringify([data, cyclization, tailoringArray]);
     let url = "http://127.0.0.1:8000/api/alola/nrps_pks?antismash_input=";
     let list_hanging_svg = [];
@@ -878,86 +894,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
         .then((data) => {
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
-            //add options for cyclization
-
-            for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-                for (let domainIndex = 0; domainIndex < geneMatrix[
-                    geneIndex].domains.length; domainIndex++) {
-                    let domain = geneMatrix[geneIndex].domains[domainIndex]
-                    if (domain.abbreviation == "TE") {
-                        domain.domainOptions = addStringToArray("Cyclization at ", data.atomsForCyclisation.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        domain.domainOptions.push("Linear product");
-
-                        domain.default_option = ["Linear product"];
-                    }
-                }
-                if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "p450" || geneMatrix[geneIndex].tailoringEnzymeType == "P450") {
-                        geneMatrix[geneIndex].options = addStringToArray("Hydroxylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No oxidation")
-                        geneMatrix[geneIndex].default_option = ("No oxidation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "n-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "c-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "o-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == " methyltransferase") {
-                        geneMatrix[geneIndex].options = data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",");
-                        geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.concat(data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", geneMatrix[geneIndex].options.concat(data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",")));
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                }
-            }
+            OptionCreator.createOptionsDomains(geneMatrix, cyclization = data.atomsForCyclisation)
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(data.complete_cluster_svg);
             document.getElementById("save_complete_cluster_svg")
@@ -982,10 +919,10 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
         .then((data) => {
             let geneMatrix = data[0]
             createOptions(geneMatrix);
-            addDragDrop();
             if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)} 
             else{ updateRiPPs(geneMatrix, BGC)};
             updateProteins(geneMatrix, BGC);
+            addDragDrop();
             addArrowClick(geneMatrix)
             return [data[1], data[2]];
         })
@@ -1393,12 +1330,21 @@ function addRiPP(geneMatrix,){
     RiPPStatus = 1;
     geneIndex = rippPrecursorGene
     geneMatrix[geneIndex].ripp_status = true;
-    var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
+    let translation = ""
+    // for antismash 7.0 files
+    if (BGCForDisplay["orfs"][geneIndex].hasOwnProperty("translation")){
+        translation = BGCForDisplay["orfs"][geneIndex].translation}
+    // for antismash 6.0 files
+    else {
+        var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
 
-    var translationSearch = regExString.exec(BGCForDisplay["orfs"][geneIndex].description);
+        var translationSearch = regExString.exec(BGCForDisplay["orfs"][geneIndex].description);
 
-    let translation = translationSearch[1]; //is the matched group if found
-    rippPrecursor = translation.slice(-5); // default only last 50 amino acids
+        translation = translationSearch[1]; //is the matched group if found
+
+    }
+    
+    rippPrecursor = translation.slice(-10); // default only last 10 amino acids
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
 function setRiPPPrecursor(geneIndex){
