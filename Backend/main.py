@@ -123,10 +123,8 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
     ripp_cluster = RiPP_Cluster(gene_name_precursor, amino_acid_sequence, cleavage_sites=cleavage_sites,
                                 tailoring_enzymes_representation=tailoringReactions)
     ripp_cluster.make_peptide()
-    print(ripp_cluster)
     peptide_svg = ripp_cluster.draw_product(as_string=True).replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")
-    print(ripp_cluster)
     if len(tailoringReactions)>0:
         ripp_cluster.do_tailoring()
         tailored_product = ripp_cluster.tailored_product
@@ -142,15 +140,14 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
         ripp_cluster.do_macrocyclization()
     cyclised_product_svg = ripp_cluster.draw_product(as_string=True).replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='cyclised_drawing'")
-    
+
     if len(cleavage_sites)>0:
         ripp_cluster.do_proteolytic_claevage()
     cleaved_ripp_svg = ripp_cluster.draw_product(as_string=True).replace("\n", "").replace(
         "\"", "'").replace("<svg", " <svg id='final_drawing'")
-    
+
     final_product = ripp_cluster.chain_intermediate
     smiles = structure_to_smiles(final_product, kekule=False)
-    print(ripp_cluster)
     atoms_for_cyclisation = str(
         find_all_o_n_atoms_for_cyclization(tailored_product))
     n_atoms_for_tailoring = str(
@@ -169,5 +166,3 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
             "o_atoms_for_tailoring": o_atoms_for_tailoring, "raw_peptide_chain": peptide_svg,
             "cyclised_structure": cyclised_product_svg, "aminoAcidsForCleavage": amino_acids,
             "structure_for_tailoring": svg_structure_for_tailoring}
-    
-    
