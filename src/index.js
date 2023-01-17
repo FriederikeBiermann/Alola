@@ -47,6 +47,7 @@ let moduleMatrix = []
 let wildcardSubstrate = "glycine"
 let wildcardModule = "elongation_module_nrps"
 let nameWildcardModule = "Custom_gene_"
+
 function findButtonbyTextContent(text) {
     var buttons = document.querySelectorAll('button');
     for (var i = 0, l = buttons.length; i < l; i++) {
@@ -711,23 +712,22 @@ function fetchFromRaichuRiPP(){
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
+    updateProteins(geneMatrix, BGC);
+    updateRiPPs(geneMatrix, BGC)
+    addDragDrop();
+    addArrowClick(geneMatrix);
     fetch(url + data_string)
         .then(response => {
             const handler = response.json();
             return handler
         })
         .then((raichu_output) => {
-            updateProteins(geneMatrix, BGC);
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
-            updateRiPPs(geneMatrix, BGC)
-            addDragDrop();
-            addArrowClick(geneMatrix);
+            // format output
             //add protase Options
-            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(raichu_output.aminoAcidsForCleavage.replaceAll(
-                "[", "")
-                .replaceAll("]", "")
-                .replaceAll(" ", "")
-                .split(",")));
+            console.log(raichu_output.aminoAcidsForCleavage)
+
+            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(JSON.parse(raichu_output.aminoAcidsForCleavage)));
             // add final drawing
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
@@ -785,7 +785,7 @@ function fetchFromRaichuRiPP(){
                 cleavage_svg.setAttribute('id', "intermediate_drawing_cleavage");
                 cleavage_svg.setAttribute('class', "intermediate_drawing_cleavage");
             }
-            
+
         })
 }
 function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
@@ -814,19 +814,20 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
     let list_hanging_svg = [];
     let container = document.getElementById("structure_container");
     container.innerHTML = "";
+    updateProteins(geneMatrix, BGC);
+    updateDomains(geneMatrix, BGC);
+    addDragDrop();
+    addArrowClick(geneMatrix);
     fetch(url + data_string)
         .then(response => {
             const handler = response.json();
             return handler
         })
         .then((raichu_output) => {
-            updateProteins(geneMatrix, BGC);
-            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
-            updateDomains(geneMatrix, BGC);
-            addDragDrop();
-            addArrowClick(geneMatrix);
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation);
             acpList = getACPList(geneMatrix);
             let intermediates = raichu_output.hanging_svg;
+            console.log(intermediates.length, acpList.length, starterACP)
             // structure for tailoring conatiner
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") != null)) {
                 let innerIntermediateContainer_tailoring_enzymes = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
@@ -1056,7 +1057,6 @@ function getACPList(geneMatrix) {
    * @output acp List
    */
     let acpList = []
-    last_domain_status = 0
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
             0) {
@@ -1067,14 +1067,11 @@ function getACPList(geneMatrix) {
                         "ACP") || geneMatrix[geneIndex].domains[domainIndex]
                             .type.includes("PP") || geneMatrix[geneIndex].domains[domainIndex]
                                 .type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
-                                    .type.includes("ACPS")) && last_domain_status == 0) {
+                                    .type.includes("ACPS"))) {
                         acpList.push(geneMatrix[geneIndex].domains[domainIndex]
                             .identifier)
-                        last_domain_status = 1
 
                     }
-                    else { last_domain_status = 0; }
-
                 }
             }
         }
@@ -1259,7 +1256,7 @@ function addRiPP(geneMatrix,){
         translation = translationSearch[1]; //is the matched group if found
 
     }
-    
+
     rippPrecursor = translation.slice(-10); // default only last 10 amino acids
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
@@ -2108,7 +2105,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                             }
                                             else { subtype = "MISCELLANEOUS" }
                                         }
-                                        
+
                                     }
                                     else {
                                         subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
@@ -2187,12 +2184,14 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     active = "False";
                                     geneMatrix[geneIndex].domains[domainIndex].ko = true};
                                 if ((domain.type.includes("ACP") || domain.type
-                                    .includes("PP") || domain.type.includes("PCP")) && moduleType == "NRPS") {
+                                    .includes("PP") || domain.type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
+                                        .type.includes("ACPS")) && moduleType == "NRPS") {
                                     type = "PCP"
                                     acpCounter += 1;
                                 }
                                 if ((domain.type.includes("ACP") || domain.type
-                                    .includes("PP") || domain.type.includes("PCP")) && moduleType == "PKS") {
+                                    .includes("PP") || domain.type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
+                                        .type.includes("ACPS")) && moduleType == "PKS") {
                                     type = "ACP"
                                     acpCounter += 1;
                                 }
@@ -2242,6 +2241,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
             }
         }
     }
+    console.log(outputForRaichu)
     return [outputForRaichu, starterACP, geneMatrix]
 }
 createButtonsForEachRegion()
