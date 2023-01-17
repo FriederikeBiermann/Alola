@@ -653,6 +653,7 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let geneSize=0
         let lengthVisualisation = 0
+        if (geneMatrix[geneIndex].ko == false) {
         if (geneMatrix[geneIndex].hasOwnProperty("domains")) {
             for (let domainIndex = 0; domainIndex < geneMatrix[
                     geneIndex].domains.length; domainIndex++) {
@@ -670,8 +671,8 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
                 lengthVisualisation += bubble_size
             };
             geneSize = lengthVisualisation - 3
-            }
-    
+          }}
+
 
         if (geneSize >0){
           var innerModelGeneContainer = document.createElement('div');
@@ -700,7 +701,7 @@ Domainer.drawGenes = (function(geneMatrix, height, scale) {
           pol.node.id = "module_gene_" + geneIndex
         }}
 
-    
+
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size=50
 
@@ -735,10 +736,10 @@ Domainer.drawModules = (function(moduleMatrix, height, scale) {
     document.getElementById('module_container')
         .innerHTML = ""
     for (let moduleIndex = 0; moduleIndex < moduleMatrix.length; moduleIndex++) {
-            
+
                 let lengthVisualisation = 0
-                
-                domains = moduleMatrix[moduleIndex].domains
+
+                domains = moduleMatrix[moduleIndex].domains;
                 for (domainIndex in domains){
                     domain = domains[domainIndex]
                     if (domain.includes(
@@ -750,6 +751,7 @@ Domainer.drawModules = (function(moduleMatrix, height, scale) {
                     else {
                         bubble_size = 50;
                     }
+
                     lengthVisualisation += bubble_size};
                 size = lengthVisualisation - 3
                 if (size > 0){
