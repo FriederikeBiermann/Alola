@@ -888,59 +888,30 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
     container.innerHTML = "";
     fetch(url + data_string)
         .then(response => {
-            const thing = response.json();
-            return thing
+            const handler = response.json();
+            return handler
         })
-        .then((data) => {
-            let container = document.getElementById("structure_container");
-            let smiles_container = document.getElementById("smiles_container");
-            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = data.atomsForCyclisation)
-            var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(data.complete_cluster_svg);
-            document.getElementById("save_complete_cluster_svg")
-                .href = url
-            document.getElementById("save_complete_cluster_svg")
-                .setAttribute("download", data.smiles + "_cluster.svg");
-            var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(data.svg);
-            document.getElementById("save_svg")
-                .href = url
-            document.getElementById("save_svg")
-                .setAttribute("download", data.smiles + ".svg");
-            container.innerHTML = formatSVG(data.svg);
-            drawing = document.getElementById("final_drawing")
-            drawing.style["max-width"] = "100%"
-            drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + data.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
-            acpList = obtainACPList(geneMatrix);
-            let intermediates = data.hanging_svg;
-            return [geneMatrix, intermediates, data]
-        })
-        .then((data) => {
-            let geneMatrix = data[0];
-            if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)} 
-            else{ updateRiPPs(geneMatrix, BGC)};
+        .then((raichu_output) => {
             updateProteins(geneMatrix, BGC);
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
+            updateDomains(geneMatrix, BGC);
             addDragDrop();
             addArrowClick(geneMatrix);
-            return [data[1], data[2]];
-        })
-        .then((data2) => {
-            intermediates = data2[0]
-            data = data2[1]
+            acpList = getACPList(geneMatrix);
+            let intermediates = raichu_output.hanging_svg;
+            // structure for tailoring conatiner
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") != null)) {
-                let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
-                tailoringEnzymes_intermediate.setAttribute("style", "width:150px")
-                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(data.structure_for_tailoring);
-                let intermediate_svg = document.getElementById("intermediate_drawing")
-                let bbox = intermediate_svg.getBBox();
-                let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
-
-                intermediate_svg.setAttribute("viewBox", viewBox)
-
-                intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
-                intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
+                let innerIntermediateContainer_tailoring_enzymes = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
+                innerIntermediateContainer_tailoring_enzymes.setAttribute("style", "width:150px")
+                innerIntermediateContainer_tailoring_enzymes.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
+                let structure_for_tailoring = document.getElementById("tailoring_drawing")
+                let bbox_structure_for_tailoring = structure_for_tailoring.getBBox();
+                let viewBox_structure_for_tailoring = [bbox_structure_for_tailoring.x, bbox_structure_for_tailoring.y, bbox_structure_for_tailoring.width, bbox_structure_for_tailoring.height].join(" ");
+                structure_for_tailoring.setAttribute("viewBox", viewBox_structure_for_tailoring)
+                structure_for_tailoring.setAttribute('id', "intermediate_drawing_tailoring");
+                structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
             }
+            //hanging svgs for spaghetti diagram
             for (let intermediateIndex = 0; intermediateIndex <
                 intermediates.length; intermediateIndex++) {
                 intermediate = intermediates[intermediateIndex]
@@ -955,13 +926,31 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y + 38, bbox.width, bbox.height].join(" ");
-
                 intermediate_svg.setAttribute("viewBox", viewBox)
                 intermediate_svg.setAttribute('id', "intermediate_drawing" + intermediateIndex);
                 intermediate_svg.setAttribute('class', "intermediate_drawing");
 
             }
-
+            // add final drawing
+            let container = document.getElementById("structure_container");
+            let smiles_container = document.getElementById("smiles_container");
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(raichu_output.complete_cluster_svg);
+            document.getElementById("save_complete_cluster_svg")
+                .href = url
+            document.getElementById("save_complete_cluster_svg")
+                .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(raichu_output.svg);
+            document.getElementById("save_svg")
+                .href = url
+            document.getElementById("save_svg")
+                .setAttribute("download", raichu_output.smiles + ".svg");
+            container.innerHTML = formatSVG(raichu_output.svg);
+            drawing = document.getElementById("final_drawing")
+            drawing.style["max-width"] = "100%"
+            drawing.style["max-height"] = "100%"
+            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
         })
 }}}
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
@@ -1132,7 +1121,7 @@ function updateProteins(geneMatrix, BGC) {
             removeSpaceBetweenProteins(proteinsForDisplay))));
     addDragDrop();
 }
-function obtainACPList(geneMatrix) {
+function getACPList(geneMatrix) {
     /**
    * Get list of ACP/PCP to attach the intermediates to it.
    *@input geneMatrix

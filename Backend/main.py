@@ -91,7 +91,7 @@ async def alola_nrps_pks(antismash_input: str, state: Optional[List[int]] = Quer
         tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True)
     structure_for_tailoring.draw_structure()
     svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
-        "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
+        "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
     svg = svg_string_from_structure(final_product).replace("\n", "").replace(
         "\"", "'").replace("<svg", " <svg id='final_drawing'")
 
