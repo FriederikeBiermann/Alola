@@ -1,3 +1,17 @@
+function addStringToArray(string, array) {
+  /**
+ * Adds a string in front of every instance of the array
+
+ * @input array and string that need to be attached
+ * @yield new array
+ */
+
+
+  let new_array = array.map(function (value, index, array) {
+    return string + value;
+  });
+  return new_array
+}
 var OptionCreator = {
   version: "1.0.0"
 };
@@ -71,3 +85,8 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, c_atoms = n
       geneMatrix[geneIndex].default_option = null;
     }
 }})
+
+
+//add options for cyclization
+
+

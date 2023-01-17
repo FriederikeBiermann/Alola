@@ -713,114 +713,45 @@ function fetchFromRaichuRiPP(){
     container.innerHTML = ""
     fetch(url + data_string)
         .then(response => {
-            const thing = response.json();
-            return thing
+            const handler = response.json();
+            return handler
         })
-        .then((data) => {
-            console.log(data)
-            let container = document.getElementById("structure_container");
-            let smiles_container = document.getElementById("smiles_container");
-            //add options for cyclization
-
-            for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-                if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "p450" || geneMatrix[geneIndex].tailoringEnzymeType == "P450") {
-                        geneMatrix[geneIndex].options = addStringToArray("Hydroxylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No oxidation")
-                        geneMatrix[geneIndex].default_option = ("No oxidation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "n-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "c-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "o-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == " methyltransferase") {
-                        geneMatrix[geneIndex].options = data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",");
-                        geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.concat(data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", geneMatrix[geneIndex].options.concat(data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",")));
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                }
-            }
-            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(data.aminoAcidsForCleavage.replaceAll(
+        .then((raichu_output) => {
+            updateProteins(geneMatrix, BGC);
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
+            updateRiPPs(geneMatrix, BGC)
+            addDragDrop();
+            addArrowClick(geneMatrix);
+            //add protase Options
+            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(raichu_output.aminoAcidsForCleavage.replaceAll(
                 "[", "")
                 .replaceAll("]", "")
                 .replaceAll(" ", "")
                 .split(",")));
+            // add final drawing
+            let container = document.getElementById("structure_container");
+            let smiles_container = document.getElementById("smiles_container");
             var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(data.svg);
+                encodeURIComponent(raichu_output.complete_cluster_svg);
+            document.getElementById("save_complete_cluster_svg")
+                .href = url
+            document.getElementById("save_complete_cluster_svg")
+                .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(raichu_output.svg);
             document.getElementById("save_svg")
                 .href = url
             document.getElementById("save_svg")
-                .setAttribute("download", data.smiles + ".svg");
-            container.innerHTML = formatSVG(data.svg);
+                .setAttribute("download", raichu_output.smiles + ".svg");
+            container.innerHTML = formatSVG(raichu_output.svg);
             drawing = document.getElementById("final_drawing")
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + data.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
-
-            return [geneMatrix, data]
-        })
-        .then((data) => {
-            let geneMatrix = data[0]
-            createOptions(geneMatrix);
-            addDragDrop();
-            if (RiPPStatus == 0) { updateDomains(geneMatrix, BGC) }
-            else { updateRiPPs(geneMatrix, BGC) };
-            updateProteins(geneMatrix, BGC);
-            addArrowClick(geneMatrix)
-            return [data[1]];
-        })
-        .then((data2) => {
-            data = data2[0]
-            console.log("test")
+            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
                 tailoringEnzymes_intermediate.setAttribute("style", "width:300px")
-                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(data.structure_for_tailoring);
+                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
@@ -832,7 +763,7 @@ function fetchFromRaichuRiPP(){
                 // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
                 precursor.setAttribute("style", "width:300px")
-                precursor.innerHTML = formatSVG_intermediates(data.raw_peptide_chain);
+                precursor.innerHTML = formatSVG_intermediates(raichu_output.raw_peptide_chain);
                 let precursor_svg = document.getElementById("precursor_drawing")
                 let precursor_bbox = intermediate_svg.getBBox();
                 let precursor_viewBox = [precursor_bbox.x, precursor_bbox.y, precursor_bbox.width, precursor_bbox.height].join(" ");
@@ -844,7 +775,7 @@ function fetchFromRaichuRiPP(){
                 //add cleavage
                 let cleavage = document.getElementById("innerIntermediateContainer_cleavedProduct");
                 cleavage.setAttribute("style", "width:300px")
-                cleavage.innerHTML = formatSVG_intermediates(data.svg);
+                cleavage.innerHTML = formatSVG_intermediates(raichu_output.svg);
                 let cleavage_svg = document.getElementById("cleavedProduct")
                 let cleavage_bbox = intermediate_svg.getBBox();
                 let cleavage_viewBox = [cleavage_bbox.x, cleavage_bbox.y, cleavage_bbox.width, cleavage_bbox.height].join(" ");
@@ -856,9 +787,6 @@ function fetchFromRaichuRiPP(){
             }
             
         })
-
-
-
 }
 function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
