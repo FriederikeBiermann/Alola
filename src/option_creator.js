@@ -56,13 +56,14 @@ domain.default_option=domain.predictions[1][1].replace(
    }
 
 })
-OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, c_atoms = none, n_atoms = none, o_atoms = none, double_CC_bond = none, peptide_bonds = none){
+OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, c_atoms = null, n_atoms = null, o_atoms = null, double_CC_bond = null, peptide_bonds = null){
   let tailoringEnzymes_Reactions = {
     "p450": {
       "Hydroxylation": c_atoms,
       "Epoxidation": double_CC_bond,
-      "Oxidative bond formation": {"Atom 1": c_atoms + n_atoms + o_atoms,
-        "Atom 2": c_atoms + n_atoms + o_atoms,
+      "Oxidative bond formation": {
+        "Atom 1": c_atoms.concat(n_atoms, o_atoms),
+        "Atom 2": c_atoms.concat(n_atoms, o_atoms),
     }},
     "reductase": {
       "Double bond reduction": double_CC_bond
@@ -71,8 +72,9 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, c_atoms = n
       "Proteolytic cleavage": peptide_bonds
     },
     "methyltransferase": {
-      "Methylation": c_atoms +  n_atoms + o_atoms,
       "O-methylation": o_atoms,
+      "Methylation": c_atoms.concat(n_atoms, o_atoms),
+      
       "N-methylation": n_atoms,
       "C-methylation": c_atoms
     }
