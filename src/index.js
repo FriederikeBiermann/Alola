@@ -731,9 +731,11 @@ function fetchFromRaichuRiPP(){
             // format output
             //add protase Options
             proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(stringToArray(raichu_output.aminoAcidsForCleavage)));
-            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring), 
-                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring), 
-                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring));
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
+                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
+                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
+                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
+                peptide_bonds = stringToArray(raichu_output.peptideBonds));
             updateRiPPs(geneMatrix, BGC)
             addArrowClick(geneMatrix);
             // add final drawing
@@ -829,10 +831,13 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             return handler
         })
         .then((raichu_output) => {
+            console.log(raichu_output.ccDoubleBonds)
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation);
             OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
                 n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
-                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring));
+                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
+                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
+                peptide_bonds = stringToArray(raichu_output.peptideBonds));
             updateDomains(geneMatrix, BGC);
             addArrowClick(geneMatrix);
             acpList = getACPList(geneMatrix);
