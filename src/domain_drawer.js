@@ -52,8 +52,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
     var line_svg = SVG(container)
         .size('100%', height)
         .group();
-    document.getElementById('domain_container')
-        .innerHTML = "";
+    container.innerHTML = "";
     var scale = (function (val) {
         return parseInt(val / (1000 / height));
     })
@@ -334,30 +333,30 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                 domainIndex].default_option
                                             ) {
                                                 optionContent =
-                                                "<button id=de" + geneIndex + '_' + moduleIndex + "_" +
-                                                domainIndex + "_" + optionIndex + " style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOption(geneMatrix," +
-                                                geneIndex + ',' + moduleIndex + "," +
-                                                domainIndex +
-                                                ",\x22," +
-                                                short_option +
-                                                "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                                                option +
-                                                "</button>";
+                                                    "<button id=de" + geneIndex + '_' + moduleIndex + "_" +
+                                                    domainIndex + "_" + optionIndex + " style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOption(geneMatrix," +
+                                                    geneIndex + ',' + moduleIndex + "," +
+                                                    domainIndex +
+                                                    ",\x22," +
+                                                    short_option +
+                                                    "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                                                    option +
+                                                    "</button>";
                                             }
                                             if (short_option == geneMatrix[geneIndex].modules[
                                                 moduleIndex].domains[
                                                 domainIndex].selected_option
                                             ) {
                                                 optionContent =
-                                                "<button id=" + geneIndex + '_' + moduleIndex + "_" +
-                                                domainIndex + "_" + optionIndex + " style= \x22background-color:#E11839; \x22 onclick='changeSelectedOption(geneMatrix," +
-                                                geneIndex + ',' + moduleIndex + "," +
-                                                domainIndex +
-                                                ",\x22," +
-                                                short_option +
-                                                "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                                                option +
-                                                "</button>";
+                                                    "<button id=" + geneIndex + '_' + moduleIndex + "_" +
+                                                    domainIndex + "_" + optionIndex + " style= \x22background-color:#E11839; \x22 onclick='changeSelectedOption(geneMatrix," +
+                                                    geneIndex + ',' + moduleIndex + "," +
+                                                    domainIndex +
+                                                    ",\x22," +
+                                                    short_option +
+                                                    "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                                                    option +
+                                                    "</button>";
                                             }
                                             innerDropdownContent.innerHTML +=
                                                 optionContent
@@ -483,7 +482,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
         .group();
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
-        if (gene.tailoringEnzymeStatus == true) {
+        if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
             let domainIdentifier = "tailoringEnzyme" + geneMatrix[geneIndex].id.replace(".", "_")
 
             let points = Domainer.getArrowPoints(
@@ -569,54 +568,64 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
             reaction_options = Object.keys(options)
             for (let reactionOptionIndex = 0; reactionOptionIndex <
                 reaction_options.length; reactionOptionIndex++) {
-                let reactionOption = reaction_options[reactionOptionIndex].toString(); 
+                let reactionOption = reaction_options[reactionOptionIndex].toString();
                 let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption + "</button>";
-                innerDropdownContent.innerHTML += reactionOptionContent}
+                innerDropdownContent.innerHTML += reactionOptionContent
+            }
             for (let reactionOptionIndex = 0; reactionOptionIndex <
-                reaction_options.length; reactionOptionIndex++) { 
-                let reactionOption = reaction_options[reactionOptionIndex].toString(); 
-            // create all the folded dropdowns
-            var innerDropdownContainer_folded_1 =
-                document.createElement(
-                    'div');
-            innerDropdownContainer_folded_1.id =
-                "innerDropdownContainer" + geneIndex + "_" + reactionOption.replaceAll(" ", "_")
-            var innerDropdownContent =
-                document.createElement(
-                    'div');
-            innerDropdownContent.id =
-                "innerDropdownContent" +
-                domainIdentifier
-            document.getElementById(
-                "button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_"))
-                .appendChild(
-                    innerDropdownContainer_folded_1);
-            innerDropdownContainer_folded_1
-                .setAttribute("class",
-                    "dropdown-tailoring-folded");
-            innerDropdownContainer_folded_1
-                .appendChild(
-                    innerDropdownContent);
-            innerDropdownContainer_folded_1
-                .setAttribute("class",
-                    "dropdown-content-tailoring-folded");
-            innerDropdownContainer_folded_1.innerHTML =
-                ""
-            let atomOptions = options[reactionOption]
-            if (atomOptions) {
-            for (let atomOptionIndex = 0; atomOptionIndex <
-                atomOptions.length; atomOptionIndex++) {
-                    let atomOption=atomOptions[atomOptionIndex]
-                innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption +">"+ atomOption+ "</button>";
-                
-                }}
+                reaction_options.length; reactionOptionIndex++) {
+                let reactionOption = reaction_options[reactionOptionIndex].toString();
+                // create all the folded dropdowns
+                var innerDropdownContainer_folded_1 =
+                    document.createElement(
+                        'div');
+                innerDropdownContainer_folded_1.id =
+                    "innerDropdownContainer" + geneIndex + "_" + reactionOption.replaceAll(" ", "_")
+                var innerDropdownContent =
+                    document.createElement(
+                        'div');
+                innerDropdownContent.id =
+                    "innerDropdownContent" +
+                    domainIdentifier
+                document.getElementById(
+                    "button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_"))
+                    .appendChild(
+                        innerDropdownContainer_folded_1);
+                innerDropdownContainer_folded_1
+                    .setAttribute("class",
+                        "dropdown-tailoring-folded");
+                innerDropdownContainer_folded_1
+                    .appendChild(
+                        innerDropdownContent);
+                innerDropdownContainer_folded_1
+                    .setAttribute("class",
+                        "dropdown-content-tailoring-folded");
+                innerDropdownContainer_folded_1.innerHTML =
+                    ""
+                let atomOptions = options[reactionOption]
+                if (atomOptions) {
+                    for (let atomOptionIndex = 0; atomOptionIndex <
+                        atomOptions.length; atomOptionIndex++) {
+                        let atomOption = atomOptions[atomOptionIndex].replaceAll("'","")
+                        if (atomOption.includes("=")){
+                            let [atomOption_1, atomOption_2] = atomOption.split("=")
+                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
+                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption_1 + "\x22);hover_in_atom(\x22" + atomOption_2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption_1 + "\x22);hover_out_atom(\x22" + atomOption_2 + "\x22);'>" + atomOption + "</button>";
 
-                    // "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionTailoring(geneMatrix," +
-                    // geneIndex + ",\x22" +
-                    // short_option +
-                    // "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                    // option +
-                    // "</button>";
+                        }
+                        else{
+                        innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption 
+                            + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22"  + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
+                        }
+                    }
+                }
+
+                // "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionTailoring(geneMatrix," +
+                // geneIndex + ",\x22" +
+                // short_option +
+                // "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                // option +
+                // "</button>";
                 //format default option differently
                 // if (  geneMatrix[geneIndex].options[
                 //         optionIndex] ==
@@ -644,7 +653,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                 //           option +
                 //         "</button>";
                 // }
-                
+
 
             }
 
@@ -671,7 +680,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                     width: 2, color: outline
                 });
             if (size > 25) {
-                var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
+                var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT").replaceAll("reductase", "RED")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
 
             dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id

@@ -2,7 +2,7 @@ let regionIndex = 0
 let regionName = ""
 let BGC ={}
 let fetching = false
-let tailoringEnzymes = ["p450", " methyltransferase", "n-methyltransferase", "c-methyltransferase", "o-methyltransferase"]
+let tailoringEnzymes = ["p450", " methyltransferase", "n-methyltransferase", "c-methyltransferase", "o-methyltransferase", "reductase"]
 let cluster_type = "nrpspks"
 let RiPPStatus = 0
 let rippPrecursor = ""
@@ -53,6 +53,7 @@ function stringToArray(string){
         "[", "")
         .replaceAll("]", "")
         .replaceAll(" ", "")
+        .replaceAll("''", "")
         .split(",")
 }
 function findButtonbyTextContent(text) {
@@ -393,12 +394,12 @@ function addArrowClick(geneMatrix) {
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         arrow_id = ("#" + geneMatrix[geneIndex].id.replace(".","_")+ "_gene_arrow")
         protein_id = ("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein")
-        ripp_button_id = protein_id = ("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_ripp_button")
+        ripp_button_id = ("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_ripp_button")
         let arrow_1 = document.querySelector(arrow_id);
         let ripp_button = document.querySelector(ripp_button_id)
         arrow_1.replaceWith(arrow_1.cloneNode(true));
         let arrow = document.querySelector(arrow_id);
-        const protein = document.querySelector(protein_id);
+        let protein = document.querySelector(protein_id);
         arrow.addEventListener(
             'click',
             function () { // anonyme Funktion
@@ -449,7 +450,7 @@ function addArrowClick(geneMatrix) {
             },
             false
         );
-        if (geneMatrix[geneIndex].displayed === true) {
+        if (geneMatrix[geneIndex].displayed == true) {
             protein.addEventListener(
                 'click',
                 function () { // anonyme Funktion
@@ -462,7 +463,7 @@ function addArrowClick(geneMatrix) {
                     if (document.getElementById("real-time-button")
                         .checked) {
                         fetchFromRaichu(details_data, regionName,
-                            geneMatrix, cluster_type)
+                            geneMatrix, cluster_type, BGC)
                     }
                 },
                 false
@@ -831,7 +832,6 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             return handler
         })
         .then((raichu_output) => {
-            console.log(raichu_output.ccDoubleBonds)
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation);
             OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
                 n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
@@ -980,28 +980,42 @@ function findTailoringReactions(geneMatrix) {
    */
     tailoringArray = []
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
-            let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType.toUpperCase()
-            let enzymeArray;
+        let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType
+        if (geneMatrix[geneIndex].tailoringEnzymeStatus == false) {
+            continue }
+        for (var [enzymeReaction, atoms] of Object.entries(geneMatrix[geneIndex].selected_option)){
+            let enzymeReactionArray;
+            let enzymeNameReaction = (enzymeType + "_" + enzymeReaction).replaceAll("-", "_").replaceAll(" ", "_").trim().toUpperCase()
+            // put atoms for bond formation in pairs
+            if (["P450_OXIDATIVE_BOND_FORMATION"].includes(enzymeNameReaction)){
+                if (atoms.length%2 == 1) {
+                    atoms.pop()
+                }
+                let pairedAtoms = [];
+                while (atoms.length) pairedAtoms.push(atoms.splice(0, 2));
+                atoms = pairedAtoms
+            }
             if (tailoringArray.length > 0) {
                 for (const enzyme of tailoringArray) {
-                    enzymeArray = enzyme.find(item => item.name == enzymeType)
-                    if (enzymeArray) break
+                    enzymeReactionArray = enzyme.find(item => item.name == enzymeNameReaction)
+                    if (enzymeReactionArray) break
                 }
             }
-            if (!enzymeArray) {
-                if (geneMatrix[geneIndex].selected_option.length > 0) { 
-                    tailoringArray.push([geneMatrix[geneIndex].id, enzymeType.replace("-", "_").trim(), [geneMatrix[geneIndex].selected_option]]); }
-            }
-            else {
-                if (geneMatrix[geneIndex].selected_option.length > 0) { 
-                enzymeArray[1].push(geneMatrix[geneIndex].selected_option);}
+            if (enzymeReactionArray) {
+                if (atoms.length > 0) {
+                    enzymeReactionArray[1].push(atoms);
+                }
+                }
 
-            }
-        }
-    }
-    return tailoringArray
-}
+            else {
+                if (atoms.length > 0) {
+                    tailoringArray.push([geneMatrix[geneIndex].id, enzymeNameReaction, atoms]);
+                }
+
+
+        }}}
+        return tailoringArray}
+
 function removePaddingBGC(BGC) {
     /**
    * removes the space before the first orf and after last orf
@@ -1046,6 +1060,7 @@ function updateProteins(geneMatrix, BGC) {
    * update Proteins to geneMAtrix to remove for instance ko genes and then calls the proteiner to draw the proteins
    *@input BGC,geneMatrix
    */
+    console.log(BGC)
     let proteinsForDisplay = JSON.parse(JSON.stringify(BGC));
     delete proteinsForDisplay.orfs
     proteinsForDisplay.orfs = []
@@ -1793,21 +1808,26 @@ function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, o
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
     }
 }
-function changeSelectedOptionTailoring(geneMatrix, geneIndex, option) {
+function changeSelectedOptionTailoring(geneMatrix, geneIndex, reactionOption, atomOption) {
     /**
     * Change the option in geneMatrix -> more than one option can be selected
    * @fires clickondomaindropdown
    *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
    *@yield Selected option correct+ cyclization option correct.
    */
-    let button = document.getElementById(geneIndex + "_" + option)
-    if (geneMatrix[geneIndex].selected_option.includes(option)) {
+    let button = document.getElementById(geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption)
+    if (atomOption.includes("=")) {
+        atomOption = atomOption.split("=")}
+    else {
+        atomOption = [atomOption]
+    }
+    if (geneMatrix[geneIndex].selected_option[reactionOption].includes(atomOption)) {
         button.setAttribute("style", "background-color: white")
-        var optionArray = geneMatrix[geneIndex].selected_option.filter((item) => item !== option);
-        geneMatrix[geneIndex].selected_option = optionArray;
+        var atomOptions = geneMatrix[geneIndex].selected_option[reactionOption].filter((item) => item !== atomOption);
+        geneMatrix[geneIndex].selected_option[reactionOption] = atomOptions;
     }
     else {
-        geneMatrix[geneIndex].selected_option.push(option);
+        geneMatrix[geneIndex].selected_option[reactionOption].push(atomOption);
         button.setAttribute("style", "background-color: #E11839")
     }
     if (document.querySelector('input[type=checkbox]')
@@ -1913,6 +1933,7 @@ function runAlola(regionIndex, details_data, recordData){
   regionName = getRegionName(regionIndex)
   cluster_type = getClusterType(regionIndex)
   document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${cluster_type} BGC`
+    document.getElementById('domain_container').innerHTML = "";
   BGC = Object.keys(recordData[0].regions[regionIndex])
       .reduce(function (obj, k) {
           if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
@@ -1948,6 +1969,7 @@ function runAlola(regionIndex, details_data, recordData){
   $('input[type=checkbox]').removeAttr('checked');
     updateProteins(geneMatrix, BGC)
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    addArrowClick(geneMatrix)
 }
 // adding modules+ opening the form to do so
 function addModulesGeneMatrix(geneMatrix, regionName) {

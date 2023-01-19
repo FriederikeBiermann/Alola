@@ -61,32 +61,43 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, c_atoms = n
     "p450": {
       "Hydroxylation": c_atoms,
       "Epoxidation": double_CC_bonds,
-      "Oxidative bond formation": {
-        "Atom 1": c_atoms.concat(n_atoms, o_atoms),
-        "Atom 2": c_atoms.concat(n_atoms, o_atoms),
-    }},
+      "Oxidative bond formation": c_atoms.concat(n_atoms, o_atoms)},
     "reductase": {
       "Double bond reduction": double_CC_bonds
     },
     "protease": {
       "Proteolytic cleavage": peptide_bonds
     },
-    "methyltransferase": {
-      "O-methylation": o_atoms,
-      "Methylation": c_atoms.concat(n_atoms, o_atoms),
-      
-      "N-methylation": n_atoms,
-      "C-methylation": c_atoms
+    "methyltransferase": {"Methylation": c_atoms.concat(n_atoms, o_atoms)},
+    "o-methyltransferase": { "O-methylation": o_atoms },
+    "n-methyltransferase": { "C-methylation": c_atoms },
+    "c-methyltransferase": { "N-methylation": n_atoms }
     }
-
-  }
 
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
     if (geneMatrix[geneIndex].tailoringEnzymeStatus == true){
-      geneMatrix[geneIndex].options = tailoringEnzymes_Reactions[geneMatrix[geneIndex].tailoringEnzymeType];
-      geneMatrix[geneIndex].default_option = null;
+      let tailoringArrayKeys = Object.keys(tailoringEnzymes_Reactions[geneMatrix[geneIndex].tailoringEnzymeType])
+      let tayloringArrayFiltered = {}
+      for (const [key,value] of Object.entries(tailoringEnzymes_Reactions[geneMatrix[geneIndex].tailoringEnzymeType])) {
+        if (JSON.stringify(value) === '[""]'){
+            continue
+          }
+        tayloringArrayFiltered[key] = value
+      }
+      let emptyTailoringArray = {}
+      for (const key of tailoringArrayKeys) {
+        emptyTailoringArray[key] = []
+      }
+      geneMatrix[geneIndex].options = tayloringArrayFiltered;
+      
+      for (const key of tailoringArrayKeys){
+          emptyTailoringArray[key]= []
+      }
+      if (geneMatrix[geneIndex].selected_option.length == 0){
+        geneMatrix[geneIndex].selected_option = emptyTailoringArray
+        geneMatrix[geneIndex].default_option = emptyTailoringArray;
     }
-}})
+}}})
 
 
 //add options for cyclization

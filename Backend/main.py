@@ -5,7 +5,6 @@ from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
 from pikachu.chem.structure import Structure
 from pikachu.reactions.functional_groups import find_bonds
-from pikachu.reactions.functional_groups import BondDefiner, GroupDefiner
 from raichu.data.molecular_moieties import PEPTIDE_BOND, CC_DOUBLE_BOND
 from pikachu.general import structure_to_smiles, svg_string_from_structure
 from raichu.run_raichu import ModuleRepresentation, DomainRepresentation, ClusterRepresentation, TailoringRepresentation, build_cluster, CleavageSiteRepresentation, MacrocyclizationRepresentation
@@ -55,6 +54,7 @@ async def alola_nrps_pks(antismash_input: str, state: Optional[List[int]] = Quer
     tailoringReactions = []
     for enzyme in antismash_input_transformed[2]:
         tailoringReactions += [TailoringRepresentation(*enzyme)]
+    print(tailoringReactions)
     raw_cluster_representation = antismash_input_transformed[0]
     #Format fake booleans
     raichu_input = format_cluster(
@@ -90,9 +90,12 @@ async def alola_nrps_pks(antismash_input: str, state: Optional[List[int]] = Quer
     c_atoms_for_tailoring = str(
         find_atoms_for_tailoring(tailored_product, "C"))
     
-    peptide_bonds = str(find_bonds(PEPTIDE_BOND, tailored_product))
     
-    cc_double_bonds = str(find_bonds(CC_DOUBLE_BOND, tailored_product))
+    peptide_bonds = find_bonds(PEPTIDE_BOND, tailored_product)
+    peptide_bond_atoms = str(["=".join([str(bond.atom_1), str(bond.atom_2)]) for bond in peptide_bonds])
+    cc_double_bonds = find_bonds(CC_DOUBLE_BOND, tailored_product)
+    cc_double_bond_atoms = str(["=".join([str(bond.atom_1), str(bond.atom_2)])
+                                for bond in cc_double_bonds])
     
     structure_for_tailoring = RaichuDrawer(
         tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True)
@@ -101,11 +104,11 @@ async def alola_nrps_pks(antismash_input: str, state: Optional[List[int]] = Quer
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
     svg = svg_string_from_structure(final_product).replace("\n", "").replace(
         "\"", "'").replace("<svg", " <svg id='final_drawing'")
-
+    print( peptide_bond_atoms)
     return {"svg": svg, "hanging_svg": spaghettis, "smiles": smiles,  "atomsForCyclisation": atoms_for_cyclisation,
             "c_atoms_for_tailoring": c_atoms_for_tailoring, "n_atoms_for_tailoring": n_atoms_for_tailoring,
-            "o_atoms_for_tailoring": o_atoms_for_tailoring, "ccDoubleBonds": cc_double_bonds,
-            "peptideBonds": peptide_bonds, "complete_cluster_svg": cluster_svg,
+            "o_atoms_for_tailoring": o_atoms_for_tailoring, "ccDoubleBonds": cc_double_bond_atoms,
+            "peptideBonds": peptide_bond_atoms, "complete_cluster_svg": cluster_svg,
             "structure_for_tailoring": svg_structure_for_tailoring}
 
 @app.get("/api/alola/ripp/")
@@ -143,7 +146,6 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
     structure_for_tailoring.draw_structure()
     svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
-    print(ripp_cluster)
     if len(macrocyclisations)>0:
         ripp_cluster.do_macrocyclization()
     cyclised_product_svg = ripp_cluster.draw_product(as_string=True).replace(
@@ -166,16 +168,18 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
         find_atoms_for_tailoring(tailored_product, "C"))
     amino_acids = []
     
-    peptide_bonds = str(find_bonds(PEPTIDE_BOND, tailored_product))
-    
-    cc_double_bonds = str(find_bonds(CC_DOUBLE_BOND, tailored_product))
-    
+    peptide_bonds = find_bonds(PEPTIDE_BOND, tailored_product)
+    peptide_bond_atoms = str([[bond.atom_1, bond.atom_2]
+                             for bond in peptide_bonds])
+    cc_double_bonds = find_bonds(CC_DOUBLE_BOND, tailored_product)
+    cc_double_bond_atoms = str([[bond.atom_1, bond.atom_2]
+                                for bond in cc_double_bonds])
     for index, aa in enumerate(amino_acid_sequence):
         amino_acids += [aa.upper()+str(index)]
     amino_acids = str(amino_acids)
     return {"svg": cleaved_ripp_svg, "smiles": smiles,  "atomsForCyclisation": atoms_for_cyclisation,
             "c_atoms_for_tailoring": c_atoms_for_tailoring, "n_atoms_for_tailoring": n_atoms_for_tailoring,
-            "o_atoms_for_tailoring": o_atoms_for_tailoring, "ccDoubleBonds": cc_double_bonds,
-            "peptideBonds": peptide_bonds, "raw_peptide_chain": peptide_svg,
+            "o_atoms_for_tailoring": o_atoms_for_tailoring, "ccDoubleBonds": cc_double_bond_atoms,
+            "peptideBonds": peptide_bond_atoms, "raw_peptide_chain": peptide_svg,
             "cyclised_structure": cyclised_product_svg, "aminoAcidsForCleavage": amino_acids,
             "structure_for_tailoring": svg_structure_for_tailoring}
