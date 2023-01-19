@@ -2143,7 +2143,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
 
                                     }
                                     else {
-                                        subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
+                                        subtype = TRANS_AT_KS_SUBTYPES[geneMatrix[geneIndex].domains[domainIndex].selected_option]
                                     }
                                 }
                                 if (domain.abbreviation == "AT") {
