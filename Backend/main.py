@@ -169,17 +169,18 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
     amino_acids = []
     
     peptide_bonds = find_bonds(PEPTIDE_BOND, tailored_product)
-    peptide_bond_atoms = str([[bond.atom_1, bond.atom_2]
-                             for bond in peptide_bonds])
+    peptide_bond_atoms = str(
+        ["=".join([str(bond.atom_1), str(bond.atom_2)]) for bond in peptide_bonds])
     cc_double_bonds = find_bonds(CC_DOUBLE_BOND, tailored_product)
-    cc_double_bond_atoms = str([[bond.atom_1, bond.atom_2]
+    cc_double_bond_atoms = str(["=".join([str(bond.atom_1), str(bond.atom_2)])
                                 for bond in cc_double_bonds])
+    print("test")
     for index, aa in enumerate(amino_acid_sequence):
         amino_acids += [aa.upper()+str(index)]
-    amino_acids = str(amino_acids)
+
     return {"svg": cleaved_ripp_svg, "smiles": smiles,  "atomsForCyclisation": atoms_for_cyclisation,
             "c_atoms_for_tailoring": c_atoms_for_tailoring, "n_atoms_for_tailoring": n_atoms_for_tailoring,
             "o_atoms_for_tailoring": o_atoms_for_tailoring, "ccDoubleBonds": cc_double_bond_atoms,
             "peptideBonds": peptide_bond_atoms, "raw_peptide_chain": peptide_svg,
-            "cyclised_structure": cyclised_product_svg, "aminoAcidsForCleavage": amino_acids,
+            "cyclised_structure": cyclised_product_svg,
             "structure_for_tailoring": svg_structure_for_tailoring}

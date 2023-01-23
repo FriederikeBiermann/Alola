@@ -8,7 +8,7 @@ var RiPPer = {
     tooltip_id_domain: "RiPPer-tooltip-123"
 };
 
-RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90){
+RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600){
     var container = document.getElementById('domain_container')
     var scale = (function (val) {
         return parseInt(val / (1000 / height));
@@ -16,11 +16,11 @@ RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90){
     document.getElementById('domain_container').innerHTML = "";
     document.getElementById('model_gene_container').innerHTML = "";
     RiPPer.drawHeadings(height)
-    RiPPer.leaveSpace(300, "precursor", scale)
+    RiPPer.leaveSpace(space, "precursor", scale)
     RiPPer.drawTailoringEnzymes(geneMatrix, height, scale)
-    RiPPer.leaveSpace(300, "tailoredProduct", scale)
+    RiPPer.leaveSpace(space, "tailoredProduct", scale)
     RiPPer.drawProtease(height,scale)
-    RiPPer.leaveSpace(300, "cleavedProduct", scale)
+    RiPPer.leaveSpace(space, "cleavedProduct", scale)
     return $(container)
         .find("svg")[0];
 })
@@ -180,7 +180,7 @@ RiPPer.drawProtease = (function ( height = 90, scale) {
             dom.node.id = "protease"
 
         });
-RiPPer.drawTailoringEnzymes = (function ( geneMatrix, height = 90, scale) {
+RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
     var container = document.getElementById('domain_container')
     let size = 50
     let indent = 0
@@ -189,10 +189,16 @@ RiPPer.drawTailoringEnzymes = (function ( geneMatrix, height = 90, scale) {
     var line_svg = SVG(container)
         .size('100%', 90)
         .group();
+    console.log(geneMatrix)
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
-        if (gene.tailoringEnzymeStatus == true) {
+        console.log(gene.tailoringEnzymeStatus)
+        if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
             let domainIdentifier = "tailoringEnzyme" + geneMatrix[geneIndex].id.replace(".", "_")
+
+            let points = Domainer.getArrowPoints(
+                15, 100,
+                90, scale)
             // declare color if ko
             let abbreviation = gene.tailoringEnzymeType
 
@@ -208,6 +214,12 @@ RiPPer.drawTailoringEnzymes = (function ( geneMatrix, height = 90, scale) {
             innerDropdownContainer.id =
                 "innerDropdownContainer" +
                 domainIdentifier
+
+            var innerIntermediateContainer =
+                document.createElement(
+                    'div');
+            innerIntermediateContainer.id =
+                "innerIntermediateContainer_tailoring_enzymes"
             var innerDropdownButton =
                 document.createElement(
                     'button');
@@ -262,63 +274,104 @@ RiPPer.drawTailoringEnzymes = (function ( geneMatrix, height = 90, scale) {
                     "dropdown-content-tailoring");
             innerDropdownContent.innerHTML =
                 ""
-            geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.sort((a, b) => a.localeCompare(b)).sort(function (a, b) {
-                return a.length - b.length;
-            });
-
-            for (let optionIndex = 0; optionIndex <
-                geneMatrix[geneIndex].options
-                    .length; optionIndex++) {
-                let option = geneMatrix[geneIndex].options[
-                    optionIndex].toString();
-                if (hasNumbers(option) == true) {
-                    short_option = option.split(" ")[option.split(" ").length - 1]
-                }
-                else {
-                    short_option = option
-                }
-
-
-                let optionContent =
-                    "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionTailoring(geneMatrix," +
-                    geneIndex + ",\x22" +
-                    short_option +
-                    "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                    option +
-                    "</button>";
-                //format default option differently
-                if (geneMatrix[geneIndex].options[
-                    optionIndex] ==
-                    geneMatrix[geneIndex].default_option
-                ) {
-                    optionContent =
-                        "<button id=" + geneIndex + "_" + short_option + " style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                        geneIndex +
-                        ",\x22" +
-                        short_option +
-                        "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                        option +
-                        "</button>";
-                }
-                //format active option differently
-
-                if (toString(geneMatrix[geneIndex].selected_option).includes(short_option)
-                ) {
-                    optionContent =
-                        "<button id=" + geneIndex + "_" + short_option + " style= \x22background-color:#E11839; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                        geneIndex +
-                        ",\x22" +
-                        short_option +
-                        "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                        option +
-                        "</button>";
-                }
-                innerDropdownContent.innerHTML +=
-                    optionContent
-
+            options = geneMatrix[geneIndex].options
+            console.log(typeof (options))
+            reaction_options = Object.keys(options)
+            for (let reactionOptionIndex = 0; reactionOptionIndex <
+                reaction_options.length; reactionOptionIndex++) {
+                let reactionOption = reaction_options[reactionOptionIndex].toString();
+                let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption + "</button>";
+                innerDropdownContent.innerHTML += reactionOptionContent
             }
+            for (let reactionOptionIndex = 0; reactionOptionIndex <
+                reaction_options.length; reactionOptionIndex++) {
+                let reactionOption = reaction_options[reactionOptionIndex].toString();
+                // create all the folded dropdowns
+                var innerDropdownContainer_folded_1 =
+                    document.createElement(
+                        'div');
+                innerDropdownContainer_folded_1.id =
+                    "innerDropdownContainer" + geneIndex + "_" + reactionOption.replaceAll(" ", "_")
+                var innerDropdownContent =
+                    document.createElement(
+                        'div');
+                innerDropdownContent.id =
+                    "innerDropdownContent" +
+                    domainIdentifier
+                document.getElementById(
+                    "button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_"))
+                    .appendChild(
+                        innerDropdownContainer_folded_1);
+                innerDropdownContainer_folded_1
+                    .setAttribute("class",
+                        "dropdown-tailoring-folded");
+                innerDropdownContainer_folded_1
+                    .appendChild(
+                        innerDropdownContent);
+                innerDropdownContainer_folded_1
+                    .setAttribute("class",
+                        "dropdown-content-tailoring-folded");
+                innerDropdownContainer_folded_1.innerHTML =
+                    ""
+                let atomOptions = options[reactionOption]
+                if (atomOptions) {
+                    for (let atomOptionIndex = 0; atomOptionIndex <
+                        atomOptions.length; atomOptionIndex++) {
+                        let atomOption = atomOptions[atomOptionIndex].replaceAll("'", "")
+                        if (atomOption.includes("=")) {
+                            let [atomOption_1, atomOption_2] = atomOption.split("=")
+                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
+                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption_1 + "\x22);hover_in_atom(\x22" + atomOption_2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption_1 + "\x22);hover_out_atom(\x22" + atomOption_2 + "\x22);'>" + atomOption + "</button>";
 
+                        }
+                        else {
+                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
+                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
+                        }
+                    }
+                }
 
+                // "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionTailoring(geneMatrix," +
+                // geneIndex + ",\x22" +
+                // short_option +
+                // "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                // option +
+                // "</button>";
+                //format default option differently
+                // if (  geneMatrix[geneIndex].options[
+                //         optionIndex] ==
+                //       geneMatrix[geneIndex].default_option
+                // ) {
+                //     optionContent =
+                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
+                //         geneIndex +
+                //         ",\x22" +
+                //           short_option+
+                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
+                //           option +
+                //         "</button>";
+                // }
+                // //format active option differently
+
+                // if (  toString(geneMatrix[geneIndex].selected_option).includes(short_option)
+                // ) {
+                //     optionContent =
+                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:#E11839; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
+                //         geneIndex +
+                //         ",\x22" +
+                //           short_option+
+                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
+                //           option +
+                //         "</button>";
+                // }
+            }
+            let x = 0;
+            if (points["0"].x > points["4"].x) {
+                x = points["4"].x
+            }
+            else {
+                x = points["0"].x
+            }
             var draw = SVG(innerDropdownButton)
                 .size(String(size) + "px", height)
                 .group();
@@ -332,17 +385,13 @@ RiPPer.drawTailoringEnzymes = (function ( geneMatrix, height = 90, scale) {
                     width: 2, color: outline
                 });
             if (size > 25) {
-                var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
+                var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT").replaceAll("reductase", "RED")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
-
             dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
-
         }
     }
-
-
 });
-RiPPer.drawHeadings = (function (height) {
+RiPPer.drawHeadings = (function (height, space = 600) {
     height = 30
     document.getElementById('module_container')
         .innerHTML = ""
@@ -351,7 +400,7 @@ RiPPer.drawHeadings = (function (height) {
         "precursorPeptide"
     document.getElementById('module_container')
         .appendChild(innerModuleContainer);
-    size = 300
+    size = space
     var draw = SVG(innerModuleContainer)
         .size(String(size) + "px", height)
         .group();
@@ -374,7 +423,7 @@ RiPPer.drawHeadings = (function (height) {
         "tailoringEnzyme"
     document.getElementById('module_container')
         .appendChild(innerModuleContainer);
-    size = 300
+    size = space
     var draw = SVG(innerModuleContainer)
         .size(String(size) + "px", height)
         .group();
@@ -397,7 +446,7 @@ RiPPer.drawHeadings = (function (height) {
         "protease"
     document.getElementById('module_container')
         .appendChild(innerModuleContainer);
-    size = 300
+    size = space
     var draw = SVG(innerModuleContainer)
         .size(String(size) + "px", height)
         .group();

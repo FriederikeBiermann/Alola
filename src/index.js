@@ -716,7 +716,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 
 function fetchFromRaichuRiPP(){
     updateRiPPs(geneMatrix, BGC)
-    let inputForRaichu = data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene])
+    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene])
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
@@ -730,8 +730,6 @@ function fetchFromRaichuRiPP(){
         .then((raichu_output) => {
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
             // format output
-            //add protase Options
-            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(stringToArray(raichu_output.aminoAcidsForCleavage)));
             OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
                 n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
                 o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
@@ -786,7 +784,7 @@ function fetchFromRaichuRiPP(){
                 //add cleavage
                 let cleavage = document.getElementById("innerIntermediateContainer_cleavedProduct");
                 cleavage.setAttribute("style", "width:300px")
-                cleavage.innerHTML = formatSVG_intermediates(raichu_output.svg);
+                cleavage.innerHTML = formatSVG_intermediates(raichu_output.svg).replaceAll("final_drawing" ,"cleavedProduct");
                 let cleavage_svg = document.getElementById("cleavedProduct")
                 let cleavage_bbox = intermediate_svg.getBBox();
                 let cleavage_viewBox = [cleavage_bbox.x, cleavage_bbox.y, cleavage_bbox.width, cleavage_bbox.height].join(" ");
@@ -1284,7 +1282,15 @@ function addRiPP(geneMatrix,){
         translation = translationSearch[1]; //is the matched group if found
 
     }
+    //add protase Options
+    let aminoacidsWithNumer = []
+    for (let aminoAcidIndex = 0; aminoAcidIndex< translation.length; aminoAcidIndex ++){
+        aminoacidsWithNumer.push(translation[aminoAcidIndex]+String(aminoAcidIndex+1))
 
+    }
+    console.log(aminoacidsWithNumer)
+    proteaseOptions = []
+    proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(aminoacidsWithNumer));
     rippPrecursor = translation.slice(-10); // default only last 10 amino acids
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
@@ -1968,8 +1974,10 @@ function runAlola(regionIndex, details_data, recordData){
   //remove all checkboxes
   $('input[type=checkbox]').removeAttr('checked');
     updateProteins(geneMatrix, BGC)
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    updateDomains(geneMatrix,BGC)
     addArrowClick(geneMatrix)
+    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    
 }
 // adding modules+ opening the form to do so
 function addModulesGeneMatrix(geneMatrix, regionName) {
