@@ -43,9 +43,18 @@ let items = document.querySelectorAll('.test-container .box')
 var dragSrcEl = null;
 let cyclization = "None"
 let geneMatrix = []
+let moduleMatrix = []
 let wildcardSubstrate = "glycine"
 let wildcardModule = "elongation_module_nrps"
 let nameWildcardModule = "Custom_gene_"
+
+function stringToArray(string){
+    return string.replaceAll(
+        "[", "")
+        .replaceAll("]", "")
+        .replaceAll(" ", "")
+        .split(",")
+}
 function findButtonbyTextContent(text) {
     var buttons = document.querySelectorAll('button');
     for (var i = 0, l = buttons.length; i < l; i++) {
@@ -710,112 +719,49 @@ function fetchFromRaichuRiPP(){
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
+    updateProteins(geneMatrix, BGC);
+    addDragDrop();
     fetch(url + data_string)
         .then(response => {
-            const thing = response.json();
-            return thing
+            const handler = response.json();
+            return handler
         })
-        .then((data) => {
-            console.log(data)
+        .then((raichu_output) => {
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
+            // format output
+            //add protase Options
+            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(stringToArray(raichu_output.aminoAcidsForCleavage)));
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
+                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
+                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
+                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
+                peptide_bonds = stringToArray(raichu_output.peptideBonds));
+            updateRiPPs(geneMatrix, BGC)
+            addArrowClick(geneMatrix);
+            // add final drawing
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
-            //add options for cyclization
-
-            for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-                if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "p450" || geneMatrix[geneIndex].tailoringEnzymeType == "P450") {
-                        geneMatrix[geneIndex].options = addStringToArray("Hydroxylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No oxidation")
-                        geneMatrix[geneIndex].default_option = ("No oxidation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "n-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "c-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "o-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == " methyltransferase") {
-                        geneMatrix[geneIndex].options = data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",");
-                        geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.concat(data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", geneMatrix[geneIndex].options.concat(data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",")));
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                }
-            }
-            
             var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(data.svg);
+                encodeURIComponent(raichu_output.complete_cluster_svg);
+            document.getElementById("save_complete_cluster_svg")
+                .href = url
+            document.getElementById("save_complete_cluster_svg")
+                .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(raichu_output.svg);
             document.getElementById("save_svg")
                 .href = url
             document.getElementById("save_svg")
-                .setAttribute("download", data.smiles + ".svg");
-            container.innerHTML = formatSVG(data.svg);
+                .setAttribute("download", raichu_output.smiles + ".svg");
+            container.innerHTML = formatSVG(raichu_output.svg);
             drawing = document.getElementById("final_drawing")
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + data.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
-
-            return [geneMatrix, data]
-        })
-        .then((data) => {
-            let geneMatrix = data[0]
-            createOptions(geneMatrix);
-            addDragDrop();
-            if (RiPPStatus == 0) { updateDomains(geneMatrix, BGC) }
-            else { updateRiPPs(geneMatrix, BGC) };
-            updateProteins(geneMatrix, BGC);
-            addArrowClick(geneMatrix)
-            return [data[1]];
-        })
-        .then((data2) => {
-            data = data2[0]
-            console.log("test")
+            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
                 tailoringEnzymes_intermediate.setAttribute("style", "width:300px")
-                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(data.structure_for_tailoring);
+                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
@@ -823,10 +769,11 @@ function fetchFromRaichuRiPP(){
                 intermediate_svg.setAttribute("viewBox", viewBox)
 
                 intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
-                intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
+                intermediate_svg.setAttribute('class', "intermediate_drawing_protease");
+                // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
                 precursor.setAttribute("style", "width:300px")
-                precursor.innerHTML = formatSVG_intermediates(data.raw_peptide_chain);
+                precursor.innerHTML = formatSVG_intermediates(raichu_output.raw_peptide_chain);
                 let precursor_svg = document.getElementById("precursor_drawing")
                 let precursor_bbox = intermediate_svg.getBBox();
                 let precursor_viewBox = [precursor_bbox.x, precursor_bbox.y, precursor_bbox.width, precursor_bbox.height].join(" ");
@@ -834,13 +781,22 @@ function fetchFromRaichuRiPP(){
                 precursor_svg.setAttribute("viewBox", precursor_viewBox)
 
                 precursor_svg.setAttribute('id', "intermediate_drawing_precursor");
-                precursor_svg.setAttribute('class', "intermediate_drawing_tailoring");
+                precursor_svg.setAttribute('class', "intermediate_drawing_precursor");
+                //add cleavage
+                let cleavage = document.getElementById("innerIntermediateContainer_cleavedProduct");
+                cleavage.setAttribute("style", "width:300px")
+                cleavage.innerHTML = formatSVG_intermediates(raichu_output.svg);
+                let cleavage_svg = document.getElementById("cleavedProduct")
+                let cleavage_bbox = intermediate_svg.getBBox();
+                let cleavage_viewBox = [cleavage_bbox.x, cleavage_bbox.y, cleavage_bbox.width, cleavage_bbox.height].join(" ");
+
+                cleavage_svg.setAttribute("viewBox", cleavage_viewBox)
+
+                cleavage_svg.setAttribute('id', "intermediate_drawing_cleavage");
+                cleavage_svg.setAttribute('class', "intermediate_drawing_cleavage");
             }
             
         })
-
-
-
 }
 function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
@@ -863,147 +819,42 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
     starterACP = extracted_results[1];
     // add tailoring reactions
     let tailoringArray = findTailoringReactions(geneMatrix);
-
     let data_string = JSON.stringify([data, cyclization, tailoringArray]);
     let url = "http://127.0.0.1:8000/api/alola/nrps_pks?antismash_input=";
-    let list_hanging_svg = [];
     let container = document.getElementById("structure_container");
     container.innerHTML = "";
+    updateProteins(geneMatrix, BGC);
+    addDragDrop();
     fetch(url + data_string)
         .then(response => {
-            const thing = response.json();
-            return thing
+            const handler = response.json();
+            return handler
         })
-        .then((data) => {
-            let container = document.getElementById("structure_container");
-            let smiles_container = document.getElementById("smiles_container");
-            //add options for cyclization
-
-            for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-                for (let domainIndex = 0; domainIndex < geneMatrix[
-                    geneIndex].domains.length; domainIndex++) {
-                    let domain = geneMatrix[geneIndex].domains[domainIndex]
-                    if (domain.abbreviation == "TE") {
-                        domain.domainOptions = addStringToArray("Cyclization at ", data.atomsForCyclisation.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        domain.domainOptions.push("Linear product");
-
-                        domain.default_option = ["Linear product"];
-                    }
-                }
-                if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "p450" || geneMatrix[geneIndex].tailoringEnzymeType == "P450") {
-                        geneMatrix[geneIndex].options = addStringToArray("Hydroxylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No oxidation")
-                        geneMatrix[geneIndex].default_option = ("No oxidation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "n-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "c-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == "o-methyltransferase") {
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                    if (geneMatrix[geneIndex].tailoringEnzymeType == " methyltransferase") {
-                        geneMatrix[geneIndex].options = data.o_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",");
-                        geneMatrix[geneIndex].options = geneMatrix[geneIndex].options.concat(data.c_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(","));
-                        geneMatrix[geneIndex].options = addStringToArray("Methylation at ", geneMatrix[geneIndex].options.concat(data.n_atoms_for_tailoring.replaceAll(
-                            "[", "")
-                            .replaceAll("]", "")
-                            .replaceAll(" ", "")
-                            .split(",")));
-                        geneMatrix[geneIndex].options.push("No methylation")
-                        geneMatrix[geneIndex].default_option = ("No methylation")
-                    }
-                }
-            }
-            var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(data.complete_cluster_svg);
-            document.getElementById("save_complete_cluster_svg")
-                .href = url
-            document.getElementById("save_complete_cluster_svg")
-                .setAttribute("download", data.smiles + "_cluster.svg");
-            var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(data.svg);
-            document.getElementById("save_svg")
-                .href = url
-            document.getElementById("save_svg")
-                .setAttribute("download", data.smiles + ".svg");
-            container.innerHTML = formatSVG(data.svg);
-            drawing = document.getElementById("final_drawing")
-            drawing.style["max-width"] = "100%"
-            drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + data.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
-            acpList = obtainACPList(geneMatrix);
-            let intermediates = data.hanging_svg;
-            return [geneMatrix, intermediates, data]
-        })
-        .then((data) => {
-            let geneMatrix = data[0]
-            createOptions(geneMatrix);
-            addDragDrop();
-            if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)} 
-            else{ updateRiPPs(geneMatrix, BGC)};
-            updateProteins(geneMatrix, BGC);
-            addArrowClick(geneMatrix)
-            return [data[1], data[2]];
-        })
-        .then((data2) => {
-            intermediates = data2[0]
-            data = data2[1]
+        .then((raichu_output) => {
+            console.log(raichu_output.ccDoubleBonds)
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation);
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
+                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
+                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
+                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
+                peptide_bonds = stringToArray(raichu_output.peptideBonds));
+            updateDomains(geneMatrix, BGC);
+            addArrowClick(geneMatrix);
+            acpList = getACPList(geneMatrix);
+            let intermediates = raichu_output.hanging_svg;
+            // structure for tailoring conatiner
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") != null)) {
-                let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
-                tailoringEnzymes_intermediate.setAttribute("style", "width:150px")
-                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(data.structure_for_tailoring);
-                let intermediate_svg = document.getElementById("intermediate_drawing")
-                let bbox = intermediate_svg.getBBox();
-                let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
-
-                intermediate_svg.setAttribute("viewBox", viewBox)
-
-                intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
-                intermediate_svg.setAttribute('class', "intermediate_drawing_tailoring");
+                let innerIntermediateContainer_tailoring_enzymes = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
+                innerIntermediateContainer_tailoring_enzymes.setAttribute("style", "width:150px")
+                innerIntermediateContainer_tailoring_enzymes.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
+                let structure_for_tailoring = document.getElementById("tailoring_drawing")
+                let bbox_structure_for_tailoring = structure_for_tailoring.getBBox();
+                let viewBox_structure_for_tailoring = [bbox_structure_for_tailoring.x, bbox_structure_for_tailoring.y, bbox_structure_for_tailoring.width, bbox_structure_for_tailoring.height].join(" ");
+                structure_for_tailoring.setAttribute("viewBox", viewBox_structure_for_tailoring)
+                structure_for_tailoring.setAttribute('id', "intermediate_drawing_tailoring");
+                structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
             }
+            //hanging svgs for spaghetti diagram
             for (let intermediateIndex = 0; intermediateIndex <
                 intermediates.length; intermediateIndex++) {
                 intermediate = intermediates[intermediateIndex]
@@ -1018,13 +869,31 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y + 38, bbox.width, bbox.height].join(" ");
-
                 intermediate_svg.setAttribute("viewBox", viewBox)
                 intermediate_svg.setAttribute('id', "intermediate_drawing" + intermediateIndex);
                 intermediate_svg.setAttribute('class', "intermediate_drawing");
 
             }
-
+            // add final drawing
+            let container = document.getElementById("structure_container");
+            let smiles_container = document.getElementById("smiles_container");
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(raichu_output.complete_cluster_svg);
+            document.getElementById("save_complete_cluster_svg")
+                .href = url
+            document.getElementById("save_complete_cluster_svg")
+                .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+            var url = "data:image/svg+xml;charset=utf-8," +
+                encodeURIComponent(raichu_output.svg);
+            document.getElementById("save_svg")
+                .href = url
+            document.getElementById("save_svg")
+                .setAttribute("download", raichu_output.smiles + ".svg");
+            container.innerHTML = formatSVG(raichu_output.svg);
+            drawing = document.getElementById("final_drawing")
+            drawing.style["max-width"] = "100%"
+            drawing.style["max-height"] = "100%"
+            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
         })
 }}}
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
@@ -1115,19 +984,18 @@ function findTailoringReactions(geneMatrix) {
             let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType.toUpperCase()
             let enzymeArray;
             if (tailoringArray.length > 0) {
-
                 for (const enzyme of tailoringArray) {
-
                     enzymeArray = enzyme.find(item => item.name == enzymeType)
                     if (enzymeArray) break
                 }
             }
             if (!enzymeArray) {
-                tailoringArray.push([geneMatrix[geneIndex].id, enzymeType.replace("-", "_").trim(), [geneMatrix[geneIndex].selected_option]]);
-
+                if (geneMatrix[geneIndex].selected_option.length > 0) { 
+                    tailoringArray.push([geneMatrix[geneIndex].id, enzymeType.replace("-", "_").trim(), [geneMatrix[geneIndex].selected_option]]); }
             }
             else {
-                enzymeArray[1].push(geneMatrix[geneIndex].selected_option);
+                if (geneMatrix[geneIndex].selected_option.length > 0) { 
+                enzymeArray[1].push(geneMatrix[geneIndex].selected_option);}
 
             }
         }
@@ -1195,14 +1063,13 @@ function updateProteins(geneMatrix, BGC) {
             removeSpaceBetweenProteins(proteinsForDisplay))));
     addDragDrop();
 }
-function obtainACPList(geneMatrix) {
+function getACPList(geneMatrix) {
     /**
    * Get list of ACP/PCP to attach the intermediates to it.
    *@input geneMatrix
    * @output acp List
    */
     let acpList = []
-    last_domain_status = 0
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
             0) {
@@ -1213,14 +1080,11 @@ function obtainACPList(geneMatrix) {
                         "ACP") || geneMatrix[geneIndex].domains[domainIndex]
                             .type.includes("PP") || geneMatrix[geneIndex].domains[domainIndex]
                                 .type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
-                                    .type.includes("ACPS")) && last_domain_status == 0) {
+                                    .type.includes("ACPS"))) {
                         acpList.push(geneMatrix[geneIndex].domains[domainIndex]
                             .identifier)
-                        last_domain_status = 1
 
                     }
-                    else { last_domain_status = 0; }
-
                 }
             }
         }
@@ -1392,12 +1256,21 @@ function addRiPP(geneMatrix,){
     RiPPStatus = 1;
     geneIndex = rippPrecursorGene
     geneMatrix[geneIndex].ripp_status = true;
-    var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
+    let translation = ""
+    // for antismash 7.0 files
+    if (BGCForDisplay["orfs"][geneIndex].hasOwnProperty("translation")){
+        translation = BGCForDisplay["orfs"][geneIndex].translation}
+    // for antismash 6.0 files
+    else {
+        var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
 
-    var translationSearch = regExString.exec(BGCForDisplay["orfs"][geneIndex].description);
+        var translationSearch = regExString.exec(BGCForDisplay["orfs"][geneIndex].description);
 
-    let translation = translationSearch[1]; //is the matched group if found
-    rippPrecursor = translation.slice(-5); // default only last 50 amino acids
+        translation = translationSearch[1]; //is the matched group if found
+
+    }
+
+    rippPrecursor = translation.slice(-10); // default only last 10 amino acids
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
 function setRiPPPrecursor(geneIndex){
@@ -2027,7 +1900,7 @@ function findTailoringEnzymeStatus(orfFunction) {
         tailoringEnzymeStatus = orfFunction.search(enzymeName) == -1 ?
             false : true;
         if (tailoringEnzymeStatus == true) {
-            return [tailoringEnzymeStatus, enzymeName]
+            return [tailoringEnzymeStatus, enzymeName.trim()]
         }
 
     }
@@ -2074,9 +1947,6 @@ function runAlola(regionIndex, details_data, recordData){
   //remove all checkboxes
   $('input[type=checkbox]').removeAttr('checked');
     updateProteins(geneMatrix, BGC)
-  if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)} 
-  else { updateRiPPs(geneMatrix, BGC)}
-    addArrowClick(geneMatrix)
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 }
 // adding modules+ opening the form to do so
@@ -2174,6 +2044,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
    */
     let outputForRaichu = []
     let region = []
+    geneMatrix.modules = []
     if (details_data.hasOwnProperty("nrpspks")) {
         region = details_data.nrpspks[region_index];
     }
@@ -2183,10 +2054,9 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     geneMatrix.sort((a, b) => {
         return a.position - b.position;
     });
-    let acpCounter = 0
-    let starterStatus = 0
-    let starterACP = 1
-    let typeModule = "";
+    moduleMatrix = []
+    let acpCounter = 0;
+    let starterACP = 1;
     let substrate = "";
     let domainArray = [];
     let typesInModule = [];
@@ -2198,131 +2068,100 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                 let orf = region.orfs[orfIndex];
                 if (geneMatrix[geneIndex].id == orf.id) {
                     // acp stat helps connecting modules that are within the same module but on different genes
-                    let acpStat = 1;
-
-                    for (let moduleIndex = 0; moduleIndex < orf.modules.length; moduleIndex++) {
-                        let module = orf.modules[moduleIndex];
-                        let startModule = module.start;
-                        let endModule = module.end;
-                        let nameModule = "module_" + orfIndex + "_" +
-                            moduleIndex;
-                        acpStat = 0;
-                        for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
-                            let domain = orf.domains[domainIndex];
-                            if (geneMatrix[geneIndex].domains[domainIndex].ko ==
-                                false || geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
-                                let nameDomain = "";
-                                let active = "True";
-                                let used = "True";
-                                let gene = orf.id;
-                                let type = "None";
-                                let subtype = "None";
-                                // checks if domain in module
-                                if (startModule >= domain.start && domain.start >=
-                                    endModule || endModule >= domain.start &&
-                                    domain.start >= startModule) {
-                                    type = domain.abbreviation;
-                                    if (domain.abbreviation == "") {
-                                        type = domain.type
-                                    }
-                                    if (domain.abbreviation == "KR") {
-                                        if (geneMatrix[geneIndex].domains[
-                                            domainIndex].selected_option.length == 0) {
-                                            if (domain.predictions.length != 0) {
-                                                let domainActivity = domain.predictions[
-                                                    0][1]
-                                                if (domainActivity ==
-                                                    "inactive" && (geneMatrix[geneIndex].domains[domainIndex].ko ==
-                                                        true || geneMatrix[geneIndex].domains[domainIndex].ko == "None")) {
-                                                    geneMatrix[geneIndex].domains[domainIndex].ko = true;
-                                                    active = "False"
-                                                }
-                                                if (domain.predictions[1][1] !=
-                                                    "(unknown)") {
-                                                    subtype = domain.predictions[1][1];
-                                                }
+                    let moduleIndex = 0;
+                    for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
+                        let domain = orf.domains[domainIndex];
+                        if (geneMatrix[geneIndex].domains[domainIndex].ko ==
+                            false || geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
+                            let active = "True";
+                            let used = "True";
+                            let gene = orf.id;
+                            let type = "None";
+                            let subtype = "None";
+                                type = domain.abbreviation;
+                                if (domain.abbreviation == "") {
+                                    type = domain.type
+                                }
+                                if (domain.abbreviation == "KR") {
+                                    if (geneMatrix[geneIndex].domains[
+                                        domainIndex].selected_option.length == 0) {
+                                        if (domain.predictions.length != 0) {
+                                            let domainActivity = domain.predictions[
+                                                0][1]
+                                            if (domainActivity ==
+                                                "inactive" && (geneMatrix[geneIndex].domains[domainIndex].ko ==
+                                                    true || geneMatrix[geneIndex].domains[domainIndex].ko == "None")) {
+                                                geneMatrix[geneIndex].domains[domainIndex].ko = true;
+                                                active = "False"
+                                            }
+                                            if (domain.predictions[1][1] !=
+                                                "(unknown)") {
+                                                subtype = domain.predictions[1][1];
                                             }
                                             else { subtype = "None" }
                                         }
-                                        else {
-                                            subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
-                                        }
+                                        else { subtype = "None" }
                                     }
-                                    if (domain.abbreviation == "KS") {
-                                        if (geneMatrix[geneIndex].domains[
-                                            domainIndex].selected_option.length == 0) {
-                                            if (domain.predictions.length != 0) {
+                                    else {
+                                        subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
+                                    }
+                                }
+                                if (domain.abbreviation == "KS") {
+                                    if (geneMatrix[geneIndex].domains[
+                                        domainIndex].selected_option.length == 0) {
+                                        if (domain.predictions.length != 0) {
 
 
-                                                if (domain.predictions[0][1] !=
-                                                    "unknown") {
-                                                    subtype = domain.predictions[0][1].toUpperCase().replaceAll("-","_");
-                                                }
-                                                else { subtype = "MISCELLANEOUS" }
+                                            if (domain.predictions[0][1] !=
+                                                "(unknown)") {
+                                                subtype = domain.predictions[0][1].toUpperCase().replaceAll("-", "_").replaceAll("/", "_");
                                             }
-                                            
+                                            else { subtype = "MISCELLANEOUS" }
                                         }
-                                        else {
-                                            subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
-                                        }
-                                    }
 
-                                    if ((domain.type.includes("ACP") || domain.type
-                                        .includes("PP") || domain.type.includes("PCP")) && moduleType == "NRPS") {
-                                        type = "PCP"
-                                        acpCounter += 1;
-                                        acpStat = 1;
                                     }
-                                    if ((domain.type.includes("ACP") || domain.type
-                                        .includes("PP") || domain.type.includes("PCP")) && moduleType == "PKS") {
-                                        type = "ACP"
-                                        acpCounter += 1;
-                                        acpStat = 1;
+                                    else {
+                                        subtype = geneMatrix[geneIndex].domains[domainIndex].selected_option
                                     }
-
-
-                                    if (domain.abbreviation == "AT") {
-                                        moduleType = "PKS"
-                                        moduleSubtype = "PKS_CIS"
-                                        if (domain.hasOwnProperty("predictions")) {
-                                            if (domain.predictions.length != 0) {
-                                                if (domain.predictions[1][1] !=
-                                                    "(unknown)") {
-                                                    substrate = domain.predictions[
-                                                        1][1].replace("-",
-                                                            '_')
-                                                        .toUpperCase()
-                                                }
-                                                else {
-                                                    substrate = "malonyl_coa".toUpperCase()
-                                                }
+                                }
+                                if (domain.abbreviation == "AT") {
+                                    moduleType = "PKS"
+                                    moduleSubtype = "PKS_CIS"
+                                    if (domain.hasOwnProperty("predictions")) {
+                                        if (domain.predictions.length != 0) {
+                                            if (domain.predictions[1][1] !=
+                                                "(unknown)") {
+                                                substrate = domain.predictions[
+                                                    1][1].replace("-",
+                                                        '_')
+                                                    .toUpperCase()
+                                            }
+                                            else {
+                                                substrate = "malonyl_coa".toUpperCase()
                                             }
                                         }
-                                        else {
-                                            substrate = "malonyl_coa".toUpperCase()
-                                        }
-                                        if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
-                                            substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option.toUpperCase()
-                                        }
                                     }
+                                    else {
+                                        substrate = "malonyl_coa".toUpperCase()
+                                    }
+                                    if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
+                                        substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option.toUpperCase()
+                                    }
+                                }
 
-                                    geneMatrix[geneIndex].domains[domainIndex].function = type
-                                    if (domain.abbreviation == "A") {
-                                        if (domain.hasOwnProperty("predictions")) {
-                                            if (domain.predictions.length != 0) {
-                                                if (domain.predictions[0][1] !=
-                                                    "unknown" && domain.predictions[0][1] !="X") {
-                                                    substrate = aminoacids[
-                                                        domain.predictions[
-                                                            0][1].replace(
-                                                                "-", '')
-                                                            .toLowerCase()]
-                                                    if (substrate === undefined) {
-                                                                substrate = "glycine"}
-                                                }
-                                                else {
-                                                    substrate = "glycine"
-                                                }
+                                geneMatrix[geneIndex].domains[domainIndex].function = type
+                                if (domain.abbreviation == "A") {
+                                    if (domain.hasOwnProperty("predictions")) {
+                                        if (domain.predictions.length != 0) {
+                                            if (domain.predictions[0][1] !=
+                                                "unknown" && domain.predictions[0][1] !="X") {
+                                                substrate = aminoacids[
+                                                    domain.predictions[
+                                                        0][1].replace(
+                                                            "-", '')
+                                                        .toLowerCase()]
+                                                if (substrate === undefined) {
+                                                            substrate = "glycine"}
                                             }
                                             else {
                                                 substrate = "glycine"
@@ -2331,51 +2170,86 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                         else {
                                             substrate = "glycine"
                                         }
-                                        geneMatrix[geneIndex].domains[domainIndex].substrate = substrate
-                                        // overrule by user selected option
+                                    }
+                                    else {
+                                        substrate = "glycine"
+                                    }
+                                    geneMatrix[geneIndex].domains[domainIndex].substrate = substrate
+                                    // overrule by user selected option
 
-                                        if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
-                                            substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option
-                                        }
+                                    if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
+                                        substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option
+                                    }
 
-                                    }
-                                    if (["A", "C", "PCP", "E"].includes(domain.abbreviation)){
-                                      moduleType = "NRPS"
-                                      moduleSubtype = "None"
-                                    }
-                                    if (["AT", "KS", "ACP", "KR"].includes(domain.abbreviation)){
-                                      moduleType = "PKS"
-                                      if (moduleSubtype == "None"){
-                                        moduleSubtype = "PKS_TRANS"
-                                      }
-                                    }
-                                    // to avoid duplicate domains
-                                    if (typesInModule.includes(type)){
-                                      active = "False";
-                                      geneMatrix[geneIndex].domains[domainIndex].ko = true};
-                                    domainArray.push([gene, type, subtype, "None", active, used]);
-                                    typesInModule.push (type);
                                 }
-                            }
-                        }
-                        if (substrate === undefined && moduleType == "PKS") {
-                            substrate = "MALONYL_COA"
-                        }
-                        if (substrate === undefined && moduleType == "NRPS") {
-                            substrate = "glycine"
-                        }
-                        // create module arrays
-                        if (acpStat == 1) {
-                            let moduleArray = [moduleType, moduleSubtype, substrate, domainArray]
-                            if (moduleArray.length != 0) {
-                                outputForRaichu.push(moduleArray)
-                            }
-                            domainArray = [];
-                            typesInModule = [];
-                        }
+                                if (["A", "C", "PCP", "E"].includes(domain.abbreviation)){
+                                    moduleType = "NRPS"
+                                    moduleSubtype = "None"
+                                }
+                                if (["AT", "KS", "ACP", "KR"].includes(domain.abbreviation)){
+                                    moduleType = "PKS"
+                                    if (moduleSubtype == "None"){
+                                    moduleSubtype = "PKS_TRANS"
+                                    }
+                                }
+                                // to avoid duplicate domains
+                                if (typesInModule.includes(type)){
+                                    active = "False";
+                                    geneMatrix[geneIndex].domains[domainIndex].ko = true};
+                                if ((domain.type.includes("ACP") || domain.type
+                                    .includes("PP") || domain.type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
+                                        .type.includes("ACPS")) && moduleType == "NRPS") {
+                                    type = "PCP"
+                                    acpCounter += 1;
+                                }
+                                if ((domain.type.includes("ACP") || domain.type
+                                    .includes("PP") || domain.type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
+                                        .type.includes("ACPS")) && moduleType == "PKS") {
+                                    type = "ACP"
+                                    acpCounter += 1;
+                                }
+                                domainArray.push([gene, type, subtype, "None", active, used]);
+                                typesInModule.push (type);
+                                // create new model everytime an ACP or PCP occurs
+                                if (type == "ACP" || type == "PCP"){
+                                    if (substrate === undefined && moduleType == "PKS") {
+                                        substrate = "MALONYL_COA"
+                                    }
+                                    if (substrate === undefined && moduleType == "NRPS") {
+                                        substrate = "glycine"
+                                    }
+                                    // remove falsely assigned domains for prediciton
+                                    let domainArrayFiltered =  []
+                                    if (moduleType == "NRPS"){
+                                        domainArrayFiltered = domainArray.filter(domain => domain[1] != "AT" && domain[1] != "KS" && domain[1] != "KR"
+                                            && domain[1] != "ER" && domain[1] != "DH");
+                                    }
+                                    if (moduleType == "PKS") {
+                                        domainArrayFiltered = domainArray.filter(domain => domain[1] != "A" && domain[1] != "C" && domain[1] != "E");
+                                    }
+                                    // create module arrays
+                                    let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered]
+                                    if (moduleArray.length != 0) {
+                                        outputForRaichu.push(moduleArray)
+                                        domains = domainArray.map(function (x) {
+                                            return x[1];
+                                        });
+                                        // add merged modules to gene matrix
+                                        moduleMatrix.push({
+                                            "id": moduleIndex,
+                                            "domains": domains,
+                                            "numberOfDomains": domains.length,
+                                            "moduleType": moduleType
+                                        })
+                                        moduleIndex++
+                                    }
+                                    domainArray = [];
+                                    typesInModule = [];
 
+                                }
+                        }
                     }
-                    break
+
                 }
             }
         }
