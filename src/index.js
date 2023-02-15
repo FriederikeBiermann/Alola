@@ -2,7 +2,7 @@ let regionIndex = 0
 let regionName = ""
 let BGC ={}
 let fetching = false
-let tailoringEnzymes = ["p450", " methyltransferase", "n-methyltransferase", "c-methyltransferase", "o-methyltransferase"]
+let tailoringEnzymes = ["METHYLTRANSFERASE ", "C_METHYLTRANSFERASE ", "N_METHYLTRANSFERASE ", "O_METHYLTRANSFERASE ", "P450", "ISOMERASE", "PRENYLTRANSFERASE", "ACETYLTRANSFERASE", "ACYLTRANSFERASE", "AMINOTRANSFERASE", "OXIDASE", "REDUCTASE", "ALCOHOLE_DEHYDROGENASE", "DEHYDRATASE", "DECARBOXYLASE", "MONOAMINE_OXIDASE", "HALOGENASE", "PEPTIDASE", "PROTEASE"]
 let cluster_type = "nrpspks"
 let RiPPStatus = 0
 let rippPrecursor = ""
@@ -731,18 +731,14 @@ function fetchFromRaichuRiPP(){
             // format output
             //add protase Options
             proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(stringToArray(raichu_output.aminoAcidsForCleavage)));
-            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
-                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
-                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
-                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
-                peptide_bonds = stringToArray(raichu_output.peptideBonds));
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites))
             updateRiPPs(geneMatrix, BGC)
             addArrowClick(geneMatrix);
             // add final drawing
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
             var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(raichu_output.complete_cluster_svg);
+                encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
                 .href = url
             document.getElementById("save_complete_cluster_svg")
@@ -761,7 +757,7 @@ function fetchFromRaichuRiPP(){
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
                 tailoringEnzymes_intermediate.setAttribute("style", "width:300px")
-                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
+                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
@@ -773,7 +769,7 @@ function fetchFromRaichuRiPP(){
                 // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
                 precursor.setAttribute("style", "width:300px")
-                precursor.innerHTML = formatSVG_intermediates(raichu_output.raw_peptide_chain);
+                precursor.innerHTML = formatSVG_intermediates(raichu_output.rawPeptideChain);
                 let precursor_svg = document.getElementById("precursor_drawing")
                 let precursor_bbox = intermediate_svg.getBBox();
                 let precursor_viewBox = [precursor_bbox.x, precursor_bbox.y, precursor_bbox.width, precursor_bbox.height].join(" ");
@@ -831,22 +827,17 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             return handler
         })
         .then((raichu_output) => {
-            console.log(raichu_output.ccDoubleBonds)
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation);
-            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
-                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
-                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
-                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
-                peptide_bonds = stringToArray(raichu_output.peptideBonds));
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites))
             updateDomains(geneMatrix, BGC);
             addArrowClick(geneMatrix);
             acpList = getACPList(geneMatrix);
-            let intermediates = raichu_output.hanging_svg;
+            let intermediates = raichu_output.hangingSvg;
             // structure for tailoring conatiner
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") != null)) {
                 let innerIntermediateContainer_tailoring_enzymes = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
                 innerIntermediateContainer_tailoring_enzymes.setAttribute("style", "width:150px")
-                innerIntermediateContainer_tailoring_enzymes.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
+                innerIntermediateContainer_tailoring_enzymes.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring);
                 let structure_for_tailoring = document.getElementById("tailoring_drawing")
                 let bbox_structure_for_tailoring = structure_for_tailoring.getBBox();
                 let viewBox_structure_for_tailoring = [bbox_structure_for_tailoring.x, bbox_structure_for_tailoring.y, bbox_structure_for_tailoring.width, bbox_structure_for_tailoring.height].join(" ");
@@ -878,7 +869,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
             var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(raichu_output.complete_cluster_svg);
+                encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
                 .href = url
             document.getElementById("save_complete_cluster_svg")

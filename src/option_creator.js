@@ -15,78 +15,93 @@ function addStringToArray(string, array) {
 var OptionCreator = {
   version: "1.0.0"
 };
-OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none){
-   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-     for (let domainIndex=0; domainIndex<geneMatrix[geneIndex].domains.length;domainIndex++){
-      let domain= geneMatrix[geneIndex].domains[domainIndex]
+OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none) {
+  for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+    for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains.length; domainIndex++) {
+      let domain = geneMatrix[geneIndex].domains[domainIndex]
       // add stereochemistry options for KR
-      if (domain.hasOwnProperty("function")){
-      if (domain.abbreviation=="KR") {if (domain.function.length>2){
-        domain.default_option=domain.function.slice(3)
+      if (domain.hasOwnProperty("function")) {
+        if (domain.abbreviation == "KR") {
+          if (domain.function.length > 2) {
+            domain.default_option = domain.function.slice(3)
+          }
+          else { domain.default_option = "undetermined stereochemisty" }
+          domain.domainOptions = ['Stereoselectivity: A1', 'Stereoselectivity: A2', 'Stereoselectivity: B1', 'Stereoselectivity: B2', 'Stereoselectivity: C1', 'Stereoselectivity: C2']
+        }
       }
-      else{domain.default_option="undetermined stereochemisty"}
-      domain.domainOptions=['Stereoselectivity: A1', 'Stereoselectivity: A2', 'Stereoselectivity: B1', 'Stereoselectivity: B2', 'Stereoselectivity: C1', 'Stereoselectivity: C2']
+      //add substrate specifities for NRPS
+      if (domain.abbreviation == "A") {
+        domain.domainOptions = Object.values(aminoacids)
+        domain.default_option = domain.predictions[0][1].replace(
+          "-", '').toLowerCase()
+      }
+      //add substrate specifities for PKS
+
+      if (domain.abbreviation == "AT") {
+        domain.domainOptions = Object.keys(nameToStructure)
+        domain.default_option = domain.predictions[1][1].replace(
+          "-", '')
+          .toLowerCase()
+      }
+      //add cyclisation options
+      if (domain.abbreviation == "TE") {
+        domain.domainOptions = addStringToArray("Cyclization at ", atomsForCyclisation.replaceAll(
+          "[", "")
+          .replaceAll("]", "")
+          .replaceAll(" ", "")
+          .split(","));
+        domain.domainOptions.push("Linear product");
+        domain.default_option = null;
+      }
     }
   }
-//add substrate specifities for NRPS
-if (domain.abbreviation=="A") {
-  domain.domainOptions=Object.values(aminoacids)
-  domain.default_option=domain.predictions[0][1].replace(
-  "-", '').toLowerCase()
-}
-//add substrate specifities for PKS
-
-if (domain.abbreviation=="AT") {
-domain.domainOptions=Object.keys(nameToStructure)
-domain.default_option=domain.predictions[1][1].replace(
-"-", '')
-.toLowerCase()
-}
-//add cyclisation options
-       if (domain.abbreviation == "TE") {
-         domain.domainOptions = addStringToArray("Cyclization at ", atomsForCyclisation.replaceAll(
-           "[", "")
-           .replaceAll("]", "")
-           .replaceAll(" ", "")
-           .split(","));
-         domain.domainOptions.push("Linear product");
-         domain.default_option = null;
-       }
-     }
-   }
 
 })
-OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, c_atoms = null, n_atoms = null, o_atoms = null, double_CC_bonds = null, peptide_bonds = null){
+OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSites) {
   let tailoringEnzymes_Reactions = {
-    "p450": {
-      "Hydroxylation": c_atoms,
-      "Epoxidation": double_CC_bonds,
-      "Oxidative bond formation": {
-        "Atom 1": c_atoms.concat(n_atoms, o_atoms),
-        "Atom 2": c_atoms.concat(n_atoms, o_atoms),
-    }},
-    "reductase": {
-      "Double bond reduction": double_CC_bonds
+    'METHYLTRANSFERASE': { 'METHYLTRANSFERASE': tailoringSites['METHYLTRANSFERASE'] },
+    'C_METHYLTRANSFERASE': { 'C_METHYLTRANSFERASE': tailoringSites['C_METHYLTRANSFERASE'] },
+    'N_METHYLTRANSFERASE': { 'N_METHYLTRANSFERASE': tailoringSites['N_METHYLTRANSFERASE'] },
+    'O_METHYLTRANSFERASE': { 'O_METHYLTRANSFERASE': tailoringSites['O_METHYLTRANSFERASE'] },
+    'P450': {
+      'HYDROXYLATION': tailoringSites['P450_HYDROXYLATION'],
+      'OXIDATIVE_BOND_FORMATION': tailoringSites['P450_OXIDATIVE_BOND_FORMATION'],
+      'EPOXIDATION': tailoringSites['P450_EPOXIDATION']
     },
-    "protease": {
-      "Proteolytic cleavage": peptide_bonds
+    'REDUCTASE': {
+      'DOUBLE_BOND_REDUCTION': tailoringSites['REDUCTASE_DOUBLE_BOND_REDUCTION'],
+      'KETO_REDUCTION': tailoringSites['REDUCTASE_KETO_REDUCTION']
     },
-    "methyltransferase": {
-      "O-methylation": o_atoms,
-      "Methylation": c_atoms.concat(n_atoms, o_atoms),
-      
-      "N-methylation": n_atoms,
-      "C-methylation": c_atoms
-    }
+    'ISOMERASE': { 'DOUBLE_BOND_SHIFT': tailoringSites['ISOMERASE_DOUBLE_BOND_SHIFT'], },
+    'PRENYLTRANSFERASE': {
+      'DIMETHYLALLYL': tailoringSites['PRENYLTRANSFERASE'],
+      'GERANYL': tailoringSites['PRENYLTRANSFERASE'],
+      'FARNESYL': tailoringSites['PRENYLTRANSFERASE'],
+      'GERANYLGERANYL': tailoringSites['PRENYLTRANSFERASE'],
+      'SQUALENE': tailoringSites['PRENYLTRANSFERASE'],
+      'PHYTOENE': tailoringSites['PRENYLTRANSFERASE']
+    },
+    'ACETYLTRANSFERASE': { 'ACETYLTRANSFERASE': tailoringSites['ACETYLTRANSFERASE'] },
+    'ACYLTRANSFERASE': { 'ACYLTRANSFERASE': tailoringSites['ACYLTRANSFERASE'] },
+    'AMINOTRANSFERASE': { 'AMINOTRANSFERASE': tailoringSites['AMINOTRANSFERASE'] },
+    'OXIDASE': { 'DOUBLE_BOND_FORMATION': tailoringSites['OXIDAS_DOUBLE_BOND_FORMATIONE'] },
+    'ALCOHOLE_DEHYDROGENASE': { 'ALCOHOLE_DEHYDROGENASE': tailoringSites['ALCOHOLE_DEHYDROGENASE'] },
+    'DEHYDRATASE': { 'DEHYDRATASE': tailoringSites['DEHYDRATASE'] },
+    'DECARBOXYLASE': { 'DECARBOXYLASE': tailoringSites['DECARBOXYLASE'] },
+    'MONOAMINE_OXIDASE': { 'MONOAMINE_OXIDASE': tailoringSites['MONOAMINE_OXIDASE'] },
+    'HALOGENASE': { 'HALOGENASE': tailoringSites['HALOGENASE'] },
+    'PEPTIDASE': { 'PEPTIDASE': tailoringSites['PEPTIDASE'] },
+    'PROTEASE': { 'PROTEASE': tailoringSites['PROTEASE'] }
 
   }
 
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-    if (geneMatrix[geneIndex].tailoringEnzymeStatus == true){
+    if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
       geneMatrix[geneIndex].options = tailoringEnzymes_Reactions[geneMatrix[geneIndex].tailoringEnzymeType];
       geneMatrix[geneIndex].default_option = null;
     }
-}})
+  }
+})
 
 
 //add options for cyclization
