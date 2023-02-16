@@ -98,7 +98,7 @@ async def alola_nrps_pks(antismash_input: str, state: Optional[List[int]] = Quer
                                 for bond in cc_double_bonds])
     
     structure_for_tailoring = RaichuDrawer(
-        tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True)
+        tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, draw_straightened=True)
     structure_for_tailoring.draw_structure()
     svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
