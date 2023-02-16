@@ -34,6 +34,8 @@ colour_outline_dict = {
     'Thioesterase': '#a25ba0',
     'KR*': '#5fbb87'
 }
+
+
 function hasNumbers(t) {
     var regex = /\d/g;
     return regex.test(t);
@@ -151,7 +153,11 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                                     geneIndex].modules[
                                                                     moduleIndex].domains[
                                                                     domainIndex].type.includes(
-                                                                        "PCP")) {
+                                                                        "PCP") || geneMatrix[
+                                                                            geneIndex].modules[
+                                                                            moduleIndex].domains[
+                                                                            domainIndex].type.includes(
+                                                                                "docking")) {
                                             size = 25;
 
                                         }
@@ -706,7 +712,7 @@ Domainer.drawGenes = (function (geneMatrix, height, scale) {
                     if (domain.includes(
                         "term") || domain.includes(
                             "ACP") || domain.includes(
-                                "PP") || domain.includes("PCP")) {
+                                "PP") || domain.includes("PCP") || domain.includes("docking")) {
                         bubble_size = 25;
                     }
                     else {
@@ -791,7 +797,7 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
             if (domain.includes(
                 "term") || domain.includes(
                     "ACP") || domain.includes(
-                        "PP") || domain.includes("PCP")) {
+                        "PP") || domain.includes("PCP") || domain.includes("docking")) {
                 bubble_size = 25;
             }
             else {

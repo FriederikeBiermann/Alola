@@ -46,7 +46,6 @@ domain.default_option=domain.predictions[1][1].replace(
        //add specifities for Trans-AT-KS
 
        if (domain.abbreviation == "KS" && domain.predictions.length != 0) {
-         console.log(domain.predictions)
          domain.domainOptions = Object.keys(TRANS_AT_KS_SUBTYPES)
          for (const [key,value] of Object.entries(TRANS_AT_KS_SUBTYPES))
          {

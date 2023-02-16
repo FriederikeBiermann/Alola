@@ -437,6 +437,7 @@ svg text {
   display: block;
   width: 100%;
   text-transform: capitalize;
+  text-align: start;
 }
 
 .dropdown-content button:active {
@@ -504,7 +505,6 @@ svg text {
 
 svg text {
   text-anchor: middle;
-  dominant-baseline: bottom;
 }
 
 /* Links inside the dropdown */
@@ -517,6 +517,7 @@ svg text {
   display: block;
   width: 100%;
   text-transform: capitalize;
+  text-align: start;
 }
 
 .dropdown-content-tailoring button:active {
@@ -602,6 +603,30 @@ svg text {
 }
 
 .intermediate_drawing_tailoring {
+  position: relative;
+  max-width: 100%;
+  height: auto;
+  bottom: 60px;
+  left: 50%;
+}
+
+.intermediate_drawing_precursor {
+  position: relative;
+  max-width: 100%;
+  height: auto;
+  bottom: 60px;
+  left: 50%;
+}
+
+.intermediate_drawing_protease {
+  position: relative;
+  max-width: 100%;
+  height: auto;
+  bottom: 60px;
+  left: 50%;
+}
+
+.cleavedProduct {
   position: relative;
   max-width: 100%;
   height: auto;

@@ -422,6 +422,8 @@ function addArrowClick(geneMatrix) {
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                 changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                     "_protein", geneIndex)
+                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
+                    "_gene_arrow");
             },
             false
         );
@@ -430,6 +432,8 @@ function addArrowClick(geneMatrix) {
             function () { // anonyme Funktion
                 changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                     "_protein", geneIndex)
+                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
+                    "_gene_arrow");
             },
             false
         );
@@ -438,7 +442,9 @@ function addArrowClick(geneMatrix) {
             function () { // anonyme Funktion
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                 changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_protein", geneIndex)
+                    "_protein", geneIndex);
+                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
+                    "_gene_arrow");
             },
             false
         );
@@ -446,7 +452,9 @@ function addArrowClick(geneMatrix) {
             'mouseleave',
             function () { // anonyme Funktion
                 changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_protein", geneIndex)
+                    "_protein", geneIndex);
+                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
+                    "_gene_arrow");
             },
             false
         );
@@ -463,7 +471,7 @@ function addArrowClick(geneMatrix) {
                     if (document.getElementById("real-time-button")
                         .checked) {
                         fetchFromRaichu(details_data, regionName,
-                            geneMatrix, cluster_type, BGC)
+                            geneMatrix, cluster_type, BGC);
                     }
                 },
                 false
@@ -473,7 +481,7 @@ function addArrowClick(geneMatrix) {
                 function () { // anonyme Funktion
                     displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                     changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                        "_gene_arrow", geneIndex)
+                        "_gene_arrow", geneIndex);
                 },
                 false
             );
@@ -481,24 +489,24 @@ function addArrowClick(geneMatrix) {
                 'mouseleave',
                 function () { // anonyme Funktion
                     changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                        "_gene_arrow", geneIndex)
+                        "_gene_arrow", geneIndex);
                 },
                 false
             );
             if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
-                const tailoringEnzymeObject = document.querySelector("#tailoringEnzyme_" + geneMatrix[geneIndex].id)
+                const tailoringEnzymeObject = document.querySelector("#tailoringEnzyme_" + geneMatrix[geneIndex].id);
                 arrow.addEventListener(
                     'mouseenter',
                     function () { // anonyme Funktion
 
-                        changeProteinColorON("#tailoringEnzyme_" + geneMatrix[geneIndex].id, geneIndex)
+                        changeProteinColorON("#tailoringEnzyme_" + geneMatrix[geneIndex].id, geneIndex);
                     },
                     false
                 );
                 arrow.addEventListener(
                     'mouseleave',
                     function () { // anonyme Funktion
-                        changeProteinColorOFF("#tailoringEnzyme_" + geneMatrix[geneIndex].id, geneIndex)
+                        changeProteinColorOFF("#tailoringEnzyme_" + geneMatrix[geneIndex].id, geneIndex);
                     },
                     false
                 );
@@ -986,6 +994,7 @@ function findTailoringReactions(geneMatrix) {
             let enzymeNameReaction = (enzymeType + "_" + enzymeReaction).replaceAll("-", "_").replaceAll(" ", "_").trim().toUpperCase()
             // put atoms for bond formation in pairs
             if (["P450_OXIDATIVE_BOND_FORMATION"].includes(enzymeNameReaction)){
+                atoms =atoms.flat(1)
                 if (atoms.length%2 == 1) {
                     atoms.pop()
                 }
