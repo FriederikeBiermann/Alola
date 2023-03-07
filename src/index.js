@@ -1,8 +1,11 @@
 let regionIndex = 0
 let regionName = ""
+var recordData = []
+var details_data = {}
 let BGC ={}
 let fetching = false
-let tailoringEnzymes = ["p450", " methyltransferase", "n-methyltransferase", "c-methyltransferase", "o-methyltransferase", "reductase"]
+let tailoringEnzymes = { "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"}
+let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"]
 let cluster_type = "nrpspks"
 let RiPPStatus = 0
 let rippPrecursor = ""
@@ -47,6 +50,50 @@ let moduleMatrix = []
 let wildcardSubstrate = "glycine"
 let wildcardModule = "elongation_module_nrps"
 let nameWildcardModule = "Custom_gene_"
+
+const dropArea = document.getElementById('regionsBar');
+
+dropArea.addEventListener('dragover', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    // Style the drag-and-drop as a "copy file" operation.
+    event.dataTransfer.dropEffect = 'copy';
+});
+
+dropArea.addEventListener('drop', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const fileList = event.dataTransfer.files;
+    const input_file = fileList[0];
+    readFile(input_file);
+
+});
+function readFile(file) {
+    const reader = new FileReader();
+    reader.addEventListener('load', (event) => {
+        const result = event.target.result.split("var ")
+        if (result.length != 5){
+            const dropArea = document.getElementById('regionsBar');
+            dropArea.innerHTML = "Input file not antiSMASH output"
+        }
+        else{
+            var recordDataString = result[1].replace("recordData = ", "").trim().slice(0, -1)
+            console.log(recordDataString.substr(recordDataString.length - 5))
+            recordData = JSON.parse(recordDataString);
+            details_data = JSON.parse(result[3].trim().replace("details_data = ", "").trim().slice(0, -1));
+            reload_site_with_genecluster()
+    }});
+
+    reader.addEventListener('progress', (event) => {
+        if (event.loaded && event.total) {
+            const percent = (event.loaded / event.total) * 100;
+            const dropArea = document.getElementById('regionsBar');
+            dropArea.innerHTML = `Progress: ${Math.round(percent)}`  ;
+        }
+    });
+    console.log("test")
+    reader.readAsText(file)
+    }
 
 function stringToArray(string){
     return string.replaceAll(
@@ -529,7 +576,7 @@ function addArrowClick(geneMatrix) {
                 tailoringEnzymeObject.addEventListener(
                     'mouseenter',
                     function () { // anonyme Funktion
-
+                        displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                         changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_gene_arrow", geneIndex); changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                                 "_protein", geneIndex)
@@ -738,18 +785,16 @@ function fetchFromRaichuRiPP(){
         .then((raichu_output) => {
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
             // format output
-            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
-                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
-                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
-                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
-                peptide_bonds = stringToArray(raichu_output.peptideBonds));
+            //add protase Options
+            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(stringToArray(raichu_output.aminoAcidsForCleavage)));
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites))
             updateRiPPs(geneMatrix, BGC)
             addArrowClick(geneMatrix);
             // add final drawing
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
             var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(raichu_output.complete_cluster_svg);
+                encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
                 .href = url
             document.getElementById("save_complete_cluster_svg")
@@ -768,7 +813,7 @@ function fetchFromRaichuRiPP(){
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
                 tailoringEnzymes_intermediate.setAttribute("style", "width:300px")
-                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
+                tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
@@ -780,7 +825,7 @@ function fetchFromRaichuRiPP(){
                 // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
                 precursor.setAttribute("style", "width:300px")
-                precursor.innerHTML = formatSVG_intermediates(raichu_output.raw_peptide_chain);
+                precursor.innerHTML = formatSVG_intermediates(raichu_output.rawPeptideChain);
                 let precursor_svg = document.getElementById("precursor_drawing")
                 let precursor_bbox = intermediate_svg.getBBox();
                 let precursor_viewBox = [precursor_bbox.x, precursor_bbox.y, precursor_bbox.width, precursor_bbox.height].join(" ");
@@ -802,7 +847,7 @@ function fetchFromRaichuRiPP(){
                 cleavage_svg.setAttribute('id', "intermediate_drawing_cleavage");
                 cleavage_svg.setAttribute('class', "intermediate_drawing_cleavage");
             }
-            
+
         })
 }
 function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
@@ -839,20 +884,16 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
         })
         .then((raichu_output) => {
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation);
-            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, c_atoms = stringToArray(raichu_output.c_atoms_for_tailoring),
-                n_atoms = stringToArray(raichu_output.n_atoms_for_tailoring),
-                o_atoms = stringToArray(raichu_output.o_atoms_for_tailoring),
-                double_CC_bonds = stringToArray(raichu_output.ccDoubleBonds),
-                peptide_bonds = stringToArray(raichu_output.peptideBonds));
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')))
             updateDomains(geneMatrix, BGC);
             addArrowClick(geneMatrix);
             acpList = getACPList(geneMatrix);
-            let intermediates = raichu_output.hanging_svg;
+            let intermediates = raichu_output.hangingSvg;
             // structure for tailoring conatiner
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") != null)) {
                 let innerIntermediateContainer_tailoring_enzymes = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
                 innerIntermediateContainer_tailoring_enzymes.setAttribute("style", "width:150px")
-                innerIntermediateContainer_tailoring_enzymes.innerHTML = formatSVG_intermediates(raichu_output.structure_for_tailoring);
+                innerIntermediateContainer_tailoring_enzymes.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring);
                 let structure_for_tailoring = document.getElementById("tailoring_drawing")
                 let bbox_structure_for_tailoring = structure_for_tailoring.getBBox();
                 let viewBox_structure_for_tailoring = [bbox_structure_for_tailoring.x, bbox_structure_for_tailoring.y, bbox_structure_for_tailoring.width, bbox_structure_for_tailoring.height].join(" ");
@@ -884,7 +925,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             let container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_container");
             var url = "data:image/svg+xml;charset=utf-8," +
-                encodeURIComponent(raichu_output.complete_cluster_svg);
+                encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
                 .href = url
             document.getElementById("save_complete_cluster_svg")
@@ -989,11 +1030,19 @@ function findTailoringReactions(geneMatrix) {
         let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType
         if (geneMatrix[geneIndex].tailoringEnzymeStatus == false) {
             continue }
-        for (var [enzymeReaction, atoms] of Object.entries(geneMatrix[geneIndex].selected_option)){
+        for (var [firstparameter, atoms] of Object.entries(geneMatrix[geneIndex].selected_option)){
             let enzymeReactionArray;
-            let enzymeNameReaction = (enzymeType + "_" + enzymeReaction).replaceAll("-", "_").replaceAll(" ", "_").trim().toUpperCase()
-            // put atoms for bond formation in pairs
-            if (["P450_OXIDATIVE_BOND_FORMATION"].includes(enzymeNameReaction)){
+            let substrate
+            let enzymeNameReaction
+            if (tailoringEnzymesWithSubstrate.includes(enzymeType)){
+                substrate = firstparameter
+                enzymeNameReaction = enzymeType
+            }
+            else{
+                enzymeNameReaction = firstparameter
+            }
+              // put atoms for bond formation in pairs
+            if (["OXIDATIVE_BOND_FORMATION"].includes(enzymeNameReaction)){
                 atoms =atoms.flat(1)
                 if (atoms.length%2 == 1) {
                     atoms.pop()
@@ -1067,7 +1116,6 @@ function updateProteins(geneMatrix, BGC) {
    * update Proteins to geneMAtrix to remove for instance ko genes and then calls the proteiner to draw the proteins
    *@input BGC,geneMatrix
    */
-    console.log(BGC)
     let proteinsForDisplay = JSON.parse(JSON.stringify(BGC));
     delete proteinsForDisplay.orfs
     proteinsForDisplay.orfs = []
@@ -1297,7 +1345,6 @@ function addRiPP(geneMatrix,){
         aminoacidsWithNumer.push(translation[aminoAcidIndex]+String(aminoAcidIndex+1))
 
     }
-    console.log(aminoacidsWithNumer)
     proteaseOptions = []
     proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(aminoacidsWithNumer));
     rippPrecursor = translation.slice(-10); // default only last 10 amino acids
@@ -1831,11 +1878,12 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, reactionOption, at
    *@yield Selected option correct+ cyclization option correct.
    */
     let button = document.getElementById(geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption)
-    if (atomOption.includes("=")) {
-        atomOption = atomOption.split("=")}
+    if (atomOption.includes(",")) {
+        atomOption = atomOption.split(",")}
     else {
         atomOption = [atomOption]
     }
+
     if (geneMatrix[geneIndex].selected_option[reactionOption].includes(atomOption)) {
         button.setAttribute("style", "background-color: white")
         var atomOptions = geneMatrix[geneIndex].selected_option[reactionOption].filter((item) => item !== atomOption);
@@ -1896,6 +1944,7 @@ function createGeneMatrix(BGC, regionName) {
             "orffunction": orfFunction,
             "tailoringEnzymeStatus": tailoringEnzymeStatus[0],
             "tailoringEnzymeType": tailoringEnzymeStatus[1],
+            "tailoringEnzymeAbbreviation": tailoringEnzymeStatus[2],
             "position_in_BGC": geneIndex + 1,
             "position": geneIndex + 1,
             "ko": false,
@@ -1930,21 +1979,21 @@ function findTailoringEnzymeStatus(orfFunction) {
    *@output tayloringstatus
    */
     let tailoringEnzymeStatus = false;
-    for (let tailoringEnzymesIndex = 0; tailoringEnzymesIndex < tailoringEnzymes.length; tailoringEnzymesIndex++) {
-        let enzymeName = tailoringEnzymes[tailoringEnzymesIndex]
-        tailoringEnzymeStatus = orfFunction.search(enzymeName) == -1 ?
+    for (const enzymeName in tailoringEnzymes) {
+        tailoringEnzymeStatus = orfFunction.toUpperCase().replaceAll("-","_").search(enzymeName) == -1 ?
             false : true;
         if (tailoringEnzymeStatus == true) {
-            return [tailoringEnzymeStatus, enzymeName.trim()]
+            return [tailoringEnzymeStatus, enzymeName.trim(), tailoringEnzymes[enzymeName]]
         }
 
     }
-    return [tailoringEnzymeStatus, ""]
+    return [tailoringEnzymeStatus, "", ""]
 
 }
 function runAlola(regionIndex, details_data, recordData){
   RiPPStatus = 0
   rippPrecursor = ""
+  cyclization = "None"
   regionName = getRegionName(regionIndex)
   cluster_type = getClusterType(regionIndex)
   document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${cluster_type} BGC`
@@ -1986,7 +2035,7 @@ function runAlola(regionIndex, details_data, recordData){
     updateDomains(geneMatrix,BGC)
     addArrowClick(geneMatrix)
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
-    
+
 }
 // adding modules+ opening the form to do so
 function addModulesGeneMatrix(geneMatrix, regionName) {
@@ -2295,5 +2344,8 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     }
     return [outputForRaichu, starterACP, geneMatrix]
 }
-createButtonsForEachRegion()
-runAlola(regionIndex, details_data, recordData)
+function reload_site_with_genecluster(){
+    createButtonsForEachRegion()
+    runAlola(regionIndex, details_data, recordData)
+}
+

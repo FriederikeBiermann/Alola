@@ -494,8 +494,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
             let points = Domainer.getArrowPoints(
                 15, 100,
                 90, scale)
-            // declare color if ko
-            let abbreviation = gene.tailoringEnzymeType
+            let abbreviation = gene.tailoringEnzymeAbbreviation;
 
             // add all the neccesary domain containers
             var innerContainer = document.createElement(
@@ -570,7 +569,6 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
             innerDropdownContent.innerHTML =
                 ""
             options = geneMatrix[geneIndex].options
-            console.log(typeof (options))
             reaction_options = Object.keys(options)
             for (let reactionOptionIndex = 0; reactionOptionIndex <
                 reaction_options.length; reactionOptionIndex++) {
@@ -612,17 +610,10 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                 if (atomOptions) {
                     for (let atomOptionIndex = 0; atomOptionIndex <
                         atomOptions.length; atomOptionIndex++) {
-                        let atomOption = atomOptions[atomOptionIndex].replaceAll("'","")
-                        if (atomOption.includes("=")){
-                            let [atomOption_1, atomOption_2] = atomOption.split("=")
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption_1 + "\x22);hover_in_atom(\x22" + atomOption_2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption_1 + "\x22);hover_out_atom(\x22" + atomOption_2 + "\x22);'>" + atomOption + "</button>";
-
-                        }
-                        else{
-                        innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption 
-                            + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22"  + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
-                        }
+                        let atomOption = atomOptions[atomOptionIndex]
+                        innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption.toString().replaceAll(" ", "")
+                            + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
+                        
                     }
                 }
 
@@ -686,7 +677,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                     width: 2, color: outline
                 });
             if (size > 25) {
-                var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT").replaceAll("reductase", "RED")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
+                var text = draw.text(abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
 
             dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id

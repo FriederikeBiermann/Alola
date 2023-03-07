@@ -199,8 +199,7 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
             let points = Domainer.getArrowPoints(
                 15, 100,
                 90, scale)
-            // declare color if ko
-            let abbreviation = gene.tailoringEnzymeType
+            let abbreviation = gene.tailoringEnzymeAbbreviation;
 
             // add all the neccesary domain containers
             var innerContainer = document.createElement(

@@ -41,6 +41,7 @@ label {
 }
 
 #regionsBar {
+  text-align: center;
   display: grid;
   grid-template-columns: repeat(100, 1fr);
   gap: 12px;
