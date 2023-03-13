@@ -105,12 +105,17 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                         if (geneMatrix[geneIndex].id == orf.locus_tag) {
                             if (!(geneMatrix[geneIndex].hasOwnProperty(
-                                "modules"))) {
+                                "modules")) ) {
+                                if (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction)){
                                 geneMatrix[geneIndex].modules = [{
                                     domains: geneMatrix[
                                         geneIndex].domains
                                 }]
                             }
+                        else{
+                            continue
+                        }}
+
                             for (let moduleIndex = 0; moduleIndex <
                                 geneMatrix[geneIndex].modules.length; moduleIndex++
                             ) {
@@ -694,7 +699,7 @@ Domainer.drawGenes = (function (geneMatrix, height, scale) {
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let geneSize = 0
         let lengthVisualisation = 0
-        if (geneMatrix[geneIndex].ko == false) {
+        if (geneMatrix[geneIndex].ko == false && biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction)) {
             if (geneMatrix[geneIndex].hasOwnProperty("domains")) {
                 for (let domainIndex = 0; domainIndex < geneMatrix[
                     geneIndex].domains.length; domainIndex++) {
@@ -783,6 +788,7 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
         let lengthVisualisation = 0
 
         domains = moduleMatrix[moduleIndex].domains;
+        console.log(domains)
         for (domainIndex in domains) {
             domain = domains[domainIndex]
             if (domain.includes(

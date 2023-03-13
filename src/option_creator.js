@@ -57,7 +57,6 @@ domain.default_option=domain.predictions[1][1].replace(
        }
 //add cyclisation options
        if (domain.abbreviation == "TE") {
-         console.log(atomsForCyclisation.replaceAll("'", '"'))
          domain.domainOptions = addStringToArray("Cyclization at ", JSON.parse(atomsForCyclisation.replaceAll("'",'"')));
          domain.domainOptions.push("Linear product");
          domain.default_option = null;
@@ -90,7 +89,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'DOUBLE_BOND_REDUCTION': tailoringSites['DOUBLE_BOND_REDUCTION'],
       'KETO_REDUCTION': tailoringSites['KETO_REDUCTION']
     },
-    'ISOMERASE': { 'DOUBLE_BOND_SHIFT': tailoringSites['ISOMERASE_DOUBLE_BOND_SHIFT'], },
+    'ISOMERASE': { 'DOUBLE_BOND_SHIFT': tailoringSites['DOUBLE_BOND_SHIFT'], },
     'PRENYLTRANSFERASE': {
       'DIMETHYLALLYL': tailoringSites['PRENYLTRANSFERASE'],
       'GERANYL': tailoringSites['PRENYLTRANSFERASE'],
@@ -123,6 +122,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
         if (JSON.stringify(value) === '[""]'){
             continue
           }
+        console.log(tailoringEnzymes_Reactions["ISOMERASE"])
         console.log(geneMatrix[geneIndex].tailoringEnzymeType)
         console.log(value)
         tayloringArrayFiltered[key] = value.map(function(item){return item.toString()})
