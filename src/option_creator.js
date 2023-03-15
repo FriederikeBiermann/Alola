@@ -19,22 +19,19 @@ var OptionCreator = {
 OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none) {
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
     for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains.length; domainIndex++) {
-      let domain = geneMatrix[geneIndex].domains[domainIndex]
+      let domain = geneMatrix[geneIndex].domains[domainIndex];
       // add stereochemistry options for KR
       if (domain.hasOwnProperty("function")) {
         if (domain.abbreviation == "KR") {
-          if (domain.function.length > 2) {
-            domain.default_option = domain.function.slice(3)
-          }
-          else { domain.default_option = "undetermined stereochemisty" }
+          domain.default_option =domain.predictions[1][1];
           domain.domainOptions = ['Stereoselectivity: A1', 'Stereoselectivity: A2', 'Stereoselectivity: B1', 'Stereoselectivity: B2', 'Stereoselectivity: C1', 'Stereoselectivity: C2']
         }
       }
 //add substrate specifities for NRPS
 if (domain.abbreviation=="A") {
   domain.domainOptions=Object.values(aminoacids)
-  domain.default_option=domain.predictions[0][1].replace(
-  "-", '').toLowerCase()
+  domain.default_option=aminoacids[domain.predictions[0][1].replace(
+  "-", '').toLowerCase()]
 }
 //add substrate specifities for PKS
 
@@ -122,9 +119,6 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
         if (JSON.stringify(value) === '[""]'){
             continue
           }
-        console.log(tailoringEnzymes_Reactions["ISOMERASE"])
-        console.log(geneMatrix[geneIndex].tailoringEnzymeType)
-        console.log(value)
         tayloringArrayFiltered[key] = value.map(function(item){return item.toString()})
       }
       let emptyTailoringArray = {}

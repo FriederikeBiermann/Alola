@@ -50,7 +50,7 @@ let moduleMatrix = []
 let wildcardSubstrate = "glycine"
 let wildcardModule = "elongation_module_nrps"
 let nameWildcardModule = "Custom_gene_"
-let biosyntheticCoreEnzymes = ["acyl carrier protein","phosphopantetheine-binding protein","sdr family oxidoreductase", "type i polyketide synthase", "type ii polyketide synthase", "type iii polyketide synthase", "polyketide synthase", "thioesterase domain-containing protein", "non-ribosomal peptide synthetase", "non-ribosomal peptide synthetase"]
+let biosyntheticCoreEnzymes = ["alpha/beta fold hydrolase","acyl carrier protein","phosphopantetheine-binding protein","sdr family oxidoreductase", "type i polyketide synthase", "type ii polyketide synthase", "type iii polyketide synthase", "polyketide synthase", "thioesterase domain-containing protein", "non-ribosomal peptide synthetase", "non-ribosomal peptide synthetase"]
 
 const dropArea = document.getElementById('regionsBar');
 
@@ -79,7 +79,6 @@ function readFile(file) {
         }
         else{
             var recordDataString = result[1].replace("recordData = ", "").trim().slice(0, -1)
-            console.log(recordDataString.substr(recordDataString.length - 5))
             recordData = JSON.parse(recordDataString);
             details_data = JSON.parse(result[3].trim().replace("details_data = ", "").trim().slice(0, -1));
             reload_site_with_genecluster()
@@ -92,10 +91,8 @@ function readFile(file) {
             dropArea.innerHTML = `Progress: ${Math.round(percent)}`  ;
         }
     });
-    console.log("test")
     reader.readAsText(file)
     }
-
 function stringToArray(string){
     return string.replaceAll(
         "[", "")
@@ -2000,7 +1997,11 @@ function runAlola(regionIndex, details_data, recordData){
   regionName = getRegionName(regionIndex)
   cluster_type = getClusterType(regionIndex)
   document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${cluster_type} BGC`
-    document.getElementById('domain_container').innerHTML = "";
+    document.getElementById('model_gene_container').innerHTML = "";
+  document.getElementById('module_container').innerHTML = "";
+  document.getElementById('domain_container').innerHTML = "";
+    document.getElementById('structure_container').innerHTML = "";
+  moduleMatrix = []
   BGC = Object.keys(recordData[0].regions[regionIndex])
       .reduce(function (obj, k) {
           if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
@@ -2207,15 +2208,12 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     if (geneMatrix[geneIndex].domains[
                                         domainIndex].selected_option.length == 0) {
                                         if (domain.predictions.length != 0) {
-
-
                                             if (domain.predictions[0][1] !=
                                                 "(unknown)") {
                                                 subtype = domain.predictions[0][1].toUpperCase().replaceAll("-", "_").replaceAll("/", "_");
                                             }
                                             else { subtype = "MISCELLANEOUS" }
                                         }
-
                                     }
                                     else {
                                         subtype = TRANS_AT_KS_SUBTYPES[geneMatrix[geneIndex].domains[domainIndex].selected_option]
@@ -2245,8 +2243,10 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                         substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option.toUpperCase()
                                     }
                                 }
-
-                                geneMatrix[geneIndex].domains[domainIndex].function = type
+                            if (domain.abbreviation == "DH" || domain.abbreviation == "DHt") {
+                                type = "DH"
+                            }
+                                
                                 if (domain.abbreviation == "A") {
                                     if (domain.hasOwnProperty("predictions")) {
                                         if (domain.predictions.length != 0) {
@@ -2277,7 +2277,6 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
                                         substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option
                                     }
-
                                 }
                                 if (["A", "C", "PCP", "E"].includes(domain.abbreviation)){
                                     moduleType = "NRPS";
@@ -2289,7 +2288,6 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     moduleSubtype = "PKS_TRANS";
                                     }
                                 }
-                                
                                 // select right kind of acp/pcp depending on module type
                                 if ((domain.type.includes("ACP") || domain.type
                                     .includes("PP") || domain.type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
@@ -2303,8 +2301,8 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     type = "ACP";
                                     acpCounter += 1;
                                 }
+                                geneMatrix[geneIndex].domains[domainIndex].function = type
                                 // to avoid duplicate domains
-                                console.log(domain.type)
                                 if (typesInModule.includes(type)) {
                                     active = "False";
                                     geneMatrix[geneIndex].domains[domainIndex].ko = true
@@ -2318,7 +2316,6 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 }
                                 if ((type == "ACP" || type == "PCP")&& domainArray.length>1)
                                 {
-                                    console.log("selected")
                                     if (substrate === undefined && moduleType == "PKS") {
                                         substrate = "MALONYL_COA";
                                     }
@@ -2396,25 +2393,18 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
         if (moduleType == "PKS") {
             domainArrayFiltered = newDomainArray.filter(domain => domain[1] != "A" && domain[1] != "C" && domain[1] != "E");
         }
-            console.log(domainArrayFiltered)
         // create module arrays
             if (domainArrayFiltered.length != 0) {
-                console.log(outputForRaichu[outputForRaichu.length - 1][3])
-                outputForRaichu[outputForRaichu.length - 1][3] = outputForRaichu[outputForRaichu.length - 1][3].concat(domainArrayFiltered)
-                console.log(outputForRaichu[outputForRaichu.length - 1][3])
+                outputForRaichu[outputForRaichu.length - 1][3] = outputForRaichu[outputForRaichu.length - 1][3].concat(domainArrayFiltered);
             domains.push(domainArray.map(function (x) {
                 return x[1];
             }));
-            console.log(domains)
             // add merged modules to gene matrix
-            console.log(moduleMatrix[moduleMatrix.length - 1].domains);
                 moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
-            console.log(moduleMatrix[moduleMatrix.length - 1].domains);
             moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.flat().length;
            
         }
     }
-    console.log(outputForRaichu)
     return [outputForRaichu, starterACP, geneMatrix]
 }
 function reload_site_with_genecluster(){

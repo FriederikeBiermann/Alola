@@ -770,7 +770,6 @@ Domainer.drawGenes = (function (geneMatrix, height, scale) {
                 .stroke({
                     width: 1
                 })
-            console.log(geneMatrix[geneIndex].id.split("_"))
             if (gene_size < 70 && geneMatrix[geneIndex].id.includes("_")) { var text = draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size / 2).y(height / 2 - 7) }
             else { var text = draw.text(geneMatrix[geneIndex].id).x(gene_size / 2).y(height / 2 - 7) }
 
@@ -789,7 +788,6 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
         let lengthVisualisation = 0
 
         domains = moduleMatrix[moduleIndex].domains;
-        console.log(domains)
         for (domainIndex in domains) {
             domain = domains[domainIndex]
             if (domain.includes(
