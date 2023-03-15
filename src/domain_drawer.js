@@ -748,8 +748,22 @@ Domainer.drawGenes = (function (geneMatrix, height, scale) {
             pol.node.id = "module_gene_" + geneIndex
         }
     }
+// leave space for tailoring
+    var innerModelGeneContainer = document.createElement('div');
+    innerModelGeneContainer.id = "innerModelGeneContainer_whitespace"
+    document.getElementById('model_gene_container')
+        .appendChild(innerModelGeneContainer);
+    var draw = SVG(innerModelGeneContainer)
+        .size(170 + "px", height)
+        .group();
 
+    var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0, 150, 40, scale)))
+        .fill("white")
 
+        .stroke("white")
+        .stroke({
+            width: 1
+        })
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size = 50
 

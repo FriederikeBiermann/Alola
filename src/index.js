@@ -2335,20 +2335,19 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered]
                                     if (moduleArray.length != 0) {
                                         outputForRaichu.push(moduleArray)
-                                        domains.push(domainArray.map(function (x) {
+                                        domains = domainArray.map(function (x) {
                                             return x[1];
-                                        }));
+                                        });
                                         // add merged modules to gene matrix
                                         moduleMatrix.push({
                                             "id": moduleIndex,
-                                            "domains": domains.flat(),
-                                            "numberOfDomains": domains.flat().length,
+                                            "domains": domains,
+                                            "numberOfDomains": domains.length,
                                             "moduleType": moduleType
                                         })
                                         moduleIndex++
                                     }
                                     domainArray = [];
-                                    domains = []
                                     typesInModule = [];
                                     moduleType = "PKS";
                                     moduleSubtype = "PKS_TRANS";
@@ -2396,12 +2395,12 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
         // create module arrays
             if (domainArrayFiltered.length != 0) {
                 outputForRaichu[outputForRaichu.length - 1][3] = outputForRaichu[outputForRaichu.length - 1][3].concat(domainArrayFiltered);
-            domains.push(domainArray.map(function (x) {
+            domains = domainArray.map(function (x) {
                 return x[1];
-            }));
+            });
             // add merged modules to gene matrix
-                moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
-            moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.flat().length;
+            moduleMatrix[moduleMatrix.length - 1].domains = moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
+            moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.length;
            
         }
     }
