@@ -106,7 +106,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                         if (geneMatrix[geneIndex].id == orf.locus_tag) {
                             if (!(geneMatrix[geneIndex].hasOwnProperty(
                                 "modules")) ) {
-                                if (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction)){
+                                if ((biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")){
                                 geneMatrix[geneIndex].modules = [{
                                     domains: geneMatrix[
                                         geneIndex].domains
@@ -685,7 +685,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                 var text = draw.text(abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
 
-            dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
+            dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id.replace(".", "_")
 
         }
     }
@@ -699,7 +699,7 @@ Domainer.drawGenes = (function (geneMatrix, height, scale) {
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let geneSize = 0
         let lengthVisualisation = 0
-        if (geneMatrix[geneIndex].ko == false && biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction)) {
+        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")) {
             if (geneMatrix[geneIndex].hasOwnProperty("domains")) {
                 for (let domainIndex = 0; domainIndex < geneMatrix[
                     geneIndex].domains.length; domainIndex++) {
@@ -770,7 +770,8 @@ Domainer.drawGenes = (function (geneMatrix, height, scale) {
                 .stroke({
                     width: 1
                 })
-            if (gene_size < 70) { var text = draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size / 2).y(height / 2 - 7) }
+            console.log(geneMatrix[geneIndex].id.split("_"))
+            if (gene_size < 70 && geneMatrix[geneIndex].id.includes("_")) { var text = draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size / 2).y(height / 2 - 7) }
             else { var text = draw.text(geneMatrix[geneIndex].id).x(gene_size / 2).y(height / 2 - 7) }
 
 

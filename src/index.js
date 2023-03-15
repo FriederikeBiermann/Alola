@@ -50,7 +50,7 @@ let moduleMatrix = []
 let wildcardSubstrate = "glycine"
 let wildcardModule = "elongation_module_nrps"
 let nameWildcardModule = "Custom_gene_"
-let biosyntheticCoreEnzymes = ["sdr family oxidoreductase", "type i polyketide synthase", "type ii polyketide synthase", "type iii polyketide synthase", "polyketide synthase", "thioesterase domain-containing protein", "non-ribosomal peptide synthetase", "non-ribosomal peptide synthetase"]
+let biosyntheticCoreEnzymes = ["acyl carrier protein","phosphopantetheine-binding protein","sdr family oxidoreductase", "type i polyketide synthase", "type ii polyketide synthase", "type iii polyketide synthase", "polyketide synthase", "thioesterase domain-containing protein", "non-ribosomal peptide synthetase", "non-ribosomal peptide synthetase"]
 
 const dropArea = document.getElementById('regionsBar');
 
@@ -542,7 +542,7 @@ function addArrowClick(geneMatrix) {
                 false
             );
             if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
-                const tailoringEnzymeObject = document.querySelector("#tailoringEnzyme_" + geneMatrix[geneIndex].id);
+                const tailoringEnzymeObject = document.querySelector("#tailoringEnzyme_" + geneMatrix[geneIndex].id.replace(".", "_"));
                 arrow.addEventListener(
                     'mouseenter',
                     function () { // anonyme Funktion
@@ -594,7 +594,7 @@ function addArrowClick(geneMatrix) {
                     false
                 );
             }
-            if (RiPPStatus == 0 && biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction)){ // there are no typical domains in ripp clusters
+            if (RiPPStatus == 0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")){ // there are no typical domains in ripp clusters
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
@@ -711,7 +711,7 @@ function changeColor(arrowId) {
    *@input arrowID
    *@yield other color of arrow
    */
-    const arrow = document.querySelector(arrowId);
+    const arrow = document.querySelector(arrowId.replace(".", "_"));
     if (arrow.getAttribute("fill") == "#E11838") {
         arrow.setAttribute('fill', '#ffffff');
     }
@@ -726,7 +726,7 @@ function changeDomainColor(domain, domainId) {
    *@input domain, domainId -> the domain is needed to change the color back to right domain
    *@yield other color of arrow
    */
-    const domainObject = document.querySelector(domainId);
+    const domainObject = document.querySelector(domainId.replace(".", "_"));
     if (domainObject.getAttribute("fill") == "#E11839") {
         if (domain.hasOwnProperty("type")) {
             if (colour_fill_dict.hasOwnProperty(domain.type)) {
@@ -753,7 +753,7 @@ function changeProteinColorON(ProteinId, geneIndex) {
    *@yield other color of protein
    */
     if (geneMatrix[geneIndex].displayed === true) {
-        const arrow = document.querySelector(ProteinId);
+        const arrow = document.querySelector(ProteinId.replace(".", "_"));
         arrow.setAttribute('style', "fill: #E11839");
     }
 }
@@ -765,7 +765,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
    *@yield other color of protein
    */
     if (geneMatrix[geneIndex].displayed === true) {
-        const arrow = document.querySelector(ProteinId);
+        const arrow = document.querySelector(ProteinId.replace(".", "_"));
         arrow.removeAttribute("style");
     }
 }
@@ -1143,7 +1143,7 @@ function getACPList(geneMatrix) {
     let acpList = []
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
-            0 && biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction)) {
+            0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")) {
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 if (geneMatrix[geneIndex].domains[domainIndex].ko == false || geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
@@ -1954,8 +1954,10 @@ function createGeneMatrix(BGC, regionName) {
             "selected_option": [],
             "options": [],
            "ripp_status": false,
-            "domains": domains
-        });
+            "domains": domains,
+            "type": BGC["orfs"][geneIndex].type
+      }
+        );
     }
     addModulesGeneMatrix(geneMatrix, regionName)
     return geneMatrix
@@ -2038,8 +2040,8 @@ function runAlola(regionIndex, details_data, recordData){
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 
 }
-// adding modules+ opening the form to do so
-function addModulesGeneMatrix(geneMatrix, regionName) {
+
+function addModulesGeneMatrix(geneMatrix, region_index) {
     /**
     *add the moodules from region js to geneMatrix (not custom modules)
    * @fires createGeneMatrix
@@ -2047,7 +2049,7 @@ function addModulesGeneMatrix(geneMatrix, regionName) {
    *@output modified geneMatrix
    */
     //
-    region_index = regionName
+    
     //iterate through all domains to assign them to correct module
     if (details_data.hasOwnProperty("nrpspks")) {
         region = details_data.nrpspks[region_index];
@@ -2154,7 +2156,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     let moduleSubtype = "PKS_TRANS";
     let moduleIndex = 0;
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        if (geneMatrix[geneIndex].ko == false && biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) ) {
+        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic") ) {
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
                 let orf = region.orfs[orfIndex];
                 if (geneMatrix[geneIndex].id == orf.id) {
@@ -2167,6 +2169,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 domains.push(domain.type)
                             }
                         else{
+                            
                             let active = "True";
                             let used = "True";
                             let gene = orf.id;
@@ -2286,10 +2289,8 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     moduleSubtype = "PKS_TRANS";
                                     }
                                 }
-                                // to avoid duplicate domains
-                                if (typesInModule.includes(type)){
-                                    active = "False";
-                                    geneMatrix[geneIndex].domains[domainIndex].ko = true};
+                                
+                                // select right kind of acp/pcp depending on module type
                                 if ((domain.type.includes("ACP") || domain.type
                                     .includes("PP") || domain.type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
                                         .type.includes("ACPS")) && moduleType == "NRPS") {
@@ -2302,10 +2303,22 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     type = "ACP";
                                     acpCounter += 1;
                                 }
+                                // to avoid duplicate domains
+                                console.log(domain.type)
+                                if (typesInModule.includes(type)) {
+                                    active = "False";
+                                    geneMatrix[geneIndex].domains[domainIndex].ko = true
+                                };
                                 domainArray.push([gene, type, subtype, "None", active, used]);
                                 typesInModule.push (type);
-                                // create new module everytime an ACP or PCP occurs
-                                if (type == "ACP" || type == "PCP"){
+                                // create new module everytime an ACP or PCP occurs, except if last domain was already ACP
+                                if ((type == "ACP" || type == "PCP") && domainArray.length == 1) {
+                                    active = "False";
+                                    geneMatrix[geneIndex].domains[domainIndex].ko = true;
+                                }
+                                if ((type == "ACP" || type == "PCP")&& domainArray.length>1)
+                                {
+                                    console.log("selected")
                                     if (substrate === undefined && moduleType == "PKS") {
                                         substrate = "MALONYL_COA";
                                     }
@@ -2316,10 +2329,10 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     let domainArrayFiltered =  []
                                     if (moduleType == "NRPS"){
                                         domainArrayFiltered = domainArray.filter(domain => domain[1] != "AT" && domain[1] != "KS" && domain[1] != "KR"
-                                            && domain[1] != "ER" && domain[1] != "DH");
+                                            && domain[1] != "ER" && domain[1] != "DH" && domain[1] != "ACP");
                                     }
                                     if (moduleType == "PKS") {
-                                        domainArrayFiltered = domainArray.filter(domain => domain[1] != "A" && domain[1] != "C" && domain[1] != "E");
+                                        domainArrayFiltered = domainArray.filter(domain => domain[1] != "A" && domain[1] != "C" && domain[1] != "E"&& domain[1] != "PCP");
                                     }
                                     // create module arrays
                                     let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered]
@@ -2340,6 +2353,8 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     domainArray = [];
                                     domains = []
                                     typesInModule = [];
+                                    moduleType = "PKS";
+                                    moduleSubtype = "PKS_TRANS";
 
                                 }
                         }
@@ -2349,39 +2364,57 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
             }
         }}
         // put everything into last module thats left
+        
         if (domainArray.length!=0){
-        if (substrate === undefined && moduleType == "PKS") {
-            substrate = "MALONYL_COA";
-        }
-        if (substrate === undefined && moduleType == "NRPS") {
-            substrate = "glycine";
-        }
+            // set everything that already exists to false
+            let newDomainArray = []
+            typesInModule = outputForRaichu[outputForRaichu.length - 1][3].map(function (x) {
+                return x[1];
+            });
+            moduleType = outputForRaichu[outputForRaichu.length - 1][0]
+            moduleSubtype = outputForRaichu[outputForRaichu.length - 1][1]
+            for (domain of domainArray){
+                let newDomain = []
+                if (typesInModule.includes(domain[1])){
+                    newDomain = domain.slice(0, 4);
+                    newDomain.push("False");
+                    newDomain.push(domain[5]);
+                }
+                else{
+                    newDomain = domain;
+                }
+                newDomainArray.push(newDomain);
+                typesInModule.push(domain[1]);
+            }
+        
         // remove falsely assigned domains for prediciton
         let domainArrayFiltered = []
         if (moduleType == "NRPS") {
-            domainArrayFiltered = domainArray.filter(domain => domain[1] != "AT" && domain[1] != "KS" && domain[1] != "KR"
+            domainArrayFiltered = newDomainArray.filter(domain => domain[1] != "AT" && domain[1] != "KS" && domain[1] != "KR"
                 && domain[1] != "ER" && domain[1] != "DH");
         }
         if (moduleType == "PKS") {
-            domainArrayFiltered = domainArray.filter(domain => domain[1] != "A" && domain[1] != "C" && domain[1] != "E");
+            domainArrayFiltered = newDomainArray.filter(domain => domain[1] != "A" && domain[1] != "C" && domain[1] != "E");
         }
+            console.log(domainArrayFiltered)
         // create module arrays
-        let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered]
-        if (moduleArray.length != 0) {
-            outputForRaichu.push(moduleArray)
+            if (domainArrayFiltered.length != 0) {
+                console.log(outputForRaichu[outputForRaichu.length - 1][3])
+                outputForRaichu[outputForRaichu.length - 1][3] = outputForRaichu[outputForRaichu.length - 1][3].concat(domainArrayFiltered)
+                console.log(outputForRaichu[outputForRaichu.length - 1][3])
             domains.push(domainArray.map(function (x) {
                 return x[1];
             }));
+            console.log(domains)
             // add merged modules to gene matrix
-            moduleMatrix.push({
-                "id": moduleIndex,
-                "domains": domains.flat(),
-                "numberOfDomains": domains.flat().length,
-                "moduleType": moduleType
-            })
-            moduleIndex++
+            console.log(moduleMatrix[moduleMatrix.length - 1].domains);
+                moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
+            console.log(moduleMatrix[moduleMatrix.length - 1].domains);
+            moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.flat().length;
+           
         }
     }
+    console.log(outputForRaichu)
     return [outputForRaichu, starterACP, geneMatrix]
 }
 function reload_site_with_genecluster(){
