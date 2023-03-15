@@ -54,11 +54,11 @@ async def alola_nrps_pks(antismash_input: str):
     tailoringReactions = []
     for enzyme in antismash_input_transformed[2]:
         tailoringReactions += [TailoringRepresentation(*enzyme)]
-    print(tailoringReactions)
     raw_cluster_representation = antismash_input_transformed[0]
     #Format fake booleans
     raichu_input = format_cluster(
         raw_cluster_representation, tailoringReactions)
+    print(raichu_input)
     cyclization = antismash_input_transformed[1]
     cluster = build_cluster(raichu_input, strict = False)
     cluster.compute_structures(compute_cyclic_products=False)
@@ -85,7 +85,6 @@ async def alola_nrps_pks(antismash_input: str):
     smiles = structure_to_smiles(final_product, kekule=False)
     atoms_for_cyclisation = str(
         [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
-    print (atoms_for_cyclisation)
     tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
     structure_for_tailoring = RaichuDrawer(
         tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, draw_straightened=True)
@@ -94,8 +93,8 @@ async def alola_nrps_pks(antismash_input: str):
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
     svg = svg_string_from_structure(final_product).replace("\n", "").replace(
         "\"", "'").replace("<svg", " <svg id='final_drawing'")
-
-    return {"svg": svg, "hangingSvg": spaghettis, "smiles": smiles, "atomsForCyclisation": atoms_for_cyclisation,  "tailoringSites": str(tailoring_sites), "complete_cluster_svg": cluster_svg,
+    print(cluster_svg)
+    return {"svg": svg, "hangingSvg": spaghettis, "smiles": smiles, "atomsForCyclisation": atoms_for_cyclisation,  "tailoringSites": str(tailoring_sites), "completeClusterSvg": cluster_svg,
             "structureForTailoring": svg_structure_for_tailoring}
 
 @app.get("/api/alola/ripp/")
