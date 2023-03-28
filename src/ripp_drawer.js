@@ -129,9 +129,9 @@ RiPPer.drawProtease = (function ( height = 90, scale) {
 
 
                 let optionContent =
-                    "<button id=" + geneIndex + "_" + short_option + "onclick='changeSelectedOptionCleavageSites('\x22" +
+                    "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionCleavageSites(\x22" +
                 short_option +
-                        "\x22');'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                        "\x22);'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
                     option +
                     "</button>";
                 //format default option differently

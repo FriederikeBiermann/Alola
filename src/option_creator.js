@@ -54,7 +54,7 @@ domain.default_option=domain.predictions[1][1].replace(
        }
 //add cyclisation options
        if (domain.abbreviation == "TE") {
-         domain.domainOptions = addStringToArray("Cyclization at ", JSON.parse(atomsForCyclisation.replaceAll("'",'"')));
+         domain.domainOptions = addStringToArray("Cyclization at ", atomsForCyclisation);
          domain.domainOptions.push("Linear product");
          domain.default_option = null;
        }

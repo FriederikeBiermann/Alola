@@ -781,11 +781,10 @@ function fetchFromRaichuRiPP(){
             return handler
         })
         .then((raichu_output) => {
-            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation)
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')))
             // format output
             //add protase Options
-            proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(stringToArray(raichu_output.aminoAcidsForCleavage)));
-            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites))
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')))
             updateRiPPs(geneMatrix, BGC)
             addArrowClick(geneMatrix);
             // add final drawing
@@ -881,7 +880,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             return handler
         })
         .then((raichu_output) => {
-            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = raichu_output.atomsForCyclisation);
+            OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')) );
             OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')))
             updateDomains(geneMatrix, BGC);
             addArrowClick(geneMatrix);
@@ -1897,6 +1896,14 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, reactionOption, at
     }
 
 }
+function changeSelectedOptionCleavageSites(option){
+    cleavageSites = [option]
+    consol.log(option)
+     if (document.querySelector('input[type=checkbox]')
+        .checked) {
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    }
+}
 function displayTextInGeneExplorer(geneId) {
     /**
     * Displays the description of the gene in the gene explorer.
@@ -2411,4 +2418,3 @@ function reload_site_with_genecluster(){
     createButtonsForEachRegion()
     runAlola(regionIndex, details_data, recordData)
 }
-
