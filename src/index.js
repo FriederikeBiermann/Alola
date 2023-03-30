@@ -9,6 +9,7 @@ let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"]
 let cluster_type = "nrpspks"
 let RiPPStatus = 0
 let rippPrecursor = ""
+let rippFullPrecursor = ""
 let rippPrecursorGene = 0
 let cleavageSites = []
 let proteaseOptions = []
@@ -769,7 +770,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 
 function fetchFromRaichuRiPP(){
     updateRiPPs(geneMatrix, BGC)
-    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene])
+    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene, rippFullPrecursor])
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
@@ -1345,6 +1346,7 @@ function addRiPP(geneMatrix,){
     }
     proteaseOptions = []
     proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(aminoacidsWithNumer));
+    rippFullPrecursor = translation
     rippPrecursor = translation.slice(-10); // default only last 10 amino acids
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
