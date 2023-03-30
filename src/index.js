@@ -9,6 +9,7 @@ let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"]
 let cluster_type = "nrpspks"
 let RiPPStatus = 0
 let rippPrecursor = ""
+let rippFullPrecursor = ""
 let rippPrecursorGene = 0
 let cleavageSites = []
 let proteaseOptions = []
@@ -769,7 +770,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 
 function fetchFromRaichuRiPP(){
     updateRiPPs(geneMatrix, BGC)
-    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene])
+    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene, rippFullPrecursor])
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
@@ -1344,6 +1345,7 @@ function addRiPP(geneMatrix,){
     }
     proteaseOptions = []
     proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(aminoacidsWithNumer));
+    rippFullPrecursor = translation
     rippPrecursor = translation.slice(-10); // default only last 10 amino acids
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
@@ -2342,20 +2344,19 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                     let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered]
                                     if (moduleArray.length != 0) {
                                         outputForRaichu.push(moduleArray)
-                                        domains.push(domainArray.map(function (x) {
+                                        domains = domainArray.map(function (x) {
                                             return x[1];
-                                        }));
+                                        });
                                         // add merged modules to gene matrix
                                         moduleMatrix.push({
                                             "id": moduleIndex,
-                                            "domains": domains.flat(),
-                                            "numberOfDomains": domains.flat().length,
+                                            "domains": domains,
+                                            "numberOfDomains": domains.length,
                                             "moduleType": moduleType
                                         })
                                         moduleIndex++
                                     }
                                     domainArray = [];
-                                    domains = []
                                     typesInModule = [];
                                     moduleType = "PKS";
                                     moduleSubtype = "PKS_TRANS";
@@ -2403,12 +2404,12 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
         // create module arrays
             if (domainArrayFiltered.length != 0) {
                 outputForRaichu[outputForRaichu.length - 1][3] = outputForRaichu[outputForRaichu.length - 1][3].concat(domainArrayFiltered);
-            domains.push(domainArray.map(function (x) {
+            domains = domainArray.map(function (x) {
                 return x[1];
-            }));
+            });
             // add merged modules to gene matrix
-                moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
-            moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.flat().length;
+            moduleMatrix[moduleMatrix.length - 1].domains = moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
+            moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.length;
            
         }
     }
