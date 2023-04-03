@@ -118,9 +118,10 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
             amino_acid_number = int(cleavage_site[1:])
             print(amino_acid_number)
             cleavage_sites += [CleavageSiteRepresentation(amino_acid, amino_acid_number, "follower")]
-    ripp_cluster = RiPP_Cluster(gene_name_precursor, amino_acid_sequence, cleavage_sites=cleavage_sites,
+    ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence, cleavage_sites=cleavage_sites,
                                 tailoring_enzymes_representation=tailoringReactions)
     ripp_cluster.make_peptide()
+    print(dir(ripp_cluster))
     peptide_svg = ripp_cluster.draw_precursor_with_modified_product(
         fold=5, size=7, as_string=True).replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")

@@ -37,12 +37,12 @@ RiPPer.leaveSpace = (function (width, id, scale) {
 
 RiPPer.drawProtease = (function ( height = 90, scale) {
     var container = document.getElementById('domain_container')
-    let size = 50
+    let size = height /2
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
     var line_svg = SVG(container)
-        .size('100%', 90)
+        .size('100%', height)
         .group();
 
             let domainIdentifier =  "Protease"
@@ -173,7 +173,7 @@ RiPPer.drawProtease = (function ( height = 90, scale) {
                 .stroke({
                     width: 2, color: outline
                 });
-            if (size > 25) {
+            if (size > height/4) {
                 var text = draw.text(abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
 
@@ -182,12 +182,12 @@ RiPPer.drawProtease = (function ( height = 90, scale) {
         });
 RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
     var container = document.getElementById('domain_container')
-    let size = 50
+    let size = height/2
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
     var line_svg = SVG(container)
-        .size('100%', 90)
+        .size('100%', height)
         .group();
     console.log(geneMatrix)
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
@@ -197,8 +197,7 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
             let domainIdentifier = "tailoringEnzyme" + geneMatrix[geneIndex].id.replace(".", "_")
 
             let points = Domainer.getArrowPoints(
-                15, 100,
-                90, scale)
+                height/4, height, height, scale)
             let abbreviation = gene.tailoringEnzymeAbbreviation;
 
             // add all the neccesary domain containers
@@ -383,7 +382,7 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
                 .stroke({
                     width: 2, color: outline
                 });
-            if (size > 25) {
+            if (size > height/4) {
                 var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT").replaceAll("reductase", "RED")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
             dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
@@ -391,7 +390,7 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
     }
 });
 RiPPer.drawHeadings = (function (height, space = 600) {
-    height = 30
+    headingHeigth = height/3
     document.getElementById('module_container')
         .innerHTML = ""
     var innerModuleContainer = document.createElement('div');
@@ -401,9 +400,9 @@ RiPPer.drawHeadings = (function (height, space = 600) {
         .appendChild(innerModuleContainer);
     size = space
     var draw = SVG(innerModuleContainer)
-        .size(String(size) + "px", height)
+        .size(String(size) + "px", headingHeigth)
         .group();
-    var dom = draw.rect(size, height)
+    var dom = draw.rect(size, headingHeigth)
         .x(0)
         .y(0)
         .fill("white")
@@ -413,7 +412,7 @@ RiPPer.drawHeadings = (function (height, space = 600) {
         })
     dom.node.id = "module_" + "precursorPeptide"
 
-    var text_module = draw.text("Precursor peptide:").x(size / 3.5).y(height / 2 - 7)
+    var text_module = draw.text("Precursor peptide:").x(size / 3.5).y(headingHeigth / 2 - 7)
         .fill("black")
         .stroke({ width: 1 })
     //tailoring enzyme
@@ -424,9 +423,9 @@ RiPPer.drawHeadings = (function (height, space = 600) {
         .appendChild(innerModuleContainer);
     size = space
     var draw = SVG(innerModuleContainer)
-        .size(String(size) + "px", height)
+        .size(String(size) + "px", headingHeigth)
         .group();
-    var dom = draw.rect(size, height)
+    var dom = draw.rect(size, headingHeigth)
         .x(0)
         .y(0)
         .fill("white")
@@ -436,7 +435,7 @@ RiPPer.drawHeadings = (function (height, space = 600) {
         })
     dom.node.id = "module_" + "tailoringEnzyme"
 
-    var text_module = draw.text("Tailoring enzymes:").x(size / 3.5).y(height / 2 - 7)
+    var text_module = draw.text("Tailoring enzymes:").x(size / 3.5).y(headingHeigth / 2 - 7)
         .fill("black")
         .stroke({ width: 1 })
     //protease
@@ -447,9 +446,9 @@ RiPPer.drawHeadings = (function (height, space = 600) {
         .appendChild(innerModuleContainer);
     size = space
     var draw = SVG(innerModuleContainer)
-        .size(String(size) + "px", height)
+        .size(String(size) + "px", headingHeigth)
         .group();
-    var dom = draw.rect(size, height)
+    var dom = draw.rect(size, headingHeigth)
         .x(0)
         .y(0)
         .fill("white")
@@ -459,7 +458,7 @@ RiPPer.drawHeadings = (function (height, space = 600) {
         })
     dom.node.id = "module_" + "protease"
 
-    var text_module = draw.text("Proteolytic cleavage:").x(size / 3.5).y(height / 2 - 7)
+    var text_module = draw.text("Proteolytic cleavage:").x(size / 3.5).y(headingHeigth / 2 - 7)
         .fill("black")
         .stroke({ width: 1 })
 });

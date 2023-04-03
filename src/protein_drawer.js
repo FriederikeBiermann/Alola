@@ -30,7 +30,7 @@ var Proteiner = {
     tooltip_id: "Proteiner-tooltip-1234567890",
     tooltip_id_protein: "Proteiner-tooltip-123"
 };
-Proteiner.drawClusterSVG = (function(cluster, height = 70) {
+Proteiner.drawClusterSVG = (function(cluster, height = 90) {
     var container = document.createElement("div");
     document.getElementById('protein_container')
         .innerHTML = "";
@@ -103,8 +103,8 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                 scale)
             var pol = draw.rect(Math.abs(points["4"].x - points["0"].x) +
                     10, Math.abs(points["4"].y - points["0"].y) + 20)
-                .rx("10")
-                .ry("10")
+                .rx("10%")
+                .ry("10%")
                 .fill(orf_color)
                 .stroke({
                     width: 2
@@ -164,8 +164,8 @@ Proteiner.drawClusterSVG = (function(cluster, height = 70) {
                             points["0"].y) + 20)
                         .x(x + 5)
                         .y(points["0"].y)
-                        .rx("10")
-                        .ry("10")
+                        .rx("10%")
+                        .ry("10%")
                         .fill(color)
                         .stroke({
                             width: 2
