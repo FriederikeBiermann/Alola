@@ -1,8 +1,19 @@
+@media screen (orientation: portrait) {
+  html {
+    transform: rotate(90deg);
+    transform-origin: right top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: hidden;
+    position: absolute;
+    top: 100%;
+    right: 0;
+  }
+}
 body {
   color: white;
   font-family: 'Catamaran', sans-serif;
-  font-size: 40px;
-
+  font-size: 3vh;
 }
 
 a:link {
@@ -13,8 +24,8 @@ button {
   border: none;
   background-color: white;
   color: black;
-  padding: 12px 15px;
-  border-radius: 3px;
+  padding: 1.2vh 1.5vh;
+  border-radius: 0.3vh;
 
 }
 
@@ -25,36 +36,36 @@ a:visited {
 label {
   color: black;
 
-  font-size: 15px;
-  padding: 2px 2px;
+  font-size: 1.5vh;
+  padding: 0.2vh 0.2vh;
   text-align: left;
 }
 
 #menu_bar {
-  border-radius: 6px;
+  border-radius: 0.6vh;
   background-color: #1F1F1F;
-  margin-bottom: 10px;
+  margin-bottom: 1vh;
   float: left;
   width: 100%;
-  height: 35px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  height: 3vh;
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
 }
 
 #regionsBar {
   text-align: center;
   display: grid;
   grid-template-columns: repeat(100, 1fr);
-  gap: 12px;
+  gap: 0.3vw;
   padding: 0.5%;
   overflow-x: auto;
   white-space: nowrap;
-  border-radius: 6px;
+  border-radius: 0.6vh;
   background-color: #1F1F1F;
-  margin-bottom: 10px;
+  margin-bottom: 1vh;
   float: left;
   width: 100%;
-  height: 80px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  height: 10%;
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
 }
 
 #gene_container {
@@ -64,95 +75,94 @@ label {
 
 #structure_container {
 
-  border-radius: 6px;
+  border-radius: 0.6vh;
   padding-left: 5%;
   padding-right: -8%;
   width: 90%;
   text-align: center;
-  height: 390px;
+  height: 3.9vh;
   overflow: auto;
 }
 
 #BGC_explorer {
 
-  border-radius: 6px;
+  border-radius: 0.6vh;
   background-color: #1F1F1F;
-  margin-bottom: 10px;
+  margin-bottom: 1vh;
   float: left;
   width: 75%;
-  height: 175px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  height: 15vh;
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
 }
 
 #Protein_explorer {
-  border-radius: 6px;
-  margin-bottom: 10px;
+  border-radius: 0.6vh;
+  margin-bottom: 1vh;
   background-color: #1F1F1F;
   float: left;
 
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  height: 200px;
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
+  height: 15vh;
   width: 75%;
 }
 
 .Domain_explorer {
-  border-radius: 6px;
-  margin-bottom: 10px;
+  border-radius: 0.6vh;
+  margin-bottom: 1vh;
   background-color: #1F1F1F;
   float: left;
 
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  height: 680px;
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
+  height: 54vh;
   width: 75%;
 }
 
 .Domain_explorer_while_saving {
-  border-radius: 6px;
-  margin-bottom: 10px;
+  border-radius: 0.6vh;
+  margin-bottom: 1vh;
   float: left;
 
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-  height: 680px;
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
+  height: 54vh;
   width: 75%;
 }
 
 #Structure_explorer {
-  border-radius: 6px;
+  border-radius: 0.6vh;
   background-color: #1F1F1F;
   float: right;
-  height: 550px;
-
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  height: 45vh;
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   width: 24.5%;
 }
 
 #Gene_explorer {
-  margin-bottom: 10px;
-  border-radius: 6px;
+  margin-bottom: 1vh;
+  border-radius: 0.6vh;
   width: 24.5%;
   background-color: #1F1F1F;
   float: right;
-  height: 515px;
+  height: 40vh;
   overflow-x: auto;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
 }
 
 .start_button {
-  margin: 3px;
+  margin: 0.2vh;
   float: right;
   color: #2B2B2B;
   text-align: center;
-  padding: 2px 2px;
+  padding: 0.1vh 0.1vh;
   text-decoration: none;
-  font-size: 17px;
+  font-size: 1.7vh;
 }
 
 .regionButton {
-  margin: 3px;
+  margin: 0.3vh;
   float: right;
   color: #2B2B2B;
   text-align: center;
-  padding: 2px 2px;
+  padding: 0.2vh 0.2vh;;
   text-decoration: none;
   font-size: 17px;
   text-transform: capitalize;
@@ -165,9 +175,9 @@ label {
   background-color: #1F1F1F;
   color: white;
   text-align: center;
-  padding-right: 5px;
-  padding-top: 1px;
-  font-size: 19px;
+  padding-right: 0.1vw;
+  padding-top: 0.1vh;
+  font-size: 1.5vh;
 }
 
 .start_button:hover {
@@ -177,14 +187,14 @@ label {
 }
 
 .save_button {
-  margin: 3px;
+  margin:0.3vh;
   float: right;
   color: #2B2B2B;
   text-align: center;
-  padding: 2px 5px;
+  padding: 0.2vh 0.5vh;
   text-decoration: none;
-  font-size: 17px;
-  margin-right: 20px;
+  font-size: 1.7 vh;
+  margin-right: 0.5 vh;
 }
 
 .save_button:hover {
@@ -195,7 +205,7 @@ label {
 
 .heading-container {
   background-color: #2B2B2B;
-  border-radius: 6px;
+  border-radius: 0.6vh;
   padding-left: 5%;
   width: 92%;
   overflow-x: auto;
@@ -206,8 +216,8 @@ label {
   position: relative;
   float: right;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 2.5vw;
+  height: 3vh;
 }
 
 /* Hide default HTML checkbox */
@@ -233,10 +243,10 @@ label {
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: 2.4vh;
+  width: 2.4vh;
+  left: 0.1vw;
+  bottom: 0.4vh;
   background-color: white;
   -webkit-transition: .4s;
   transition: .4s;
@@ -251,14 +261,14 @@ input:focus+.slider {
 }
 
 input:checked+.slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(2.4vh);
+  -ms-transform: translateX(2.4vh);
+  transform: translateX(2.4vh);
 }
 
 /* Rounded sliders */
 .slider.round {
-  border-radius: 34px;
+  border-radius: 3.4vh;
 }
 
 .slider.round:before {
@@ -270,14 +280,14 @@ input:checked+.slider:before {
   color: #2B2B2B;
   background-color: white;
   text-align: center;
-  padding: 2px 2px;
+  padding: 0.2vh 0.2vh;;
 
   text-decoration: none;
 
 }
 
 #smiles_container {
-  font-size: 12px;
+  font-size: 1.2vh;
 }
 
 .final_drawing {
@@ -291,16 +301,16 @@ input:checked+.slider:before {
   max-width: 100%;
   height: auto;
 
-  bottom: 15px;
+  bottom: 1.5vh;
 
   left: 9%;
 
 }
 
 .outerDomainExplorer {
-  border-radius: 10px;
+  border-radius: 1vh;
   overflow: auto;
-  max-height: 550px;
+  height: 43vh;
   overflow-x: auto;
   background-color: white;
   max-width: 99%;
@@ -311,7 +321,7 @@ input:checked+.slider:before {
 .outerDomainExplorer_while_saving {
   background-color: white;
   overflow: auto;
-  height: 1000px;
+  height: 100vh;
   display: inline-block;
   overflow-x: auto;
   overflow: visible;
@@ -327,7 +337,7 @@ input:checked+.slider:before {
 }
 
 .contentWithPadding {
-  margin: 10px;
+  margin: 1vh;
   width: 100%;
 
 
@@ -342,12 +352,12 @@ input:checked+.slider:before {
 .protein-container {
   display: grid;
   grid-template-columns: repeat(100, 1fr);
-  gap: 12px;
-  padding: 0.5%;
+  gap: 0.3vw;
+  padding: 0.1%;
   width: 99%;
   overflow-x: auto;
   white-space: nowrap;
-  height: 120px;
+  height: 8vh;
   font-size: medium;
 }
 
@@ -358,38 +368,37 @@ input:checked+.slider:before {
   gap: 10px;
   padding: 0px;
   width: 99%;
-
+  height: 100%;
   white-space: nowrap;
-  height: 550px;
   font-size: medium;
 }
 
 .module-container {
   display: grid;
   grid-template-columns: repeat(100, 1fr);
-  gap: 3px;
-  padding: 10px;
+  gap: 0.1vw;
+  padding: 1vh;
   width: 97%;
 
   white-space: nowrap;
-  height: 50px;
+  height: 5vh;
   font-size: medium;
 }
 
 .intermediateContainer {
   position: relative;
-  right: 67px;
+  right: 6.7vh;
 
 
-  height: 800px;
+  height: 80vh;
 }
 
 .intermediateContainerTailoring {
   position: relative;
-  right: 67px;
+  right: 6.7vh;
   top: 10%;
 
-  height: 800px;
+  height: 80vh;
 }
 
 .box {
@@ -400,7 +409,7 @@ input:checked+.slider:before {
 .dropbtn {
 
   background-color: transparent;
-  font-size: 16px;
+  font-size: 1.6vh;
   text-transform: capitalize;
   border: none;
 }
@@ -420,8 +429,8 @@ input:checked+.slider:before {
   background-color: white;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
-  min-width: 150px;
-  margin-top: -20px;
+  min-width: 3.75vw;
+  margin-top: -0.5vw;
 }
 
 svg text {
@@ -431,9 +440,9 @@ svg text {
 
 /* Links inside the dropdown */
 .dropdown-content button {
-  min-width: 100px;
+  min-width: 2.5vw;
   color: black;
-  padding: 3px 3px;
+  padding: 0.3vh 0.3 vh;
   text-decoration: none;
   display: block;
   width: 100%;
@@ -464,7 +473,7 @@ svg text {
 .dropbtn-tailoring {
   position: relative;
   background-color: transparent;
-  font-size: 16px;
+  font-size: 1.6vh;
   text-transform: capitalize;
   border: none;
 }
@@ -484,10 +493,10 @@ svg text {
   display: none;
   position: absolute;
   background-color: white;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0.8vh 1.6vh 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
-  min-width: 170px;
-  margin-top: -20px;
+  min-width: 4vw;
+  margin-top: -0.5vw;
 }
 
 .dropdown-content-tailoring-folded {
@@ -495,12 +504,12 @@ svg text {
   display: none;
   opacity: 0.9;
   position: absolute;
-  margin-left: 165px;
+  margin-left: 165*0.025vw;
   background-color: white;
-  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 0.8vh 1.6vh 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
-  min-width: 170px;
-  margin-top: -20px;
+  min-width: 170*0.025vw;
+  margin-top: -2vh;
 }
 
 
@@ -511,9 +520,9 @@ svg text {
 /* Links inside the dropdown */
 .dropdown-content-tailoring button {
 
-  min-width: 100px;
+  min-width: 100*0.025vw;
   color: black;
-  padding: 3px 3px;
+  padding: 0.3vh 0.3vh;
   text-decoration: none;
   display: block;
   width: 100%;
@@ -554,10 +563,10 @@ svg text {
 
 .openButton {
   border: none;
-  border-radius: 5px;
+  border-radius: 0.5vh;
   background-color: #1c87c9;
   color: white;
-  padding: 14px 20px;
+  padding: 1.4vh 2vh;
   cursor: pointer;
   position: fixed;
 }
@@ -573,24 +582,24 @@ svg text {
   position: fixed;
   left: 45%;
   top: 5%;
-  border: 3px solid #999999;
+  border: 0.3vh solid #999999;
   z-index: 9;
 }
 
 .formContainer {
-  max-width: 300px;
-  padding: 20px;
+  max-width: 300*0.025vw;
+  padding: 0.2vh;
   background-color: #fff;
 }
 
 .formContainer .btn {
-  padding: 12px 20px;
+  padding: 1.2vh 0.2vh;
   border: none;
   background-color: #1F1F1F;
   color: #fff;
   cursor: pointer;
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 1.5vh;
   opacity: 0.8;
 }
 
@@ -607,7 +616,7 @@ svg text {
   position: relative;
   max-width: 100%;
   height: auto;
-  bottom: 60px;
+  bottom: 6vh;
   left: 50%;
 }
 
@@ -615,7 +624,7 @@ svg text {
   position: relative;
   max-width: 100%;
   height: auto;
-  bottom: 60px;
+  bottom: 6vh;
   left: 50%;
 }
 
@@ -623,7 +632,7 @@ svg text {
   position: relative;
   max-width: 100%;
   height: auto;
-  bottom: 60px;
+  bottom: 6vh;
   left: 50%;
 }
 
@@ -631,6 +640,6 @@ svg text {
   position: relative;
   max-width: 100%;
   height: auto;
-  bottom: 60px;
+  bottom: 6vh;
   left: 50%;
 }

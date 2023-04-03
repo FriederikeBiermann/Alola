@@ -405,7 +405,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                 .stroke({
                                     width: 2, color: outline
                                 });
-                            if (size > hight/4) {
+                            if (size > height/4) {
                                 var text = draw.text(domain.abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
                             }
 
@@ -464,9 +464,9 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
     $(container)
         .find("svg")
         .attr("width", width + "px");
-    Domainer.drawModules(moduleMatrix, height/4, scale)
-    Domainer.drawGenes(geneMatrix, height / 4, scale)
-    Domainer.leaveSpaceForTailoring(width/4, scale)
+    Domainer.drawModules(moduleMatrix, height, scale)
+    Domainer.drawGenes(geneMatrix, height, scale)
+    Domainer.leaveSpaceForTailoring(height*2, scale)
     Domainer.drawTailoringEnzymes(cluster, geneMatrix, height, scale)
     return $(container)
         .find("svg")[0];
@@ -484,7 +484,7 @@ Domainer.leaveSpaceForTailoring = (function (width, scale) {
 
 Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, scale) {
     var container = document.getElementById('domain_container')
-    let size = hight/2
+    let size = height/2
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
@@ -680,7 +680,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                 .stroke({
                     width: 2, color: outline
                 });
-            if (size > hight/4) {
+            if (size > height/4) {
                 var text = draw.text(abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
 
@@ -707,10 +707,10 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
                         "term") || domain.includes(
                             "ACP") || domain.includes(
                                 "PP") || domain.includes("PCP") || domain.includes("docking")) {
-                        bubble_size = hight/4;
+                        bubble_size = height/4;
                     }
                     else {
-                        bubble_size = hight/2;
+                        bubble_size = height/2;
                     }
                     lengthVisualisation += bubble_size
                 };
@@ -737,10 +737,10 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
                     width: 1
                 })
             if (geneSize < height / 2) {
-                var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_")).x(geneSize / 2).y(height / 2 - 7)
+                var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_")).x(geneSize / 2).y(height / 4 - 7)
             }
 
-            else { var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_")).x(geneSize / 2).y(height / 2 - 7) }
+            else { var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_")).x(geneSize / 2).y(height / 4 - 7) }
 
 
             pol.node.id = "module_gene_" + geneIndex
@@ -751,17 +751,7 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
     innerModelGeneContainer.id = "innerModelGeneContainer_whitespace"
     document.getElementById('model_gene_container')
         .appendChild(innerModelGeneContainer);
-    var draw = SVG(innerModelGeneContainer)
-        .size(height * 2 + "px", height)
-        .group();
-
-    var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0, height * 1.5, height/2, scale)))
-        .fill("white")
-
-        .stroke("white")
-        .stroke({
-            width: 1
-        })
+    innerModelGeneContainer.style.width = String(height*2.2) + "px";
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size = height / 2
 
@@ -772,18 +762,18 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
             document.getElementById('model_gene_container')
                 .appendChild(innerModelGeneContainer);
             var draw = SVG(innerModelGeneContainer)
-                .size(String(gene_size) + "px", height)
+                .size(String(gene_size-2) + "px", height)
                 .group();
 
-            var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0, gene_size, 40, scale)))
+            var pol = draw.polygon(Domainer.toPointString(Domainer.getArrowPoints(0, gene_size-3, height/2, scale)))
                 .fill("white")
 
                 .stroke("#2B2B2B")
                 .stroke({
                     width: 1
                 })
-            if (gene_size < height *0.75 && geneMatrix[geneIndex].id.includes("_")) { var text = draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size / 2).y(height / 2 - 7) }
-            else { var text = draw.text(geneMatrix[geneIndex].id).x(gene_size / 2).y(height / 2 - 7) }
+            if (gene_size < height *0.75 && geneMatrix[geneIndex].id.includes("_")) { var text = draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size / 2).y(height / 4 - 7) }
+            else { var text = draw.text(geneMatrix[geneIndex].id).x(gene_size / 2).y(height / 4 - 7) }
 
 
             pol.node.id = "module_gene_" + geneIndex
@@ -833,9 +823,9 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
                 })
             dom.node.id = "module_" + moduleIndex
             if (size >= height*0.75) {
-                var text_module = draw.text("Module " + String(moduleIndex)).x(size / 2).y(height / 2 - 7).fill("white")
+                var text_module = draw.text("Module " + String(moduleIndex)).x(size / 2).y(module_height / 2 - 7).fill("white")
             }
-            else { var text_module = draw.text(String(moduleIndex)).x(size / 2).y(height / 2 - 7).fill("white") }
+            else { var text_module = draw.text(String(moduleIndex)).x(size / 2).y(module_height / 2 - 7).fill("white") }
         }
     }
     //tailoring enzyme
@@ -844,7 +834,7 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
         "tailoringEnzyme"
     document.getElementById('module_container')
         .appendChild(innerModuleContainer);
-    size = 300
+    size = height * 3
     var draw = SVG(innerModuleContainer)
         .size(String(size) + "px", module_height)
         .group();
@@ -858,7 +848,7 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
         })
     dom.node.id = "module_" + "tailoringEnzyme"
 
-    var text_module = draw.text("Tailoring enzymes:").x(size / 3.5).y(height / 2 - 7)
+    var text_module = draw.text("Tailoring enzymes:").x(size / 3.5).y(module_height / 2 - 7)
         .fill("black")
         .stroke({ width: 1 })
 });

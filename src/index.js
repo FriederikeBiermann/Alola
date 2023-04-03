@@ -1,5 +1,6 @@
 let regionIndex = 0
 let regionName = ""
+let viewPortHeight = window.innerHeight
 var recordData = []
 var details_data = {}
 let BGC ={}
@@ -1128,7 +1129,8 @@ function updateProteins(geneMatrix, BGC) {
     }
     $("#protein_container")
         .html(Proteiner.drawClusterSVG(removePaddingBGC(
-            removeSpaceBetweenProteins(proteinsForDisplay))));
+            removeSpaceBetweenProteins(proteinsForDisplay)), height =
+        viewPortHeight*0.07));
     addDragDrop();
 }
 function getACPList(geneMatrix) {
