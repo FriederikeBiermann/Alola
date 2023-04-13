@@ -1,5 +1,5 @@
-@media screen (orientation: portrait) {
-  html {
+@media screen and (orientation: portrait) {
+  html{
     transform: rotate(90deg);
     transform-origin: right top;
     width: 100vh;
@@ -45,7 +45,6 @@ a:visited {
 
 label {
   color: black;
-
   font-size: 1.5vh;
   padding: 0.2vh 0.2vh;
   text-align: left;
@@ -131,7 +130,6 @@ label {
   border-radius: 0.6vh;
   margin-bottom: 1vh;
   float: left;
-
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 54vh;
   width: 75%;
@@ -315,12 +313,9 @@ input:checked+.slider:before {
 
 .intermediate_drawing {
   position: relative;
-
   max-width: 100%;
   height: auto;
-
   bottom: 1.5vh;
-
   left: 9%;
 
 }
@@ -356,14 +351,10 @@ input:checked+.slider:before {
 .contentWithPadding {
   margin: 1.5vh;
   margin-right: 1.5vh;
-
-
 }
 
 .contentWithPaddingOverflow {
-
   height: 150%;
-
 }
 
 .protein-container {
@@ -404,8 +395,6 @@ input:checked+.slider:before {
 .intermediateContainer {
   position: relative;
   right: 6.7vh;
-
-
   height: 80vh;
 }
 
@@ -413,7 +402,6 @@ input:checked+.slider:before {
   position: relative;
   right: 6.7vh;
   top: 10%;
-
   height: 80vh;
 }
 
@@ -451,7 +439,6 @@ input:checked+.slider:before {
 
 svg text {
   text-anchor: middle;
-  dominant-baseline: bottom;
 }
 
 /* Links inside the dropdown */
@@ -535,7 +522,6 @@ svg text {
 
 /* Links inside the dropdown */
 .dropdown-content-tailoring button {
-
   min-width: 100*0.025vw;
   color: black;
   padding: 0.3vh 0.3vh;
@@ -547,9 +533,7 @@ svg text {
 }
 
 .dropdown-content-tailoring button:active {
-
   background-color: #E11839;
-
 }
 
 /* Change color of dropdown links on hover */

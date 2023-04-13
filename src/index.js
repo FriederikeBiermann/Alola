@@ -1398,10 +1398,9 @@ function setColorOfDropDown(button) {
 }
 //everything to do with the wildcard modules
 function setWildcardSubstrate(substrate) {
-    let wildcardSubstrate = substrate
+    wildcardSubstrate = substrate
     let button = findButtonbyTextContent(substrate)
     setColorOfDropDown(button)
-    return wildcardSubstrate
 }
 function setWildcardModule(moduleType) {
     wildcardModule = moduleType;
@@ -1522,8 +1521,8 @@ function addWildcard(geneMatrix) {
     }
     let defaultTEDomain = {
         "type": "Thioesterase",
-        "start": 1059,
-        "end": 1254,
+        "start": 2350,
+        "end": 2550,
         "predictions": [],
         "napdoslink": "",
         "blastlink": "http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE=Proteins&amp;PROGRAM=blastp&amp;BLAST_PROGRAMS=blastp&amp;QUERY=TLFAFPPVLGYGLMYQPLAKQLSGYKICAFDFIEEDNRIERYTELINQLQPEGPVKLFGYSAGCTLAFETAKRLEAGGREVERLIMVDSYKKQGVSDLEGRTVESDVQALMKVNRDNEALNNEAVKEGLAKKTNAFYSYFVHTVSTGRVNADIDLLTSEPDFAMPPWLASWEEATTGEYRVKKGCGTHAEMLQGE&amp;LINK_LOC=protein&amp;PAGE_TYPE=BlastSearch",
@@ -1795,19 +1794,22 @@ function addWildcard(geneMatrix) {
     else { wildcardModule = [nameWildcardModule, wildcardModule, wildcardSubstrate] }
 
 
-
-
+    let endLastGene = 0
+    if (BGC.orfs.length > 0){
+        endLastGene = BGC.orfs[BGC.orfs.length - 1].end
+    }
+    BGC.end += 7254
     let wildcard_gene = {
         antismashArray: domainArray,
         default_option: [],
-        start: 0,
-        end: 7254,
+        start: endLastGene,
+        end: endLastGene+7254,
         locus_tag: nameWildcardModule,
         displayed: true,
         type: "biosynthetic",
         domains: longDomainArray,
         strand: 1,
-        description: "",
+        description: "Custom Gene",
         id: nameWildcardModule,
 
         ko: false,
@@ -1820,7 +1822,7 @@ function addWildcard(geneMatrix) {
 
         selected_option: [],
         modules: [{
-            "start": 0,
+            "start": 1,
             "end": 4000,
             "complete": true,
             "iterative": false,
@@ -1952,6 +1954,9 @@ function createGeneMatrix(BGC, regionName) {
         }
         let orfFunction = findFuctionOrf(BGC["orfs"][geneIndex].description)
         let tailoringEnzymeStatus = findTailoringEnzymeStatus(orfFunction)
+        if (biosyntheticCoreEnzymes.includes(orfFunction) || BGC["orfs"][geneIndex].type == "biosynthetic"){
+            tailoringEnzymeStatus = false
+        }
 
         geneMatrix.push({
             "id": BGC["orfs"][geneIndex].locus_tag,
@@ -1996,7 +2001,7 @@ function findTailoringEnzymeStatus(orfFunction) {
    */
     let tailoringEnzymeStatus = false;
     for (const enzymeName in tailoringEnzymes) {
-        tailoringEnzymeStatus = orfFunction.toUpperCase().replaceAll("-","_").search(enzymeName) == -1 ?
+        tailoringEnzymeStatus = orfFunction.toUpperCase().replaceAll("-", "_").search(enzymeName) == -1 ?
             false : true;
         if (tailoringEnzymeStatus == true) {
             return [tailoringEnzymeStatus, enzymeName.trim(), tailoringEnzymes[enzymeName]]
@@ -2436,8 +2441,8 @@ function create_empty_BGC(){
             "seq_id": "Custom_BGC",
             "regions": [
                 {
-                    "start": 721,
-                    "end": 5908,
+                    "start": 0,
+                    "end": 1,
                     "idx": 1,
                     "type": "NRPS",
                     "anchor": "r1c1",
