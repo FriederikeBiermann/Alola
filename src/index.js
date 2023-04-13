@@ -1267,6 +1267,7 @@ function createButtonsForEachRegion(){
 function getClusterType(regionIndex){
 let type = recordData[0].regions[regionIndex].type;
     if (type.includes("PKS") || type.includes("NRPS") || type.includes("Fatty_acid")){
+        document.getElementById("add_module_button").style.display = "block";
         return "nrpspks"
     }
     if (type.includes("Terpene")) {
@@ -1274,6 +1275,9 @@ let type = recordData[0].regions[regionIndex].type;
     }
     if (type.includes("peptide")) {
         return "peptide"
+    }
+    if (RiPPStatus == 1){
+        return "ripp"
     }
     return "misc"
 }
@@ -2005,15 +2009,16 @@ function findTailoringEnzymeStatus(orfFunction) {
 function runAlola(regionIndex, details_data, recordData){
   RiPPStatus = 0
   rippPrecursor = ""
+    document.getElementById("add_module_button").style.display = "none";
   cyclization = "None"
   regionName = getRegionName(regionIndex)
   cluster_type = getClusterType(regionIndex)
-  document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${cluster_type} BGC`
+    document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${recordData[0].regions[regionIndex].type} BGC`
     document.getElementById('model_gene_container').innerHTML = "";
   document.getElementById('module_container').innerHTML = "";
   document.getElementById('domain_container').innerHTML = "";
     document.getElementById('structure_container').innerHTML = "";
-   let module_button = document.getElementById("add_module_button");
+    
   moduleMatrix = []
   BGC = Object.keys(recordData[0].regions[regionIndex])
       .reduce(function (obj, k) {
