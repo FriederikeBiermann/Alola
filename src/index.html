@@ -16,7 +16,7 @@
 <div id="menu_bar">
   <!-- Rounded switch -->
 
-       
+
 
 <button type="button" class="start_button"> <strong>Create empty BGC
   </strong></button>
@@ -58,10 +58,10 @@
 </div>
 </div>
 
-    <div id="Domain_explorer" class="Domain_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Biosynthetic model 
+    <div id="Domain_explorer" class="Domain_explorer">   <div class= "contentWithPadding"><div class= "heading-container"> Biosynthetic model
       <button type="button" class="start_button" onclick="openForm()"><strong>Add Module</strong></button>
       <button type="button" class="start_button" id= "ripp_button" onclick="openRiPPForm()"><strong><a> RiPP BGC </a></strong></button></div>
-  
+
     <div id="outerDomainExplorer" class="outerDomainExplorer">
 
     <div class="module-container" id= "model_gene_container"> </div>
@@ -72,18 +72,17 @@
     <button type="button" class="start_button" id="save_biosynthetic_model_button" ><a id="save_complete_cluster_svg"><strong> Save
     biosynthetic model withOUT tayloring enzymes (svg)</strong></a></button>
 
-    <div id= "smiles_container_intermediates"></div>
     </div>
     </div>
-    <div id="Structure_explorer">   <div class= "contentWithPadding"> <div class= "heading-container"> Structure explorer</div>
+    <div id="Structure_explorer">   <div class= "heading-container"> Structure explorer</div>
     <div id= "structure_container"> </div>
-
-    <div> </div>
+    <div id = "button_container">
     <button type="button" class="start_button" id= "save_button" > <a id= "save_svg"><strong> Download SVG</strong></a></button>
     <button type="button" class="start_button" id= "Zoom_out_button" onclick="zoom_in()"><a><strong>Zoom in</strong></a></button>
     <button type="button" class="start_button" id= "Zoom_in_button" onclick="zoom_out()"><a><strong>Zoom out</strong></a></button>
 <div id= "smiles_container"></div>
     </div>
+
     </div>
 
 
@@ -201,7 +200,7 @@
         <label for="wildcardProtease"> Add Protease</label><br>
         <input type="checkbox" id="wildcardCyclase" name="wildcardCyclase" value="true">
         <label for="wildcardCyclase"> Add Cyclase</label><br>
-        
+
         <button type="button" class="btn" onclick="addRiPP(geneMatrix);closeRiPPForm()">Submit</button>
         <button type="button" class="btn cancel" onclick="closeRiPPForm()">Close</button>
       </form>

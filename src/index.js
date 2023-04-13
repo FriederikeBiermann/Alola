@@ -808,7 +808,7 @@ function fetchFromRaichuRiPP(){
             drawing = document.getElementById("final_drawing")
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
+            smiles_container.innerHTML = " <button type='button' class='start_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
                 tailoringEnzymes_intermediate.setAttribute("style", "width:300px")
@@ -939,7 +939,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             drawing = document.getElementById("final_drawing")
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='save_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
+            smiles_container.innerHTML = " <button type='button' class='start_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
         })
 }}}
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
@@ -1130,7 +1130,7 @@ function updateProteins(geneMatrix, BGC) {
     $("#protein_container")
         .html(Proteiner.drawClusterSVG(removePaddingBGC(
             removeSpaceBetweenProteins(proteinsForDisplay)), height =
-        viewPortHeight*0.07));
+        viewPortHeight*0.05));
     addDragDrop();
 }
 function getACPList(geneMatrix) {
@@ -2061,7 +2061,7 @@ function addModulesGeneMatrix(geneMatrix, region_index) {
    *@output modified geneMatrix
    */
     //
-    
+
     //iterate through all domains to assign them to correct module
     if (details_data.hasOwnProperty("nrpspks")) {
         region = details_data.nrpspks[region_index];
@@ -2173,7 +2173,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                 let orf = region.orfs[orfIndex];
                 if (geneMatrix[geneIndex].id == orf.id) {
                     // acp stat helps connecting modules that are within the same module but on different genes
-                    
+
                     for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
                         let domain = orf.domains[domainIndex];
                         if (!(geneMatrix[geneIndex].domains[domainIndex].ko ==
@@ -2181,7 +2181,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                                 domains.push(domain.type)
                             }
                         else{
-                            
+
                             let active = "True";
                             let used = "True";
                             let gene = orf.id;
@@ -2257,7 +2257,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                             if (domain.abbreviation == "DH" || domain.abbreviation == "DHt") {
                                 type = "DH"
                             }
-                                
+
                                 if (domain.abbreviation == "A") {
                                     if (domain.hasOwnProperty("predictions")) {
                                         if (domain.predictions.length != 0) {
@@ -2371,7 +2371,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
             }
         }}
         // put everything into last module thats left
-        
+
         if (domainArray.length!=0){
             // set everything that already exists to false
             let newDomainArray = []
@@ -2393,7 +2393,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
                 newDomainArray.push(newDomain);
                 typesInModule.push(domain[1]);
             }
-        
+
         // remove falsely assigned domains for prediciton
         let domainArrayFiltered = []
         if (moduleType == "NRPS") {
@@ -2412,7 +2412,7 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
             // add merged modules to gene matrix
             moduleMatrix[moduleMatrix.length - 1].domains = moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
             moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.length;
-           
+
         }
     }
     return [outputForRaichu, starterACP, geneMatrix]
