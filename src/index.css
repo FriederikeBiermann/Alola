@@ -10,6 +10,7 @@
     right: 0;
   }
 }
+
 body {
   color: white;
   font-family: 'Catamaran', sans-serif;
@@ -27,6 +28,16 @@ button {
   padding: 1.2vh 1.5vh;
   border-radius: 0.3vh;
 
+}
+
+#save_complete_cluster_svg {
+  color: black;
+  text-decoration-color: white;
+}
+
+#save_svg {
+  color: black;
+  text-decoration-color: white;
 }
 
 a:visited {
@@ -84,7 +95,7 @@ label {
 }
 
 #BGC_explorer {
-
+  padding: 1.5vh;
   border-radius: 0.6vh;
   background-color: #1F1F1F;
   margin-bottom: 1vh;
@@ -95,6 +106,7 @@ label {
 }
 
 #Protein_explorer {
+  padding: 1.5vh;
   border-radius: 0.6vh;
   margin-bottom: 1vh;
   background-color: #1F1F1F;
@@ -110,7 +122,7 @@ label {
   margin-bottom: 1vh;
   background-color: #1F1F1F;
   float: left;
-
+  padding: 1.5vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 54vh;
   width: 75%;
@@ -127,17 +139,19 @@ label {
 }
 
 #Structure_explorer {
+  padding: 1.5vh;
   border-radius: 0.6vh;
   background-color: #1F1F1F;
   float: right;
   height: 45vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   width: 24.5%;
-  display:flex;
+  display: flex;
   flex-direction: column;
 }
 
 #Gene_explorer {
+  padding: 1.5vh;
   margin-bottom: 1vh;
   border-radius: 0.6vh;
   width: 24.5%;
@@ -163,7 +177,8 @@ label {
   float: right;
   color: #2B2B2B;
   text-align: center;
-  padding: 0.2vh 0.2vh;;
+  padding: 0.2vh 0.2vh;
+  ;
   text-decoration: none;
   font-size: 17px;
   text-transform: capitalize;
@@ -183,7 +198,7 @@ label {
 
 #button_container {
   flex-direction: row;
-  display:flex;
+  display: flex;
   height: 3vh;
 }
 
@@ -194,7 +209,7 @@ label {
 }
 
 .save_button {
-  margin:0.3vh;
+  margin: 0.3vh;
   float: right;
   color: #2B2B2B;
   text-align: center;
@@ -287,7 +302,8 @@ input:checked+.slider:before {
   color: #2B2B2B;
   background-color: white;
   text-align: center;
-  padding: 0.2vh 0.2vh;;
+  padding: 0.2vh 0.2vh;
+  ;
 
   text-decoration: none;
 
@@ -313,10 +329,9 @@ input:checked+.slider:before {
 .outerDomainExplorer {
   border-radius: 1vh;
   overflow: auto;
-  height: 43vh;
+  height: 42.9vh;
   overflow-x: auto;
   background-color: white;
-  max-width: 99%;
   margin-top: 1%;
 
 }
@@ -333,15 +348,15 @@ input:checked+.slider:before {
 
 .container {
 
-  padding: 1%;
+  padding: 0.1vh;
   width: 99%;
   overflow-x: auto;
   white-space: nowrap;
 }
 
 .contentWithPadding {
-  margin: 1%;
-  width: 100%;
+  margin: 1.5vh;
+  margin-right: 1.5vh;
 
 
 }
@@ -370,7 +385,6 @@ input:checked+.slider:before {
   grid-template-columns: repeat(100, 1fr);
   gap: 10px;
   padding: 0px;
-  width: 99%;
   height: 100%;
   white-space: nowrap;
   font-size: medium;
