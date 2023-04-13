@@ -484,6 +484,7 @@ function addArrowClick(geneMatrix) {
             },
             false
         );
+        if (ripp_button){
         ripp_button.addEventListener(
             'mouseenter',
             function () { // anonyme Funktion
@@ -504,7 +505,7 @@ function addArrowClick(geneMatrix) {
                     "_gene_arrow");
             },
             false
-        );
+        );}
         if (geneMatrix[geneIndex].displayed == true) {
             protein.addEventListener(
                 'click',
@@ -1204,7 +1205,8 @@ function updateRiPPs(geneMatrix, BGC) {
         }
     }
     $("#Domain_container")
-        .html(RiPPer.drawCluster(genesForDisplay, geneMatrix));
+        .html(RiPPer.drawCluster(genesForDisplay, geneMatrix), height =
+            viewPortHeight * 0.05);
     addDragDrop();
 }
 function setKoStatus(geneIndex, domainIndex, geneMatrix) {
@@ -1263,7 +1265,17 @@ function createButtonsForEachRegion(){
      }
 }
 function getClusterType(regionIndex){
-  return recordData[0].regions[regionIndex].type
+let type = recordData[0].regions[regionIndex].type;
+    if (type.includes("PKS") || type.includes("NRPS") || type.includes("Fatty_acid")){
+        return "nrpspks"
+    }
+    if (type.includes("Terpene")) {
+        return "terpene"
+    }
+    if (type.includes("peptide")) {
+        return "peptide"
+    }
+    return "misc"
 }
 function getRegionName(regionIndex){
     return recordData[0].regions[regionIndex].anchor
@@ -1367,7 +1379,8 @@ function displayGenes(BGC) {
         delete BGCForDisplay["orfs"][geneIndex]["domains"];
     }
     $("#arrow_container")
-        .html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay)));
+        .html(Arrower.drawClusterSVG(removePaddingBGC(BGCForDisplay), height =
+            viewPortHeight * 0.05));
     return BGCForDisplay
 }
 function setColorOfDropDown(button) {
@@ -1696,12 +1709,6 @@ function addWildcard(geneMatrix) {
         }
 
         else { longDomainArray.push(defaultADomain, defaultCDomain, defaultPCPDomain) }
-        if (document.getElementById("wildcardnMT")
-            .checked) { domainArray.push(["nMT"]) }
-        if (document.getElementById("wildcardoMT")
-            .checked) { domainArray.push(["oMT"]) }
-        if (document.getElementById("wildcardcMT")
-            .checked) { domainArray.push(["cMT"]) }
     }
     if (wildcardModule == "terminator_module_nrps") {
         if (document.getElementById("wildcardE")
@@ -1711,12 +1718,6 @@ function addWildcard(geneMatrix) {
         }
 
         else { longDomainArray.push(defaultADomain, defaultCDomain, defaultPCPDomain, defaultTEDomain) }
-        if (document.getElementById("wildcardnMT")
-            .checked) { domainArray.push(["nMT"]) }
-        if (document.getElementById("wildcardoMT")
-            .checked) { domainArray.push(["oMT"]) }
-        if (document.getElementById("wildcardcMT")
-            .checked) { domainArray.push(["cMT"]) }
     }
 
 
@@ -1799,7 +1800,7 @@ function addWildcard(geneMatrix) {
         end: 7254,
         locus_tag: nameWildcardModule,
         displayed: true,
-
+        type: "biosynthetic",
         domains: longDomainArray,
         strand: 1,
         description: "",
@@ -1831,10 +1832,10 @@ function addWildcard(geneMatrix) {
     geneMatrix.push(wildcard_gene)
     BGC.orfs.push(wildcard_gene)
     if (details_data.hasOwnProperty(cluster_type)) {
-        details_data[cluster_type][region_index].orfs.push(wildcard_gene)
+        details_data[cluster_type][regionName].orfs.push(wildcard_gene)
     }
     else {
-        details_data[region_index].orfs.push(wildcard_gene)
+        details_data[regionName].orfs.push(wildcard_gene)
     }
     displayGenes(BGC)
     updateProteins(geneMatrix, BGC)
@@ -1924,7 +1925,7 @@ function createGeneMatrix(BGC, regionName) {
     /**
     * extract the information and predictions from region.js+ creates a easier to handle matrix (object) from it that can be modified easier
    * @fires onpageload
-   *@input details_data -> from region.js input, region_index
+   *@input details_data -> from region.js input, regionIndex
    *@output geneMatrix
    */
     var geneMatrix = [];
@@ -2012,6 +2013,7 @@ function runAlola(regionIndex, details_data, recordData){
   document.getElementById('module_container').innerHTML = "";
   document.getElementById('domain_container').innerHTML = "";
     document.getElementById('structure_container').innerHTML = "";
+   let module_button = document.getElementById("add_module_button");
   moduleMatrix = []
   BGC = Object.keys(recordData[0].regions[regionIndex])
       .reduce(function (obj, k) {
@@ -2053,7 +2055,7 @@ function runAlola(regionIndex, details_data, recordData){
 
 }
 
-function addModulesGeneMatrix(geneMatrix, region_index) {
+function addModulesGeneMatrix(geneMatrix, regionIndex) {
     /**
     *add the moodules from region js to geneMatrix (not custom modules)
    * @fires createGeneMatrix
@@ -2064,10 +2066,10 @@ function addModulesGeneMatrix(geneMatrix, region_index) {
 
     //iterate through all domains to assign them to correct module
     if (details_data.hasOwnProperty("nrpspks")) {
-        region = details_data.nrpspks[region_index];
+        region = details_data.nrpspks[regionIndex];
     }
     else {
-        region = details_data[region_index];
+        region = details_data[regionIndex];
     }
     if (region){
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
@@ -2136,12 +2138,12 @@ function addModulesGeneMatrix(geneMatrix, region_index) {
     }}
     return geneMatrix;
 }
-function extractAntismashPredictionsFromRegion(details_data, region_index,
+function extractAntismashPredictionsFromRegion(details_data, regionIndex,
     geneMatrix) {
     /**
     * extract the information and predictions from region.js+ combines this information with geneMatrix
    * @fires fetchFromRaichu
-   *@input details_data -> from region.js input, region_index,
+   *@input details_data -> from region.js input, regionIndex,
        geneMatrix
    *@output formatted data for Raichu/Backend
    */
@@ -2149,10 +2151,10 @@ function extractAntismashPredictionsFromRegion(details_data, region_index,
     let region = []
     geneMatrix.modules = []
     if (details_data.hasOwnProperty("nrpspks")) {
-        region = details_data.nrpspks[region_index];
+        region = details_data.nrpspks[regionIndex];
     }
     else {
-        region = details_data[region_index];
+        region = details_data[regionIndex];
     }
     geneMatrix.sort((a, b) => {
         return a.position - b.position;

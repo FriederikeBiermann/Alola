@@ -57,7 +57,7 @@
 
 
     <div id="Domain_explorer" class="Domain_explorer">  <div class= "heading-container"> Biosynthetic model
-      <button type="button" class="start_button" onclick="openForm()"><strong>Add Module</strong></button>
+      <button type="button" class="start_button" onclick="openForm()" id = "add_module_button" ><strong>Add Module</strong></button>
       <button type="button" class="start_button" id= "ripp_button" onclick="openRiPPForm()"><strong><a> RiPP BGC </a></strong></button></div>
 
     <div id="outerDomainExplorer" class="outerDomainExplorer">
@@ -118,7 +118,7 @@
 
        </div>
      </div>
-
+<br>
 <input type="checkbox" id="wildcardKR" name="wildcardKR" value="true">
 <label for="wildcardKR">  	Ketoreductase domain</label><br>
 <input type="checkbox" id="wildcardDH" name="wildcardDH" value="true">
@@ -171,14 +171,9 @@
 
        </div>
      </div>
-     <input type="checkbox" id="wildcardcMT" name="wildcardcMT" value="true">
-  <label for="wildcardcMT"> Carbon Methyltransferase</label><br>
+    <br>
   <input type="checkbox" id="wildcardE" name="wildcardE" value="true">
 <label for="wildcardE"> Epimerization</label><br>
-<input type="checkbox" id="wildcardnMT" name="wildcardnMT" value="true">
-<label for="wildcardnMT"> Nitrogen Methyltransferase</label><br>
-<input type="checkbox" id="wildcardoMT" name="wildcardoMT" value="true">
-<label for="wildcardoMT"> Oxygen Methyltransferase</label><br>
          <button type="button" class="btn" onclick="addWildcard(geneMatrix);closeNRPSForm()">Submit</button>
          <button type="button" class="btn cancel" onclick="closeNRPSForm()">Close</button>
        </form>

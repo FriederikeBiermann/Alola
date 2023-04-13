@@ -25,7 +25,6 @@ button {
   border: none;
   background-color: white;
   color: black;
-  padding: 1.2vh 1.5vh;
   border-radius: 0.3vh;
 
 }
@@ -604,7 +603,7 @@ svg text {
 }
 
 .formContainer {
-  max-width: 300*0.025vw;
+  max-width: 12vw;
   padding: 0.2vh;
   background-color: #fff;
 }
