@@ -2428,3 +2428,21 @@ function reload_site_with_genecluster(){
     createButtonsForEachRegion()
     runAlola(regionIndex, details_data, recordData)
 }
+function create_empty_BGC(){
+    regionIndex = 0
+    recordData = [
+        {
+            "length": 6283062,
+            "seq_id": "Custom_BGC",
+            "regions": [
+                {
+                    "start": 721,
+                    "end": 5908,
+                    "idx": 1,
+                    "type": "NRPS",
+                    "anchor": "r1c1",
+                    "orfs": []
+                }]}]
+    details_data = {"nrpspks":{"r1c1":{"id":"r1c1", "orfs":[]}}}
+    runAlola(regionIndex, details_data, recordData)
+}
