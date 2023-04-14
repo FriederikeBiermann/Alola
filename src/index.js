@@ -594,7 +594,7 @@ function addArrowClick(geneMatrix) {
                     false
                 );
             }
-            if (RiPPStatus == 0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")){ // there are no typical domains in ripp clusters
+            if (RiPPStatus == 0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))){ // there are no typical domains in ripp clusters
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
@@ -792,7 +792,7 @@ function fetchFromRaichuRiPP(){
             addArrowClick(geneMatrix);
             // add final drawing
             let container = document.getElementById("structure_container");
-            let smiles_container = document.getElementById("smiles_container");
+            let smiles_button = document.getElementById("smiles_button");
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
@@ -809,10 +809,10 @@ function fetchFromRaichuRiPP(){
             drawing = document.getElementById("final_drawing")
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='start_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
+            smiles_button.addEventListener("click", function(){ navigator.clipboard.writeText(raichu_output.smiles)}); 
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
-                tailoringEnzymes_intermediate.setAttribute("style", "width:300px")
+                tailoringEnzymes_intermediate.setAttribute("style", "width:30vw")
                 tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
@@ -820,11 +820,11 @@ function fetchFromRaichuRiPP(){
 
                 intermediate_svg.setAttribute("viewBox", viewBox)
 
-                intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
+                intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring_ripp");
                 intermediate_svg.setAttribute('class', "intermediate_drawing_protease");
                 // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
-                precursor.setAttribute("style", "width:300px")
+                precursor.setAttribute("style", "width:30vw")
                 precursor.innerHTML = formatSVG_intermediates(raichu_output.rawPeptideChain);
                 let precursor_svg = document.getElementById("precursor_drawing")
                 let precursor_bbox = intermediate_svg.getBBox();
@@ -836,7 +836,7 @@ function fetchFromRaichuRiPP(){
                 precursor_svg.setAttribute('class', "intermediate_drawing_precursor");
                 //add cleavage
                 let cleavage = document.getElementById("innerIntermediateContainer_cleavedProduct");
-                cleavage.setAttribute("style", "width:300px")
+                cleavage.setAttribute("style", "width:30vw")
                 cleavage.innerHTML = formatSVG_intermediates(raichu_output.svg).replaceAll("final_drawing" ,"cleavedProduct");
                 let cleavage_svg = document.getElementById("cleavedProduct")
                 let cleavage_bbox = intermediate_svg.getBBox();
@@ -1143,7 +1143,7 @@ function getACPList(geneMatrix) {
     let acpList = []
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
-            0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")) {
+            0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 if (geneMatrix[geneIndex].domains[domainIndex].ko == false || geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
@@ -2180,7 +2180,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
     let moduleSubtype = "PKS_TRANS";
     let moduleIndex = 0;
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic") ) {
+        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic")) ) {
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
                 let orf = region.orfs[orfIndex];
                 if (geneMatrix[geneIndex].id == orf.id) {
@@ -2326,7 +2326,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                 }
                                 geneMatrix[geneIndex].domains[domainIndex].function = type
                                 // to avoid duplicate domains
-                                if (typesInModule.includes(type)) {
+                            if (typesInModule.includes(type) || (type == "TD" && typesInModule.includes("TE")) || (type == "TE" && typesInModule.includes("TD"))) {
                                     active = "False";
                                     geneMatrix[geneIndex].domains[domainIndex].ko = true
                                 };
@@ -2394,7 +2394,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
             moduleSubtype = outputForRaichu[outputForRaichu.length - 1][1]
             for (domain of domainArray){
                 let newDomain = []
-                if (typesInModule.includes(domain[1])){
+                if (typesInModule.includes(domain[1]) || (domain[1] == "TD" && typesInModule.includes("TE")) || (domain[1] == "TE" && typesInModule.includes("TD"))){
                     newDomain = domain.slice(0, 4);
                     newDomain.push("False");
                     newDomain.push(domain[5]);

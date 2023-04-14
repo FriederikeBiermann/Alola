@@ -106,7 +106,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                         if (geneMatrix[geneIndex].id == orf.locus_tag) {
                             if (!(geneMatrix[geneIndex].hasOwnProperty(
                                 "modules")) ) {
-                                if ((biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")){
+                                if ((biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))){
                                 geneMatrix[geneIndex].modules = [{
                                     domains: geneMatrix[
                                         geneIndex].domains
@@ -697,7 +697,7 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let geneSize = 0
         let lengthVisualisation = 0
-        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type=="biosynthetic")) {
+        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
             if (geneMatrix[geneIndex].hasOwnProperty("domains")) {
                 for (let domainIndex = 0; domainIndex < geneMatrix[
                     geneIndex].domains.length; domainIndex++) {
@@ -786,9 +786,7 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
     document.getElementById('module_container')
         .innerHTML = ""
     for (let moduleIndex = 0; moduleIndex < moduleMatrix.length; moduleIndex++) {
-
         let lengthVisualisation = 0
-
         domains = moduleMatrix[moduleIndex].domains;
         for (domainIndex in domains) {
             domain = domains[domainIndex]
@@ -801,13 +799,13 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
             else {
                 bubble_size = height/2;
             }
-
-            lengthVisualisation += bubble_size
+            lengthVisualisation += bubble_size;
+            console.log(bubble_size, domain, domains)
         };
-        size = lengthVisualisation - 3
+        size = lengthVisualisation - 3;
         if (size > 0) {
             var innerModuleContainer = document.createElement('div');
-            innerModuleContainer.id = "innerModuleContainer" + "_" + moduleIndex
+            innerModuleContainer.id = "innerModuleContainer" + "_" + moduleIndex;
             document.getElementById('module_container')
                 .appendChild(innerModuleContainer);
             var draw = SVG(innerModuleContainer)
@@ -830,11 +828,10 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
     }
     //tailoring enzyme
     var innerModuleContainer = document.createElement('div');
-    innerModuleContainer.id = "innerModuleContainer" + "_" +
-        "tailoringEnzyme"
+    innerModuleContainer.id = "innerModuleContainer_tailoringEnzyme";
     document.getElementById('module_container')
         .appendChild(innerModuleContainer);
-    size = height * 3
+    size = height * 3;
     var draw = SVG(innerModuleContainer)
         .size(String(size) + "px", module_height)
         .group();
@@ -845,8 +842,8 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
         .stroke("white")
         .stroke({
             width: 2
-        })
-    dom.node.id = "module_" + "tailoringEnzyme"
+        });
+    dom.node.id = "module_tailoringEnzyme";
 
     var text_module = draw.text("Tailoring enzymes:").x(size / 3.5).y(module_height / 2 - 7)
         .fill("black")

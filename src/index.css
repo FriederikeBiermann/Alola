@@ -166,7 +166,7 @@ label {
   text-align: center;
   padding: 0.1vh 0.1vh;
   text-decoration: none;
-  font-size: 1.7vh;
+  font-size: 0.7vw;
 }
 
 .regionButton {
@@ -175,9 +175,8 @@ label {
   color: #2B2B2B;
   text-align: center;
   padding: 0.2vh 0.2vh;
-  ;
   text-decoration: none;
-  font-size: 17px;
+  font-size: 0.7vw;
   text-transform: capitalize;
   text-align: center;
 }
@@ -323,7 +322,7 @@ input:checked+.slider:before {
 .outerDomainExplorer {
   border-radius: 1vh;
   overflow: auto;
-  height: 42.9vh;
+  height: 42vh;
   overflow-x: auto;
   background-color: white;
   margin-top: 1%;
@@ -619,13 +618,18 @@ svg text {
   bottom: 6vh;
   left: 50%;
 }
-
+.intermediate_drawing_tailoring_ripp{
+  position: relative;
+    max-width: 100%;
+    height: auto;
+    bottom: 6vh;
+}
 .intermediate_drawing_precursor {
   position: relative;
   max-width: 100%;
   height: auto;
   bottom: 6vh;
-  left: 50%;
+  left: 20%;
 }
 
 .intermediate_drawing_protease {
