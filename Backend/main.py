@@ -55,8 +55,8 @@ def get_drawings(cluster) :
         y2 = max_y + padding
         width = x2
         height = y2
+        svg_style = r" <style> line {stroke: black; stroke_width: 1px;} </style> "
         svg_header = f"""<svg width="{width}" height="{height}" viewBox="{x1} {y1} {x2} {y2}" xmlns="http://www.w3.org/2000/svg">\n {svg_style}\n"""
-        print("header", carrier_domain_pos, svg_header)
         squiggly_svg = f'<path d="M {sulphur_pos.x} {sulphur_pos.y - 5} Q {sulphur_pos.x - 5} {sulphur_pos.y - (sulphur_pos.y - 5 - carrier_domain_pos.y)/2}, {carrier_domain_pos.x} {sulphur_pos.y - 5 - (sulphur_pos.y - 5 - carrier_domain_pos.y)/2} T {carrier_domain_pos.x} {carrier_domain_pos.y}" stroke="grey" fill="white"/>'
         svg = f"{svg_header}{drawing.draw_svg()}{squiggly_svg}".replace("\n", "").replace(
             "\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
