@@ -884,6 +884,11 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             return handler
         })
         .then((raichu_output) => {
+            if (raichu_output.hasOwnProperty("Error")){
+                let module_container = document.getElementById("module_container")
+                module_container.innerHTML = "<strong>"+ raichu_output.Error +"</strong>"
+                return 0
+            }
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')) );
             OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')))
             updateDomains(geneMatrix, BGC);

@@ -17,6 +17,7 @@ body {
   font-size: 3vh;
 }
 
+
 a:link {
   color: #E11839;
 }
@@ -384,7 +385,7 @@ input:checked+.slider:before {
   gap: 0.1vw;
   padding: 1vh;
   width: 97%;
-
+  color: #1F1F1F;
   white-space: nowrap;
   height: 5vh;
   font-size: medium;

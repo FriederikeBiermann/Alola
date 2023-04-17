@@ -91,108 +91,111 @@ async def root():
 
 @app.get("/api/alola/nrps_pks/")
 async def alola_nrps_pks(antismash_input: str):
-    assert antismash_input
-    # handle input data
-    antismash_input_transformed = ast.literal_eval(antismash_input)
-    tailoringReactions = []
-    for enzyme in antismash_input_transformed[2]:
-        tailoringReactions += [TailoringRepresentation(*enzyme)]
-    raw_cluster_representation = antismash_input_transformed[0]
-    #Format fake booleans
-    raichu_input = format_cluster(
-        raw_cluster_representation, tailoringReactions)
-    cyclization = antismash_input_transformed[1]
-    cluster = build_cluster(raichu_input, strict = False)
-    cluster.compute_structures(compute_cyclic_products=False)
-    cluster_svg = cluster.draw_cluster()
-    
-    linear_intermediate = cluster.linear_product
-    cluster.do_tailoring()
-    tailored_product = cluster.chain_intermediate.deepcopy()
-    final_product = cluster.chain_intermediate
-    if cyclization != "None":
-        # try to find atom for atom for cyclisation before the tailoring occurs
-        atom_cyclisation = [atom for atom in tailored_product.atoms.values() if str(
-            atom) == cyclization]
-        if len(atom_cyclisation) == 0:
-            raise ValueError(
-                f"Atom {cyclization} for cyclization does not exist.")
-        else:
-            atom_cyclisation = atom_cyclisation[0]
-        cluster.cyclise(atom_cyclisation)
-        final_product = cluster.cyclised_product
-    smiles = structure_to_smiles(final_product, kekule=False)
-    atoms_for_cyclisation = str(
-        [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
-    tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
-    structure_for_tailoring = RaichuDrawer(
-        tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, draw_straightened=True)
-    structure_for_tailoring.draw_structure()
-    svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
-        "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
-    svg = svg_string_from_structure(final_product).replace("\n", "").replace(
-        "\"", "'").replace("<svg", " <svg id='final_drawing'")
-    spaghettis = get_drawings(cluster)
-    return {"svg": svg, "hangingSvg": spaghettis, "smiles": smiles, "atomsForCyclisation": atoms_for_cyclisation,  "tailoringSites": str(tailoring_sites), "completeClusterSvg": cluster_svg,
-            "structureForTailoring": svg_structure_for_tailoring}
+    try:
+        assert antismash_input
+        # handle input data
+        antismash_input_transformed = ast.literal_eval(antismash_input)
+        tailoringReactions = []
+        for enzyme in antismash_input_transformed[2]:
+            tailoringReactions += [TailoringRepresentation(*enzyme)]
+        raw_cluster_representation = antismash_input_transformed[0]
+        #Format fake booleans
+        raichu_input = format_cluster(
+            raw_cluster_representation, tailoringReactions)
+        cyclization = antismash_input_transformed[1]
+        cluster = build_cluster(raichu_input, strict = False)
+        cluster.compute_structures(compute_cyclic_products=False)
+        cluster_svg = cluster.draw_cluster()
+        
+        linear_intermediate = cluster.linear_product
+        cluster.do_tailoring()
+        tailored_product = cluster.chain_intermediate.deepcopy()
+        final_product = cluster.chain_intermediate
+        if cyclization != "None":
+            # try to find atom for atom for cyclisation before the tailoring occurs
+            atom_cyclisation = [atom for atom in tailored_product.atoms.values() if str(
+                atom) == cyclization]
+            if len(atom_cyclisation) == 0:
+                raise ValueError(
+                    f"Atom {cyclization} for cyclization does not exist.")
+            else:
+                atom_cyclisation = atom_cyclisation[0]
+            cluster.cyclise(atom_cyclisation)
+            final_product = cluster.cyclised_product
+        smiles = structure_to_smiles(final_product, kekule=False)
+        atoms_for_cyclisation = str(
+            [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
+        tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
+        structure_for_tailoring = RaichuDrawer(
+            tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, draw_straightened=True)
+        structure_for_tailoring.draw_structure()
+        svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
+            "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
+        svg = svg_string_from_structure(final_product).replace("\n", "").replace(
+            "\"", "'").replace("<svg", " <svg id='final_drawing'")
+        spaghettis = get_drawings(cluster)
+        return {"svg": svg, "hangingSvg": spaghettis, "smiles": smiles, "atomsForCyclisation": atoms_for_cyclisation,  "tailoringSites": str(tailoring_sites), "completeClusterSvg": cluster_svg,
+                "structureForTailoring": svg_structure_for_tailoring}
+    except:
+        return {"Error": "The Cluster is not biosynthetically correct, try removing domains to inlcude only complete modules."}
 
 @app.get("/api/alola/ripp/")
 async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(None)):
-    assert antismash_input
-    # handle input data
-    antismash_input_transformed = ast.literal_eval(antismash_input)
-    tailoringReactions = []
-    macrocyclisations = []
-    cleavage_sites = []
-    amino_acid_sequence = antismash_input_transformed[0]
-    gene_name_precursor = antismash_input_transformed[4]
-    full_amino_acid_sequence = antismash_input_transformed[5]
-    if antismash_input_transformed[1] != "None":
-        for cyclization in antismash_input_transformed[1]:
-            if len(cyclization)>0:
-                macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
-    for enzyme in antismash_input_transformed[2]:
-        if len(enzyme)>0:
-            tailoringReactions += [TailoringRepresentation(*enzyme)]
-    for cleavage_site in antismash_input_transformed[3]:
-        if len(cleavage_site)>0:
-            amino_acid = cleavage_site[0]
-            amino_acid_number = int(cleavage_site[1:])
-            cleavage_sites += [CleavageSiteRepresentation(amino_acid, amino_acid_number, "follower")]
-    ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence, cleavage_sites=cleavage_sites,
-                                tailoring_enzymes_representation=tailoringReactions)
-    ripp_cluster.make_peptide()
-    peptide_svg = ripp_cluster.draw_precursor_with_modified_product(
-        fold=10, size=7, as_string=True).replace(
-        "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")
-    if len(tailoringReactions)>0:
-        ripp_cluster.do_tailoring()
-        tailored_product = ripp_cluster.tailored_product
-    else:
-        tailored_product = ripp_cluster.linear_product
-    svg_structure_for_tailoring = ripp_cluster.draw_precursor_with_modified_product(
-        fold=10, size=7, as_string=True,  draw_Cs_in_pink=True).replace(
-        "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
-    if len(macrocyclisations)>0:
-        ripp_cluster.do_macrocyclization()
-    cyclised_product_svg = ripp_cluster.draw_precursor_with_modified_product(fold=5, size=7, as_string=True).replace(
-        "\n", "").replace("\"", "'").replace("<svg", " <svg id='cyclised_drawing'")
+        assert antismash_input
+        # handle input data
+        antismash_input_transformed = ast.literal_eval(antismash_input)
+        tailoringReactions = []
+        macrocyclisations = []
+        cleavage_sites = []
+        amino_acid_sequence = antismash_input_transformed[0]
+        gene_name_precursor = antismash_input_transformed[4]
+        full_amino_acid_sequence = antismash_input_transformed[5]
+        if antismash_input_transformed[1] != "None":
+            for cyclization in antismash_input_transformed[1]:
+                if len(cyclization)>0:
+                    macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
+        for enzyme in antismash_input_transformed[2]:
+            if len(enzyme)>0:
+                tailoringReactions += [TailoringRepresentation(*enzyme)]
+        for cleavage_site in antismash_input_transformed[3]:
+            if len(cleavage_site)>0:
+                amino_acid = cleavage_site[0]
+                amino_acid_number = int(cleavage_site[1:])
+                cleavage_sites += [CleavageSiteRepresentation(amino_acid, amino_acid_number, "follower")]
+        ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence, cleavage_sites=cleavage_sites,
+                                    tailoring_enzymes_representation=tailoringReactions)
+        ripp_cluster.make_peptide()
+        peptide_svg = ripp_cluster.draw_precursor_with_modified_product(
+            fold=10, size=7, as_string=True).replace(
+            "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")
+        if len(tailoringReactions)>0:
+            ripp_cluster.do_tailoring()
+            tailored_product = ripp_cluster.tailored_product
+        else:
+            tailored_product = ripp_cluster.linear_product
+        svg_structure_for_tailoring = ripp_cluster.draw_precursor_with_modified_product(
+            fold=10, size=7, as_string=True,  draw_Cs_in_pink=True).replace(
+            "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
+        if len(macrocyclisations)>0:
+            ripp_cluster.do_macrocyclization()
+        cyclised_product_svg = ripp_cluster.draw_precursor_with_modified_product(fold=5, size=7, as_string=True).replace(
+            "\n", "").replace("\"", "'").replace("<svg", " <svg id='cyclised_drawing'")
 
-    if len(cleavage_sites)>0:
-        ripp_cluster.do_proteolytic_claevage()
-    cleaved_ripp_svg = ripp_cluster.draw_product(as_string=True).replace("\n", "").replace(
-        "\"", "'").replace("<svg", " <svg id='final_drawing'")
+        if len(cleavage_sites)>0:
+            ripp_cluster.do_proteolytic_claevage()
+        cleaved_ripp_svg = ripp_cluster.draw_product(as_string=True).replace("\n", "").replace(
+            "\"", "'").replace("<svg", " <svg id='final_drawing'")
 
-    final_product = ripp_cluster.chain_intermediate
-    smiles = structure_to_smiles(final_product, kekule=False)
-    atoms_for_cyclisation = str(
-        [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
-    tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
-    amino_acids = []
-    for index, aa in enumerate(amino_acid_sequence):
-        amino_acids += [aa.upper()+str(index)]
-    amino_acids = str(amino_acids)
-    return {"svg": cleaved_ripp_svg, "smiles": smiles,  "atomsForCyclisation": atoms_for_cyclisation, "tailoringSites": str(tailoring_sites)
-            , "rawPeptideChain": peptide_svg,
-            "cyclisedStructure": cyclised_product_svg, "aminoAcidsForCleavage": amino_acids,
-            "structureForTailoring": svg_structure_for_tailoring}
+        final_product = ripp_cluster.chain_intermediate
+        smiles = structure_to_smiles(final_product, kekule=False)
+        atoms_for_cyclisation = str(
+            [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
+        tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
+        amino_acids = []
+        for index, aa in enumerate(amino_acid_sequence):
+            amino_acids += [aa.upper()+str(index)]
+        amino_acids = str(amino_acids)
+        return {"svg": cleaved_ripp_svg, "smiles": smiles,  "atomsForCyclisation": atoms_for_cyclisation, "tailoringSites": str(tailoring_sites)
+                , "rawPeptideChain": peptide_svg,
+                "cyclisedStructure": cyclised_product_svg, "aminoAcidsForCleavage": amino_acids,
+                "structureForTailoring": svg_structure_for_tailoring}
