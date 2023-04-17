@@ -21,6 +21,49 @@ origins = ["http://localhost:3000",
 middleware = [Middleware(CORSMiddleware, allow_origins=origins)]
 app = FastAPI(middleware=middleware)
 
+def get_drawings(cluster) :
+    drawings, widths = cluster.get_drawings()
+    svg_strings = []
+    for i, drawing in enumerate(drawings):
+        max_x = 0
+        min_x = 100000000
+        max_y = 0
+        min_y = 100000000
+        drawing.set_structure_id(f"s{i}")
+        padding = 0
+        drawing.options.padding = 0
+        carrier_domain_pos = None
+        svg_style = drawing.svg_style
+        for atom in drawing.structure.graph:
+            if atom.annotations.domain_type:
+                carrier_domain_pos = atom.draw.position
+                atom.draw.positioned = False
+                sulphur_pos = atom.get_neighbour('S').draw.position
+            if atom.draw.positioned:
+                    if atom.draw.position.x < min_x:
+                        min_x = atom.draw.position.x
+                    if atom.draw.position.y < min_y:
+                        min_y = atom.draw.position.y
+                    if atom.draw.position.x > max_x:
+                        max_x = atom.draw.position.x
+                    if atom.draw.position.y > max_y:
+                        max_y = atom.draw.position.y
+        assert carrier_domain_pos
+        x1 = 0
+        x2 = max_x + padding
+        y1 = padding
+        y2 = max_y + padding
+        width = x2
+        height = y2
+        svg_header = f"""<svg width="{width}" height="{height}" viewBox="{x1} {y1} {x2} {y2}" xmlns="http://www.w3.org/2000/svg">\n {svg_style}\n"""
+        print("header", carrier_domain_pos, svg_header)
+        squiggly_svg = f'<path d="M {sulphur_pos.x} {sulphur_pos.y - 5} Q {sulphur_pos.x - 5} {sulphur_pos.y - (sulphur_pos.y - 5 - carrier_domain_pos.y)/2}, {carrier_domain_pos.x} {sulphur_pos.y - 5 - (sulphur_pos.y - 5 - carrier_domain_pos.y)/2} T {carrier_domain_pos.x} {carrier_domain_pos.y}" stroke="grey" fill="white"/>'
+        svg = f"{svg_header}{drawing.draw_svg()}{squiggly_svg}".replace("\n", "").replace(
+            "\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
+        svg_strings.append(
+            [svg, carrier_domain_pos.x, carrier_domain_pos.y, width, height])
+
+    return svg_strings
 
 def format_cluster(raw_cluster: List, tailoring_reactions: TailoringRepresentation) -> ClusterRepresentation:
     formatted_modules = []
@@ -62,8 +105,7 @@ async def alola_nrps_pks(antismash_input: str):
     cluster = build_cluster(raichu_input, strict = False)
     cluster.compute_structures(compute_cyclic_products=False)
     cluster_svg = cluster.draw_cluster()
-    spaghettis = [spaghetti.replace("\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
-                  for spaghetti in cluster.draw_spaghettis()][:-1]
+    
     linear_intermediate = cluster.linear_product
     cluster.do_tailoring()
     tailored_product = cluster.chain_intermediate.deepcopy()
@@ -90,6 +132,7 @@ async def alola_nrps_pks(antismash_input: str):
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
     svg = svg_string_from_structure(final_product).replace("\n", "").replace(
         "\"", "'").replace("<svg", " <svg id='final_drawing'")
+    spaghettis = get_drawings(cluster)
     return {"svg": svg, "hangingSvg": spaghettis, "smiles": smiles, "atomsForCyclisation": atoms_for_cyclisation,  "tailoringSites": str(tailoring_sites), "completeClusterSvg": cluster_svg,
             "structureForTailoring": svg_structure_for_tailoring}
 
@@ -112,18 +155,15 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
         if len(enzyme)>0:
             tailoringReactions += [TailoringRepresentation(*enzyme)]
     for cleavage_site in antismash_input_transformed[3]:
-        print(cleavage_site)
         if len(cleavage_site)>0:
             amino_acid = cleavage_site[0]
             amino_acid_number = int(cleavage_site[1:])
-            print(amino_acid_number)
             cleavage_sites += [CleavageSiteRepresentation(amino_acid, amino_acid_number, "follower")]
     ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence, cleavage_sites=cleavage_sites,
                                 tailoring_enzymes_representation=tailoringReactions)
     ripp_cluster.make_peptide()
-    print(dir(ripp_cluster))
     peptide_svg = ripp_cluster.draw_precursor_with_modified_product(
-        fold=5, size=7, as_string=True).replace(
+        fold=10, size=7, as_string=True).replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")
     if len(tailoringReactions)>0:
         ripp_cluster.do_tailoring()
@@ -131,7 +171,7 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
     else:
         tailored_product = ripp_cluster.linear_product
     svg_structure_for_tailoring = ripp_cluster.draw_precursor_with_modified_product(
-        fold=5, size=7, as_string=True,  draw_Cs_in_pink=True).replace(
+        fold=10, size=7, as_string=True,  draw_Cs_in_pink=True).replace(
         "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
     if len(macrocyclisations)>0:
         ripp_cluster.do_macrocyclization()

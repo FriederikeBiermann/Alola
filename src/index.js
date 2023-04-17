@@ -1,6 +1,7 @@
 let regionIndex = 0
 let regionName = ""
 let viewPortHeight = window.innerHeight
+let viewPortWidth = window.innerWidth
 var recordData = []
 var details_data = {}
 let BGC ={}
@@ -902,28 +903,43 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
                 structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
             }
             //hanging svgs for spaghetti diagram
+            let carrier_x = 0
+            var widths = intermediates.map(
+                function (element) { return element[3]; }
+            );
+            max_width = Math.max(...widths)
             for (let intermediateIndex = 0; intermediateIndex <
                 intermediates.length; intermediateIndex++) {
-                intermediate = intermediates[intermediateIndex]
+                intermediate = intermediates[intermediateIndex][0];
+                carrier_x = intermediates[intermediateIndex][1]
                 if (starterACP < 1) {
                     starterACP = 1
                 }
                 let intermediate_container = document.getElementById(
                     'innerIntermediateContainer' + acpList[
                     intermediateIndex + starterACP - 1].replace(".","_") )
-                intermediate_container.setAttribute("style", "width:150px")
+                intermediate_container.setAttribute("style", "width:5vw;")
                 intermediate_container.innerHTML = formatSVG_intermediates(intermediate);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
                 let bbox = intermediate_svg.getBBox();
-                let viewBox = [bbox.x, bbox.y + 38, bbox.width, bbox.height].join(" ");
+                let viewBox = [bbox.x, bbox.y, max_width, intermediates[intermediateIndex][4]].join(" ");
+                
                 intermediate_svg.setAttribute("viewBox", viewBox)
+                intermediate_svg.setAttribute("width", max_width)
                 intermediate_svg.setAttribute('id', "intermediate_drawing" + intermediateIndex);
                 intermediate_svg.setAttribute('class', "intermediate_drawing");
-
+                console.log(bbox.x, intermediates[intermediateIndex], carrier_x, max_width)
+                if (0.05* viewPortWidth <= max_width){
+                    intermediate_svg.setAttribute('style', "right: " + (((carrier_x - bbox.x) / max_width) * 5 -700/viewPortHeight) + "vw;");
+                }
+                else{
+                    intermediate_svg.setAttribute('style', "right: " + (carrier_x - bbox.x-13)+ "px;");
+                }
+                
             }
             // add final drawing
             let container = document.getElementById("structure_container");
-            let smiles_container = document.getElementById("smiles_container");
+            let smiles_container = document.getElementById("smiles_button");
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
@@ -940,8 +956,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
             drawing = document.getElementById("final_drawing")
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
-            smiles_container.innerHTML = " <button type='button' class='start_button'  onclick= navigator.clipboard.writeText('" + raichu_output.smiles + "')>" + "<strong> Copy SMILES to clipboard </strong>" + "</button>";
-        })
+            smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})})
 }}}
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     /**
@@ -1131,7 +1146,7 @@ function updateProteins(geneMatrix, BGC) {
     $("#protein_container")
         .html(Proteiner.drawClusterSVG(removePaddingBGC(
             removeSpaceBetweenProteins(proteinsForDisplay)), height =
-        viewPortHeight*0.05));
+        viewPortHeight*0.07));
     addDragDrop();
 }
 function getACPList(geneMatrix) {

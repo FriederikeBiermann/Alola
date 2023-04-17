@@ -314,8 +314,7 @@ input:checked+.slider:before {
   position: relative;
   max-width: 100%;
   height: auto;
-  bottom: 1.5vh;
-  left: 9%;
+  bottom: 1vh;
 
 }
 
@@ -393,13 +392,11 @@ input:checked+.slider:before {
 
 .intermediateContainer {
   position: relative;
-  right: 6.7vh;
   height: 80vh;
 }
 
 .intermediateContainerTailoring {
   position: relative;
-  right: 6.7vh;
   top: 10%;
   height: 80vh;
 }

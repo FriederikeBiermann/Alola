@@ -31,7 +31,6 @@ var Proteiner = {
     tooltip_id_protein: "Proteiner-tooltip-123"
 };
 Proteiner.drawClusterSVG = (function(cluster, height = 90) {
-    console.log(height)
     var container = document.createElement("div");
     document.getElementById('protein_container')
         .innerHTML = "";
@@ -102,8 +101,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 90) {
                 .group();
             points = Proteiner.getproteinPoints(orf, cluster, height,
                 scale)
-            var pol = draw.rect(Math.abs(points["4"].x - points["0"].x) +
-                    10, Math.abs(points["4"].y - points["0"].y) + 20)
+            var pol = draw.rect(Math.abs(points["4"].x - points["0"].x), Math.abs(points["4"].y - points["0"].y))
                 .rx(height/8)
                 .ry(height / 8)
                 .fill(orf_color)
@@ -162,8 +160,8 @@ Proteiner.drawClusterSVG = (function(cluster, height = 90) {
                     }
                     var dom = draw.rect(Math.abs(points["4"].x - points[
                             "0"].x), Math.abs(points["4"].y -
-                            points["0"].y) + 20)
-                        .x(x + 5)
+                            points["0"].y))
+                        .x(x)
                         .y(points["0"].y)
                         .rx(height / 8)
                         .ry(height / 8)
@@ -350,10 +348,10 @@ Proteiner.getDomainPoints = (function(domain, orf, cluster, height, scale) {
                     (protein_pts[3].y - getY(new_point.x))));
         // apply margin
         if (i < 4) { // upper
-            new_point.y += (height / 20);
+            new_point.y -= (height / 10);
         }
         else { // lower
-            new_point.y -= (height / 20);
+            new_point.y += (height / 10);
         }
         points.push(new_point);
     }
