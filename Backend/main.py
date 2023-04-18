@@ -137,10 +137,11 @@ async def alola_nrps_pks(antismash_input: str):
         return {"svg": svg, "hangingSvg": spaghettis, "smiles": smiles, "atomsForCyclisation": atoms_for_cyclisation,  "tailoringSites": str(tailoring_sites), "completeClusterSvg": cluster_svg,
                 "structureForTailoring": svg_structure_for_tailoring}
     except:
-        return {"Error": "The Cluster is not biosynthetically correct, try removing domains to inlcude only complete modules."}
+        return {"Error": "The Cluster is not biosynthetically correct, try removing domains to include only complete modules or changing the order of proteins."}
 
 @app.get("/api/alola/ripp/")
 async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(None)):
+    try:
         assert antismash_input
         # handle input data
         antismash_input_transformed = ast.literal_eval(antismash_input)
@@ -199,3 +200,5 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
                 , "rawPeptideChain": peptide_svg,
                 "cyclisedStructure": cyclised_product_svg, "aminoAcidsForCleavage": amino_acids,
                 "structureForTailoring": svg_structure_for_tailoring}
+    except:
+        return {"Error": "An error occured, try selecting a different precursor."}

@@ -29,7 +29,11 @@ button {
   border-radius: 0.3vh;
 
 }
-
+textarea {
+  color: black;
+  min-height: 30vh;
+  width: 100%;
+}
 #save_complete_cluster_svg {
   color: black;
   text-decoration-color: white;
@@ -584,9 +588,11 @@ svg text {
 }
 
 .formContainer {
-  max-width: 12vw;
+  max-width: 30vw;
   padding: 0.2vh;
   background-color: #fff;
+  color: black;
+  font-size: 1.6vh;;
 }
 
 .formContainer .btn {

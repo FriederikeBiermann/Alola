@@ -14,6 +14,7 @@ let rippPrecursor = ""
 let rippFullPrecursor = ""
 let rippPrecursorGene = 0
 let cleavageSites = []
+window.rippSelection = ""
 let proteaseOptions = []
 let nameToStructure = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
@@ -72,6 +73,11 @@ dropArea.addEventListener('drop', (event) => {
     readFile(input_file);
 
 });
+document.querySelector('textarea').addEventListener('mouseup', function () {
+    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd)
+});
+document.querySelector('textarea').addEventListener('mouseleave', function () { 
+    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd); })
 function readFile(file) {
     const reader = new FileReader();
     reader.addEventListener('load', (event) => {
@@ -785,6 +791,11 @@ function fetchFromRaichuRiPP(){
             return handler
         })
         .then((raichu_output) => {
+            if (raichu_output.hasOwnProperty("Error")) {
+                let module_container = document.getElementById("module_container")
+                module_container.innerHTML = "<strong>" + raichu_output.Error + "</strong>"
+                return 0
+            }
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')))
             // format output
             //add protase Options
@@ -938,7 +949,7 @@ function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC
                     intermediate_svg.setAttribute('style', "right: " + (((carrier_x - bbox.x) / max_width) * 5 -700/viewPortHeight) + "vw;");
                 }
                 else{
-                    intermediate_svg.setAttribute('style', "right: " + (carrier_x - bbox.x-13)+ "px;");
+                    intermediate_svg.setAttribute('style', "right: " + (carrier_x - bbox.x - 13000/viewPortHeight)+ "px;");
                 }
                 
             }
@@ -1356,9 +1367,10 @@ function addRiPPPrecursorOptions(geneMatrix){
         id = geneMatrix[geneIndex].id.replace(".", "_")
         innerHTML += "<button class='wildcardsubstrate' type='button' id='" + id + "_ripp_button' onclick='setRiPPPrecursor(\x22" + geneIndex + "\x22)'>" + id + "</button>"
     }
+    
     document.getElementById("ripp_precursor_selection").innerHTML=innerHTML
 }
-function addRiPP(geneMatrix,){
+function addRiPP(geneMatrix,rippSelection){
     RiPPStatus = 1;
     geneIndex = rippPrecursorGene
     geneMatrix[geneIndex].ripp_status = true;
@@ -1369,26 +1381,43 @@ function addRiPP(geneMatrix,){
     // for antismash 6.0 files
     else {
         var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
-
         var translationSearch = regExString.exec(BGCForDisplay["orfs"][geneIndex].description);
-
         translation = translationSearch[1]; //is the matched group if found
-
     }
     //add protase Options
     let aminoacidsWithNumer = []
     for (let aminoAcidIndex = 0; aminoAcidIndex< translation.length; aminoAcidIndex ++){
         aminoacidsWithNumer.push(translation[aminoAcidIndex]+String(aminoAcidIndex+1))
-
     }
     proteaseOptions = []
     proteaseOptions = addStringToArray("Proteolytic cleavage at ", proteaseOptions.concat(aminoacidsWithNumer));
     rippFullPrecursor = translation
-    rippPrecursor = translation.slice(-10); // default only last 10 amino acids
+    if (rippSelection.length>0){
+        rippPrecursor = rippSelection;
+    }
+    else{
+        rippPrecursor = translation.slice(-5)// default only last 5 amino acids
+    }
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+    window.rippSelection = ""
+    let textarea = document.querySelector('textarea');
+    textarea.value = "";
 }
 function setRiPPPrecursor(geneIndex){
-    rippPrecursorGene = geneIndex
+    rippPrecursorGene = geneIndex;
+    let textarea = document.querySelector('textarea');
+    let translation = "";
+    // for antismash 7.0 files
+    if (BGCForDisplay["orfs"][geneIndex].hasOwnProperty("translation")) {
+        translation = BGCForDisplay["orfs"][geneIndex].translation;
+    }
+    // for antismash 6.0 files
+    else {
+        var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
+        var translationSearch = regExString.exec(BGCForDisplay["orfs"][geneIndex].description);
+        translation = translationSearch[1]; //is the matched group if found
+    }
+    textarea.value = translation;
 }
 function openPKSForm() {
     document.getElementById("popupFormPKS").style.display = "block";

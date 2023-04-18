@@ -25,31 +25,20 @@
         structures</strong></button>
     <button type="button" class="start_button" onclick="reload_site_with_genecluster()"><strong> Reset
         view</strong></button>
-
     <label class="switch">
-
       <input id="real-time-button" type="checkbox">
       <span class="slider round"></span>
     </label>
     <div id="fake_button"> Real time calculation</div>
-
-
   </div>
   <div id="regionsBar"> Drop region.js antiSMASH output here</div>
   <div id="BGC_explorer">
     <div class="heading-container" id="BGCHeading"> Biosynthetic gene cluster explorer</div>
     <div class="container" id="arrow_container"> </div>
-
   </div>
   <div id="Gene_explorer">
-
     <div class="heading-container"> Gene explorer</div>
-
-
-
     <div id="gene_container">
-
-
     </div>
   </div>
   </div>
@@ -60,8 +49,6 @@
     <div class="protein-container" id="protein_container"> </div>
   </div>
   </div>
-
-
   <div id="Domain_explorer" class="Domain_explorer">
     <div class="heading-container"> Biosynthetic model
       <button type="button" class="start_button" onclick="openForm()" id="add_module_button"><strong>Add
@@ -69,7 +56,6 @@
       <button type="button" class="start_button" id="ripp_button" onclick="openRiPPForm()"><strong><a> RiPP BGC
           </a></strong></button>
     </div>
-
     <div id="outerDomainExplorer" class="outerDomainExplorer">
 
       <div class="module-container" id="model_gene_container"> </div>
@@ -81,9 +67,7 @@
     <button type="button" class="start_button" id="save_biosynthetic_model_button"><a
         id="save_complete_cluster_svg"><strong> Save
           biosynthetic model withOUT tayloring enzymes (svg)</strong></a></button>
-
   </div>
-
   <div id="Structure_explorer">
     <div class="heading-container"> Structure explorer</div>
     <div id="structure_container"> </div>
@@ -95,12 +79,7 @@
       <button type="button" class="start_button" id="Zoom_in_button" onclick="zoom_out()"><a><strong>Zoom
             out</strong></a></button>
       <button type='button' class='start_button' id = "smiles_button"><a><strong> Copy SMILES to clipboard </strong></a></button>
-
   </div>
-
-
-
-
   <div class="loginPopup">
     <div class="formPopup" id="popupForm">
       <form class="formContainer">
@@ -130,11 +109,9 @@
         <div class="dropdown">
           <button type="button" class="dropbtn">Module Type</button>
           <div class="dropdown-content">
-
             <button type="button" onclick="setWildcardModule('starter_module_pks')">Starter Module</button>
             <button type="button" onclick="setWildcardModule('elongation_module_pks')">Elongation Module</button>
             <button type="button" onclick="setWildcardModule('terminator_module_pks')">Terminator Module</button>
-
           </div>
         </div>
         <br>
@@ -189,7 +166,6 @@
             <button class="wildcardsubstrate" type="button"
               onclick="setWildcardSubstrate('tryptophan')">tryptophan</button>
             <button class="wildcardsubstrate" type="button" onclick="setWildcardSubstrate('tyrosine')">tyrosine</button>
-
           </div>
         </div>
         <div class="dropdown">
@@ -199,7 +175,6 @@
             <button type="button" onclick="setWildcardModule('starter_module_nrps')">Starter Module</button>
             <button type="button" onclick="setWildcardModule('elongation_module_nrps')">Elongation Module</button>
             <button type="button" onclick="setWildcardModule('terminator_module_nrps')">Terminator Module</button>
-
           </div>
         </div>
         <br>
@@ -210,31 +185,30 @@
       </form>
     </div>
   </div>
-
-
   <div class="formPopup" id="popupFormRiPP">
     <form class="formContainer">
-      <div class="dropdown">
-        <button type="button" class="dropbtn">RiPP precursor</button>
+      <div class="dropdown" style="width: 100%;">
+        <button type="button" class="btn cancel">Select RiPP precursor</button>
         <div class="dropdown-content" id="ripp_precursor_selection">
         </div>
       </div>
+      <br>
+      <div> <strong> Select core peptide from amino acid sequence. If no core peptide is selected, the last 5 amino acids will be used.</strong></div>
+      <textarea spellcheck="false"  placeholder="The amino acid sequence will appear here" style="resize: none;">
+      </textarea>
       <br>
       <input type="checkbox" id="wildcardProtease" name="wildcardProtease" value="true">
       <label for="wildcardProtease"> Add Protease</label><br>
       <input type="checkbox" id="wildcardCyclase" name="wildcardCyclase" value="true">
       <label for="wildcardCyclase"> Add Cyclase</label><br>
-
-      <button type="button" class="btn" onclick="addRiPP(geneMatrix);closeRiPPForm()">Submit</button>
+      <button type="button" class="btn" onclick="addRiPP(geneMatrix, rippSelection);closeRiPPForm()">Submit</button>
       <button type="button" class="btn cancel" onclick="closeRiPPForm()">Close</button>
     </form>
   </div>
-
-
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.js"></script>
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-
+<script type="text/css" src="http://yui.yahooapis.com/3.18.1/build/cssreset/cssreset-min.css"></script>
   <script type="text/javascript" src="./default_domains.js"></script>
   <script type="text/javascript" src="./protein_drawer.js"></script>
   <script type="text/javascript" src="./domain_drawer.js"></script>
@@ -242,7 +216,4 @@
   <script type="text/javascript" src="./option_creator.js"></script>
   <script type="text/javascript" src="./index.js"></script>
   <script type="text/javascript" src="./arrower.js"></script>
-
-
-
 </body>
