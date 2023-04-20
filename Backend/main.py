@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Query
+import traceback
 from typing import List
 import ast
 from starlette.middleware.cors import CORSMiddleware
@@ -136,7 +137,11 @@ async def alola_nrps_pks(antismash_input: str):
         spaghettis = get_drawings(cluster)
         return {"svg": svg, "hangingSvg": spaghettis, "smiles": smiles, "atomsForCyclisation": atoms_for_cyclisation,  "tailoringSites": str(tailoring_sites), "completeClusterSvg": cluster_svg,
                 "structureForTailoring": svg_structure_for_tailoring}
-    except:
+    except Exception as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        exc_type = type(e).__name__
+        filename, lineno, _, _ = tb[-1]
+        print(f"{exc_type} occurred at {filename}:{lineno}")
         return {"Error": "The Cluster is not biosynthetically correct, try removing domains to include only complete modules or changing the order of proteins."}
 
 @app.get("/api/alola/ripp/")
@@ -174,6 +179,7 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
             tailored_product = ripp_cluster.tailored_product
         else:
             tailored_product = ripp_cluster.linear_product
+        tailoring_sites = get_tailoring_sites_atom_names(ripp_cluster.chain_intermediate)
         svg_structure_for_tailoring = ripp_cluster.draw_precursor_with_modified_product(
             fold=10, size=7, as_string=True,  draw_Cs_in_pink=True).replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
@@ -191,7 +197,7 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
         smiles = structure_to_smiles(final_product, kekule=False)
         atoms_for_cyclisation = str(
             [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
-        tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
+        print(tailoring_sites, ripp_cluster.linear_product.graph)
         amino_acids = []
         for index, aa in enumerate(amino_acid_sequence):
             amino_acids += [aa.upper()+str(index)]
@@ -200,5 +206,9 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
                 , "rawPeptideChain": peptide_svg,
                 "cyclisedStructure": cyclised_product_svg, "aminoAcidsForCleavage": amino_acids,
                 "structureForTailoring": svg_structure_for_tailoring}
-    except:
+    except Exception as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        exc_type = type(e).__name__
+        filename, lineno, _, _ = tb[-1]
+        print(f"{exc_type} occurred at {filename}:{lineno}")
         return {"Error": "An error occured, try selecting a different precursor."}
