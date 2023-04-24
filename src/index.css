@@ -231,7 +231,6 @@ label {
   border-radius: 0.6vh;
   padding-left: 5%;
   width: 92%;
-  overflow-x: auto;
 }
 
 /* The switch - the box around the slider */
@@ -633,7 +632,6 @@ svg text {
   max-width: 100%;
   height: auto;
   bottom: 6vh;
-  left: 20%;
 }
 
 .intermediate_drawing_protease {
@@ -641,7 +639,6 @@ svg text {
   max-width: 100%;
   height: auto;
   bottom: 6vh;
-  left: 50%;
 }
 
 .cleavedProduct {

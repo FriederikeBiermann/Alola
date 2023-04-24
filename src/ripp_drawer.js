@@ -19,8 +19,12 @@ RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600){
     RiPPer.leaveSpace(space, "precursor", scale)
     RiPPer.drawTailoringEnzymes(geneMatrix, height, scale)
     RiPPer.leaveSpace(space, "tailoredProduct", scale)
-    RiPPer.drawProtease(height,scale)
-    RiPPer.leaveSpace(space, "cleavedProduct", scale)
+    if (document.getElementById("wildcardProtease")
+        .checked) {
+        RiPPer.drawProtease(height, scale);
+        RiPPer.leaveSpace(space, "cleavedProduct", scale);
+    }
+
     return $(container)
         .find("svg")[0];
 })
@@ -189,7 +193,6 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
     var line_svg = SVG(container)
         .size('100%', height)
         .group();
-    console.log(geneMatrix)
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
         console.log(gene.tailoringEnzymeStatus)
@@ -456,10 +459,13 @@ RiPPer.drawHeadings = (function (height, space = 600) {
         .stroke({
             width: 2
         })
-    dom.node.id = "module_" + "protease"
+    if (document.getElementById("wildcardProtease")
+        .checked) {
+        dom.node.id = "module_" + "protease";
+        var text_module = draw.text("Proteolytic cleavage:").x(size / 3.5).y(headingHeigth / 2 - 7)
+            .fill("black")
+            .stroke({ width: 1 })
+    }
 
-    var text_module = draw.text("Proteolytic cleavage:").x(size / 3.5).y(headingHeigth / 2 - 7)
-        .fill("black")
-        .stroke({ width: 1 })
 });
 

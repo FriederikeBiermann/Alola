@@ -1,27 +1,27 @@
-let regionIndex = 0
-let regionName = ""
-let viewPortHeight = window.innerHeight
-let viewPortWidth = window.innerWidth
-var recordData = []
-var details_data = {}
-let BGC ={}
+let regionIndex = 0;
+let regionName = "";
+let viewPortHeight = window.innerHeight;
+let viewPortWidth = window.innerWidth;
+var recordData = [];
+var details_data = {};
+let BGC ={};
 let fetching = false
 let tailoringEnzymes = { "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"}
-let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"]
-let cluster_type = "nrpspks"
-let RiPPStatus = 0
-let rippPrecursor = ""
-let rippFullPrecursor = ""
-let rippPrecursorGene = 0
-let cleavageSites = []
-window.rippSelection = ""
-let proteaseOptions = []
+let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
+let cluster_type = "nrpspks";
+let RiPPStatus = 0;
+let rippPrecursor = "";
+let rippFullPrecursor = "";
+let rippPrecursorGene = 0;
+let cleavageSites = [];
+window.rippSelection = "";
+let proteaseOptions = [];
 let nameToStructure = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
     "malonyl_coa": "OC(=O)CC(S)=O",
     'methoxymalonyl_acp': "SC(=O)C(C(=O)O)OC)O",
     'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
-}
+};
 let aminoacids = {
     "arg": "arginine",
     "his": "histidine",
@@ -45,15 +45,17 @@ let aminoacids = {
     "tyr": "tyrosine",
     "trp": "tryptophan",
     "sal": "salicylicacid"
-}
-let items = document.querySelectorAll('.test-container .box')
+};
+let items = document.querySelectorAll('.test-container .box');
 var dragSrcEl = null;
-let cyclization = "None"
-let geneMatrix = []
-let moduleMatrix = []
-let wildcardSubstrate = "glycine"
-let wildcardModule = "elongation_module_nrps"
-let nameWildcardModule = "Custom_gene_"
+let cyclization = "None";
+let geneMatrix = [];
+let moduleMatrix = [];
+let wildcardSubstrate = "glycine";
+let wildcardModule = "elongation_module_nrps";
+let nameWildcardModule = "Custom_gene_";
+let nameWildcardEnzyme = "Custom_tailoring_gene_";
+let wildcardEnzyme = "";
 let biosyntheticCoreEnzymes = ["alpha/beta fold hydrolase","acyl carrier protein","phosphopantetheine-binding protein","sdr family oxidoreductase", "type i polyketide synthase", "type ii polyketide synthase", "type iii polyketide synthase", "polyketide synthase", "thioesterase domain-containing protein", "non-ribosomal peptide synthetase", "non-ribosomal peptide synthetase"]
 
 const dropArea = document.getElementById('regionsBar');
@@ -78,6 +80,42 @@ document.querySelector('textarea').addEventListener('mouseup', function () {
 });
 document.querySelector('textarea').addEventListener('mouseleave', function () { 
     window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd); })
+appendWildcardButtons(Object.keys(tailoringEnzymes));
+function appendWildcardButtons(entries) {
+    const dropdown = document.getElementById("dropdownWildcard");
+    entries.forEach(entry => {
+        const btn = document.createElement("button");
+        btn.textContent = entry;
+        btn.classList.add("wildcardsubstrate");
+        btn.onclick = () => setWildcardTailoring(entry);
+        dropdown.appendChild(btn);
+    });
+}
+function reformatSVGToBoundary(svg) {
+    // Get the bounding box of the SVG
+    const bbox = svg.getBBox();
+    // Get the width and height of the bounding box
+    const width = bbox.width;
+    const height = bbox.height;
+    // Get the x and y coordinates of the top-left corner of the bounding box
+    const bboxX = bbox.x;
+    const bboxY = bbox.y;
+    // Set the new viewBox attribute to fit the bounding box exactly
+    svg.setAttribute("viewBox", `${bboxX} ${bboxY} ${width} ${height}`);
+    // Set the width and height attributes to match the bounding box
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    // Move all child elements to fit within the new viewBox
+//     for (let i = 0; i < svg.children.length; i++) {
+//         const child = svg.children[i];
+//         if (child.getBBox && child.id != "unlabeled") {
+//             const childBBox = child.getBBox();
+//             const childX = childBBox.x - bboxX;
+//             const childY = childBBox.y - bboxY;
+//             child.setAttribute("transform", `translate(${childX}, ${childY})`);
+//         }
+//     }
+}
 function readFile(file) {
     const reader = new FileReader();
     reader.addEventListener('load', (event) => {
@@ -279,8 +317,12 @@ function highlight_atom_in_SVG(atom, color, width) {
    * @parameters color: desired color, atom: atom selector, width: width for stroke to highlight even more
   * @fire hoverin/out_atom
    */
-
-    if (atom.toString().includes("_")) {
+    if (RiPPStatus){
+        let nameAtom = "atom_"+atom;
+        let group = document.getElementById(nameAtom);
+        group.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width)
+    }
+    else if (atom.toString().includes("_")) {
         let links = document.querySelectorAll('a[*|href=\x22' + atom + '\x22]');
         for (let linkIndex = 0; linkIndex < links.length; linkIndex++) {
             let link = links[linkIndex]
@@ -779,7 +821,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 
 function fetchFromRaichuRiPP(){
     updateRiPPs(geneMatrix, BGC)
-    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), cleavageSites, rippPrecursorGene, rippFullPrecursor])
+    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), [], rippPrecursorGene, rippFullPrecursor])
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
@@ -824,38 +866,28 @@ function fetchFromRaichuRiPP(){
             smiles_button.addEventListener("click", function(){ navigator.clipboard.writeText(raichu_output.smiles)}); 
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let tailoringEnzymes_intermediate = document.getElementById("innerIntermediateContainer_tailoredProduct");
-                tailoringEnzymes_intermediate.setAttribute("style", "width:30vw")
+                tailoringEnzymes_intermediate.setAttribute("style", "width:25vw")
                 tailoringEnzymes_intermediate.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring);
                 let intermediate_svg = document.getElementById("intermediate_drawing")
-                let bbox = intermediate_svg.getBBox();
-                let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
+                reformatSVGToBoundary(intermediate_svg)
 
-                intermediate_svg.setAttribute("viewBox", viewBox)
-
-                intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring_ripp");
+                intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
                 intermediate_svg.setAttribute('class', "intermediate_drawing_protease");
                 // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
-                precursor.setAttribute("style", "width:30vw")
+                precursor.setAttribute("style", "width:25vw")
                 precursor.innerHTML = formatSVG_intermediates(raichu_output.rawPeptideChain);
                 let precursor_svg = document.getElementById("precursor_drawing")
-                let precursor_bbox = intermediate_svg.getBBox();
-                let precursor_viewBox = [precursor_bbox.x, precursor_bbox.y, precursor_bbox.width, precursor_bbox.height].join(" ");
-
-                precursor_svg.setAttribute("viewBox", precursor_viewBox)
+                reformatSVGToBoundary(precursor_svg)
 
                 precursor_svg.setAttribute('id', "intermediate_drawing_precursor");
                 precursor_svg.setAttribute('class', "intermediate_drawing_precursor");
                 //add cleavage
                 let cleavage = document.getElementById("innerIntermediateContainer_cleavedProduct");
-                cleavage.setAttribute("style", "width:30vw")
+                cleavage.setAttribute("style", "width:25vw")
                 cleavage.innerHTML = formatSVG_intermediates(raichu_output.svg).replaceAll("final_drawing" ,"cleavedProduct");
                 let cleavage_svg = document.getElementById("cleavedProduct")
-                let cleavage_bbox = intermediate_svg.getBBox();
-                let cleavage_viewBox = [cleavage_bbox.x, cleavage_bbox.y, cleavage_bbox.width, cleavage_bbox.height].join(" ");
-
-                cleavage_svg.setAttribute("viewBox", cleavage_viewBox)
-
+                reformatSVGToBoundary(cleavage_svg)
                 cleavage_svg.setAttribute('id', "intermediate_drawing_cleavage");
                 cleavage_svg.setAttribute('class', "intermediate_drawing_cleavage");
             }
@@ -1347,6 +1379,17 @@ function openForm() {
 function closeForm() {
     document.getElementById("popupForm").style.display = "none";
 }
+function openTailoringForm() {
+    /**
+    *opens wildcard dialog
+
+   */
+    //
+    document.getElementById("popupFormTailoring").style.display = "block";
+}
+function closeTailoringForm() {
+    document.getElementById("popupFormTailoring").style.display = "none";
+}
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";
 }
@@ -1451,10 +1494,71 @@ function setWildcardSubstrate(substrate) {
     let button = findButtonbyTextContent(substrate)
     setColorOfDropDown(button)
 }
+function setWildcardTailoring(enzyme) {
+    wildcardEnzyme = enzyme
+    let button = findButtonbyTextContent(enzyme)
+    setColorOfDropDown(button)
+}
 function setWildcardModule(moduleType) {
     wildcardModule = moduleType;
 
     return wildcardModule
+}
+function addWildcardTailoring(geneMatrix) {
+    /**
+    *adds a wildcard module to the gene Matrix+ to the raw data (BGC)
+   * @fires wildcarddialog
+   *@input geneMatrix)
+   *@output different BGC, geneMatrix
+   */
+    let endLastGene = 0
+    if (BGC.orfs.length > 0) {
+        endLastGene = BGC.orfs[BGC.orfs.length - 1].end
+    }
+    BGC.end += 300
+    nameWildcardEnzyme += "_I"
+    let wildcard_gene = {
+        antismashArray: [],
+        default_option: [],
+        start: endLastGene,
+        end: endLastGene + 300,
+        locus_tag: nameWildcardEnzyme,
+        displayed: true,
+        tailoringEnzymeStatus: true,
+        tailoringEnzymeType: wildcardEnzyme,
+        tailoringEnzymeAbbreviation: tailoringEnzymeAbbreviation[wildcardEnzyme],
+        orffunction:wildcardEnzyme,
+        type: "",
+        domains: [],
+        strand: 1,
+        description: "Custom Gene",
+        id: nameWildcardModule,
+
+        ko: false,
+
+        options: [],
+
+        position: geneMatrix.length + 1,
+
+        position_in_BGC: geneMatrix.length + 1,
+
+        selected_option: [],
+        modules: []
+    }
+    geneMatrix.push(wildcard_gene)
+    BGC.orfs.push(wildcard_gene)
+    if (details_data.hasOwnProperty(cluster_type)) {
+        details_data[cluster_type][regionName].orfs.push(wildcard_gene)
+    }
+    else {
+        details_data[regionName].orfs.push(wildcard_gene)
+    }
+    displayGenes(BGC)
+    updateProteins(geneMatrix, BGC)
+    if (RiPPStatus == 0) { updateDomains(geneMatrix, BGC) } else { updateRiPPs(geneMatrix, BGC) }
+    addArrowClick(geneMatrix)
+    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+
 }
 function addWildcard(geneMatrix) {
     /**
@@ -1958,7 +2062,20 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, reactionOption, at
 }
 function changeSelectedOptionCleavageSites(option){
     cleavageSites = [option]
-    consol.log(option)
+    let translation = ""
+    // for antismash 7.0 files
+    if (BGCForDisplay["orfs"][rippPrecursorGene].hasOwnProperty("translation")) {
+        translation = BGCForDisplay["orfs"][rippPrecursorGene].translation
+    }
+    // for antismash 6.0 files
+    else {
+        var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
+        var translationSearch = regExString.exec(BGCForDisplay["orfs"][rippPrecursorGene].description);
+        translation = translationSearch[1]; //is the matched group if found
+    }
+    let cleavageNumber = parseInt(option.replace(/\D/g, ''));
+    rippPrecursor = translation.slice(-cleavageNumber);//
+
      if (document.querySelector('input[type=checkbox]')
         .checked) {
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)

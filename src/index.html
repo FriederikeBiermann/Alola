@@ -53,6 +53,8 @@
     <div class="heading-container"> Biosynthetic model
       <button type="button" class="start_button" onclick="openForm()" id="add_module_button"><strong>Add
           Module</strong></button>
+      <button type="button" class="start_button" onclick="openTailoringForm()" id="add_tailoring_enzyme_button"><strong>Add
+          tailoring Enzyme</strong></button>
       <button type="button" class="start_button" id="ripp_button" onclick="openRiPPForm()"><strong><a> RiPP BGC
           </a></strong></button>
     </div>
@@ -90,6 +92,21 @@
       </form>
     </div>
   </div>
+  <div class="loginPopup">
+    <div class="formPopup" id="popupFormTailoring">
+      <form class="formContainer">
+          <div class="dropdown">
+            <button type="button" class="dropbtn">Tailoring Enzyme</button>
+            <div class="dropdown-content" id = "dropdownWildcard">
+
+              </div>
+              </div>
+                        <button type="button" class="btn" onclick="addWildcardTailoring(geneMatrix);closeTailoringForm()">Submit</button>
+                        <button type="button" class="btn cancel" onclick="closeTailoringForm()">Close</button>
+      </form>
+    </div>
+  </div>
+
   <div class="loginPopup">
     <div class="formPopup" id="popupFormPKS">
       <form class="formContainer">
@@ -199,8 +216,8 @@
       <br>
       <input type="checkbox" id="wildcardProtease" name="wildcardProtease" value="true">
       <label for="wildcardProtease"> Add Protease</label><br>
-      <input type="checkbox" id="wildcardCyclase" name="wildcardCyclase" value="true">
-      <label for="wildcardCyclase"> Add Cyclase</label><br>
+      <!-- <input type="checkbox" id="wildcardCyclase" name="wildcardCyclase" value="true">
+      <label for="wildcardCyclase"> Add Cyclase</label><br> -->
       <button type="button" class="btn" onclick="addRiPP(geneMatrix, rippSelection);closeRiPPForm()">Submit</button>
       <button type="button" class="btn cancel" onclick="closeRiPPForm()">Close</button>
     </form>
