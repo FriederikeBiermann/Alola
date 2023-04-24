@@ -16,6 +16,12 @@ function addStringToArray(string, array) {
 var OptionCreator = {
   version: "1.0.0"
 };
+OptionCreator.createOptionsTerpeneCyclase = (function(atomsForCyclisation = none, tailoringSites = none){
+  options = {"Cyclization": atomsForCyclisation,
+    "Isomerization": tailoringSites['DOUBLE_BOND_SHIFT']}
+  return options
+  
+})
 OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none) {
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
     for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains.length; domainIndex++) {

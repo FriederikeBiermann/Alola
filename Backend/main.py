@@ -13,6 +13,8 @@ from raichu.reactions.chain_release import find_all_o_n_atoms_for_cyclization
 from raichu.reactions.general_tailoring_reactions import find_atoms_for_tailoring
 from raichu.drawing.drawer import RaichuDrawer
 from raichu.ripp import RiPP_Cluster
+from raichu.terpene import Terpene_Cluster
+from raichu.tailoring_enzymes import TailoringEnzyme
 
 # Allow cross origin requests
 from starlette.middleware import Middleware
@@ -145,14 +147,13 @@ async def alola_nrps_pks(antismash_input: str):
         return {"Error": "The Cluster is not biosynthetically correct, try removing domains to include only complete modules or changing the order of proteins."}
 
 @app.get("/api/alola/ripp/")
-async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(None)):
+async def alola_ripp(antismash_input: str):
     try:
         assert antismash_input
         # handle input data
         antismash_input_transformed = ast.literal_eval(antismash_input)
         tailoringReactions = []
         macrocyclisations = []
-        cleavage_sites = []
         amino_acid_sequence = antismash_input_transformed[0]
         gene_name_precursor = antismash_input_transformed[4]
         full_amino_acid_sequence = antismash_input_transformed[5]
@@ -163,11 +164,6 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
         for enzyme in antismash_input_transformed[2]:
             if len(enzyme)>0:
                 tailoringReactions += [TailoringRepresentation(*enzyme)]
-        for cleavage_site in antismash_input_transformed[3]:
-            if len(cleavage_site)>0:
-                amino_acid = cleavage_site[0]
-                amino_acid_number = int(cleavage_site[1:])
-                cleavage_sites += [CleavageSiteRepresentation(amino_acid, amino_acid_number, "follower")]
         ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence, cleavage_sites=cleavage_sites,
                                     tailoring_enzymes_representation=tailoringReactions)
         ripp_cluster.make_peptide()
@@ -187,9 +183,6 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
             ripp_cluster.do_macrocyclization()
         cyclised_product_svg = ripp_cluster.draw_precursor_with_modified_product(fold=5, size=7, as_string=True).replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='cyclised_drawing'")
-
-        if len(cleavage_sites)>0:
-            ripp_cluster.do_proteolytic_claevage()
         cleaved_ripp_svg = ripp_cluster.draw_product(as_string=True).replace("\n", "").replace(
             "\"", "'").replace("<svg", " <svg id='final_drawing'")
 
@@ -211,4 +204,52 @@ async def alola_ripp(antismash_input: str, state: Optional[List[int]] = Query(No
         exc_type = type(e).__name__
         filename, lineno, _, _ = tb[-1]
         print(f"{exc_type} occurred at {filename}:{lineno}")
+        return {"Error": "An error occured, try selecting a different precursor."}
+    
+
+@app.get("/api/alola/terpene/")
+async def alola_terpene(antismash_input: str):
+    try:
+        assert antismash_input
+        # handle input data
+        antismash_input_transformed = ast.literal_eval(antismash_input)
+        tailoringReactions = []
+        macrocyclisations = []
+        precursor = antismash_input_transformed[1]
+        gene_name_terpene_synthase = antismash_input_transformed[0]
+        terpene_cyclase_type = antismash_input_transformed[4]
+        if antismash_input_transformed[2] != "None":
+            for cyclization in antismash_input_transformed[2]:
+                if len(cyclization)>0:
+                    macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
+        for enzyme in antismash_input_transformed[3]:
+            if len(enzyme)>0:
+                tailoringReactions += [TailoringRepresentation(*enzyme)]
+        terpene_cluster = Terpene_Cluster (gene_name_terpene_synthase, precursor, macrocyclisations=macrocyclisations, terpene_cyclase_type=terpene_cyclase_type, tailoring_enzymes_representation = tailoringReactions)
+        terpene_cluster.create_precursor()
+        precursor_svg = terpene_cluster.draw_product().replace(
+            "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")
+        if len(macrocyclisations)>0:
+            terpene_cluster.do_macrocyclization()
+        cyclised_product_svg = terpene_cluster.draw_product().replace(
+            "\n", "").replace("\"", "'").replace("<svg", " <svg id='cyclized_drawing'")
+        # get options for cyclisation
+        cyclase = TailoringEnzyme("gene", "OXIDATIVE_BOND_FORMATION")   
+        atoms_for_cyclisation = str(
+            [str(atom) for atom in cyclase.get_possible_sites(
+            terpene_cluster.chain_intermediate) if str(atom) != "O_0"])
+        if len(tailoringReactions)>0:
+            terpene_cluster.do_tailoring()
+        svg_final_product_raw = terpene_cluster.draw_product()
+        svg_tailoring = svg_final_product_raw.replace(
+            "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
+        svg_final_product = svg_final_product_raw.replace("\n", "").replace(
+            "\"", "'").replace("<svg", " <svg id='final_drawing'")
+        smiles = structure_to_smiles(terpene_cluster.chain_intermediate, kekule=False)
+        tailoring_sites = get_tailoring_sites_atom_names(terpene_cluster.chain_intermediate)
+        return {"svg": svg_final_product, "smiles": smiles,  "atomsForCyclisation": atoms_for_cyclisation, "tailoringSites": str(tailoring_sites)
+                , "precursor": precursor_svg,
+                "cyclizedStructure": cyclised_product_svg,
+                "structureForTailoring": svg_tailoring}
+    except:
         return {"Error": "An error occured, try selecting a different precursor."}
