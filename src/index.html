@@ -17,6 +17,7 @@
     <!-- Rounded switch -->
 
 
+<button class="start_button" onclick="showImpressum()"><strong>Impressum</strong></button>
 
     <button type="button" class="start_button" onclick="create_empty_BGC()"> <strong>Create empty BGC
       </strong></button>
@@ -82,6 +83,7 @@
             out</strong></a></button>
       <button type='button' class='start_button' id = "smiles_button"><a><strong> Copy SMILES to clipboard </strong></a></button>
   </div>
+  </div>
   <div class="loginPopup">
     <div class="formPopup" id="popupForm">
       <form class="formContainer">
@@ -108,6 +110,8 @@
   </div>
     <div class="formPopup" id="popupFormTerpene">
       <div class="formContainer">
+        Select a substrate if you want this BGC to be processed as a Terpene BGC.
+        <br>
           <div class="dropdown">
             <button type="button" class="dropbtn">Substrate</button>
             <div class="dropdown-content" id = dropdownContentTerpene>
@@ -232,7 +236,15 @@
       <button type="button" class="btn" onclick="addRiPP(geneMatrix, rippSelection);closeRiPPForm()">Submit</button>
       <button type="button" class="btn cancel" onclick="closeRiPPForm()">Close</button>
     </form>
+  </div> 
+  <div id="popupImpressum" class="formPopup" >
+    <h2>Impressum and Contact Information</h2>
+    <p>If you have any questions, suggestions or bugs to report, please contact Friederike Biermann</p>
+    <p>Email: <a href="mailto:f.biermann@bio.uni-frankfurt.de">f.biermann@bio.uni-frankfurt.de</a></p>
+    <p>Group Name: Medema Lab, Bioinformatics</p>
+    <p>Address: Droevendaalsesteeg 1, 6708PB WAGENINGEN</p>
   </div>
+
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.js"></script>
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>

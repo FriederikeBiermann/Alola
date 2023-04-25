@@ -3,7 +3,6 @@ let regionName = "";
 let viewPortHeight = window.innerHeight;
 let viewPortWidth = window.innerWidth;
 var recordData = [];
-
 var details_data = {};
 let BGC ={};
 let fetching = false;
@@ -52,7 +51,6 @@ let aminoacids = {
 };
 let items = document.querySelectorAll('.test-container .box');
 var dragSrcEl = null;
-let cyclization = "None";
 let geneMatrix = [];
 let moduleMatrix = [];
 let wildcardSubstrate = "glycine";
@@ -1517,6 +1515,10 @@ function openTailoringForm() {
 }
 function closeTailoringForm() {
     document.getElementById("popupFormTailoring").style.display = "none";
+}
+function showImpressum() {
+    var popup = document.getElementById("popupImpressum");
+    popup.style.display = "block";
 }
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";
