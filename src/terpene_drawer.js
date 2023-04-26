@@ -8,14 +8,14 @@ var Terpener = {
     tooltip_id_domain: "Terpener-tooltip-123"
 };
 
-Terpener.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600){
+Terpener.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 300){
     var container = document.getElementById('domain_container')
     var scale = (function (val) {
         return parseInt(val / (1000 / height));
     })
     document.getElementById('domain_container').innerHTML = "";
     document.getElementById('model_gene_container').innerHTML = "";
-    Terpener.drawHeadings(height)
+    Terpener.drawHeadings(height, space)
     Terpener.leaveSpace(space, "precursor", scale)
     Terpener.drawCyclase(height, scale)
     Terpener.leaveSpace(space, "cyclizedProduct", scale)

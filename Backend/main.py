@@ -243,7 +243,7 @@ async def alola_terpene(antismash_input: str):
         svg_final_product_raw = terpene_cluster.draw_product()
         svg_tailoring = svg_final_product_raw.replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
-        svg_final_product = svg_final_product_raw.replace("\n", "").replace(
+        svg_final_product = RaichuDrawer(terpene_cluster.chain_intermediate, dont_show= True).draw_structure().save_svg_string().replace("\n", "").replace(
             "\"", "'").replace("<svg", " <svg id='final_drawing'")
         smiles = structure_to_smiles(terpene_cluster.chain_intermediate, kekule=False)
         tailoring_sites = get_tailoring_sites_atom_names(terpene_cluster.chain_intermediate)

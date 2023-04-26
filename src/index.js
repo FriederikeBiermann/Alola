@@ -342,7 +342,7 @@ function highlight_atom_in_SVG(atom, color, width) {
         let links = document.querySelectorAll('a[*|href=\x22' + atom + '\x22]');
         for (let linkIndex = 0; linkIndex < links.length; linkIndex++) {
             let link = links[linkIndex]
-            if (link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailoring")) {
+            if (link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailoring") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_cyclisation") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_precursor") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailored")) {
                 let text = link.childNodes[3]
                 text.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width)
             }
@@ -518,6 +518,7 @@ function addArrowClick(geneMatrix) {
             function () { // anonyme Funktion
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                 updateProteins(geneMatrix, BGC);
+                addArrowClick(geneMatrix);
                 if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
                 
                 // change color on click
@@ -565,8 +566,9 @@ function addArrowClick(geneMatrix) {
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                 changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".", "_") +
                     "_protein", geneIndex);
-                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_gene_arrow");
+                if (!geneMatrix[geneIndex].ko) {
+                    arrow.style.fill = "#E11839";
+                }
             },
             false
         );
@@ -575,8 +577,9 @@ function addArrowClick(geneMatrix) {
             function () { // anonyme Funktion
                 changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".", "_") +
                     "_protein", geneIndex);
-                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_gene_arrow");
+                if (!geneMatrix[geneIndex].ko) {
+                    arrow.style.fill = originalColorArrow;
+                }
             },
             false
         );}
@@ -587,8 +590,12 @@ function addArrowClick(geneMatrix) {
                     setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                     updateProteins(geneMatrix, BGC);
                     if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
-                    changeColor("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                        "_gene_arrow");
+                    const currentColor = getComputedStyle(arrow).fill;
+                    if (geneMatrix[geneIndex].ko == true) {
+                        arrow.style.fill = "#E11839";
+                    } else {
+                        arrow.style.fill = originalColorArrow;
+                    }
                     addArrowClick(geneMatrix);
                     if (document.getElementById("real-time-button")
                         .checked) {
@@ -668,36 +675,41 @@ function addArrowClick(geneMatrix) {
                     false
                 );
             }
-            if (RiPPStatus == 0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))){ // there are no typical domains in ripp clusters
+            if (RiPPStatus == 0 && (geneMatrix[geneIndex].hasOwnProperty(
+                "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))){ // there are no typical domains in ripp clusters
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
                 domainId = "#" + geneMatrix[geneIndex].id.replace(".","_") + "_domain_" + domain
                     .sequence;
+                domainId = "#domain" + geneMatrix[geneIndex].domains[
+                    domainIndex].identifier.replace(".", "_")
+                const domainObject_2 = document.querySelector(domainId);
                 const domainObject = document.querySelector(domainId);
+                const originalColorDomain = getComputedStyle(domainObject).fill;
+                const originalColorDomain_2 = getComputedStyle(domainObject_2).fill;
                 domainObject.addEventListener(
                     'click',
                     function () { // anonyme Funktion
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#" + geneMatrix[
-                                geneIndex].id + "_domain_" + geneMatrix[
-                                    geneIndex].domains[domainIndex].sequence);
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#domain" + geneMatrix[
-                                geneIndex].domains[domainIndex].identifier);
+                        const currentColor = getComputedStyle(domainObject).fill;
+                        if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
+                            domainObject.style.fill = "#E11839";
+                            domainObject_2.style.fill = "E11839"
+                        } else {
+                            domainObject.style.fill = originalColorDomain;
+                            domainObject_2.style.fill = originalColorDomain;
+                        }
+                        addArrowClick(geneMatrix);
                         setKoStatus(geneIndex, domainIndex, geneMatrix)
                     },
                     false);
                 domainObject.addEventListener(
                     'mouseenter',
                     function () { // anonyme Funktion
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#" + geneMatrix[
-                                geneIndex].id + "_domain_" + geneMatrix[
-                                    geneIndex].domains[domainIndex].sequence);
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#domain" + geneMatrix[
-                                geneIndex].domains[domainIndex].identifier);
+                        if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
+                            domainObject.style.fill = "#E11839";
+                            domainObject_2.style.fill = "E11839"
+                        }
                         displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                         changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_protein", geneIndex);
@@ -709,13 +721,10 @@ function addArrowClick(geneMatrix) {
                 domainObject.addEventListener(
                     'mouseleave',
                     function () { // anonyme Funktion
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#" + geneMatrix[
-                                geneIndex].id + "_domain_" + geneMatrix[
-                                    geneIndex].domains[domainIndex].sequence);
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#domain" + geneMatrix[
-                                geneIndex].domains[domainIndex].identifier);
+                        if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
+                            domainObject.style.fill = originalColorDomain;
+                            domainObject_2.style.fill = originalColorDomain_2;
+                        }
                         changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_gene_arrow", geneIndex);
                         changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
@@ -723,32 +732,28 @@ function addArrowClick(geneMatrix) {
                     },
                     false
                 );
-                domainId = "#domain" + geneMatrix[geneIndex].domains[
-                    domainIndex].identifier.replace(".", "_")
-                const domainObject_2 = document.querySelector(domainId);
+                
+                
                 domainObject_2.addEventListener(
                     'click',
                     function () { // anonyme Funktion
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#" + geneMatrix[
-                                geneIndex].id + "_domain_" + geneMatrix[
-                                    geneIndex].domains[domainIndex].sequence);
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#domain" + geneMatrix[
-                                geneIndex].domains[domainIndex].identifier); scale: 2,
-                                    setKoStatus(geneIndex, domainIndex, geneMatrix)
+                        if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
+                            domainObject.style.fill = "#E11839";
+                            domainObject_2.style.fill = "E11839"
+                        } else {
+                            domainObject.style.fill = originalColorDomain;
+                            domainObject_2.style.fill = originalColorDomain;
+                        }
+                        setKoStatus(geneIndex, domainIndex, geneMatrix);
                     },
                     false);
                 domainObject_2.addEventListener(
                     'mouseenter',
                     function () { // anonyme Funktion
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#" + geneMatrix[
-                                geneIndex].id + "_domain_" + geneMatrix[
-                                    geneIndex].domains[domainIndex].sequence);
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#domain" + geneMatrix[
-                                geneIndex].domains[domainIndex].identifier);
+                        if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
+                            domainObject_2.style.fill = "#E11839";
+                            domainObject.style.fill = "#E11839";
+                        }
                         displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                         changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_protein", geneIndex);
@@ -760,13 +765,10 @@ function addArrowClick(geneMatrix) {
                 domainObject_2.addEventListener(
                     'mouseleave',
                     function () { // anonyme Funktion
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#" + geneMatrix[
-                                geneIndex].id + "_domain_" + geneMatrix[
-                                    geneIndex].domains[domainIndex].sequence);
-                        changeDomainColor(geneMatrix[geneIndex].domains[
-                            domainIndex], "#domain" + geneMatrix[
-                                geneIndex].domains[domainIndex].identifier);
+                        if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
+                            domainObject_2.style.fill = originalColorDomain_2;
+                            domainObject.style.fill = originalColorDomain;
+                        }
                         changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
                             "_gene_arrow", geneIndex);
                         changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
@@ -891,7 +893,7 @@ function fetchFromRaichuTerpene(){
             smiles_button.addEventListener("click", function(){ navigator.clipboard.writeText(raichu_output.smiles)});
             if ((typeof (document.getElementById("innerIntermediateContainer_tailoredProduct")) != 'undefined' && document.getElementById("innerIntermediateContainer_tailoredProduct") != null)) {
                 let cyclized_product = document.getElementById("innerIntermediateContainer_cyclizedProduct");
-                cyclized_product.setAttribute("style", "width:30vw")
+                cyclized_product.setAttribute("style", "width:15vw")
                 cyclized_product.innerHTML = formatSVG_intermediates(raichu_output.cyclizedStructure);
                 let intermediate_svg = document.getElementById("cyclized_drawing")
                 let bbox = intermediate_svg.getBBox();
@@ -903,7 +905,7 @@ function fetchFromRaichuTerpene(){
                 intermediate_svg.setAttribute('class', "intermediate_drawing_cyclisation");
                 // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
-                precursor.setAttribute("style", "width:30vw")
+                precursor.setAttribute("style", "width:15vw")
                 precursor.innerHTML = formatSVG_intermediates(raichu_output.precursor);
                 let precursor_svg = document.getElementById("precursor_drawing")
                 let precursor_bbox = intermediate_svg.getBBox();
@@ -915,7 +917,7 @@ function fetchFromRaichuTerpene(){
                 precursor_svg.setAttribute('class', "intermediate_drawing_precursor");
                 //add cleavage
                 let tailored_product = document.getElementById("innerIntermediateContainer_tailoredProduct");
-                tailored_product.setAttribute("style", "width:30vw")
+                tailored_product.setAttribute("style", "width:15vw")
                 tailored_product.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring)
                 let tailored_svg = document.getElementById("intermediate_drawing")
                 let tailored_bbox = intermediate_svg.getBBox();
@@ -1117,7 +1119,8 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
             smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})}
-}}
+    }
+}
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     /**
     * Change color of domain.
@@ -1318,7 +1321,8 @@ function getACPList(geneMatrix) {
     let acpList = []
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
-            0 && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+            0 && (geneMatrix[geneIndex].hasOwnProperty(
+                "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 if (geneMatrix[geneIndex].domains[domainIndex].ko == false || geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
@@ -1527,7 +1531,11 @@ function closeTailoringForm() {
 }
 function showImpressum() {
     var popup = document.getElementById("popupImpressum");
-    popup.style.display = "block";
+    if (popup.style.display == "block"){
+        popup.style.display = "none";
+    }
+    else { popup.style.display = "block"; }
+    
 }
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";
@@ -2273,7 +2281,8 @@ function createGeneMatrix(BGC, regionName) {
         }
         let orfFunction = findFuctionOrf(BGC["orfs"][geneIndex].description)
         let tailoringEnzymeStatus = findTailoringEnzymeStatus(orfFunction)
-        if (biosyntheticCoreEnzymes.includes(orfFunction) || BGC["orfs"][geneIndex].type == "biosynthetic"){
+        if (BGC["orfs"][geneIndex].hasOwnProperty(
+            "modules") || biosyntheticCoreEnzymes.includes(orfFunction) || BGC["orfs"][geneIndex].type == "biosynthetic" ){
             tailoringEnzymeStatus = false
         }
 
@@ -2503,7 +2512,8 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
     let moduleSubtype = "PKS_TRANS";
     let moduleIndex = 0;
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic")) ) {
+        if (geneMatrix[geneIndex].ko == false && (geneMatrix[geneIndex].hasOwnProperty(
+            "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic")) ) {
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
                 let orf = region.orfs[orfIndex];
                 if (geneMatrix[geneIndex].id == orf.id) {

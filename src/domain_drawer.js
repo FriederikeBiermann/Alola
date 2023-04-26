@@ -106,7 +106,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                         if (geneMatrix[geneIndex].id == orf.locus_tag) {
                             if (!(geneMatrix[geneIndex].hasOwnProperty(
                                 "modules")) ) {
-                                if ((biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))){
+                                if (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic")){
                                 geneMatrix[geneIndex].modules = [{
                                     domains: geneMatrix[
                                         geneIndex].domains
@@ -697,7 +697,8 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let geneSize = 0
         let lengthVisualisation = 0
-        if (geneMatrix[geneIndex].ko == false && (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+        if (geneMatrix[geneIndex].ko == false && (geneMatrix[geneIndex].hasOwnProperty(
+            "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
             if (geneMatrix[geneIndex].hasOwnProperty("domains")) {
                 for (let domainIndex = 0; domainIndex < geneMatrix[
                     geneIndex].domains.length; domainIndex++) {
