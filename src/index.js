@@ -512,14 +512,21 @@ function addArrowClick(geneMatrix) {
         arrow_1.replaceWith(arrow_1.cloneNode(true));
         let arrow = document.querySelector(arrow_id);
         let protein = document.querySelector(protein_id);
+        const originalColorArrow = getComputedStyle(arrow).fill;
         arrow.addEventListener(
             'click',
             function () { // anonyme Funktion
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                 updateProteins(geneMatrix, BGC);
                 if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
-                changeColor("#" + geneMatrix[geneIndex].id.replace(".","_") + "_gene_arrow");
-                addArrowClick(geneMatrix);
+                
+                // change color on click
+                const currentColor = getComputedStyle(arrow).fill;
+                if (geneMatrix[geneIndex].ko == true) {
+                    arrow.style.fill = "#E11839";
+                } else {
+                    arrow.style.fill = originalColorArrow;
+                }
                 if (document.getElementById("real-time-button")
                     .checked) {
                     fetchFromRaichu(details_data, regionName, geneMatrix,
@@ -534,8 +541,9 @@ function addArrowClick(geneMatrix) {
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                 changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
                     "_protein", geneIndex)
-                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_gene_arrow");
+                if (!geneMatrix[geneIndex].ko) {
+                    arrow.style.fill = "#E11839";
+                }
             },
             false
         );
@@ -543,9 +551,10 @@ function addArrowClick(geneMatrix) {
             'mouseleave',
             function () { // anonyme Funktion
                 changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                    "_protein", geneIndex)
-                changeColor("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_gene_arrow");
+                    "_protein", geneIndex);
+                if (!geneMatrix[geneIndex].ko) {
+                    arrow.style.fill = originalColorArrow;
+                }
             },
             false
         );
