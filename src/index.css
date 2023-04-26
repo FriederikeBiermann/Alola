@@ -96,6 +96,12 @@ label {
   text-align: center;
   overflow: auto;
 }
+#popupImpressum{
+  color: #1F1F1F;
+  background-color: white;
+  text-align: center;
+  font-size: 3vh;
+}
 
 #BGC_explorer {
   padding: 1.5vh;
@@ -580,8 +586,9 @@ svg text {
 .formPopup {
   display: none;
   position: fixed;
-  left: 45%;
-  top: 5%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   border: 0.3vh solid #999999;
   z-index: 9;
 }
