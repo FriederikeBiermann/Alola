@@ -2,6 +2,10 @@ let regionIndex = 0;
 let regionName = "";
 let viewPortHeight = window.innerHeight;
 let viewPortWidth = window.innerWidth;
+if (window.matchMedia("(orientation: portrait)").matches) {
+    viewPortHeight = window.innerWidth;
+    viewPortWidth = window.innerHeight;
+}
 var recordData = [];
 var details_data = {};
 let BGC ={};
@@ -680,11 +684,12 @@ function addArrowClick(geneMatrix) {
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
                 domain = geneMatrix[geneIndex].domains[domainIndex]
-                domainId = "#" + geneMatrix[geneIndex].id.replace(".","_") + "_domain_" + domain
+                domainId_2 = "#" + geneMatrix[geneIndex].id.replace(".","_") + "_domain_" + domain
                     .sequence;
+                const domainObject_2 = document.querySelector(domainId_2);
                 domainId = "#domain" + geneMatrix[geneIndex].domains[
                     domainIndex].identifier.replace(".", "_")
-                const domainObject_2 = document.querySelector(domainId);
+                
                 const domainObject = document.querySelector(domainId);
                 const originalColorDomain = getComputedStyle(domainObject).fill;
                 const originalColorDomain_2 = getComputedStyle(domainObject_2).fill;
@@ -694,7 +699,7 @@ function addArrowClick(geneMatrix) {
                         const currentColor = getComputedStyle(domainObject).fill;
                         if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
                             domainObject.style.fill = "#E11839";
-                            domainObject_2.style.fill = "E11839"
+                            domainObject_2.style.fill = "#E11839";
                         } else {
                             domainObject.style.fill = originalColorDomain;
                             domainObject_2.style.fill = originalColorDomain;
@@ -707,8 +712,8 @@ function addArrowClick(geneMatrix) {
                     'mouseenter',
                     function () { // anonyme Funktion
                         if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
+                            domainObject_2.style.fill = "#E11839";
                             domainObject.style.fill = "#E11839";
-                            domainObject_2.style.fill = "E11839"
                         }
                         displayTextInGeneExplorer(geneMatrix[geneIndex].id);
                         changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
@@ -739,7 +744,7 @@ function addArrowClick(geneMatrix) {
                     function () { // anonyme Funktion
                         if (!(geneMatrix[geneIndex].domains[domainIndex].ko == true)) {
                             domainObject.style.fill = "#E11839";
-                            domainObject_2.style.fill = "E11839"
+                            domainObject_2.style.fill = "#E11839";
                         } else {
                             domainObject.style.fill = originalColorDomain;
                             domainObject_2.style.fill = originalColorDomain;
@@ -1024,10 +1029,10 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
             fetchFromRaichuTerpene();
 
         }
-        else {
+        else if (details_data.nrpspks.hasOwnProperty(regionName)) {
             let data = "";
             let starterACP = "";
-            if (details_data.nrpspks.hasOwnProperty(regionName)) {
+            
                 let extracted_results = extractAntismashPredictionsFromRegion(details_data, regionName, geneMatrix);
                 data = extracted_results[0];
                 starterACP = extracted_results[1];
@@ -1090,7 +1095,6 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
                 intermediate_svg.setAttribute("width", max_width)
                 intermediate_svg.setAttribute('id', "intermediate_drawing" + intermediateIndex);
                 intermediate_svg.setAttribute('class', "intermediate_drawing");
-                console.log(bbox.x, intermediates[intermediateIndex], carrier_x, max_width)
                 if (0.05* viewPortWidth <= max_width){
                     intermediate_svg.setAttribute('style', "right: " + (((carrier_x - bbox.x) / max_width) * 5 -700/viewPortHeight) + "vw;");
                 }
@@ -1119,8 +1123,11 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
             smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})}
-    }
-}
+    else{
+    let module_container = document.getElementById("module_container");
+    module_container.innerHTML = "<strong>" + "This type of BGC is not implemented yet."+ "</strong>";
+    }}
+
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     /**
     * Change color of domain.
@@ -1362,7 +1369,7 @@ function updateDomains(geneMatrix, BGC) {
     }
     $("#Domain_container")
         .html(Domainer.drawClusterSVG(removePaddingBGC(
-            removeSpaceBetweenProteins(domainsForDisplay))));
+            removeSpaceBetweenProteins(domainsForDisplay)), height = viewPortHeight * 0.09));
     addDragDrop();
 }
 function updateRiPPs(geneMatrix, BGC) {
@@ -1673,24 +1680,24 @@ function addWildcardTailoring(geneMatrix) {
     if (BGC.orfs.length > 0) {
         endLastGene = BGC.orfs[BGC.orfs.length - 1].end
     }
-    BGC.end += 300
+    BGC.end += 900
     nameWildcardEnzyme += "_I"
     let wildcard_gene = {
         antismashArray: [],
         default_option: [],
         start: endLastGene,
-        end: endLastGene + 300,
+        end: endLastGene +900,
         locus_tag: nameWildcardEnzyme,
         displayed: true,
         tailoringEnzymeStatus: true,
         tailoringEnzymeType: wildcardEnzyme,
-        tailoringEnzymeAbbreviation: tailoringEnzymeAbbreviation[wildcardEnzyme],
+        tailoringEnzymeAbbreviation: tailoringEnzymes[wildcardEnzyme],
         orffunction:wildcardEnzyme,
         type: "",
         domains: [],
         strand: 1,
         description: "Custom Gene",
-        id: nameWildcardModule,
+        id: nameWildcardEnzyme,
 
         ko: false,
 
@@ -2691,9 +2698,9 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                     let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered]
                                     if (moduleArray.length != 0) {
                                         outputForRaichu.push(moduleArray)
-                                        domains = domainArray.map(function (x) {
+                                        domains = domains.concat(domainArray.map(function (x) {
                                             return x[1];
-                                        });
+                                        }));
                                         // add merged modules to gene matrix
                                         moduleMatrix.push({
                                             "id": moduleIndex,
@@ -2704,6 +2711,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                         moduleIndex++
                                     }
                                     domainArray = [];
+                                    domains = []
                                     typesInModule = [];
                                     moduleType = "PKS";
                                     moduleSubtype = "PKS_TRANS";
@@ -2751,9 +2759,9 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
         // create module arrays
             if (domainArrayFiltered.length != 0) {
                 outputForRaichu[outputForRaichu.length - 1][3] = outputForRaichu[outputForRaichu.length - 1][3].concat(domainArrayFiltered);
-            domains = domainArray.map(function (x) {
+            domains = domains.concat(domainArray.map(function (x) {
                 return x[1];
-            });
+            }))
             // add merged modules to gene matrix
             moduleMatrix[moduleMatrix.length - 1].domains = moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
             moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.length;

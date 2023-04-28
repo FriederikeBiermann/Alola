@@ -396,7 +396,7 @@ input:checked+.slider:before {
   color: #1F1F1F;
   white-space: nowrap;
   height: 5vh;
-  font-size: medium;
+  font-size: 1.5vh;
 }
 
 .intermediateContainer {

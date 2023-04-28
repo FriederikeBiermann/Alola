@@ -6,6 +6,8 @@ colour_fill_dict = {
     'PKS_AT': '#f78181',
     'PKS_KS(Modular-KS)': '#81f781',
     'PKS_KS(Trans-AT-KS)': '#81f781',
+    'PKS_KS(Hybrid-KS)': '#81f781',
+    'PKS_KS(Enediyne-KS)': '#81f781',
     'PKS_KR': '#80f680',
     'PKS_DH': '#f7be81',
     'PKS_DH2': '#f7be81',
@@ -17,7 +19,14 @@ colour_fill_dict = {
     'Condensation_DCL': '#5858b6',
     'Condensation_Starter': '#5858b6',
     'AMP-binding': '#bc7ff5', 'PCP': '#81bef7', 'Epimerization': '#8181f7', "TIGR01720": '#8181f7',
-    'nMT': '#dadada'
+    "CAL_domain": '#43AA8B',
+    "PKS_Docking_Nterm":"#B2B09B",
+    "PKS_Docking_Cterm": "#B2B09B",
+    "cMT":"#8B9556",
+    "oMT": "#8B9556",
+    "nMT": "#8B9556",
+    "Aminotran_1_2":"#4F928B",
+    "NAD_binding_4": "#957580"
 }
 colour_outline_dict = {
     'PKS_DH2': '#ca9862',
@@ -27,15 +36,27 @@ colour_outline_dict = {
     'PKS_AT': '#df5d5d',
     'PKS_KS': '#5fc65f',
     'PKS_KS(Modular-KS)': '#5fc65f',
+    'PKS_KS(Hybrid-KS)': '#5fc65f',
+    'PKS_KS(Enediyne-KS)': '#5fc65f',
     'PKS_KR': '#5fbb87',
     'PKS_DH': '#ca9862',
     'PKS_ER': '#61bbad',
     'PKS_TE': '#a25ba0',
     'Thioesterase': '#a25ba0',
-    'KR*': '#5fbb87'
+    'KR*': '#5fbb87',
+    'Condensation_LCL': '#3E3E8E',
+    'Condensation_DCL': '#3E3E8E',
+    'Condensation_Starter': '#3E3E8E',
+    'AMP-binding': '#922EEF', 'PCP': '#1988F0', 'Epimerization': '#5252F4', "TIGR01720": '#5252F4',
+    "CAL_domain": '#296654',
+    "PKS_Docking_Nterm": "#737159",
+    "PKS_Docking_Cterm": "#737159",
+        "cMT":"#60683C",
+    "oMT": "#60683C",
+    "nMT": "#60683C",
+    "Aminotran_1_2": "#2B504C",
+    "NAD_binding_4": "#6D545D"
 }
-
-
 function hasNumbers(t) {
     var regex = /\d/g;
     return regex.test(t);
@@ -77,24 +98,25 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                 for (var j in orf.domains) {
                     var numberOfDomains = orf.domains.length
                     var domain = orf.domains[j];
-                    var color = "gray";
+                    var color = "";
+                    var opacity = "1"
                     if (domain.hasOwnProperty("type")) {
                         if (colour_fill_dict.hasOwnProperty(domain.type)) {
                             color = colour_fill_dict[domain.type];
                         }
                         else {
-                            color = "#025699"
+                            color = "#0486F1"
                         }
                         if (colour_outline_dict.hasOwnProperty(domain.type)) {
                             outline = colour_outline_dict[domain.type];
                         }
                         else {
-                            outline = "black";
+                            outline = "#025AA1";
                         }
                     }
                     else {
-                        color = "#025699";
-                        outline = "black"
+                        color = "#0486F1";
+                        outline = "#025AA1"
                     }
                     let geneIndex = 0
                     let domainIdentifier = ""
@@ -141,7 +163,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                         // declare color if ko
                                         if (geneMatrix[geneIndex].modules[
                                             moduleIndex].domains[
-                                            domainIndex].ko == true) { color = "#E11839" }
+                                            domainIndex].ko == true) { opacity = "0.5" }
                                         //declare size of balls
                                         if (geneMatrix[geneIndex].modules[
                                             moduleIndex].domains[
@@ -402,6 +424,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                 .rx("200%")
                                 .ry("200%")
                                 .fill(color)
+                                .opacity(opacity)
                                 .stroke({
                                     width: 2, color: outline
                                 });
@@ -481,7 +504,6 @@ Domainer.leaveSpaceForTailoring = (function (width, scale) {
     innerContainer.appendChild(innerIntermediateContainer);
     innerContainer.style.width = String(width) + "px";
 })
-
 Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, scale) {
     var container = document.getElementById('domain_container')
     let size = height/2
@@ -738,7 +760,7 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
                     width: 1
                 })
             if (geneSize < height / 2) {
-                var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_")).x(geneSize / 2).y(height / 4 - 7)
+                var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_").slice(-4)).x(geneSize / 2).y(height / 4 - 7)
             }
 
             else { var text = draw.text(geneMatrix[geneIndex].id.replace(".", "_")).x(geneSize / 2).y(height / 4 - 7) }
@@ -773,7 +795,7 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
                 .stroke({
                     width: 1
                 })
-            if (gene_size < height *0.75 && geneMatrix[geneIndex].id.includes("_")) { var text = draw.text(geneMatrix[geneIndex].id.split("_")[1]).x(gene_size / 2).y(height / 4 - 7) }
+            if (gene_size < height * 0.75 ) { var text = draw.text(geneMatrix[geneIndex].id.slice(-4)).x(gene_size / 2).y(height / 4 - 7) }
             else { var text = draw.text(geneMatrix[geneIndex].id).x(gene_size / 2).y(height / 4 - 7) }
 
 
@@ -822,9 +844,9 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
                 })
             dom.node.id = "module_" + moduleIndex
             if (size >= height*0.75) {
-                var text_module = draw.text("Module " + String(moduleIndex)).x(size / 2).y(module_height / 2 - 7).fill("white")
+                var text_module = draw.text("Module " + String(moduleIndex + 1)).x(size / 2).y(module_height / 2 - 7).fill("white")
             }
-            else { var text_module = draw.text(String(moduleIndex)).x(size / 2).y(module_height / 2 - 7).fill("white") }
+            else { var text_module = draw.text(String(moduleIndex + 1)).x(size / 2).y(module_height / 2 - 7).fill("white") }
         }
     }
     //tailoring enzyme
