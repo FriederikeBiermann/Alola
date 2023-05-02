@@ -853,13 +853,13 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 
 function fetchFromRaichuTerpene(){
     updateTerpenes(geneMatrix, BGC)
-    let data_string = JSON.stringify(["terpene-cyclase", terpeneSubstrate, splitArrayIntoPairs(cyclization), findTailoringReactions(geneMatrix), "Class_1"])
+    let data_string = JSON.stringify({"gene_name_precursor": "terpene-cyclase", "substrate": terpeneSubstrate, "cyclization": splitArrayIntoPairs(cyclization),"tailoring": findTailoringReactions(geneMatrix), "terpene_cyclase_type": "Class_1"})
     let url = "http://127.0.0.1:8000/api/alola/terpene?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
     updateProteins(geneMatrix, BGC);
     addDragDrop();
-    fetch(url + data_string)
+    fetch(url + encodeURIComponent(data_string))
         .then(response => {
             const handler = response.json();
             return handler
@@ -938,13 +938,13 @@ function fetchFromRaichuTerpene(){
 }
 function fetchFromRaichuRiPP() {
     updateRiPPs(geneMatrix, BGC)
-    let data_string = JSON.stringify([rippPrecursor, cyclization, findTailoringReactions(geneMatrix), [], rippPrecursorGene, rippFullPrecursor])
+    let data_string = JSON.stringify({"rippPrecursor":rippPrecursor, "cyclization": cyclization, "tailoring": findTailoringReactions(geneMatrix), "rippPrecursorName": rippPrecursorGene, "rippFullPrecursor": rippFullPrecursor})
     let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
     updateProteins(geneMatrix, BGC);
     addDragDrop();
-    fetch(url + data_string)
+    fetch(url + encodeURIComponent(data_string))
         .then(response => {
             const handler = response.json();
             return handler
@@ -1038,13 +1038,13 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
                 starterACP = extracted_results[1];
                 // add tailoring reactions
                 let tailoringArray = findTailoringReactions(geneMatrix);
-                let data_string = JSON.stringify([data, cyclization, tailoringArray]);
+                let data_string = JSON.stringify({"clusterRepresentation": data, "cyclization": cyclization, "tailoring": tailoringArray});
                 let url = "http://127.0.0.1:8000/api/alola/nrps_pks?antismash_input=";
                 let container = document.getElementById("structure_container");
                 container.innerHTML = "";
                 updateProteins(geneMatrix, BGC);
                 addDragDrop();
-                const response = await fetch(url + data_string); // use await to handle asynchronous request
+            const response = await fetch(url + encodeURIComponent(data_string)); // use await to handle asynchronous request
                 const raichu_output = await response.json();
                 if (raichu_output.hasOwnProperty("Error")) {
                     let module_container = document.getElementById("module_container");

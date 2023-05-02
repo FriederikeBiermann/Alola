@@ -2,6 +2,7 @@ from fastapi import FastAPI, Query
 import traceback
 from typing import List
 import ast
+import json
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
 from pikachu.chem.structure import Structure
@@ -93,19 +94,19 @@ async def root():
 
 
 @app.get("/api/alola/nrps_pks/")
-async def alola_nrps_pks(antismash_input: str):
+async def alola_nrps_pks(antismash_input):
     try:
         assert antismash_input
         # handle input data
-        antismash_input_transformed = ast.literal_eval(antismash_input)
+        antismash_input_transformed = json.loads(antismash_input)
         tailoringReactions = []
-        for enzyme in antismash_input_transformed[2]:
+        for enzyme in antismash_input_transformed["tailoring"]:
             tailoringReactions += [TailoringRepresentation(*enzyme)]
-        raw_cluster_representation = antismash_input_transformed[0]
+        raw_cluster_representation = antismash_input_transformed["clusterRepresentation"]
         #Format fake booleans
         raichu_input = format_cluster(
             raw_cluster_representation, tailoringReactions)
-        cyclization = antismash_input_transformed[1]
+        cyclization = antismash_input_transformed["cyclization"]
         cluster = build_cluster(raichu_input, strict = False)
         cluster.compute_structures(compute_cyclic_products=False)
         cluster_svg = cluster.draw_cluster()
@@ -151,17 +152,17 @@ async def alola_ripp(antismash_input: str):
     try:
         assert antismash_input
         # handle input data
-        antismash_input_transformed = ast.literal_eval(antismash_input)
+        antismash_input_transformed = json.loads(antismash_input)
         tailoringReactions = []
         macrocyclisations = []
-        amino_acid_sequence = antismash_input_transformed[0]
-        gene_name_precursor = antismash_input_transformed[4]
-        full_amino_acid_sequence = antismash_input_transformed[5]
+        amino_acid_sequence = antismash_input_transformed["rippPrecursor"]
+        gene_name_precursor = antismash_input_transformed["rippPrecursorName"]
+        full_amino_acid_sequence = antismash_input_transformed["rippFullPrecursor"]
         if antismash_input_transformed[1] != "None":
-            for cyclization in antismash_input_transformed[1]:
+            for cyclization in antismash_input_transformed["cyclization"]:
                 if len(cyclization)>0:
                     macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
-        for enzyme in antismash_input_transformed[2]:
+        for enzyme in antismash_input_transformed["tailoring"]:
             if len(enzyme)>0:
                 tailoringReactions += [TailoringRepresentation(*enzyme)]
         ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence,
@@ -212,17 +213,17 @@ async def alola_terpene(antismash_input: str):
     try:
         assert antismash_input
         # handle input data
-        antismash_input_transformed = ast.literal_eval(antismash_input)
+        antismash_input_transformed = json.loads(antismash_input)
         tailoringReactions = []
         macrocyclisations = []
-        precursor = antismash_input_transformed[1]
-        gene_name_terpene_synthase = antismash_input_transformed[0]
-        terpene_cyclase_type = antismash_input_transformed[4]
-        if antismash_input_transformed[2] != "None":
-            for cyclization in antismash_input_transformed[2]:
+        precursor = antismash_input_transformed["substrate"]
+        gene_name_terpene_synthase = antismash_input_transformed["gene_name_precursor"]
+        terpene_cyclase_type = antismash_input_transformed["terpene_cyclase_type"]
+        if antismash_input_transformed["cyclization"] != "None":
+            for cyclization in antismash_input_transformed["cyclization"]:
                 if len(cyclization)>0:
                     macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
-        for enzyme in antismash_input_transformed[3]:
+        for enzyme in antismash_input_transformed["tailoring"]:
             if len(enzyme)>0:
                 tailoringReactions += [TailoringRepresentation(*enzyme)]
         terpene_cluster = Terpene_Cluster (gene_name_terpene_synthase, precursor, macrocyclisations=macrocyclisations, terpene_cyclase_type=terpene_cyclase_type, tailoring_enzymes_representation = tailoringReactions)
@@ -251,5 +252,9 @@ async def alola_terpene(antismash_input: str):
                 , "precursor": precursor_svg,
                 "cyclizedStructure": cyclised_product_svg,
                 "structureForTailoring": svg_tailoring}
-    except:
+    except Exception as e:
+        tb = traceback.extract_tb(e.__traceback__)
+        exc_type = type(e).__name__
+        filename, lineno, _, _ = tb[-1]
+        print(f"{exc_type} occurred at {filename}:{lineno}")
         return {"Error": "An error occured, try selecting a different precursor."}
