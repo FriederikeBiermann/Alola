@@ -164,7 +164,7 @@ async def alola_ripp(antismash_input: str):
         for enzyme in antismash_input_transformed[2]:
             if len(enzyme)>0:
                 tailoringReactions += [TailoringRepresentation(*enzyme)]
-        ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence, cleavage_sites=cleavage_sites,
+        ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence,
                                     tailoring_enzymes_representation=tailoringReactions)
         ripp_cluster.make_peptide()
         peptide_svg = ripp_cluster.draw_precursor_with_modified_product(
