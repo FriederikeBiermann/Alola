@@ -2,5 +2,5 @@ fastapi>=0.68.0,<0.69.0
 pydantic>=1.8.0,<2.0.0
 uvicorn>=0.15.0,<0.16.0
 pikachu-chem >=1.0.10
-starlette==0.25.0
+starlette==0.14.2
 aiofiles==0.8.0
