@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Query
+from fastapi.staticfiles import StaticFiles
 import traceback
 from typing import List
 import ast
@@ -24,6 +25,8 @@ origins = ["http://localhost:3000",
            "localhost:3000"]
 middleware = [Middleware(CORSMiddleware, allow_origins=origins)]
 app = FastAPI(middleware=middleware)
+
+app.mount("/static", StaticFiles(directory="app"), name="static")
 
 def get_drawings(cluster) :
     drawings, widths = cluster.get_drawings()
