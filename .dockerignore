@@ -1,0 +1,6 @@
+# Exclude Python cache files
+Backend/__pycache__
+Backend/build
+
+# Exclude Node.js modules
+src/node_modules
