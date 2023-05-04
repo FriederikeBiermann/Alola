@@ -1,3 +1,4 @@
+let port = "http://127.0.0.1:8000/"
 let regionIndex = 0;
 let regionName = "";
 let viewPortHeight = window.innerHeight;
@@ -854,7 +855,7 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 function fetchFromRaichuTerpene(){
     updateTerpenes(geneMatrix, BGC)
     let data_string = JSON.stringify({"gene_name_precursor": "terpene-cyclase", "substrate": terpeneSubstrate, "cyclization": splitArrayIntoPairs(cyclization),"tailoring": findTailoringReactions(geneMatrix), "terpene_cyclase_type": "Class_1"})
-    let url = "http://127.0.0.1:8000/api/alola/terpene?antismash_input=";
+    let url = port +"api/alola/terpene?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
     updateProteins(geneMatrix, BGC);
@@ -939,7 +940,7 @@ function fetchFromRaichuTerpene(){
 function fetchFromRaichuRiPP() {
     updateRiPPs(geneMatrix, BGC)
     let data_string = JSON.stringify({"rippPrecursor":rippPrecursor, "cyclization": cyclization, "tailoring": findTailoringReactions(geneMatrix), "rippPrecursorName": rippPrecursorGene, "rippFullPrecursor": rippFullPrecursor})
-    let url = "http://127.0.0.1:8000/api/alola/ripp?antismash_input=";
+    let url = port +"api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
     container.innerHTML = ""
     updateProteins(geneMatrix, BGC);
@@ -1039,7 +1040,7 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
                 // add tailoring reactions
                 let tailoringArray = findTailoringReactions(geneMatrix);
                 let data_string = JSON.stringify({"clusterRepresentation": data, "cyclization": cyclization, "tailoring": tailoringArray});
-                let url = "http://127.0.0.1:8000/api/alola/nrps_pks?antismash_input=";
+                let url = port +"api/alola/nrps_pks?antismash_input=";
                 let container = document.getElementById("structure_container");
                 container.innerHTML = "";
                 updateProteins(geneMatrix, BGC);
