@@ -164,7 +164,7 @@ async def alola_ripp(antismash_input: str):
         amino_acid_sequence = antismash_input_transformed["rippPrecursor"]
         gene_name_precursor = antismash_input_transformed["rippPrecursorName"]
         full_amino_acid_sequence = antismash_input_transformed["rippFullPrecursor"]
-        if antismash_input_transformed[1] != "None":
+        if antismash_input_transformed["cyclization"] != "None":
             for cyclization in antismash_input_transformed["cyclization"]:
                 if len(cyclization)>0:
                     macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
