@@ -1,4 +1,4 @@
-let port = "http://api.alola.bioinformatics.nl"
+let port = "https://api-alola.bioinformatics.nl/"
 let regionIndex = 0;
 let regionName = "";
 let viewPortHeight = window.innerHeight;
