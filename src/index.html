@@ -25,12 +25,12 @@
   <div id="menu_bar">
     <!-- Rounded switch -->
     <button type="button" id="undoButton" class="redoUndo_button tooltip"
-      data-tooltip="Click to revert your last action." onclick="bgcSystem.undo()">
+      data-tooltip="Click to revert your last action." onclick="session.record.undo()">
       <strong>Undo</strong>
     </button>
 
     <button type="button" id="redoButton" class="redoUndo_button tooltip"
-      data-tooltip="Click to reapply an action you have undone." onclick="bgcSystem.redo()">
+      data-tooltip="Click to reapply an action you have undone." onclick="session.record.redo()">
       <strong>Redo</strong>
     </button>
 
@@ -40,7 +40,7 @@
       <strong>Alola Manual</strong>
     </button>
 
-    <button class="start_button tooltip" data-tooltip="View Impressum" onclick="uiHandler.showImpressum()">
+    <button class="start_button tooltip" data-tooltip="View Impressum" onclick="session.uiHandler.showImpressum()">
       <strong>Impressum</strong>
     </button>
 
@@ -54,7 +54,7 @@
 
     <button type="button" class="start_button tooltip"
       data-tooltip="Create an empty biosynthetic gene cluster (BGC) to fill with modules."
-      onclick="bgcSystem.create_empty_BGC()">
+      onclick="session.record.create_empty_BGC()">
       <strong>Create empty BGC</strong>
     </button>
 
@@ -65,13 +65,13 @@
 
     <button type="button" class="start_button tooltip"
       data-tooltip="Fetch updated data and refresh the displayed structures and spaghetti diagram."
-      onclick="bgcSystem.refreshStructures()">
+      onclick="record.refreshStructures()">
       <strong>Refresh structures</strong>
     </button>
 
     <button type="button" class="start_button tooltip"
       data-tooltip="Reset the view to the initial state without modifications to the biosynthetic model."
-      onclick="bgcSystem.reload_site_with_genecluster()">
+      onclick="record.reload_site_with_genecluster()">
       <strong>Reset view</strong>
     </button>
 
@@ -95,7 +95,7 @@
   <div id="BGC_explorer">
     <!-- Biosynthetic gene cluster explorer -->
     <button type="button" class="start_button tooltip" data-tooltip="Click to reverse the BGC arrangement"
-      onclick="bgcSystem.reverseBGC()">
+      onclick="record.reverseBGC()">
       <strong>Reverse BGC</strong>
     </button>
     <div class="heading-container tooltip" id="BGCHeading"
@@ -204,7 +204,7 @@
           </div>
         </div>
         <button type="button" class="btn"
-          onclick="bgcSystem.addWildcardTailoring(bgcSystem.geneMatrix);uiHandler.closeTailoringForm()">Submit</button>
+          onclick="record.addWildcardTailoring(record.geneMatrix);uiHandler.closeTailoringForm()">Submit</button>
         <button type="button" class="btn cancel" onclick="uiHandler.closeTailoringForm()">Close</button>
       </div>
     </div>
@@ -219,7 +219,7 @@
         </div>
       </div>
       <button type="button" class="btn"
-        onclick="bgcSystem.apiService.fetchFromRaichu();uiHandler.closeFormTerpene()">Submit</button>
+        onclick="record.apiService.fetchFromRaichu();uiHandler.closeFormTerpene()">Submit</button>
       <button type="button" class="btn cancel" onclick="uiHandler.closeFormTerpene()">Close</button>
       </form>
     </div>
@@ -243,10 +243,10 @@
         <div class="dropdown">
           <button type="button" class="dropbtn">Module Type</button>
           <div class="dropdown-content">
-            <button type="button" onclick="bgcSystem.setWildcardModule('starter_module_pks')">Starter Module</button>
-            <button type="button" onclick="bgcSystem.setWildcardModule('elongation_module_pks')">Elongation
+            <button type="button" onclick="record.setWildcardModule('starter_module_pks')">Starter Module</button>
+            <button type="button" onclick="record.setWildcardModule('elongation_module_pks')">Elongation
               Module</button>
-            <button type="button" onclick="bgcSystem.setWildcardModule('terminator_module_pks')">Terminator
+            <button type="button" onclick="record.setWildcardModule('terminator_module_pks')">Terminator
               Module</button>
           </div>
         </div>
@@ -258,7 +258,7 @@
         <input type="checkbox" id="wildcardER" name="wildcardER" value="true">
         <label for="wildcardER"> Enoylreductase domain</label><br>
         <button type="button" class="btn"
-          onclick="bgcSystem.addWildcard(bgcSystem.geneMatrix);uiHandler.closePKSForm()">Submit</button>
+          onclick="record.addWildcard(record.geneMatrix);uiHandler.closePKSForm()">Submit</button>
         <button type="button" class="btn cancel" onclick="uiHandler.closePKSForm()">Close</button>
       </form>
     </div>
@@ -276,45 +276,45 @@
             <button class="wildcardsubstrate" type="button" onclick="setWildcardSubstrate('glutamic acid')">glutamic
               acid</button>
             <button class="wildcardsubstrate" type="button"
-              onclick="bgcSystem.setWildcardSubstrate('phenylalanine')">phenylalanine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('glycine')">glycine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('histidine')">histidine</button>
+              onclick="record.setWildcardSubstrate('phenylalanine')">phenylalanine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('glycine')">glycine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('histidine')">histidine</button>
             <button class="wildcardsubstrate" type="button"
-              onclick="bgcSystem.setWildcardSubstrate('isoleucine')">isoleucine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('lysine')">lysine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('leucine')">leucine</button>
+              onclick="record.setWildcardSubstrate('isoleucine')">isoleucine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('lysine')">lysine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('leucine')">leucine</button>
             <button class="wildcardsubstrate" type="button"
-              onclick="bgcSystem.setWildcardSubstrate('methionine')">methionine</button>
+              onclick="record.setWildcardSubstrate('methionine')">methionine</button>
             <button class="wildcardsubstrate" type="button"
-              onclick="bgcSystem.setWildcardSubstrate('asparagine')">asparagine</button>
+              onclick="record.setWildcardSubstrate('asparagine')">asparagine</button>
             <button class="wildcardsubstrate" type="button"
-              onclick="bgcSystem.setWildcardSubstrate('pyrrolysine')">pyrrolysine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('proline')">proline</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('glutamine')">glutamine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('arginine')">arginine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('serine')">serine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('threonine')">threonine</button>
+              onclick="record.setWildcardSubstrate('pyrrolysine')">pyrrolysine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('proline')">proline</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('glutamine')">glutamine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('arginine')">arginine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('serine')">serine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('threonine')">threonine</button>
             <button class="wildcardsubstrate" type="button"
-              onclick="bgcSystem.setWildcardSubstrate('selenocysteine')">selenocysteine</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('valine')">valine</button>
+              onclick="record.setWildcardSubstrate('selenocysteine')">selenocysteine</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('valine')">valine</button>
             <button class="wildcardsubstrate" type="button"
-              onclick="bgcSystem.setWildcardSubstrate('tryptophan')">tryptophan</button>
-            <button class="wildcardsubstrate" type="button" onclick="bgcSystem.setWildcardSubstrate('tyrosine')">tyrosine</button>
+              onclick="record.setWildcardSubstrate('tryptophan')">tryptophan</button>
+            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('tyrosine')">tyrosine</button>
             </div>
             </div>
             <div class="dropdown">
               <button type="button" class="dropbtn">Module Type</button>
               <div class="dropdown-content">
-                <button type="button" onclick="bgcSystem.setWildcardModule('starter_module_nrps')">Starter Module</button>
-                <button type="button" onclick="bgcSystem.setWildcardModule('elongation_module_nrps')">Elongation Module</button>
-                <button type="button" onclick="bgcSystem.setWildcardModule('terminator_module_nrps')">Terminator Module</button>
+                <button type="button" onclick="record.setWildcardModule('starter_module_nrps')">Starter Module</button>
+                <button type="button" onclick="record.setWildcardModule('elongation_module_nrps')">Elongation Module</button>
+                <button type="button" onclick="record.setWildcardModule('terminator_module_nrps')">Terminator Module</button>
               </div>
             </div>
             <br>
             <input type="checkbox" id="wildcardE" name="wildcardE" value="true">
             <label for="wildcardE"> Epimerization</label><br>
             <button type="button" class="btn"
-              onclick="bgcSystem.addWildcard(bgcSystem.geneMatrix);uiHandler.closeNRPSForm()">Submit</button>
+              onclick="record.addWildcard(record.geneMatrix);uiHandler.closeNRPSForm()">Submit</button>
             <button type="button" class="btn cancel" onclick="uiHandler.closeNRPSForm()">Close</button>
             </form>
             </div>
@@ -335,7 +335,7 @@
                 <input type="checkbox" id="wildcardProtease" name="wildcardProtease" value="true">
                 <label for="wildcardProtease"> Add Protease</label><br>
                 <button type="button" class="btn"
-                  onclick="bgcSystem.addRiPP(bgcSystem.geneMatrix, rippSelection);uiHandler.closeRiPPForm()">Submit</button>
+                  onclick="record.addRiPP(record.geneMatrix, rippSelection);uiHandler.closeRiPPForm()">Submit</button>
                 <button type="button" class="btn cancel" onclick="uiHandler.closeRiPPForm()">Close</button>
               </form>
             </div>

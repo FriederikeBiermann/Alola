@@ -77,21 +77,12 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
     const scale = val => parseInt(val / (1000 / height));
     const width = scale(cluster.end - cluster.start);
 
-    const lineSvg = SVG(container)
-        .size('100%', height)
-        .group();
-
-    // Draw main line
-    lineSvg.line(0, height / 2, width, height / 2)
-        .stroke({ color: "white", width: 2 });
 
     if (cluster.orfs) {
         drawOrfs(cluster.orfs, height, scale, geneMatrix);
     }
 
-    addClusterEventListeners(lineSvg, cluster, recordData);
-
-    finalizeSvg(container, width);
+    finalizeSvg(container);
 
     Domainer.drawModules(moduleMatrix, height, scale);
     Domainer.drawGenes(geneMatrix, height, scale);
@@ -107,12 +98,6 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
                 drawDomains(orf, orf.domains, height, scale, geneMatrix, indentSteps);
             }
         });
-    }
-
-    function createModuleContainer(geneIndex, moduleIndex) {
-        const moduleContainer = document.createElement('div');
-        moduleContainer.id = `innerModuleContainer${geneIndex}_${moduleIndex}`;
-        document.getElementById('domain_container').appendChild(moduleContainer);
     }
 
     function drawDomains(orf, domains, height, scale, geneMatrix, indentSteps) {
@@ -149,7 +134,7 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
     }
 
     function shouldIndentDomain(domainType) {
-        return ['DH', 'KR', 'ER'].includes(domainType);
+        return ['DH', 'ER'].includes(domainType);
     }
 
     function createDomainElements(domainData, height, scale, indentSteps) {
@@ -163,14 +148,23 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
         const color = getDomainColor(domain);
         const opacity = domainInfo.ko ? "0.5" : "1";
         const points = Domainer.getDomainPoints(domain, gene, cluster, height, scale);
-        const indent = shouldIndentDomain(domainInfo.type) ? indentStep : 0;
+        const indent = shouldIndentDomain(domainInfo.
+            abbreviation) ? indentSteps : 0;
+
+        // Set the width of the container
+        containerElements.container.style.width = `${size - 10}px`;
+
+        // Ensure the button fills the container
+        containerElements.button.style.width = '100%';
+        containerElements.button.style.height = '100%';
+        containerElements.button.style.padding = '0';
+        containerElements.button.style.border = 'none';
 
         createDomainSvg(containerElements.button, size, height, color, opacity, domainInfo, points, indent);
         populateDropdownContent(containerElements.content, gene, moduleIndex, domainIndex, domainInfo);
 
-        createModuleContainer(gene.index, moduleIndex);
+        return containerElements;
     }
-
     function createContainerElements(domainIdentifier) {
         const container = document.createElement('div');
         container.id = `innerdomainContainer${domainIdentifier}`;
@@ -286,19 +280,12 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
         // Add module visualization logic here
     }
 
-    function addClusterEventListeners(svg, cluster, recordData) {
-        $(svg).mouseover({ cluster }, function (event) {
-            const bgcDesc = `<b>BGC: ${recordData[0].seq_id} region ${regionName}</b>${cluster.desc ? '<br />' + cluster.desc : ''}`;
-            Domainer.showToolTip(bgcDesc, event);
+    function finalizeSvg(container) {
+        $(container).find("svg").each(function () {
+            let currentWidth = parseFloat($(this).attr("width")); // Get current width as a number
+            let newWidth = currentWidth + 3; // Add 3 to the width
+            $(this).attr("width", newWidth + "px"); // Set the new width
         });
-
-        $(svg).mouseleave(function () {
-            $("#" + Domainer.tooltip_id).css("display", "none");
-        });
-    }
-
-    function finalizeSvg(container, width) {
-        $(container).find("svg").attr("width", width + "px");
     }
 
     function hasNumbers(str) {

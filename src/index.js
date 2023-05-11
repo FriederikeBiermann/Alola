@@ -192,35 +192,27 @@ const NAME_TO_STRUCTURE = {
     'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
 }; 
 
-class BGCSystem {
+class Record {
     constructor() {
         this.geneMatrixHandler = null;
         this.clusterTypeHandler = new ClusterTypeHandler();
         this.historyStack = new HistoryStack();
-        this.regionHandler = new RegionHandler();
-        this.uiHandler = new UIHandler();
-        this.svgHandler = new SVGHandler();
-        this.apiService = new APIService(CONFIG.PORT, this.svgHandler);
+
 
         this.regionIndex = 0;
         this.recordIndex = 0;
         this.reversed = false;
         this.regionName = "";
         this.BGC = {};
-        this.geneMatrix = [];
-        this.cluster_type = "";
-        this.cyclization = [];
-        this.rippPrecursor = "";
-        this.rippFullPrecursor = "";
-        this.rippPrecursorGene = 0;
-        this.cleavageSites = [];
-        this.proteaseOptions = null;
-        this.terpeneCyclaseOptions = [];
+        
+
         this.historyStack = [];
         this.wildcardModule = "";
         this.wildcardSubstrate = "";
         this.wildcardEnzyme = "";
-        this.terpeneSubstrate = "";
+        this.recordData = null;
+        this.details_data = null;
+        
     }
 
     init(recordData, details_data) {
@@ -231,8 +223,8 @@ class BGCSystem {
 
     updateHistory() {
         this.historyStack.push({
-            geneMatrix: this.geneMatrix,
-            BGC: this.BGC
+            geneMatrix: this.geneMatrixHandler.geneMatrix,
+            BGC: this.geneMatrixHandler.BGC
         });
         this.historyStack.updateButtonStates();
     }
@@ -240,10 +232,11 @@ class BGCSystem {
     undo() {
         const previousState = this.historyStack.undo();
         if (previousState) {
-            this.geneMatrix = previousState.geneMatrix;
+            this.geneMatrixHandler.geneMatrix = previousState.geneMatrix;
             this.BGC = previousState.BGC;
-            this.uiHandler.updateUI(this.geneMatrix, this.cluster_type, this.BGC, this.recordData);
-            this.apiService.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix, this.cluster_type, this.BGC);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
         }
         this.historyStack.updateButtonStates();
     }
@@ -251,17 +244,18 @@ class BGCSystem {
     redo() {
         const nextState = this.historyStack.redo();
         if (nextState) {
-            this.geneMatrix = nextState.geneMatrix;
+            this.geneMatrixHandler.geneMatrix = nextState.geneMatrix;
             this.BGC = nextState.BGC;
-            this.uiHandler.updateUI(this.geneMatrix, this.cluster_type, this.BGC, this.recordData);
-            this.apiService.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix, this.cluster_type, this.BGC);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
         }
         this.historyStack.updateButtonStates();
     }
 
     reload_site_with_genecluster() {
-        this.uiHandler.createButtonsForEachRegion(this.recordData);
-        [this.regionIndex, this.recordIndex] = this.regionHandler.getFirstRegion(this.recordData);
+        uiHandler.createButtonsForEachRegion(this.recordData);
+        [this.regionIndex, this.recordIndex] = regionHandler.getFirstRegion(this.recordData);
         this.runAlola();
     }
 
@@ -270,24 +264,25 @@ class BGCSystem {
         this.reversed = false;
         this.rippPrecursor = "";
         this.cyclization = "None";
-        this.regionName = this.regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
-        this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData);
+        this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
+        let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData);
        
         
 
-        this.BGC = this.regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
-        this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, this.cluster_type);
-        this.geneMatrix = this.geneMatrixHandler.geneMatrix;
+        this.BGC = regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
+        this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex);
         this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
+        console.log(this.geneMatrixHandler.moduleMatrix)
 
-        this.uiHandler.updateUI(this.geneMatrix, this.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix);
-        this.uiHandler.addRiPPPrecursorOptions(this.geneMatrix);
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName, this.regionName);
+        uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
 
-        if (this.cluster_type === "terpene") {
-            this.uiHandler.openFormTerpene();
+        if (this.geneMatrixHandler.cluster_type === "terpene") {
+            uiHandler.openFormTerpene();
         }
 
-        this.apiService.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix, this.cluster_type, this.BGC);
+        apiService.fetchFromRaichu(this.geneMatrixHandler);
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName, this.regionName);
         this.updateHistory()
 
     }
@@ -297,20 +292,21 @@ class BGCSystem {
             this.runAlola();
         } else {
             this.reversed = true;
-            this.BGC = this.regionHandler.getReversedBGC(this.regionIndex, this.recordIndex, this.details_data, this.recordData);
-            this.geneMatrix = this.geneMatrixHandler.createGeneMatrix(this.BGC, this.regionName);
+            this.BGC = regionHandler.getReversedBGC(this.regionIndex, this.recordIndex, this.details_data, this.recordData);
             this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
-            this.uiHandler.updateUI(this.geneMatrix, this.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.module_matrix);
-            this.apiService.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix.geneMatrix, this.cluster_type, this.BGC);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+
         }
     }
 
 
     addRiPP(rippSelection) {
-        this.cluster_type = "ripp";
+        this.geneMatrixHandler.cluster_type = "ripp";
         this.terpeneCyclaseOptions = [];
         this.cyclization = [];
-        this.geneMatrix[this.rippPrecursorGene].ripp_status = true;
+        this.geneMatrixHandler.geneMatrix[this.rippPrecursorGene].ripp_status = true;
 
         let translation = this.geneMatrixHandler.getTranslation(this.BGC, this.rippPrecursorGene);
         this.terpeneCyclaseOptions = this.geneMatrixHandler.generateRiPPOptions(translation);
@@ -318,11 +314,13 @@ class BGCSystem {
         this.rippFullPrecursor = translation;
         this.rippPrecursor = rippSelection.length > 0 ? rippSelection : translation.slice(-5);
 
-        this.apiService.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix, this.cluster_type, this.BGC);
+        apiService.fetchFromRaichu(this.geneMatrixHandler);
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+
     }
 
     addTerpene(substrate) {
-        this.cluster_type = "terpene";
+        this.geneMatrixHandler.cluster_type = "terpene";
         this.terpeneSubstrate = substrate;
         this.cyclization = [];
     }
@@ -330,7 +328,7 @@ class BGCSystem {
     setRiPPPrecursor(geneIndex) {
         this.rippPrecursorGene = geneIndex;
         let translation = this.geneMatrixHandler.getTranslation(this.BGC, geneIndex);
-        this.uiHandler.updateRiPPPrecursorTextarea(translation);
+        uiHandler.updateRiPPPrecursorTextarea(translation);
     }
 
     changeRegion(direction) {
@@ -339,18 +337,19 @@ class BGCSystem {
     }
 
     changeRegionTo(regionName) {
-        [this.regionIndex, this.recordIndex] = this.regionHandler.selectRegion(this.recordData, regionName);
+        console.log(this.recordData)
+        [this.regionIndex, this.recordIndex] = regionHandler.selectRegion(this.recordData, regionName);
         this.runAlola();
     }
 
     setWildcardSubstrate(substrate) {
         this.wildcardSubstrate = substrate;
-        this.uiHandler.setColorOfDropDown(substrate);
+        uiHandler.setColorOfDropDown(substrate);
     }
 
     setWildcardTailoring(enzyme) {
         this.wildcardEnzyme = enzyme;
-        this.uiHandler.setColorOfDropDown(enzyme);
+        uiHandler.setColorOfDropDown(enzyme);
     }
 
     setWildcardModule(moduleType) {
@@ -358,20 +357,21 @@ class BGCSystem {
     }
 
     setKoStatus(geneIndex, domainIndex) {
-        this.geneMatrix = this.geneMatrixHandler.toggleKoStatus(this.geneMatrix, geneIndex, domainIndex);
-        this.geneMatrixHandler.removeTailoringEnzymes(this.geneMatrix);
-        if (this.uiHandler.isRealTimeCalculationEnabled()) {
-            this.apiService.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix, this.cluster_type, this.BGC);
+        this.geneMatrixHandler.toggleKoStatus(geneIndex, domainIndex);
+        this.geneMatrixHandler.removeTailoringEnzymes();
+        if (uiHandler.isRealTimeCalculationEnabled()) {
+            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
         }
     }
 
     setDisplayedStatus(id) {
-        this.geneMatrix = this.geneMatrixHandler.toggleDisplayedStatus(this.geneMatrix, id);
+        this.geneMatrixHandler.toggleDisplayedStatus(id);
     }
 
     updateHistory() {
         this.historyStack.push({
-            geneMatrix: JSON.parse(JSON.stringify(this.geneMatrix)),
+            geneMatrix: JSON.parse(JSON.stringify(this.geneMatrixHandler.geneMatrix)),
             BGC: JSON.parse(JSON.stringify(this.BGC))
         });
     }
@@ -380,19 +380,38 @@ class BGCSystem {
         if (this.historyStack.length > 1) {
             this.historyStack.pop(); // Remove current state
             const previousState = this.historyStack[this.historyStack.length - 1];
-            this.geneMatrix = previousState.geneMatrix;
+            this.geneMatrixHandler.geneMatrix = previousState.geneMatrix;
             this.BGC = previousState.BGC;
-            this.uiHandler.updateUI(this.geneMatrix, this.cluster_type, this.BGC, this.recordData);
-            this.apiService.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix, this.cluster_type, this.BGC);
+            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            
         }
     }
-}
+
+    create_empty_BGC() {
+        this.regionIndex = 0
+        let recordData = [
+            {
+                "length": 6283062,
+                "seq_id": "Custom_BGC",
+                "regions": [
+                    {
+                        "start": 0,
+                        "end": 1,
+                        "idx": 1,
+                        "type": "NRPS",
+                        "anchor": "r1c1",
+                        "orfs": []
+                    }]
+            }]
+        let details_data = { "nrpspks": { "r1c1": { "id": "r1c1", "orfs": [] } } }
+        this.init(recordData, details_data)
+}}
 
 class ApplicationManager {
     constructor() {
-        this.bgcSystem = new BGCSystem();
-        this.fileHandler = new FileHandler(this.bgcSystem);
-        this.uiHandler = new UIHandler();
+        this.record = new Record();
+        this.fileHandler = new FileHandler(this.record);
     }
 
     init() {
@@ -403,19 +422,18 @@ class ApplicationManager {
         document.getElementById('uploadButton').addEventListener('click', () => this.fileHandler.triggerFileInput());
         document.getElementById('fileInput').addEventListener('change', (event) => this.handleFileSelection(event));
         document.getElementById('load_example_button').addEventListener('click', () => this.fileHandler.loadExampleFile());
+        this.fileHandler.setupDropArea();
         
         // Add more event listeners as needed
     }
 
+
     handleFileSelection(event) {
         const file = event.target.files[0];
         if (file) {
-            this.fileHandler.readFile(file); // FileHandler will automatically call bgcSystem.init after reading
+            this.fileHandler.readFile(file); // FileHandler will automatically call record.init after reading
         }}
     
-    loadExampleFile() {
-        this.fileHandler.loadExampleFile();
-    }
 }
 
 class UIHandler {
@@ -423,28 +441,32 @@ class UIHandler {
 
     }
 
-    updateUI(geneMatrix, cluster_type, BGC, recordData, moduleMatrix) {
-        this.displayGenes(BGC, recordData);
+    updateUI(geneMatrix, cluster_type, BGC, recordData, moduleMatrix, regionName) {
+        this.displayGenes(BGC, recordData, regionName);
         this.updateProteins(geneMatrix, BGC, recordData);
-        this.updateDomains(geneMatrix, BGC, recordData, moduleMatrix);
+        
         if (cluster_type === "ripp") {
             this.updateRiPPs(geneMatrix, BGC);
         }
+        else{
+            this.updateDomains(geneMatrix, BGC, recordData, moduleMatrix);
+        }
         this.addArrowClick(geneMatrix, cluster_type);
     }
-    displayGenes(BGC, recordData) {
+    displayGenes(BGC, recordData, regionName) {
         this.viewPortHeight = window.innerHeight;
         this.viewPortWidth = window.innerWidth;
         let BGCForDisplay = JSON.parse(JSON.stringify(BGC));
         for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
             delete BGCForDisplay["orfs"][geneIndex]["domains"];
         }
-        $("#arrow_container").html(Arrower.drawClusterSVG(this.removePaddingBGC(BGCForDisplay), this.viewPortHeight * 0.05, recordData));
+        $("#arrow_container").html(Arrower.drawClusterSVG(this.removePaddingBGC(BGCForDisplay), this.viewPortHeight * 0.05, recordData, regionName));
         return BGCForDisplay;}
 
     createButtonsForEachRegion(recordData) {
         let listRegions = [];
         let listTypes = [];
+        console.log(this.recordData)
 
         for (const record of recordData) {
             for (let index = 0; index < record.regions.length; index++) {
@@ -459,7 +481,7 @@ class UIHandler {
         for (let index = 0; index < listRegions.length; index++) {
             let region = listRegions[index];
             let type = listTypes[index];
-            innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=changeRegionTo("${region}")><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`;
+            innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=session.record.changeRegionTo("${region}")><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`;
         }
 
         regionsBar.innerHTML = innerHTML;
@@ -469,7 +491,7 @@ class UIHandler {
         let innerHTML = "";
         for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
             let id = geneMatrix[geneIndex].id.replace(".", "_");
-            innerHTML += `<button class='wildcardsubstrate' type='button' id='${id}_ripp_button' onclick='bgcSystem.setRiPPPrecursor("${geneIndex}")'>${id}</button>`;
+            innerHTML += `<button class='wildcardsubstrate' type='button' id='${id}_ripp_button' onclick='session.record.setRiPPPrecursor("${geneIndex}")'>${id}</button>`;
         }
         document.getElementById("ripp_precursor_selection").innerHTML = innerHTML;
     }
@@ -631,22 +653,22 @@ class UIHandler {
 
     // Event handlers
     handleArrowClick(gene, arrow, originalColor) {
-        this.setDisplayedStatus(gene.id, this.geneMatrix);
-        this.removeTailoringEnzymes(this.geneMatrix);
+        session.record.geneMatrixHandler.setDisplayedStatus(gene.id);
+        session.record.geneMatrixHandler.removeTailoringEnzymes();
         arrow.style.fill = gene.ko ? "#E11839" : originalColor;
-        this.fetchFromRaichu(this.details_data, this.regionName, this.geneMatrix, this.cluster_type, this.BGC);
+        this.fetchFromRaichu(this.geneMatrixHandler);
     }
 
-    handleArrowMouseEnter(gene, arrow, geneIndex) {
+    handleArrowMouseEnter(gene, arrow, geneIndex, geneMatrix) {
         this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
+        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
         if (!gene.ko) {
             arrow.style.fill = "#E11839";
         }
     }
 
-    handleArrowMouseLeave(gene, arrow, geneIndex, originalColor) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
+    handleArrowMouseLeave(gene, arrow, geneIndex, originalColor, geneMatrix) {
+        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
         if (!gene.ko) {
             arrow.style.fill = originalColor;
         }
@@ -656,25 +678,25 @@ class UIHandler {
         this.handleArrowClick(gene, document.querySelector(`#${gene.id.replace(".", "_")}_gene_arrow`), originalColor);
     }
 
-    handleProteinMouseEnter(gene, geneIndex) {
+    handleProteinMouseEnter(gene, geneIndex, geneMatrix) {
         this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex);
+        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
     }
 
-    handleProteinMouseLeave(gene, geneIndex) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex);
+    handleProteinMouseLeave(gene, geneIndex, geneMatrix) {
+        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
     }
 
-    handleRippButtonMouseEnter(gene, arrow, geneIndex) {
+    handleRippButtonMouseEnter(gene, arrow, geneIndex, geneMatrix) {
         this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
+        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
         if (!gene.ko) {
             arrow.style.fill = "#E11839";
         }
     }
 
-    handleRippButtonMouseLeave(gene, arrow, geneIndex, originalColor) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
+    handleRippButtonMouseLeave(gene, arrow, geneIndex, originalColor, geneMatrix) {
+        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
         if (!gene.ko) {
             arrow.style.fill = originalColor;
         }
@@ -682,13 +704,13 @@ class UIHandler {
 
     handleTailoringEnzymeMouseEnter(gene, geneIndex) {
         this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
+        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
+        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
     }
 
-    handleTailoringEnzymeMouseLeave(gene, geneIndex) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex);
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
+    handleTailoringEnzymeMouseLeave(gene, geneIndex, geneMatrix) {
+        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
+        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
     }
 
     handleDomainClick(gene, geneIndex, domainIndex, domain, domain2, originalColor, originalColor2) {
@@ -696,8 +718,8 @@ class UIHandler {
         const newColor = isKo ? originalColor : "#E11839";
         domain.style.fill = newColor;
         domain2.style.fill = newColor;
-        this.setKoStatus(geneIndex, domainIndex, this.geneMatrix);
-        this.addArrowClick(this.geneMatrix, this.cluster_type); // Re-initialize to update all elements
+        this.setKoStatus(geneIndex, domainIndex);
+        this.addArrowClick(); // Re-initialize to update all elements
     }
 
     handleDomainMouseEnter(gene, geneIndex, domain, domain2) {
@@ -771,6 +793,27 @@ class UIHandler {
     displayTextInGeneExplorer(geneId, BGCForDisplay) {
         // Implementation of displayTextInGeneExplorer...
     }
+
+    changeProteinColorON(ProteinId, geneIndex, geneMatrix) {
+    /**
+    * Change color of protein.
+   * @fires arrowclick
+   *@input ProteinId, geneIndex -> find the protein svg as well as corresponding gene
+   *@yield other color of protein
+   */
+        const arrow = document.querySelector(ProteinId.replace(".", "_"));
+        arrow.setAttribute('style', "fill: #E11839");
+}
+    changeProteinColorOFF(ProteinId, geneIndex, geneMatrix) {
+    /**
+    * Change color of protein.
+   * @fires arrowclick
+   *@input ProteinId, geneIndex -> find the protein svg as well as corresponding gene
+   *@yield other color of protein
+   */
+        const arrow = document.querySelector(ProteinId.replace(".", "_"));
+        arrow.removeAttribute("style");
+}
 }
 
 class HistoryStack {
@@ -811,8 +854,8 @@ class HistoryStack {
     }
 
     updateButtonStates() {
-        const undoButton = document.querySelector('.redoUndo_button[onclick="bgcSystem.undo()"]');
-        const redoButton = document.querySelector('.redoUndo_button[onclick="bgcSystem.redo()"]');
+        const undoButton = document.querySelector('.redoUndo_button[onclick="session.record.undo()"]');
+        const redoButton = document.querySelector('.redoUndo_button[onclick="session.record.redo()"]');
 
         if (!this.canUndo()) {
             undoButton.setAttribute('data-tooltip', 'No job to revert!');
@@ -833,8 +876,8 @@ class HistoryStack {
 }
 
 class FileHandler {
-    constructor(bgcSystem) {
-        this.bgcSystem = bgcSystem;
+    constructor(record) {
+        this.record = record;
         this.viewPortHeight = window.innerHeight;
         this.viewPortWidth = window.innerWidth;
         if (window.matchMedia("(orientation: portrait)").matches) {
@@ -889,8 +932,8 @@ class FileHandler {
                 const details_data = JSON.parse(result[3].trim().replace("details_data = ", "").trim().slice(0, -1));
 
 
-                this.bgcSystem = new BGCSystem();
-                this.bgcSystem.init(recordData, details_data);
+                this.record = new Record();
+                this.record.init(recordData, details_data);
             }
         });
 
@@ -904,6 +947,7 @@ class FileHandler {
 
         reader.readAsText(file);
     }
+
 
     setupDropArea() {
         const dropArea = document.getElementById('regionsBar');
@@ -923,22 +967,12 @@ class FileHandler {
         });
     }
 
-    setupFileInput() {
-        const fileInput = document.getElementById('fileInput');
-        fileInput.addEventListener('change', (event) => this.handleFileSelection(event));
-    }
 
-    setupUploadButton() {
-        const uploadButton = document.getElementById('uploadButton');
-        uploadButton.addEventListener('click', () => this.triggerFileInput());
-    }
-
-    init() {
-        this.setupDropArea();
-        this.setupFileInput();
-        this.setupUploadButton();
-    }
 }
 
 let session = new ApplicationManager();
+let regionHandler = new RegionHandler();
+let uiHandler = new UIHandler();
+let svgHandler = new SVGHandler();
+let apiService = new APIService(CONFIG.PORT, svgHandler);
 session.init();

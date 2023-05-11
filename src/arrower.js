@@ -15,7 +15,7 @@ var Arrower = {
     tooltip_id: "arrower-tooltip-1234567890"
 };
 
-Arrower.drawClusterSVG = (function(cluster, height = 40, recordData) {
+Arrower.drawClusterSVG = (function(cluster, height = 40, recordData, regionName) {
   var container = document.createElement("div");
   var draw = SVG(container).size('100%', height).group();
   var scale = (function(val) { return parseInt(val / (1000 / height)); })
