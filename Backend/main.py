@@ -17,16 +17,19 @@ from raichu.drawing.drawer import RaichuDrawer
 from raichu.ripp import RiPP_Cluster
 from raichu.terpene import Terpene_Cluster
 from raichu.tailoring_enzymes import TailoringEnzyme
+from starlette.requests import Request
+from starlette.responses import Response
+
+
 
 # Allow cross origin requests
 from starlette.middleware import Middleware
-app = FastAPI()
-origins = ["http://localhost:3000",
-           "localhost:3000"]
+origins = ["https://alola.bioinformatics.nl", "https://www.alola.bioinformatics.nl"]
 middleware = [Middleware(CORSMiddleware, allow_origins=origins)]
 app = FastAPI(middleware=middleware)
 
 app.mount("/static", StaticFiles(directory="app"), name="static")
+
 
 def get_drawings(cluster) :
     drawings, widths = cluster.get_drawings()

@@ -1,4 +1,4 @@
-let port = "http://127.0.0.1:8000/"
+let port = "https://api-alola.bioinformatics.nl/"
 let regionIndex = 0;
 let regionName = "";
 let viewPortHeight = window.innerHeight;
