@@ -2,23 +2,20 @@ from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles
 import traceback
 from typing import List
-import ast
 import json
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
 from pikachu.chem.structure import Structure
-from pikachu.reactions.functional_groups import find_bonds
-from raichu.data.molecular_moieties import PEPTIDE_BOND, CC_DOUBLE_BOND
+
 from pikachu.general import structure_to_smiles, svg_string_from_structure
-from raichu.run_raichu import get_tailoring_sites_atom_names, ModuleRepresentation, DomainRepresentation, ClusterRepresentation, TailoringRepresentation, build_cluster, CleavageSiteRepresentation, MacrocyclizationRepresentation
+from raichu.run_raichu import get_tailoring_sites_atom_names, build_cluster 
+from raichu.representations import ModuleRepresentation, DomainRepresentation, ClusterRepresentation, TailoringRepresentation,  CleavageSiteRepresentation, MacrocyclizationRepresentation
 from raichu.reactions.chain_release import find_all_o_n_atoms_for_cyclization
 from raichu.drawing.drawer import RaichuDrawer
 from raichu.cluster.ripp_cluster import RiPPCluster
 from raichu.cluster.modular_cluster import ModularCluster
 from raichu.cluster.terpene_cluster import TerpeneCluster
 from raichu.tailoring_enzymes import TailoringEnzyme
-from starlette.requests import Request
-from starlette.responses import Response
 
 
 
@@ -32,7 +29,7 @@ app.mount("/static", StaticFiles(directory="app"), name="static")
 
 
 def get_drawings(cluster) :
-    drawings, widths = cluster.get_spaghettis()
+    drawings, widths, max_height, centre_points = cluster.get_drawings()
     svg_strings = []
     for i, drawing in enumerate(drawings):
         max_x = 0
@@ -139,7 +136,7 @@ async def alola_nrps_pks(antismash_input):
         tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
 
         structure_for_tailoring = RaichuDrawer(
-            tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, make_linear = False)
+            tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, make_linear=True)
         structure_for_tailoring.draw_structure()
         svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
