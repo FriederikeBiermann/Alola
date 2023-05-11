@@ -192,6 +192,7 @@ class TerpeneHandler extends BGCFetcher {
             cyclization: this.splitArrayIntoPairs(geneMatrixHandler.cyclization),
             double_bond_isomerase: geneMatrixHandler.terpeneDoubleBondIsomerization,
             methyl_mutase: geneMatrixHandler.terpeneMethylShift,
+            water_quenching: geneMatrixHandler.terpeneWaterQuenching,
             tailoring: geneMatrixHandler.tailoringArray,
             terpene_cyclase_type: "Class_1"
         });

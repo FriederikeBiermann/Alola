@@ -10,6 +10,7 @@ class GeneMatrixHandler {
         this.terpeneSubstrate = "";
         this.terpeneDoubleBondIsomerization = [];
         this.terpeneMethylShift = [];
+        this.terpeneWaterQuenching = [];
         this.cyclization = [];
         this.rippPrecursor = "";
         this.rippFullPrecursor = "";
@@ -148,7 +149,7 @@ class GeneMatrixHandler {
         this.cluster_type = "terpene";
         this.terpeneSubstrate = substrate;
         this.cyclization = [];
-        this.terpeneCyclaseOptions = OptionCreator.createOptionsTerpeneCyclase([], { "METHYL_MUTASE": [], "DOUBLE_BOND_ISOMERASE": []})
+        this.terpeneCyclaseOptions = OptionCreator.createOptionsTerpeneCyclase([], { "METHYL_MUTASE": [], "DOUBLE_BOND_ISOMERASE": [], "WATER_QUENCHING": []})
     }
 
     changeCyclization(atom) {
@@ -171,6 +172,16 @@ class GeneMatrixHandler {
             atom = atom.split(",")
         }
         this.terpeneMethylShift.push(atom)
+        this.removeTailoringEnzymes();
+        this.reloadGeneCluster();
+    }
+
+    changeWaterQuenching(atom) {
+        if (atom.includes(",")) {
+            atom = atom.split(",")
+        }
+        // Accept single carbon atom identifiers as strings or ["C_x"] arrays
+        this.terpeneWaterQuenching.push(atom);
         this.removeTailoringEnzymes();
         this.reloadGeneCluster();
     }

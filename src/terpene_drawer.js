@@ -271,6 +271,10 @@ Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, gen
                     button.onclick = () => geneMatrixHandler.changeMethylShift(atomOptionCleaned);
                 } 
 
+                else if (reactionOption.includes("Water_quenching")) {
+                    button.onclick = () => geneMatrixHandler.changeWaterQuenching(atomOptionCleaned);
+                }
+
                 else {
                     button.onclick = () => geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
                 }

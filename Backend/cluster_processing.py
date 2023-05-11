@@ -25,6 +25,7 @@ from raichu.representations import (
     MacrocyclizationRepresentation,
     IsomerizationRepresentation,
     MethylShiftRepresentation,
+    WaterQuenchingRepresentation,
 )
 from raichu.smiles_handling import get_smiles, UNKNOWN_SUBSTRATE, load_smiles
 
@@ -130,6 +131,13 @@ class BasePathway:
             self.cluster.chain_intermediate
         )
         logging.debug(f"Identified tailoring sites: {self.tailoring_sites}")
+
+        self.tailoring_sites["WATER_QUENCHING"] = sorted(
+            set([[atom] for atom in
+                self.tailoring_sites["C_METHYLTRANSFERASE"].flatten()
+                + self.tailoring_sites["DOUBLE_BOND_REDUCTASE"].flatten()
+            ])
+        )
 
         self.atoms_for_cyclisation = [
             str(atom)
@@ -582,6 +590,11 @@ class TerpenePathway(BasePathway):
             for methyl_shift in self.antismash_input.get("methyl_mutase", [])
             if len(methyl_shift) > 0
         ]
+        self.water_quenching: List[WaterQuenchingRepresentation] = [
+            WaterQuenchingRepresentation(wq)
+            for wq in self.antismash_input.get("water_quenching", [])
+            if len(wq) > 0
+        ]
         self.cluster: TerpeneCluster = TerpeneCluster(
             self.antismash_input["gene_name_precursor"],
             self.precursor,
@@ -589,6 +602,7 @@ class TerpenePathway(BasePathway):
             macrocyclisations=self.macrocyclisations,
             double_bond_isomerisations=self.double_bond_isomerase,
             methyl_shifts=self.methyl_mutase,
+            water_quenching=self.water_quenching,
             tailoring_representations=self.tailoring_reactions,
         )
         logging.info("TerpenePathway initialized and cluster built.")
@@ -624,6 +638,14 @@ class TerpenePathway(BasePathway):
             self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
             "cyclized_drawing",
         )
+
+        # Perform any post-cyclization terpene modifications that are wired in the cluster
+        # Methyl shift is invoked inside macrocyclization; water quenching is separate
+        if self.water_quenching:
+            try:
+                self.cluster.do_water_quenching()
+            except Exception as e:
+                logging.error({"event": "terpene.water_quenching.error", "error": str(e)})
 
         if self.tailoring_reactions:
             self.cluster.do_tailoring()
@@ -674,4 +696,3 @@ class TerpenePathway(BasePathway):
                 "structureForTailoring": svg_tailoring,
             },
         )
-
