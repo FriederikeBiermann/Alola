@@ -21,8 +21,7 @@ from raichu.tailoring_enzymes import TailoringEnzyme
 # Allow cross origin requests
 from starlette.middleware import Middleware
 app = FastAPI()
-origins = ["http://localhost:3000",
-           "localhost:3000"]
+origins = ["http://alola.bioinformatics.nl]
 middleware = [Middleware(CORSMiddleware, allow_origins=origins)]
 app = FastAPI(middleware=middleware)
 
