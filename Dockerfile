@@ -1,4 +1,4 @@
-FROM node:16 AS build-frontend
+FROM public.ecr.aws/docker/library/node:16.13.0 AS build-frontend
 
 WORKDIR /app
 COPY ./src/package.json ./src/package-lock.json ./
