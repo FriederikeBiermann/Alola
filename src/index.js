@@ -1,5 +1,6 @@
 let port = "http://127.0.0.1:8000/"
 let regionIndex = 0;
+let recordIndex = 0;
 let regionName = "";
 let viewPortHeight = window.innerHeight;
 let viewPortWidth = window.innerWidth;
@@ -30,29 +31,79 @@ let nameToStructure = {
     'methoxymalonyl_acp': "SC(=O)C(C(=O)O)OC)O",
     'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
 };
-let aminoacids = {
+let aminoacids= {
+    "ala": 'alanine',
     "arg": "arginine",
-    "his": "histidine",
-    "lys": "lysine",
-    "asp": "asparticacid",
-    "glu": "glutamicacid",
-    "ser": "serine",
-    "thr": "threonine",
     "asn": "asparagine",
-    "gln": "glutamine",
+    "asp": "aspartic acid",
     "cys": "cysteine",
-    "sec": "selenocysteine",
+    "gln": "glutamine",
+    "glu": "glutamic acid",
     "gly": "glycine",
-    "pro": "proline",
-    "ala": "alanine",
-    "val": "valine",
+    "his": "histidine",
     "ile": "isoleucine",
     "leu": "leucine",
+    "lys": "lysine",
     "met": "methionine",
     "phe": "phenylalanine",
-    "tyr": "tyrosine",
+    "pro": "proline",
+    "ser": "serine",
+    "thr": "threonine",
     "trp": "tryptophan",
-    "sal": "salicylicacid"
+    "tyr": "tyrosine",
+    "val": "valine",
+    "3-me-glu": "4-methylglutamicacid",
+    "4ppro": "**Unknown**",
+    "aad": "2-aminoadipicacid",
+    'abu': "2-aminobutyricacid",
+    'aeo': '2-amino-9,10-epoxy-8-oxodecanoidacid',
+    'ala-b': 'beta-alanine',
+    'ala-d': 'd-alanine',
+    'allo-thr': "allo-threonine",
+    'b-ala': 'beta-alanine',
+    'beta-ala': 'beta-alanine',
+    'bmt': "4-butenyl-4-methylthreonine",
+    'cap': "capreomycidine",
+    'bht': "**Unknown**",
+    'dab': "2,4-diaminobutyricacid",
+    'dhb': "2,3-dihydroxybenzoicacid",
+    'dhpg': "3,5-dihydroxyphenylglycine",
+    'dht': "dehydrobutyrine",
+    'dpg': "3,5-dihydroxyphenylglycine",
+    'hiv': "2-hydroxyisovalerate",
+    'hiv-d': "d-2-hydroxyisovalerate",
+    'hmp-d': "**Unknown**",
+    'horn': "**Unknown**",
+    'hpg': "4-hydroxyphenylglycine",
+    'hyv': "4-hydroxyvaline",
+    'hyv-d': "**Unknown**",
+    'iva': "isovaline",
+    'lys-b': "beta-lysine",
+    'orn': "ornithine",
+    'oh-orn': "N5-hydroxyornithine",
+    'phg': "phenylglycine",
+    'pip': "pipecolic acid",
+    'sal': "salicylic acid",
+    'tcl': "**Unknown**",
+    'vol': "valinol",
+    'ldap': "**Unknown**",
+    'meval': "tert-leu",
+    'alle': "allo-isoleucine",
+    'alaninol': "alaninol",
+    'n-(1,1-dimethyl-1-allyl)trp': "**Unknown**",
+    'd-lyserg': "d-lysergicacid",
+    'ser-thr': "**Unknown**",
+    'mephe': "**Unknown**",
+    'haorn': "**Unknown**",
+    'hasn': "**Unknown**",
+    'hforn': "**Unknown**",
+    's-nmethoxy-trp': "**Unknown**",
+    'alpha-hydroxy-isocaproic-acid': "**Unknown**",
+    'mehoval': "**Unknown**",
+    '2-oxo-isovaleric-acid': "alpha-ketoisovalericacid",
+    'aoda': "**Unknown**",
+    'x': "**Unknown**",
+    'foh-orn': 'N5-formyl-N5-hydroxyornithine'
 };
 let items = document.querySelectorAll('.test-container .box');
 var dragSrcEl = null;
@@ -64,6 +115,19 @@ let nameWildcardModule = "Custom_gene_";
 let nameWildcardEnzyme = "Custom_tailoring_gene_";
 let wildcardEnzyme = "";
 let biosyntheticCoreEnzymes = ["alpha/beta fold hydrolase","acyl carrier protein","phosphopantetheine-binding protein","sdr family oxidoreductase", "type i polyketide synthase", "type ii polyketide synthase", "type iii polyketide synthase", "polyketide synthase", "thioesterase domain-containing protein", "non-ribosomal peptide synthetase", "non-ribosomal peptide synthetase"]
+
+const uploadButton = document.getElementById('uploadButton');
+const fileInput = document.getElementById('fileInput');
+
+uploadButton.addEventListener('click', (event) => {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', (event) => {
+    const input_file = event.target.files[0];
+    readFile(input_file);
+});
+
 
 const dropArea = document.getElementById('regionsBar');
 
@@ -89,6 +153,8 @@ document.querySelector('textarea').addEventListener('mouseleave', function () {
     window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd); })
 appendWildcardButtons(Object.keys(tailoringEnzymes));
 appendButtonsToDropdownTerpene(terpeneSubstrates)
+
+
 function appendButtonsToDropdownTerpene(entries) {
     const dropdown = document.getElementById("dropdownContentTerpene");
 
@@ -137,6 +203,31 @@ function reformatSVGToBoundary(svg) {
         svg.setAttribute("width", width);
         svg.setAttribute("height", height);
       }
+function selectFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.js';
+    input.addEventListener('change', handleFileSelection, false);
+    input.click();
+}
+function handleFileSelection(event) {
+    const file = event.target.files[0];
+
+    if (file) {readFile(file)
+    }
+}
+
+async function loadExampleFile() {
+    const response = await fetch("./example_regions.js");
+    const content = await response.text();
+
+    // Convert the text content to a Blob so that it can be read using FileReader
+    const blob = new Blob([content], { type: "text/javascript" });
+
+    // Use the readFile function to read the Blob
+    readFile(blob);
+}
+
 function readFile(file) {
     const reader = new FileReader();
     reader.addEventListener('load', (event) => {
@@ -1458,24 +1549,31 @@ function setDisplayedStatus(id, geneMatrix) {
         }
     }
 }
-function createButtonsForEachRegion(){
-  let listRegions = []
-  let listTypes = []
-  for (index = 0; index < recordData[0].regions.length; index++){
-    listRegions.push(recordData[0].regions[index].anchor);
-      listTypes.push(recordData[0].regions[index].type);
-  }
-  let regionsBar = document.getElementById("regionsBar")
-  let innerHTML = ""
-  for (index = 0; index < listRegions.length; index++){
-    region = listRegions[index]
-    type = listTypes[index]
-    innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=changeRegionTo("${region}")><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`
-  regionsBar.innerHTML = innerHTML
-     }
+function createButtonsForEachRegion() {
+    let listRegions = [];
+    let listTypes = [];
+
+    for (const record of recordData) {
+        for (let index = 0; index < record.regions.length; index++) {
+            listRegions.push(record.regions[index].anchor);
+            listTypes.push(record.regions[index].type);
+        }
+    }
+
+    let regionsBar = document.getElementById("regionsBar");
+    let innerHTML = "";
+
+    for (let index = 0; index < listRegions.length; index++) {
+        let region = listRegions[index];
+        let type = listTypes[index];
+        innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=changeRegionTo("${region}")><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`;
+    }
+
+    regionsBar.innerHTML = innerHTML;
 }
+
 function getClusterType(regionIndex){
-let type = recordData[0].regions[regionIndex].type;
+let type = recordData[recordIndex].regions[regionIndex].type;
     if (type.includes("PKS") || type.includes("NRPS") || type.includes("Fatty_acid")){
         document.getElementById("add_module_button").style.display = "block";
         return "nrpspks"
@@ -1491,16 +1589,27 @@ let type = recordData[0].regions[regionIndex].type;
     }
     return "misc"
 }
-function getRegionName(regionIndex){
-    return recordData[0].regions[regionIndex].anchor
+function getRegionName(regionIndex, recordIndex){
+    return recordData[recordIndex].regions[regionIndex].anchor
+}
+function getFirstRegion(recordData){
+    let record_index = 0
+    for (const record of recordData) {
+
+        for (let region_index = 0; region_index < record.regions.length; region_index++) {
+            return [region_index, record_index]
+        }
+        record_index++
+    }
+
 }
 function changeRegion(direction){
   regionIndex += direction
-  runAlola(regionIndex, details_data, recordData)
+  runAlola(regionIndex, recordIndex, details_data, recordData)
 }
 function changeRegionTo(regionName){
-  regionIndex = selectRegion(recordData, regionName)
-  runAlola(regionIndex, details_data, recordData)
+  [regionIndex, recordIndex] = selectRegion(recordData, regionName)
+  runAlola(regionIndex, recordIndex, details_data, recordData)
 }
 function selectRegion(recordData, regionName) {
     /**
@@ -1509,10 +1618,15 @@ function selectRegion(recordData, regionName) {
    *@input name of region
    *@output index of region
    */
-    for (let region_index = 0; region_index < recordData[0].regions.length; region_index++) {
-        if (recordData[0].regions[region_index].anchor == regionName) {
-            return region_index
+    let record_index = 0
+    for (const record of recordData) {
+        
+        for (let region_index = 0; region_index < record.regions.length; region_index++) {
+            if (record.regions[region_index].anchor == regionName) {
+                return [region_index, record_index]
+            }
         }
+        record_index++
     }
 }
 function openForm() {
@@ -2347,25 +2461,25 @@ function findTailoringEnzymeStatus(orfFunction) {
     return [tailoringEnzymeStatus, "", ""]
 
 }
-function runAlola(regionIndex, details_data, recordData){
+function runAlola(regionIndex, recordIndex, details_data, recordData){
   RiPPStatus = 0;
     terpeneStatus = 0;
   rippPrecursor = "";
     document.getElementById("add_module_button").style.display = "none";
   cyclization = "None";
-  regionName = getRegionName(regionIndex);
+  regionName = getRegionName(regionIndex, recordIndex);
   cluster_type = getClusterType(regionIndex);
-    document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${recordData[0].regions[regionIndex].type} BGC`;
+    document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${recordData[recordIndex].regions[regionIndex].type} BGC`;
     document.getElementById('model_gene_container').innerHTML = "";
   document.getElementById('module_container').innerHTML = "";
   document.getElementById('domain_container').innerHTML = "";
     document.getElementById('structure_container').innerHTML = "";
 
   moduleMatrix = []
-  BGC = Object.keys(recordData[0].regions[regionIndex])
+  BGC = Object.keys(recordData[recordIndex].regions[regionIndex])
       .reduce(function (obj, k) {
           if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
-              0].regions[regionIndex][k];
+              recordIndex].regions[regionIndex][k];
           return obj;
       }, {});
   for (const [key_1, value_1] of Object.entries(details_data)) {
@@ -2398,7 +2512,7 @@ function runAlola(regionIndex, details_data, recordData){
     updateProteins(geneMatrix, BGC)
     updateDomains(geneMatrix,BGC)
     addArrowClick(geneMatrix)
-    if (recordData[0].regions[regionIndex].type.includes("terpene")){
+    if (recordData[recordIndex].regions[regionIndex].type.includes("terpene")){
         openFormTerpene()
     }
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
@@ -2544,6 +2658,9 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                 if (domain.abbreviation == "") {
                                     type = domain.type;
                                 }
+                                if (domain.type == "Heterocyclization") {
+                                    type = "CYC"
+                                }
                                 if (domain.abbreviation == "KR") {
                                     if (geneMatrix[geneIndex].domains[
                                         domainIndex].selected_option.length == 0) {
@@ -2583,6 +2700,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                         subtype = TRANS_AT_KS_SUBTYPES[geneMatrix[geneIndex].domains[domainIndex].selected_option]
                                     }
                                 }
+                            
                                 if (domain.abbreviation == "AT") {
                                     moduleType = "PKS"
                                     moduleSubtype = "PKS_CIS"
@@ -2618,9 +2736,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                                 "unknown" && domain.predictions[0][1] !="X") {
                                                 substrate = aminoacids[
                                                     domain.predictions[
-                                                        0][1].replace(
-                                                            "-", '')
-                                                        .toLowerCase()]
+                                                        0][1].toLowerCase()]
                                                 if (substrate === undefined) {
                                                             substrate = "glycine"}
                                             }
@@ -2680,10 +2796,10 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                 }
                                 if ((type == "ACP" || type == "PCP")&& domainArray.length>1)
                                 {
-                                    if (substrate === undefined && moduleType == "PKS") {
+                                    if (substrate === "" && moduleType == "PKS") {
                                         substrate = "MALONYL_COA";
                                     }
-                                    if (substrate === undefined && moduleType == "NRPS") {
+                                    if (substrate === "" && moduleType == "NRPS") {
                                         substrate = "glycine";
                                     }
                                     // remove falsely assigned domains for prediciton
@@ -2772,8 +2888,9 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
     return [outputForRaichu, starterACP, geneMatrix]
 }
 function reload_site_with_genecluster(){
-    createButtonsForEachRegion()
-    runAlola(regionIndex, details_data, recordData)
+    createButtonsForEachRegion();
+    [regionIndex, recordIndex] = getFirstRegion(recordData);
+    runAlola(regionIndex, recordIndex, details_data, recordData);
 }
 function create_empty_BGC(){
     regionIndex = 0
@@ -2791,5 +2908,5 @@ function create_empty_BGC(){
                     "orfs": []
                 }]}]
     details_data = {"nrpspks":{"r1c1":{"id":"r1c1", "orfs":[]}}}
-    runAlola(regionIndex, details_data, recordData)
+    runAlola(regionIndex, recordIndex, details_data, recordData)
 }

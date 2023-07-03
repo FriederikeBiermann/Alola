@@ -12,10 +12,10 @@ from raichu.data.molecular_moieties import PEPTIDE_BOND, CC_DOUBLE_BOND
 from pikachu.general import structure_to_smiles, svg_string_from_structure
 from raichu.run_raichu import get_tailoring_sites_atom_names, ModuleRepresentation, DomainRepresentation, ClusterRepresentation, TailoringRepresentation, build_cluster, CleavageSiteRepresentation, MacrocyclizationRepresentation
 from raichu.reactions.chain_release import find_all_o_n_atoms_for_cyclization
-from raichu.reactions.general_tailoring_reactions import find_atoms_for_tailoring
 from raichu.drawing.drawer import RaichuDrawer
-from raichu.ripp import RiPP_Cluster
-from raichu.terpene import Terpene_Cluster
+from raichu.cluster.ripp_cluster import RiPPCluster
+from raichu.cluster.modular_cluster import ModularCluster
+from raichu.cluster.terpene_cluster import TerpeneCluster
 from raichu.tailoring_enzymes import TailoringEnzyme
 
 # Allow cross origin requests
@@ -29,7 +29,7 @@ app = FastAPI(middleware=middleware)
 app.mount("/static", StaticFiles(directory="app"), name="static")
 
 def get_drawings(cluster) :
-    drawings, widths = cluster.get_drawings()
+    drawings, widths = cluster.get_spaghettis()
     svg_strings = []
     for i, drawing in enumerate(drawings):
         max_x = 0
@@ -113,6 +113,7 @@ async def alola_nrps_pks(antismash_input):
         cluster = build_cluster(raichu_input, strict = False)
         cluster.compute_structures(compute_cyclic_products=False)
         cluster_svg = cluster.draw_cluster()
+        spaghettis = get_drawings(cluster)
         
         linear_intermediate = cluster.linear_product
         cluster.do_tailoring()
@@ -128,16 +129,20 @@ async def alola_nrps_pks(antismash_input):
             else:
                 atom_cyclisation = atom_cyclisation[0]
             cluster.cyclise(atom_cyclisation)
-            final_product = cluster.cyclised_product
+            final_product = cluster.cyclic_product
         smiles = structure_to_smiles(final_product, kekule=False)
         atoms_for_cyclisation = str(
             [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
         tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
+
         structure_for_tailoring = RaichuDrawer(
-            tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, draw_straightened=True)
+            tailored_product, dont_show=True, add_url=True, draw_Cs_in_pink=True, make_linear = False)
         structure_for_tailoring.draw_structure()
         svg_structure_for_tailoring = structure_for_tailoring.save_svg_string().replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='tailoring_drawing'")
+        
+        svg_structure_for_tailoring
+
         svg = svg_string_from_structure(final_product).replace("\n", "").replace(
             "\"", "'").replace("<svg", " <svg id='final_drawing'")
         spaghettis = get_drawings(cluster)
@@ -168,7 +173,7 @@ async def alola_ripp(antismash_input: str):
         for enzyme in antismash_input_transformed["tailoring"]:
             if len(enzyme)>0:
                 tailoringReactions += [TailoringRepresentation(*enzyme)]
-        ripp_cluster = RiPP_Cluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence,
+        ripp_cluster = RiPPCluster(gene_name_precursor, full_amino_acid_sequence, amino_acid_sequence,
                                     tailoring_enzymes_representation=tailoringReactions)
         ripp_cluster.make_peptide()
         peptide_svg = ripp_cluster.draw_precursor_with_modified_product(
@@ -194,7 +199,6 @@ async def alola_ripp(antismash_input: str):
         smiles = structure_to_smiles(final_product, kekule=False)
         atoms_for_cyclisation = str(
             [str(atom) for atom in find_all_o_n_atoms_for_cyclization(tailored_product) if str(atom) != "O_0"])
-        print(tailoring_sites, ripp_cluster.linear_product.graph)
         amino_acids = []
         for index, aa in enumerate(amino_acid_sequence):
             amino_acids += [aa.upper()+str(index)]
@@ -217,8 +221,8 @@ async def alola_terpene(antismash_input: str):
         assert antismash_input
         # handle input data
         antismash_input_transformed = json.loads(antismash_input)
-        tailoringReactions = []
-        macrocyclisations = []
+        tailoringReactions = None
+        macrocyclisations = None
         precursor = antismash_input_transformed["substrate"]
         gene_name_terpene_synthase = antismash_input_transformed["gene_name_precursor"]
         terpene_cyclase_type = antismash_input_transformed["terpene_cyclase_type"]
@@ -229,7 +233,7 @@ async def alola_terpene(antismash_input: str):
         for enzyme in antismash_input_transformed["tailoring"]:
             if len(enzyme)>0:
                 tailoringReactions += [TailoringRepresentation(*enzyme)]
-        terpene_cluster = Terpene_Cluster (gene_name_terpene_synthase, precursor, macrocyclisations=macrocyclisations, terpene_cyclase_type=terpene_cyclase_type, tailoring_enzymes_representation = tailoringReactions)
+        terpene_cluster = TerpeneCluster(gene_name_terpene_synthase, precursor)
         terpene_cluster.create_precursor()
         precursor_svg = terpene_cluster.draw_product().replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")

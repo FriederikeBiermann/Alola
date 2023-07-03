@@ -370,7 +370,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                     domainIndex + "_" + optionIndex + " style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOption(geneMatrix," +
                                                     geneIndex + ',' + moduleIndex + "," +
                                                     domainIndex +
-                                                    ",\x22," +
+                                                    ",\x22" +
                                                     short_option +
                                                     "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
                                                     option +

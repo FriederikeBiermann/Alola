@@ -1,4 +1,4 @@
-TRANS_AT_KS_SUBTYPES = { 'Gcn5-related n-acetyltransferase starter': 'ACST', 'Amino acids (glycine)': 'AA', 'Beta-hydroxyl or e-configured double bonds': 'BETA_OH_EDB', 'Non-elongating (beta-hydroxyl groups)': 'NON_ELOGATING_BETA_OH', 'Non-elongating (double bond before branching events)': 'NON_ELOGATING_BETA_OH', 'Beta-o-methyl groups': 'BETA_D_OME', 'Beta-methyl double bonds': 'BETA_ME', 'Reduced or shifted double bonds': 'RED_SHDB', 'Pyran or furan rings': 'PYR', 'Alpha-methyl beta-l-hydroxyl groups': 'ALPHAME_BETA_L_OH', 'Alpha-methyl e-configured double bonds': 'ALPHAME_EDB', 'Beta-l-hydroxyl groups': 'BETA_L_OH', 'Beta-keto groups': 'KETO', 'Double bonds or double bond starter': 'DB', 'Vinylogous chain branching': 'BR', 'Non-elongating (amino acids oxazole or thiazole rings)': 'NON_ELOGATING_OXA', 'Mostly alpha-hydroxyl beta-hydroxyl groups': 'ALPHABETA_OH', 'Beta-hydroxyl groups': 'BETA_OH', 'E-configured double bonds': 'EDB', 'Double bonds': 'DB', 'Lactate starter': 'LACST', 'Non-elongating (beta-l-hydroxyl groups)': 'NON_ELOGATING_BETA_L_OH', 'Beta-exomethylene or reduced beta-methyl groups': 'BETA_ME', 'Non-elongating (double bonds)': 'NON_ELOGATING_DB', 'Reduced with alpha-methyl or alpha-methyl beta-hydroxyl or alpha-methyl beta-keto groups': 'ALPHAME', 'Reduced with alpha-methyl or shifted double bonds with alpha-methyl groups': 'ALPHAME', 'Acetyl starter': 'ACST', 'Amino acids': 'AA', 'Non-elongating (beta-hydroxyl groups introduced by bimodules)': 'NON_ELOGATING_BETA_OH', 'Acetyl or aromatic starter': 'ST', 'Methoxycarbonyl starter': 'MEOST', 'Oxygen insertion': 'OXI', 'Non-elongating (pyran or furan rings)': 'NON_ELOGATING_PYR', 'Beta-hydroxyl or beta-keto groups': 'BETA_OH_KETO', 'Non-elongating (various substrate specificities)': 'NON_ELOGATING', 'Non-elongating (hemiacetal or beta-hydroxyl groups)': 'NON_ELOGATING_BETA_OH', 'Shifted double bonds': 'SHDB', 'Amino acids (oxazole or thiazole rings)': 'OXA', 'Z-configured double bonds': 'ZDB', 'Alpha-l-methyl beta-d-hydroxyl groups': 'ALPHAME_BETA_D_OH', 'Alpha-methyl beta-hydroxyl groups': 'ALPHAME_BETAOH', 'Phosphoglycerate-derived starter': 'UNST', 'Beta-d-hydroxyl groups': 'BETA_D_OH', 'Alpha-hydroxyl beta-hydroxyl groups': 'ALPHABETA_OH', 'Beta-methyl e-configured double bonds': 'BETA_MEDB', 'Mainly acetyl starter': 'ST', 'Amide-containing starters': 'ST', 'Non-elongating (alpha-methyl e-configured double bonds)': 'NON_ELOGATING_ALPHAME_EDB', 'Aromatic starter': 'ARST', 'Alpha-hydroxyl groups': 'ALPHA_OH' }
+TRANS_AT_KS_SUBTYPES = { ' Beta Keto groups.': 'BETA_OH_KETO', 'Acetyl groups as the starting building block of the polyketide.': 'ACST', 'Alpha hydroxy groups, beta keto group': 'ALPHA_OH', 'Alpha-L-methyl groups in conjunction with beta-D-hydroxyl groups.': 'ALPHAME_BETA_D_OH', 'Alpha-hydroxyl groups in conjunction with beta-hydroxyl groups.': 'ALPHABETA_OH', 'Alpha-methyl groups in conjunction with beta-L-hydroxyl groups.': 'ALPHAME_BETA_L_OH', 'Alpha-methyl groups in conjunction with beta-hydroxyl groups.': 'ALPHAME_BETAOH', 'Alpha-methyl groups with E-configured double bonds.': 'ALPHAME_EDB', 'Alpha-methyl groups with Z-configured double bonds.': 'ALPHAME_ZDB', 'Alpha-methyl groups with beta-gamma-double bonds.': 'ALPHA_D_ME_SHDB', 'Alpha-methyl groups with double bonds.': 'ALPHAME_DB', 'Alpha-methyl groups with either a reduced bond or a beta-gamma-double bond.': 'ALPHAME', 'Amidated amino acid starters. Amide groups are introduced by a dedicated aminotransferase.': 'ST', 'Amino acids containing oxazole or thiazole rings introduced by the NRPS module upstream.': 'OXA', 'Aromatic rings as the starting building block of the polyketide.': 'ARST', 'Beta-D-hydroxyl groups.': 'BETA_D_OH', 'Beta-L-hydroxyl groups.': 'BETA_L_OH', 'Beta-gamma-double bonds.': 'SHDB', 'Beta-hydroxy E-double bond': 'BETA_OH_EDB', 'Beta-hydroxyl groups.': 'BETA_OH', 'Beta-keto groups.': 'KETO', 'Beta-methoxy groups.': 'BETA_D_OME', 'Beta-methyl groups with double bonds.': 'BETA_MEDB', 'Double bonds of various configurations.': 'DB', 'E-configured double bonds.': 'EDB', 'Either beta-exomethylene groups or reduced beta-methyl groups, depending on the module composition upstream.': 'BETA_ME', 'Exomethylene groups.': 'EXOMETHYLENE', 'Glycine introduced by the NRPS module upstream.': 'AA', 'Lactate as the starting building block of the polyketide.': 'LACST', 'Methoxycarbonyl units as the starting building block of the polyketide.': 'MEOST', 'Non-elongating KS with keto groups': 'NON_ELONGATING_OXA', 'Non-elongating KS with specifity for pyran or furan rings.': 'NON_ELONGATING_PYR', 'Non-elongating with alpha-methyl groups and E-double bonds.': 'NON_ELONGATING_ALPHAME_EDB', 'Non-elongating with beta-L-hydroxy groups.': 'NON_ELONGATING_BETA_L_OH', 'Non-elongating with beta-hydroxy groups.': 'NON_ELONGATING_BETA_OH', 'Non-elongating with double bonds.': 'NON_ELONGATING_DB', 'Phosphoglycerate-derived molecules as the starting building block of the polyketide.': 'UNST', 'Pyran or furan rings, depending on the presence of an in-trans-acting hydroxylases two modules upstream.': 'PYR', 'Reduced bonds.': 'RED', 'Shifted double bond.': 'RED_SHDB', 'Substrates with inserted oxygen, oftentimes resulting in oxidative cleaving.': 'OXI', 'This type is elongating, but the substrate specificity cannot be predicted.': 'MISCELLANEOUS', 'This type is in an out group.': 'OUT', 'This type is specific for vinylogous chain branching.': 'BR', 'When without a suffix, this type is non-elongating, but the substrate specificity cannot be predicted.': 'NON_ELONGATING', 'Z-Double bonds': 'ZDB' }
 function addStringToArray(string, array) {
   /**
  * Adds a string in front of every instance of the array
@@ -18,7 +18,7 @@ var OptionCreator = {
 };
 OptionCreator.createOptionsTerpeneCyclase = (function(atomsForCyclisation = none, tailoringSites = none){
   options = {"Cyclization": atomsForCyclisation,
-    "Isomerization": tailoringSites['DOUBLE_BOND_SHIFT']}
+    "Isomerization": tailoringSites['DOUBLE_BOND_SHIFT']};
   return options
   
 })
@@ -35,26 +35,26 @@ OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation 
       }
 //add substrate specifities for NRPS
 if (domain.abbreviation=="A") {
-  domain.domainOptions=Object.values(aminoacids)
+  domain.domainOptions = [...new Set(Object.values(aminoacids))];
   domain.default_option=aminoacids[domain.predictions[0][1].replace(
-  "-", '').toLowerCase()]
+  "-", '').toLowerCase()];
 }
 //add substrate specifities for PKS
 
 if (domain.abbreviation=="AT") {
-domain.domainOptions=Object.keys(nameToStructure)
+domain.domainOptions=Object.keys(nameToStructure);
 domain.default_option=domain.predictions[1][1].replace(
 "-", '')
-.toLowerCase()
+.toLowerCase();
 }
        //add specifities for Trans-AT-KS
 
        if (domain.abbreviation == "KS" && domain.predictions.length != 0) {
-         domain.domainOptions = Object.keys(TRANS_AT_KS_SUBTYPES)
+         domain.domainOptions = Object.keys(TRANS_AT_KS_SUBTYPES);
          for (const [key,value] of Object.entries(TRANS_AT_KS_SUBTYPES))
          {
            if (value == domain.predictions[0][1].toUpperCase().replaceAll("-", "_").replaceAll("/", "_"))
-            domain.default_option = key
+            domain.default_option = key;
          }
 
        }
