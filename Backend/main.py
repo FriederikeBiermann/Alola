@@ -235,11 +235,11 @@ async def alola_terpene(antismash_input: str):
                 tailoringReactions += [TailoringRepresentation(*enzyme)]
         terpene_cluster = TerpeneCluster(gene_name_terpene_synthase, precursor)
         terpene_cluster.create_precursor()
-        precursor_svg = terpene_cluster.draw_product().replace(
+        precursor_svg = terpene_cluster.draw_product(as_string=True, draw_Cs_in_pink=True).replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='precursor_drawing'")
         if len(macrocyclisations)>0:
             terpene_cluster.do_macrocyclization()
-        cyclised_product_svg = terpene_cluster.draw_product().replace(
+        cyclised_product_svg = terpene_cluster.draw_product(as_string=True, draw_Cs_in_pink=True).replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='cyclized_drawing'")
         # get options for cyclisation
         cyclase = TailoringEnzyme("gene", "OXIDATIVE_BOND_FORMATION")   
@@ -248,7 +248,7 @@ async def alola_terpene(antismash_input: str):
             terpene_cluster.chain_intermediate) if str(atom) != "O_0"])
         if len(tailoringReactions)>0:
             terpene_cluster.do_tailoring()
-        svg_final_product_raw = terpene_cluster.draw_product()
+        svg_final_product_raw = terpene_cluster.draw_product(as_string=True)
         svg_tailoring = svg_final_product_raw.replace(
             "\n", "").replace("\"", "'").replace("<svg", " <svg id='intermediate_drawing'")
         svg_final_product = RaichuDrawer(terpene_cluster.chain_intermediate, dont_show= True).draw_structure().save_svg_string().replace("\n", "").replace(
