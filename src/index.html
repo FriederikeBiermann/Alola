@@ -16,72 +16,107 @@
   <div id="menu_bar">
     <!-- Rounded switch -->
 
+<button class="start_button tooltip" data-tooltip="View Impressum" onclick="showImpressum()">
+  <strong>Impressum</strong>
+</button>
 
-<button class="start_button" onclick="showImpressum()"><strong>Impressum</strong></button>
+<button type="button" class="start_button tooltip" id="uploadButton"
+  data-tooltip="Please upload 'region.js' files from antiSMASH output. This can be found in the 'antiSMASH output' folder when clicking 'Download All Results' in the antiSMASH web server or in the results folder when using antiSMASH locally.">
+  <strong> Upload file </strong>
+</button>
 
-    <button type="button" class="start_button" onclick="create_empty_BGC()"> <strong>Create empty BGC
-      </strong></button>
-    <button type="button" class="start_button"
-      onclick="fetchFromRaichu(details_data, regionName,geneMatrix, cluster_type, BGC)"> <strong>Refresh
-        structures</strong></button>
-    <button type="button" class="start_button" onclick="reload_site_with_genecluster()"><strong> Reset
-        view</strong></button>
-    <label class="switch">
-      <input id="real-time-button" type="checkbox">
-      <span class="slider round"></span>
-    </label>
-    <div id="fake_button"> Real time calculation</div>
+<input type="file" id="fileInput" accept=".js" style="display: none" />
+
+<button type="button" class="start_button tooltip"
+  data-tooltip="Create an empty biosynthetic gene cluster (BGC) to fill with modules." onclick="create_empty_BGC()">
+  <strong>Create empty BGC</strong>
+</button>
+
+<button type="button" class="start_button tooltip" id="load_example_button" data-tooltip="Loads an example antiSMASH output from Saccharopolyspora erythraea NRRL 2338." onclick="loadExampleFile()">
+  <strong>Load Example</strong>
+</button>
+
+<button type="button" class="start_button tooltip"
+  data-tooltip="Fetch updated data and refresh the displayed structures and spaghetti diagram."
+  onclick="fetchFromRaichu(details_data, regionName,geneMatrix, cluster_type, BGC)">
+  <strong>Refresh structures</strong>
+</button>
+
+<button type="button" class="start_button tooltip"
+  data-tooltip="Reset the view to the initial state without modifications to the biosynthetic model."
+  onclick="reload_site_with_genecluster()">
+  <strong>Reset view</strong>
+</button>
+
+<label class="switch">
+  <input id="real-time-button" type="checkbox">
+  <span class="slider round"></span>
+</label>
+
+<div id="fake_button" class="tooltip"
+  data-tooltip="Toggle to enable real-time calculations. If not activated, spaghetti diagrams and structures are only fetched when pressing the 'Refresh Structures' button. This might be useful when implementing a lot of changes.">
+  Real time calculation
+</div>
   </div>
-  <div id="regionsBar"> Drop region.js antiSMASH output here</div>
+<div id="regionsBar" class="tooltip"
+  data-tooltip="Please drop 'region.js' files from antiSMASH output. This can be found in the 'antiSMASH output' folder when clicking 'Download All Results' in the antiSMASH web server or in the results folder when using antiSMASH locally.">
+  Please drop 'region.js' files from antiSMASH output
+</div>
+
   <div id="BGC_explorer">
-    <div class="heading-container" id="BGCHeading"> Biosynthetic gene cluster explorer</div>
+    <div class="heading-container tooltip" id="BGCHeading"
+      data-tooltip="Knock out genes by clicking on them. Hover over them to get more information.">
+      Biosynthetic gene cluster explorer
+    </div>
     <div class="container" id="arrow_container"> </div>
   </div>
   <div id="Gene_explorer">
     <div class="heading-container"> Gene explorer</div>
-    <div id="gene_container">
-    </div>
+    <div id="gene_container"></div>
   </div>
-  </div>
-
-  </div>
+  
   <div id="Protein_explorer">
-    <div class="heading-container"> Protein explorer</div>
+    <div class="heading-container tooltip"
+      data-tooltip="Drag and drop the proteins to change the direction. This might be especially useful when parts of the gene cluster are on the reverse strand. Click on the proteins to knock them out, and click on the domains to knock them out as well.">
+      Protein explorer
+    </div>
     <div class="protein-container" id="protein_container"> </div>
   </div>
-  </div>
   <div id="Domain_explorer" class="Domain_explorer">
-    <div class="heading-container"> Biosynthetic model
-      <button type="button" class="start_button" onclick="openForm()" id="add_module_button"><strong>Add
-          Module</strong></button>
-      <button type="button" class="start_button" onclick="openTailoringForm()" id="add_tailoring_enzyme_button"><strong>Add
-          tailoring Enzyme</strong></button>
-      <button type="button" class="start_button" id="ripp_button" onclick="openRiPPForm()"><strong><a> RiPP BGC
-          </a></strong></button>
+    <div class="heading-container">
+      Biosynthetic model
+      <button type="button" class="start_button tooltip" onclick="openForm()" id="add_module_button"
+        data-tooltip="Add a new module to the biosynthetic model."><strong>Add Module</strong></button>
+      <button type="button" class="start_button tooltip" onclick="openTailoringForm()" id="add_tailoring_enzyme_button"
+        data-tooltip="Add a new tailoring enzyme to the biosynthetic model."><strong>Add tailoring
+          Enzyme</strong></button>
+      <button type="button" class="start_button tooltip" id="ripp_button" onclick="openRiPPForm()"
+        data-tooltip="Create a RiPP BGC from the current BGC (select a precursor)."><strong><a> RiPP BGC </a></strong></button>
     </div>
     <div id="outerDomainExplorer" class="outerDomainExplorer">
-
       <div class="module-container" id="model_gene_container"> </div>
       <div class="module-container" id="module_container"> </div>
       <div class="domain-container" id="domain_container"> </div>
     </div>
-    <button type="button" class="start_button" id="save_biosynthetic_model_button" onclick="PrintDiv()"><strong><a>Save
+    <button type="button" class="start_button tooltip-above" id="save_biosynthetic_model_button" onclick="PrintDiv()"
+      data-tooltip="Save the current biosynthetic model, including tailoring enzymes, as a png image. May include more bugs than svg image."><strong><a>Save
           biosynthetic model with tayloring enzymes (png)</a></strong></button>
-    <button type="button" class="start_button" id="save_biosynthetic_model_button"><a
-        id="save_complete_cluster_svg"><strong> Save
-          biosynthetic model withOUT tayloring enzymes (svg)</strong></a></button>
+    <button type="button" class="start_button tooltip-above" id="save_biosynthetic_model_button"
+      data-tooltip="Save the current biosynthetic model, excluding tailoring enzymes, as a svg image."><a
+        id="save_complete_cluster_svg"><strong> Save biosynthetic model withOUT tayloring enzymes
+          (svg)</strong></a></button>
   </div>
   <div id="Structure_explorer">
     <div class="heading-container"> Structure explorer</div>
     <div id="structure_container"> </div>
     <div id="button_container">
-      <button type="button" class="start_button" id="save_button"> <a id="save_svg"><strong> Download
+      <button type="button" class="start_button tooltip-above" id="save_button" data-tooltip="Download the visualized structure as SVG."> <a id="save_svg"><strong> Download
             SVG</strong></a></button>
-      <button type="button" class="start_button" id="Zoom_out_button" onclick="zoom_in()"><a><strong>Zoom
+      <button type="button" class="start_button tooltip-above" id="Zoom_out_button" onclick="zoom_in()" data-tooltip="Zoom into the structure."><a><strong>Zoom
             in</strong></a></button>
-      <button type="button" class="start_button" id="Zoom_in_button" onclick="zoom_out()"><a><strong>Zoom
+      <button type="button" class="start_button tooltip-above" id="Zoom_in_button" onclick="zoom_out()" data-tooltip="Zoom out of the structure."><a><strong>Zoom
             out</strong></a></button>
-      <button type='button' class='start_button' id = "smiles_button"><a><strong> Copy SMILES to clipboard </strong></a></button>
+      <button type='button' class='start_button tooltip-above' id = "smiles_button" data-tooltip="Copy the structure's SMILES (Simplified Molecular Input Line Entry System) notation to the clipboard. SMILES is a standard way to represent a chemical structure using a text string. You can for instance directly copy the SMILES into ChemDraw or MarvinSketch to modify the structure."><a><strong> Copy SMILES to clipboard </strong></a></button>
   </div>
   </div>
   <div class="loginPopup">
@@ -113,7 +148,7 @@
         Select a substrate if you want this BGC to be processed as a Terpene BGC.
         <br>
           <div class="dropdown" style="display: inherit;">
-            <button type="button" class="btn cancel">Substrate</button>
+            <button type="button" class="btn cancel"><a>Substrate</a> </button>
             <div class="dropdown-content" id = dropdownContentTerpene>
             </div>
           </div>
@@ -239,10 +274,11 @@
   </div> 
   <div id="popupImpressum" class="formPopup" >
     <h2>Impressum and Contact Information</h2>
-    <p>If you have any questions, suggestions or bugs to report, please contact Friederike Biermann</p>
+    <p>Alola is still in its alpha version. If you have any questions, suggestions or bugs to report, please contact Friederike Biermann</p>
     <p>Email: <a href="mailto:f.biermann@bio.uni-frankfurt.de">f.biermann@bio.uni-frankfurt.de</a></p>
-    <p>Group Name: Medema Lab, Bioinformatics</p>
-    <p>Address: Droevendaalsesteeg 1, 6708PB WAGENINGEN</p>
+    <p>Group Name: Medema Lab, Bioinformatics and Helfrich Lab, Natural Product Genomics</p>
+    <p>Address: Droevendaalsesteeg 1, 6708PB WAGENINGEN / Max-von-Laue-Straße 9
+    60438 FRANKFURT</p>
   </div>
 
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.js"></script>

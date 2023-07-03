@@ -65,6 +65,7 @@ label {
 }
 
 #regionsBar {
+  position: relative;
   text-align: center;
   display: grid;
   grid-template-columns: repeat(100, 1fr);
@@ -170,6 +171,7 @@ label {
 }
 
 .start_button {
+  position: relative;
   margin: 0.2vh;
   float: right;
   color: #2B2B2B;
@@ -192,7 +194,7 @@ label {
 }
 
 #fake_button {
-
+  position: relative;
   float: right;
   background-color: #1F1F1F;
   color: white;
@@ -232,6 +234,7 @@ label {
 }
 
 .heading-container {
+  position: relative;
   background-color: #2B2B2B;
   border-radius: 0.6vh;
   padding-left: 5%;
@@ -653,4 +656,64 @@ svg text {
   height: auto;
   bottom: 6vh;
   left: 50%;
+}
+/* Tooltip styling */
+.tooltip::before,
+.tooltip-above::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  background: #555;
+  color: #fff;
+  font-size: 0.7vw;
+  padding: 5px;
+  border-radius: 6px;
+  max-width: 10vw;
+  /* Limit the width */
+  word-wrap: break-word;
+  /* Wrap the text */
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 1000;
+  /* Overlay all layers beneath */
+}
+
+.tooltip::after,
+.tooltip-above::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip:hover::before,
+.tooltip-above:hover::before,
+.tooltip:hover::after,
+.tooltip-above:hover::after {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Tooltip styling for above */
+.tooltip-above::before {
+  bottom: 150%;
+}
+
+.tooltip-above::after {
+  bottom: 90%;
+  border-top-color: #555;
+}
+
+/* Tooltip styling for below */
+.tooltip::before {
+  top: 150%;
+}
+
+.tooltip::after {
+  top: 90%;
+  border-bottom-color: #555;
 }
