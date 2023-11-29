@@ -1,5 +1,4 @@
-FROM node:16 AS build-frontend
-
+FROM public.ecr.aws/docker/library/node:16.13.0 AS build-frontend
 WORKDIR /app
 COPY ./src/package.json ./src/package-lock.json ./
 RUN npm install
@@ -7,7 +6,7 @@ COPY ./src/index.html ./public/
 COPY ./src/index.css ./public/
 COPY ./src/*.js ./public/
 COPY ./src/ ./src
-RUN npm run build && npm install -g npm@latest npx@latest
+RUN npm run build && npm install -g npm@8 npx@latest
 FROM python:3.9
 WORKDIR /code
 COPY ./RAIChU /code/RAIChU
@@ -18,6 +17,7 @@ COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./Backend /code/app
 COPY --from=build-frontend /app/build /code/app/static
+RUN rm -rf /usr/share/doc
 COPY --from=build-frontend /usr /usr 
 
 # Expose the port that the FastAPI application is listening on
