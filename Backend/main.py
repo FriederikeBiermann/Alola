@@ -1,15 +1,17 @@
 from fastapi import FastAPI, Query
 from fastapi.staticfiles import StaticFiles
-import traceback
-from typing import List
-import ast
-import json
 from starlette.middleware.cors import CORSMiddleware
-from typing import Optional
+from starlette.middleware import Middleware
+from typing import List, Optional
+
+import traceback
+import json
+
 from pikachu.chem.structure import Structure
 from pikachu.reactions.functional_groups import find_bonds
-from raichu.data.molecular_moieties import PEPTIDE_BOND, CC_DOUBLE_BOND
 from pikachu.general import structure_to_smiles, svg_string_from_structure
+
+from raichu.data.molecular_moieties import PEPTIDE_BOND, CC_DOUBLE_BOND
 from raichu.run_raichu import (
     get_tailoring_sites_atom_names,
     ModuleRepresentation,
@@ -27,14 +29,11 @@ from raichu.cluster.modular_cluster import ModularCluster
 from raichu.cluster.terpene_cluster import TerpeneCluster
 from raichu.tailoring_enzymes import TailoringEnzyme
 
-# Allow cross origin requests
-from starlette.middleware import Middleware
-
+# FastAPI app setup
 app = FastAPI()
 origins = ["http://localhost:3000", "localhost:3000"]
 middleware = [Middleware(CORSMiddleware, allow_origins=origins)]
 app = FastAPI(middleware=middleware)
-
 app.mount("/static", StaticFiles(directory="app"), name="static")
 
 
@@ -121,92 +120,134 @@ async def root():
 
 
 @app.get("/api/alola/nrps_pks/")
-async def alola_nrps_pks(antismash_input):
+async def alola_nrps_pks(antismash_input: str):
+    """
+    Process input data from antismash for NRPS/PKS analysis.
+    :param antismash_input: JSON string containing antismash data.
+    :return: Dictionary containing SVG representations, SMILES strings, and other molecular data.
+    """
     try:
-        assert antismash_input
-        # handle input data
-        antismash_input_transformed = json.loads(antismash_input)
-        tailoringReactions = []
-        for enzyme in antismash_input_transformed["tailoring"]:
-            tailoringReactions += [TailoringRepresentation(*enzyme)]
-        raw_cluster_representation = antismash_input_transformed[
-            "clusterRepresentation"
+        assert antismash_input, "Input data is required."
+
+        # Decode the JSON input
+        input_data = json.loads(antismash_input)
+
+        # Extract and convert tailoring enzymes
+        tailoring_reactions = [
+            TailoringRepresentation(*enzyme) for enzyme in input_data["tailoring"]
         ]
-        # Format fake booleans
-        raichu_input = format_cluster(raw_cluster_representation, tailoringReactions)
-        cyclization = antismash_input_transformed["cyclization"]
+
+        # Format cluster data and handle fake booleans
+        raichu_input = format_cluster(
+            input_data["clusterRepresentation"], tailoring_reactions
+        )
+
+        # Initialize and compute cluster structures
         cluster = build_cluster(raichu_input, strict=False)
         cluster.compute_structures(compute_cyclic_products=False)
-        cluster_svg = cluster.draw_cluster()
-        spaghettis = get_drawings(cluster)
 
-        linear_intermediate = cluster.linear_product
+        # Perform tailoring and cyclization if applicable
         cluster.do_tailoring()
         tailored_product = cluster.chain_intermediate.deepcopy()
-        final_product = cluster.chain_intermediate
-        if cyclization != "None":
-            # try to find atom for atom for cyclisation before the tailoring occurs
-            atom_cyclisation = [
+        cyclization = input_data["cyclization"]
+        final_product = perform_cyclization(cyclization, tailored_product, cluster)
+
+        # Prepare data for response
+        response_data = prepare_response_data(cluster, final_product, tailored_product)
+
+        return response_data
+
+    except Exception as e:
+        # Log and return error information
+        return log_error(e)
+
+
+def perform_cyclization(cyclization, tailored_product, cluster):
+    """
+    Perform cyclization on the tailored product if specified.
+    :param cyclization: Cyclization data.
+    :param tailored_product: The tailored product from the cluster.
+    :param cluster: The cluster object.
+    :return: Final product after cyclization.
+    """
+    if cyclization != "None":
+        atom_cyclization = next(
+            (
                 atom
                 for atom in tailored_product.atoms.values()
                 if str(atom) == cyclization
-            ]
-            if len(atom_cyclisation) == 0:
-                raise ValueError(f"Atom {cyclization} for cyclization does not exist.")
-            else:
-                atom_cyclisation = atom_cyclisation[0]
-            cluster.cyclise(atom_cyclisation)
-            final_product = cluster.cyclic_product
-        smiles = structure_to_smiles(final_product, kekule=False)
-        atoms_for_cyclisation = str(
-            [
-                str(atom)
-                for atom in find_all_o_n_atoms_for_cyclization(tailored_product)
-                if str(atom) != "O_0"
-            ]
+            ),
+            None,
         )
-        tailoring_sites = get_tailoring_sites_atom_names(tailored_product)
+        if not atom_cyclization:
+            raise ValueError(f"Atom {cyclization} for cyclization does not exist.")
 
-        structure_for_tailoring = RaichuDrawer(
-            tailored_product,
-            dont_show=True,
-            add_url=True,
-            make_linear=False,
-        )
-        structure_for_tailoring.draw_structure()
-        svg_structure_for_tailoring = (
-            structure_for_tailoring.save_svg_string()
-            .replace("\n", "")
-            .replace('"', "'")
-            .replace("<svg", " <svg id='tailoring_drawing'")
-        )
+        cluster.cyclise(atom_cyclization)
+        return cluster.cyclic_product
 
-        svg_structure_for_tailoring
+    return cluster.chain_intermediate
 
-        svg = (
-            svg_string_from_structure(final_product)
-            .replace("\n", "")
-            .replace('"', "'")
-            .replace("<svg", " <svg id='final_drawing'")
-        )
-        spaghettis = get_drawings(cluster)
-        return {
-            "svg": svg,
-            "hangingSvg": spaghettis,
-            "smiles": smiles,
-            "atomsForCyclisation": atoms_for_cyclisation,
-            "tailoringSites": str(tailoring_sites),
-            "completeClusterSvg": cluster_svg,
-            "structureForTailoring": svg_structure_for_tailoring,
-        }
-    except Exception as e:
-        tb = traceback.extract_tb(e.__traceback__)
-        exc_type = type(e).__name__
-        filename, lineno, _, _ = tb[-1]
-        print(f"{exc_type} occurred at {filename}:{lineno}")
-        return {
-            "Error": "The Cluster is not biosynthetically correct, try removing domains to include only complete modules or changing the order of proteins."
-        }
+
+def prepare_response_data(cluster, final_product, tailored_product):
+    """
+    Prepare the response data including SVG strings and molecular information.
+    :param cluster: The cluster object.
+    :param final_product: The final product after processing.
+    :param tailored_product: The tailored product from the cluster.
+    :return: A dictionary containing the response data.
+    """
+    smiles = structure_to_smiles(final_product, kekule=False)
+    atoms_for_cyclisation = [
+        str(atom)
+        for atom in find_all_o_n_atoms_for_cyclization(tailored_product)
+        if str(atom) != "O_0"
+    ]
+
+    structure_for_tailoring = RaichuDrawer(
+        tailored_product, dont_show=True, add_url=True, make_linear=False
+    )
+    structure_for_tailoring.draw_structure()
+
+    svg_structure_for_tailoring = format_svg(
+        structure_for_tailoring.save_svg_string()
+    ).replace("<svg", " <svg id='tailoring_drawing'")
+    svg_final = format_svg(svg_string_from_structure(final_product)).replace(
+        "<svg", " <svg id='final_drawing'"
+    )
+
+    return {
+        "svg": svg_final,
+        "hangingSvg": get_drawings(cluster),
+        "smiles": smiles,
+        "atomsForCyclisation": str(atoms_for_cyclisation),
+        "tailoringSites": str(get_tailoring_sites_atom_names(tailored_product)),
+        "completeClusterSvg": cluster.draw_cluster(),
+        "structureForTailoring": svg_structure_for_tailoring,
+    }
+
+
+def format_svg(svg_string):
+    """
+    Format an SVG string for display.
+    :param svg_string: The raw SVG string.
+    :return: Formatted SVG string.
+    """
+    return svg_string.replace("\n", "").replace('"', "'")
+
+
+def log_error(exception):
+    """
+    Log the exception and extract relevant information for the response.
+    :param exception: The caught exception.
+    :return: Dictionary with error information.
+    """
+    tb = traceback.extract_tb(exception.__traceback__)
+    exc_type = type(exception).__name__
+    filename, lineno, _, _ = tb[-1]
+    print(f"{exc_type} occurred at {filename}:{lineno}")
+    return {
+        "Error": "The Cluster is not biosynthetically correct, try removing domains to include only complete modules or changing the order of proteins."
+    }
 
 
 @app.get("/api/alola/ripp/")
@@ -246,7 +287,9 @@ async def alola_ripp(antismash_input: str):
             tailored_product = ripp_cluster.tailored_product
         else:
             tailored_product = ripp_cluster.linear_product
-        tailoring_sites = get_tailoring_sites_atom_names(ripp_cluster.chain_intermediate)
+        tailoring_sites = get_tailoring_sites_atom_names(
+            ripp_cluster.chain_intermediate
+        )
         svg_structure_for_tailoring = (
             ripp_cluster.draw_cluster(fold=10, size=7, as_string=True)
             .replace("\n", "")
@@ -292,7 +335,6 @@ async def alola_ripp(antismash_input: str):
             "structureForTailoring": svg_structure_for_tailoring,
         }
 
-
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
         exc_type = type(e).__name__
@@ -316,9 +358,7 @@ async def alola_terpene(antismash_input: str):
             for cyclization in antismash_input_transformed["cyclization"]:
                 if len(cyclization) > 0:
                     macrocyclisations.append(
-                            MacrocyclizationRepresentation(
-                                cyclization[0], cyclization[1]
-                            )
+                        MacrocyclizationRepresentation(cyclization[0], cyclization[1])
                     )
         for enzyme in antismash_input_transformed["tailoring"]:
             if len(enzyme) > 0:
@@ -350,7 +390,9 @@ async def alola_terpene(antismash_input: str):
         atoms_for_cyclisation = str(
             [
                 str(atom[0])
-                for atom in cyclase.get_possible_sites(terpene_cluster.chain_intermediate)
+                for atom in cyclase.get_possible_sites(
+                    terpene_cluster.chain_intermediate
+                )
                 if str(atom[0]) != "O_0"
             ]
         )
@@ -369,7 +411,9 @@ async def alola_terpene(antismash_input: str):
             .replace("<svg", " <svg id='final_drawing'")
         )
         smiles = structure_to_smiles(terpene_cluster.chain_intermediate, kekule=False)
-        tailoring_sites = get_tailoring_sites_atom_names(terpene_cluster.chain_intermediate)
+        tailoring_sites = get_tailoring_sites_atom_names(
+            terpene_cluster.chain_intermediate
+        )
         return {
             "svg": svg_final_product,
             "smiles": smiles,
@@ -379,7 +423,6 @@ async def alola_terpene(antismash_input: str):
             "cyclizedStructure": cyclised_product_svg,
             "structureForTailoring": svg_tailoring,
         }
-
 
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
