@@ -176,6 +176,7 @@ function splitArrayIntoPairs(array) {
         }
         pairs.push([array[i], array[i + 1]]);
     }
+    console.log(pairs)
     return pairs;
 }
 function appendWildcardButtons(entries) {
