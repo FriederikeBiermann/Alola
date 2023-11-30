@@ -150,19 +150,23 @@ async def alola_nrps_pks(antismash_input: str):
         cluster.do_tailoring()
         tailored_product = cluster.chain_intermediate.deepcopy()
         cyclization = input_data["cyclization"]
-        final_product = perform_cyclization(cyclization, tailored_product, cluster)
+        final_product = perform_cyclization_nrps_pks(
+            cyclization, tailored_product, cluster
+        )
 
         # Prepare data for response
-        response_data = prepare_response_data(cluster, final_product, tailored_product)
+        response_data = prepare_response_data_nrps_pks(
+            cluster, final_product, tailored_product
+        )
 
         return response_data
 
     except Exception as e:
         # Log and return error information
-        return log_error(e)
+        return log_error_nrps_pks(e)
 
 
-def perform_cyclization(cyclization, tailored_product, cluster):
+def perform_cyclization_nrps_pks(cyclization, tailored_product, cluster):
     """
     Perform cyclization on the tailored product if specified.
     :param cyclization: Cyclization data.
@@ -188,7 +192,7 @@ def perform_cyclization(cyclization, tailored_product, cluster):
     return cluster.chain_intermediate
 
 
-def prepare_response_data(cluster, final_product, tailored_product):
+def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
     """
     Prepare the response data including SVG strings and molecular information.
     :param cluster: The cluster object.
@@ -208,13 +212,10 @@ def prepare_response_data(cluster, final_product, tailored_product):
     )
     structure_for_tailoring.draw_structure()
 
-    svg_structure_for_tailoring = format_svg(
-        structure_for_tailoring.save_svg_string()
-    ).replace("<svg", " <svg id='tailoring_drawing'")
-    svg_final = format_svg(svg_string_from_structure(final_product)).replace(
-        "<svg", " <svg id='final_drawing'"
+    svg_structure_for_tailoring = process_svg(
+        structure_for_tailoring.save_svg_string(), "tailoring_drawing"
     )
-
+    svg_final = process_svg(svg_string_from_structure(final_product), "final_drawing")
     return {
         "svg": svg_final,
         "hangingSvg": get_drawings(cluster),
@@ -226,16 +227,21 @@ def prepare_response_data(cluster, final_product, tailored_product):
     }
 
 
-def format_svg(svg_string):
+def process_svg(svg_string, svg_id):
     """
-    Format an SVG string for display.
+    Process and format an SVG string with a specific ID.
     :param svg_string: The raw SVG string.
-    :return: Formatted SVG string.
+    :param svg_id: The ID to be assigned to the SVG.
+    :return: Formatted SVG string with the specified ID.
     """
-    return svg_string.replace("\n", "").replace('"', "'")
+    return (
+        svg_string.replace("\n", "")
+        .replace('"', "'")
+        .replace("<svg", f" <svg id='{svg_id}'")
+    )
 
 
-def log_error(exception):
+def log_error_nrps_pks(exception):
     """
     Log the exception and extract relevant information for the response.
     :param exception: The caught exception.
@@ -252,95 +258,172 @@ def log_error(exception):
 
 @app.get("/api/alola/ripp/")
 async def alola_ripp(antismash_input: str):
-    try:
-        assert antismash_input
-        # handle input data
-        antismash_input_transformed = json.loads(antismash_input)
-        tailoringReactions = []
-        macrocyclisations = []
-        amino_acid_sequence = antismash_input_transformed["rippPrecursor"]
-        gene_name_precursor = antismash_input_transformed["rippPrecursorName"]
-        full_amino_acid_sequence = antismash_input_transformed["rippFullPrecursor"]
-        if antismash_input_transformed["cyclization"] != "None":
-            for cyclization in antismash_input_transformed["cyclization"]:
-                if len(cyclization) > 0:
-                    macrocyclisations += [MacrocyclizationRepresentation(*cyclization)]
-        for enzyme in antismash_input_transformed["tailoring"]:
-            if len(enzyme) > 0:
-                tailoringReactions += [TailoringRepresentation(*enzyme)]
-        ripp_cluster = RiPPCluster(
-            gene_name_precursor,
-            full_amino_acid_sequence,
-            amino_acid_sequence,
-            macrocyclisations=macrocyclisations,
-            tailoring_representations=tailoringReactions,
+        """
+        Process input data from antismash for RiPP analysis.
+        :param antismash_input: JSON string containing antismash data.
+        :return: Dictionary containing SVG representations, SMILES strings, and other molecular data.
+        """
+        # try:
+        assert antismash_input, "Input data is required."
+
+        input_data = json.loads(antismash_input)
+        tailoring_reactions, macrocyclisations = parse_ripp_input_data(input_data)
+
+        ripp_cluster = create_ripp_cluster_from_data(
+            input_data, macrocyclisations, tailoring_reactions
         )
         ripp_cluster.make_peptide()
-        peptide_svg = (
-            ripp_cluster.draw_cluster(fold=10, size=7, as_string=True)
-            .replace("\n", "")
-            .replace('"', "'")
-            .replace("<svg", " <svg id='precursor_drawing'")
+
+        peptide_svg = process_svg(
+            ripp_cluster.draw_cluster(fold=10, size=7, as_string=True),
+            "precursor_drawing",
         )
-        if len(tailoringReactions) > 0:
-            ripp_cluster.do_tailoring()
-            tailored_product = ripp_cluster.tailored_product
-        else:
-            tailored_product = ripp_cluster.linear_product
+
+        tailored_product = perform_ripp_tailoring(ripp_cluster, tailoring_reactions)
         tailoring_sites = get_tailoring_sites_atom_names(
             ripp_cluster.chain_intermediate
         )
-        svg_structure_for_tailoring = (
-            ripp_cluster.draw_cluster(fold=10, size=7, as_string=True)
-            .replace("\n", "")
-            .replace('"', "'")
-            .replace("<svg", " <svg id='intermediate_drawing'")
+
+        svg_structure_for_tailoring = process_svg(
+            ripp_cluster.draw_cluster(fold=10, size=7, as_string=True),
+            "intermediate_drawing",
         )
-        if len(macrocyclisations) > 0:
-            ripp_cluster.do_macrocyclization()
-        cyclised_product_svg = (
-            ripp_cluster.draw_cluster(fold=5, size=7, as_string=True)
-            .replace("\n", "")
-            .replace('"', "'")
-            .replace("<svg", " <svg id='cyclised_drawing'")
+
+        perform_ripp_macrocyclization(ripp_cluster, macrocyclisations)
+        cyclised_product_svg = process_svg(
+            ripp_cluster.draw_cluster(fold=5, size=7, as_string=True),
+            "cyclised_drawing",
         )
-        cleaved_ripp_svg = (
-            ripp_cluster.draw_product(as_string=True)
-            .replace("\n", "")
-            .replace('"', "'")
-            .replace("<svg", " <svg id='final_drawing'")
+
+        cleaved_ripp_svg = process_svg(
+            ripp_cluster.draw_product(as_string=True), "final_drawing"
         )
 
         final_product = ripp_cluster.chain_intermediate
-        smiles = structure_to_smiles(final_product, kekule=False)
-        atoms_for_cyclisation = str(
-            [
-                str(atom)
-                for atom in find_all_o_n_atoms_for_cyclization(tailored_product)
-                if str(atom) != "O_0"
-            ]
+        (
+            smiles,
+            atoms_for_cyclisation,
+            amino_acids
+        ) = prepare_ripp_response_data(
+            final_product,
+            tailored_product,
+            input_data["rippPrecursor"]
+
         )
-        amino_acids = []
-        for index, aa in enumerate(amino_acid_sequence):
-            amino_acids += [aa.upper() + str(index)]
-        amino_acids = str(amino_acids)
+
         return {
             "svg": cleaved_ripp_svg,
             "smiles": smiles,
             "atomsForCyclisation": atoms_for_cyclisation,
-            "tailoringSites": str(tailoring_sites),
+            "tailoringSites": tailoring_sites,
             "rawPeptideChain": peptide_svg,
             "cyclisedStructure": cyclised_product_svg,
             "aminoAcidsForCleavage": amino_acids,
             "structureForTailoring": svg_structure_for_tailoring,
         }
 
-    except Exception as e:
-        tb = traceback.extract_tb(e.__traceback__)
-        exc_type = type(e).__name__
-        filename, lineno, _, _ = tb[-1]
-        print(f"{exc_type} occurred at {filename}:{lineno}")
-        return {"Error": "An error occured, try selecting a different precursor."}
+    # except Exception as e:
+    #     return log_error_ripps(e)
+
+
+def log_error_ripps(exception):
+    """
+    Log the exception and extract relevant information for the response.
+    :param exception: The caught exception.
+    :return: Dictionary with error information.
+    """
+    tb = traceback.extract_tb(exception.__traceback__)
+    exc_type = type(exception).__name__
+    filename, lineno, _, _ = tb[-1]
+    print(f"{exc_type} occurred at {filename}:{lineno}")
+    return {
+        "Error": "The Cluster is not biosynthetically correct, try reloading and incoperating other tailoring reactions."
+    }
+
+
+def parse_ripp_input_data(input_data):
+    """
+    Parse and transform input data from antismash.
+    :param input_data: The JSON decoded input data.
+    :return: Parsed tailoring reactions and macrocyclisations.
+    """
+    tailoring_reactions = [
+        TailoringRepresentation(*enzyme)
+        for enzyme in input_data.get("tailoring", [])
+        if len(enzyme) > 0
+    ]
+    macrocyclisations = [
+        MacrocyclizationRepresentation(*cyclization)
+        for cyclization in input_data.get("cyclization", [])
+        if len(cyclization) > 0
+    ]
+
+    return tailoring_reactions, macrocyclisations
+
+
+def create_ripp_cluster_from_data(input_data, macrocyclisations, tailoring_reactions):
+    """
+    Create a RiPP cluster from input data.
+    :param input_data: The JSON decoded input data.
+    :param macrocyclisations: List of macrocyclisations.
+    :param tailoring_reactions: List of tailoring reactions.
+    :return: RiPPCluster instance.
+    """
+    return RiPPCluster(
+        input_data["rippPrecursorName"],
+        input_data["rippFullPrecursor"],
+        input_data["rippPrecursor"],
+        macrocyclisations=macrocyclisations,
+        tailoring_representations=tailoring_reactions,
+    )
+
+
+def perform_ripp_tailoring(ripp_cluster, tailoring_reactions):
+    """
+    Perform tailoring on the RiPP cluster if applicable.
+    :param ripp_cluster: RiPPCluster instance.
+    :param tailoring_reactions: List of tailoring reactions.
+    :return: Tailored product.
+    """
+    if tailoring_reactions:
+        ripp_cluster.do_tailoring()
+        return ripp_cluster.tailored_product
+    return ripp_cluster.linear_product
+
+
+def perform_ripp_macrocyclization(ripp_cluster, macrocyclisations):
+    """
+    Perform macrocyclization on the RiPP cluster if applicable.
+    :param ripp_cluster: RiPPCluster instance.
+    :param macrocyclisations: List of macrocyclisations.
+    """
+    if macrocyclisations:
+        ripp_cluster.do_macrocyclization()
+
+
+def prepare_ripp_response_data(
+    final_product, tailored_product, amino_acid_sequence
+):
+    """
+    Prepare the response data including SMILES strings and other molecular information.
+    :param final_product: The final product after processing.
+    :param tailored_product: The tailored product from the cluster.
+    :param amino_acid_sequence: The amino acid sequence used in the process.
+    :param protease_options: Options or data related to protease processing.
+    :return: A tuple containing SMILES string, atoms for cyclisation, amino acids for cleavage.
+    """
+    smiles = structure_to_smiles(final_product, kekule=False)
+    atoms_for_cyclisation = [
+        str(atom)
+        for atom in find_all_o_n_atoms_for_cyclization(tailored_product)
+        if str(atom) != "O_0"
+    ]
+    amino_acids_for_cleavage = []
+
+    for index, aa in enumerate(amino_acid_sequence):
+        amino_acids_for_cleavage += [aa.upper() + str(index)]
+
+    return smiles, str(atoms_for_cyclisation), str(amino_acids_for_cleavage)
 
 
 @app.get("/api/alola/terpene/")
