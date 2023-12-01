@@ -22,6 +22,7 @@ let RiPPStatus = 0;
 let rippPrecursor = "";
 let rippFullPrecursor = "";
 let rippPrecursorGene = 0;
+let proteaseOptions = null;
 let cyclization = [];
 window.rippSelection = "";
 let  terpeneCyclaseOptions = [];
@@ -176,6 +177,7 @@ function splitArrayIntoPairs(array) {
         }
         pairs.push([array[i], array[i + 1]]);
     }
+    console.log(pairs)
     return pairs;
 }
 function appendWildcardButtons(entries) {
@@ -1047,10 +1049,11 @@ function fetchFromRaichuRiPP() {
                 module_container.innerHTML = "<strong>" + raichu_output.Error + "</strong>"
                 return 0
             }
+            proteaseOptions = raichu_output.aminoAcidsForCleavage
             OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')))
             // format output
             //add protase Options
-            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')))
+            OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = raichu_output.tailoringSites)
             updateRiPPs(geneMatrix, BGC)
             addArrowClick(geneMatrix);
             // add final drawing
@@ -1114,10 +1117,10 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
  * @param {string} BGC - the BGC that is being worked on
  * @returns {Promise<void>}
  */
-        if (RiPPStatus === 1) {
+        if (RiPPStatus == 1) {
             fetchFromRaichuRiPP();
         }
-        else if (terpeneStatus === 1){
+        else if (terpeneStatus == 1){
             fetchFromRaichuTerpene();
 
         }
@@ -1483,8 +1486,8 @@ function updateRiPPs(geneMatrix, BGC) {
         }
     }
     $("#Domain_container")
-        .html(RiPPer.drawCluster(genesForDisplay, geneMatrix), height =
-            viewPortHeight * 0.05);
+        .html(RiPPer.drawCluster(genesForDisplay, geneMatrix, proteaseOptions), height =
+            viewPortHeight * 0.05, proteaseOptions);
     addDragDrop();
 }
 function updateTerpenes(geneMatrix, BGC) {
@@ -1690,6 +1693,9 @@ function addRiPPPrecursorOptions(geneMatrix){
 }
 function addRiPP(geneMatrix,rippSelection){
     RiPPStatus = 1;
+    terpeneStatus = 0;
+    terpeneCyclaseOptions = [];
+    cyclization = [];
     geneIndex = rippPrecursorGene
     geneMatrix[geneIndex].ripp_status = true;
     let translation = ""

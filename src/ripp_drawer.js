@@ -8,7 +8,7 @@ var RiPPer = {
     tooltip_id_domain: "RiPPer-tooltip-123"
 };
 
-RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600){
+RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600, proteaseOptions = null){
     var container = document.getElementById('domain_container')
     var scale = (function (val) {
         return parseInt(val / (1000 / height));
@@ -20,8 +20,8 @@ RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600){
     RiPPer.drawTailoringEnzymes(geneMatrix, height, scale)
     RiPPer.leaveSpace(space, "tailoredProduct", scale)
     if (document.getElementById("wildcardProtease")
-        .checked) {
-        RiPPer.drawProtease(height, scale);
+        .checked || proteaseOptions) {
+        RiPPer.drawProtease(height, scale, proteaseOptions);
         RiPPer.leaveSpace(space, "cleavedProduct", scale);
     }
 
@@ -39,7 +39,7 @@ RiPPer.leaveSpace = (function (width, id, scale) {
     innerContainer.style.width = String(width) + "px";
 })
 
-RiPPer.drawProtease = (function ( height = 90, scale) {
+RiPPer.drawProtease = (function ( height = 90, scale, proteaseOptions) {
     var container = document.getElementById('domain_container')
     let size = height /2
     let indent = 0
@@ -118,7 +118,7 @@ RiPPer.drawProtease = (function ( height = 90, scale) {
                     "dropdown-content-tailoring");
             innerDropdownContent.innerHTML =
                 ""
-
+            if (proteaseOptions){
             for (let optionIndex = 0; optionIndex <
                 proteaseOptions
                     .length; optionIndex++) {
@@ -162,7 +162,7 @@ RiPPer.drawProtease = (function ( height = 90, scale) {
                 innerDropdownContent.innerHTML +=
                     optionContent
 
-            }
+            }}
 
 
             var draw = SVG(innerDropdownButton)
