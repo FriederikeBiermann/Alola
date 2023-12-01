@@ -38,7 +38,7 @@ app.mount("/static", StaticFiles(directory="app"), name="static")
 
 
 def get_drawings(cluster):
-    drawings, widths, max_height, centre_points = cluster.get_drawings()
+    drawings, widths = cluster.get_spaghettis()
     svg_strings = []
     for i, drawing in enumerate(drawings):
         max_x = 0
