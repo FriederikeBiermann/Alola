@@ -136,7 +136,7 @@ class BasePathway:
         c_methyl = [item for sublist in self.tailoring_sites["C_METHYLTRANSFERASE"] for item in (sublist if isinstance(sublist, list) else [sublist])]
         double_bond = [item for sublist in self.tailoring_sites["DOUBLE_BOND_REDUCTASE"] for item in (sublist if isinstance(sublist, list) else [sublist])]
         self.tailoring_sites["WATER_QUENCHING"] = sorted(
-            set([[atom] for atom in c_methyl + double_bond])
+            [list(t) for t in set((atom,) for atom in c_methyl + double_bond)]
         )
 
         self.atoms_for_cyclisation = [
