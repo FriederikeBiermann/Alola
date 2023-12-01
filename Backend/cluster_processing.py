@@ -132,11 +132,11 @@ class BasePathway:
         )
         logging.debug(f"Identified tailoring sites: {self.tailoring_sites}")
 
+        # Flatten the lists for C_METHYLTRANSFERASE and DOUBLE_BOND_REDUCTASE without numpy
+        c_methyl = [item for sublist in self.tailoring_sites["C_METHYLTRANSFERASE"] for item in (sublist if isinstance(sublist, list) else [sublist])]
+        double_bond = [item for sublist in self.tailoring_sites["DOUBLE_BOND_REDUCTASE"] for item in (sublist if isinstance(sublist, list) else [sublist])]
         self.tailoring_sites["WATER_QUENCHING"] = sorted(
-            set([[atom] for atom in
-                self.tailoring_sites["C_METHYLTRANSFERASE"].flatten()
-                + self.tailoring_sites["DOUBLE_BOND_REDUCTASE"].flatten()
-            ])
+            set([[atom] for atom in c_methyl + double_bond])
         )
 
         self.atoms_for_cyclisation = [
