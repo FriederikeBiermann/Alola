@@ -1301,7 +1301,7 @@ function updateOptionArray(optionArray, index) {
 function findTailoringReactions(geneMatrix) {
     /**
    * Format an array of all tailoring Arrays of a gene cluster -> just formats all genes already annotated as tailoring enzymes.
-   * @fires   fetchFromRaichu
+   * @fires   fetchFromRaichu, fetchFromRaichuRiPP, fetchFromRaichuTerpene
    * @input geneMatrix
    * @output array of all tayloring enzymes and their corresponding genes
    */
