@@ -1,5 +1,5 @@
 let port = "http://127.0.0.1:8000/"
-let regionIndex = 0;
+let regionIndex = 0;let regionIndex = 0;
 let recordIndex = 0;
 let regionName = "";
 let viewPortHeight = window.innerHeight;
