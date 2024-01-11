@@ -1,4 +1,4 @@
-/* Copyright 2017 Satria A. Kautsar */
+/* Copyright 2017 Satria A. Kautsar E.Zamani*/
 var type_colors={
   "biosynthetic-additional":"grey",
   "biosynthetic":"white",
