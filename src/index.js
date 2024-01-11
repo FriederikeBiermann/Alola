@@ -26,6 +26,9 @@ let proteaseOptions = null;
 let cyclization = [];
 window.rippSelection = "";
 let  terpeneCyclaseOptions = [];
+
+// Mapping of chemical compound names to their corresponding structures
+
 let nameToStructure = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
     "malonyl_coa": "OC(=O)CC(S)=O",
@@ -120,16 +123,19 @@ let biosyntheticCoreEnzymes = ["alpha/beta fold hydrolase","acyl carrier protein
 const uploadButton = document.getElementById('uploadButton');
 const fileInput = document.getElementById('fileInput');
 
+// allowing users to select a file for upload by setting up a click event listener on the 'uploadButton' element.
 uploadButton.addEventListener('click', (event) => {
     fileInput.click();
 });
 
+// Event listener for the 'fileInput': When a file is selected,
+// retrieve the selected file and pass it to the 'readFile' function for processing.
 fileInput.addEventListener('change', (event) => {
     const input_file = event.target.files[0];
     readFile(input_file);
 });
 
-
+// Enable drag-and-drop file copying for a designated drop area ('regionsBar').
 const dropArea = document.getElementById('regionsBar');
 
 dropArea.addEventListener('dragover', (event) => {
@@ -147,15 +153,18 @@ dropArea.addEventListener('drop', (event) => {
     readFile(input_file);
 
 });
+
+// Capture selected text in a textarea on mouseup mouseleave ,storing it in 'window.rippSelection'.
 document.querySelector('textarea').addEventListener('mouseup', function () {
-    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd)
+    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd);
 });
 document.querySelector('textarea').addEventListener('mouseleave', function () {
-    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd); })
+    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd); 
+});
 appendWildcardButtons(Object.keys(tailoringEnzymes));
-appendButtonsToDropdownTerpene(terpeneSubstrates)
+appendButtonsToDropdownTerpene(terpeneSubstrates);
 
-
+// Dynamically appends buttons to a dropdown element based on an array of entries, each triggering 'addTerpene' on click.
 function appendButtonsToDropdownTerpene(entries) {
     const dropdown = document.getElementById("dropdownContentTerpene");
 
@@ -169,6 +178,8 @@ function appendButtonsToDropdownTerpene(entries) {
         dropdown.appendChild(button);
     }
 }
+
+// Splits an array into pairs and logs the result.
 function splitArrayIntoPairs(array) {
     const pairs = [];
     for (let i = 0; i < array.length; i += 2) {
@@ -180,16 +191,27 @@ function splitArrayIntoPairs(array) {
     console.log(pairs)
     return pairs;
 }
+
+// Dynamically appending buttons to a dropdown element based on an array of entries, each triggering 'setWildcardTailoring' on click.
 function appendWildcardButtons(entries) {
+        // Get a reference to the dropdown element with the id "dropdownWildcard".
         const dropdown = document.getElementById("dropdownWildcard");
+        // Iterate over each entry in the 'entries' array.
         entries.forEach(entry => {
+            // Create a new button element
             const btn = document.createElement("button");
+            // Set the text content of the button to the current entry.
             btn.textContent = entry;
+            // Add a CSS class "wildcardsubstrate" to the button.
             btn.classList.add("wildcardsubstrate");
+            // Set the onclick event handler for the button.
             btn.onclick = () => setWildcardTailoring(entry);
+            // Append the button to the dropdown element.
             dropdown.appendChild(btn);
         });
-    }
+
+}
+
 function reformatSVGToBoundary(svg) {
         // Get the bounding box of the SVG
         const bbox = svg.getBBox();
@@ -204,7 +226,7 @@ function reformatSVGToBoundary(svg) {
         // Set the width and height attributes to match the bounding box
         svg.setAttribute("width", width);
         svg.setAttribute("height", height);
-      }
+}
 function selectFile() {
     const input = document.createElement('input');
     input.type = 'file';
