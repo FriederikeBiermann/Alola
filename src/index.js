@@ -227,6 +227,7 @@ function reformatSVGToBoundary(svg) {
         svg.setAttribute("width", width);
         svg.setAttribute("height", height);
 }
+// Creates a file input element, restricts file type to .js, attaches an event listener for file selection, and triggers a click to open the file selection dialog.
 function selectFile() {
     const input = document.createElement('input');
     input.type = 'file';
@@ -234,13 +235,14 @@ function selectFile() {
     input.addEventListener('change', handleFileSelection, false);
     input.click();
 }
+// Handles the file selection event, retrieves the selected file, and if present, calls 'readFile'.
 function handleFileSelection(event) {
     const file = event.target.files[0];
 
     if (file) {readFile(file)
     }
 }
-
+// Asynchronously loads the content of "example_regions.js
 async function loadExampleFile() {
     const response = await fetch("./example_regions.js");
     const content = await response.text();
@@ -252,38 +254,58 @@ async function loadExampleFile() {
     readFile(blob);
 }
 
+// Function to read the content of a file and process it
 function readFile(file) {
+    // Create a FileReader object
     const reader = new FileReader();
+
+    // Event listener for when the file is loaded
     reader.addEventListener('load', (event) => {
+        // Split the result by "var " to extract specific data
         const result = event.target.result.split("var ")
+
+        // Check if the result has the expected structure
         if (result.length != 5){
+            // If not, display an error message
             const dropArea = document.getElementById('regionsBar');
             dropArea.innerHTML = "Input file not antiSMASH output"
         }
         else{
+            // Process the data if the structure is as expected
             var recordDataString = result[1].replace("recordData = ", "").trim().slice(0, -1)
             recordData = JSON.parse(recordDataString);
+            
+            // Parse details_data and call the reload_site_with_genecluster function
             details_data = JSON.parse(result[3].trim().replace("details_data = ", "").trim().slice(0, -1));
             reload_site_with_genecluster()
     }});
 
+    // Event listener for progress tracking during file reading
     reader.addEventListener('progress', (event) => {
         if (event.loaded && event.total) {
+            // Calculate and display the progress percentage
             const percent = (event.loaded / event.total) * 100;
             const dropArea = document.getElementById('regionsBar');
             dropArea.innerHTML = `Progress: ${Math.round(percent)}`  ;
         }
     });
+
+    // Read the contents of the file as text
     reader.readAsText(file)
     }
+
+// Function to convert a string representation of an array to an actual array
 function stringToArray(string){
-    return string.replaceAll(
-        "[", "")
+    // Remove opening '[' and closing ']', spaces, and single quotes from the input string
+    return string
+        .replaceAll("[", "")
         .replaceAll("]", "")
         .replaceAll(" ", "")
-        .replaceAll("''", "")
-        .split(",")
+        .replaceAll("'", "")
+        // Split the string into an array using commas
+        .split(",")             
 }
+// Function to find a button by its text content
 function findButtonbyTextContent(text) {
     var buttons = document.querySelectorAll('button');
     for (var i = 0, l = buttons.length; i < l; i++) {
@@ -291,90 +313,96 @@ function findButtonbyTextContent(text) {
             return buttons[i];
     }
 }
+
+/**
+ * Adds a string in front of every element in the array.
+ * 
+ * @param {string} string - The string to be added.
+ * @param {Array} array - The array to which the string will be prepended.
+ * @returns {Array} - A new array with the specified string added in front of each element.
+ */
 function addStringToArray(string, array) {
-    /**
-   * Adds a string in front of every instance of the array
-
-   * @input array and string that need to be attached
-   * @yield new array
-   */
-
-
-    let new_array = array.map(function (value, index, array) {
+    return array.map(function (value) {
         return string + value;
     });
-    return new_array
 }
-function removeAllInstances(arr, item) {
-    /**
-   * Removes all instances of an item in array.
 
-   * @input array and item that needs to be removed
-   * @yield cleaned up array
-   */
+/**
+ * Removes all instances of an item in array.
+ * 
+ * @param {Array} arr - The array from which instances of the item will be removed.
+ * @param {*} item - The item to be removed from the array.
+ * @returns {Array} - The cleaned up array with all instances of the item removed.
+ */
+function removeAllInstances(arr, item) {
     for (var i = arr.length; i--;) {
         if (arr[i] === item) arr.splice(i, 1);
     }
 }
+/**
+ * Handles the drag start by making the element transparent and movable.
+ * 
+ * @param {Event} e - The drag start event.
+ * @input {HTMLElement} element - The element that is being grabbed.
+ * @fires dragstart - Fires when the element is grabbed.
+ */
 function handleDragStart(e) {
-    /**
-   * Handles the drag start.
-   * Makes Item transparent, makes it movable.
-
-   * @input element thats grabbed
-   * @fire fires when element is grabbed
-   */
-
-
     this.style.opacity = '0.4';
     dragSrcEl = this;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.innerHTML);
 }
+/**
+ * Handles the dragover event during a drag-and-drop operation.
+ * 
+ * @param {Event} e - The dragover event.
+ */
 function handleDragOver(e) {
-    /**
-   * Handles the drag /drop
-
-   */
     if (e.preventDefault) {
         e.preventDefault();
     }
     e.dataTransfer.dropEffect = 'move';
     return false;
 }
-function handleDragEnter(e) {  /**
- * Handles the drag /drop
-
+/**
+ * Handles the dragenter event during a drag-and-drop operation.
  */
+function handleDragEnter() {
     this.classList.add('over');
 }
-function handleDragLeave(e) {
-    /**
-   * Handles the drag /drop
-
-   */
+/**
+ * Handles the dragleave event during a drag-and-drop operation.
+ */
+function handleDragLeave() {
     this.classList.remove('over');
 }
+/**
+ * Handles the drop event during a drag-and-drop operation.
+ * After the drop, the position of the genes is exchanged in the geneMatrix, and all visualizations are updated.
+ * If the "Real time calculation" button is checked, data will be automatically fetched from Raichu again.
+ * 
+ * @param {Event} e - The drop event.
+ * @returns {boolean} - Returns false to prevent the browser's default behavior.
+ */
 function handleDrop(e) {
-    /**
-   * Handles the drag /drop
-  * after the drop, the position of the genes are exchanged in the geneMAtrix, then all visualisations are done again. That way, not only the visualisation is changed, but also everything
-  * requested from the backend. If the "Real time calculation button is checked, it will be automatically fetched from Raichu again."
-   */
     if (e.stopPropagation) {
-        e.stopPropagation(); // stops the browser from redirecting.
+        e.stopPropagation(); // Stops the browser from redirecting.
     }
+
+    // Check if the dragged element is different from the drop target
     if (dragSrcEl != this) {
-        // change position in geneMatrix
-        geneMatrix.sort((a, b) => {
-            return a.position - b.position;
-        });
-        const locusTagDragged = dragSrcEl.id.substring(21)
-        const locusTagTarget = this.id.substring(21)
-        let positionDragged = 1
-        let geneIndexDragged = 1
-        let positionTarget = 1
-        let geneIndexTarget = 1
+        // Change position in geneMatrix
+        geneMatrix.sort((a, b) => a.position - b.position);
+
+        const locusTagDragged = dragSrcEl.id.substring(21);
+        const locusTagTarget = this.id.substring(21);
+
+        let positionDragged = 1;
+        let geneIndexDragged = 1;
+        let positionTarget = 1;
+        let geneIndexTarget = 1;
+
+        // Find positions and indices of the dragged and target elements in the geneMatrix
         for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
             if (geneMatrix[geneIndex].id == locusTagDragged) {
                 positionDragged = geneMatrix[geneIndex].position;
@@ -385,7 +413,8 @@ function handleDrop(e) {
                 geneIndexTarget = geneIndex;
             }
         }
-        // if we want to move protein back
+
+        // Move protein back
         if (positionTarget > positionDragged) {
             for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                 if (geneMatrix[geneIndex].position >= positionDragged &&
@@ -393,9 +422,10 @@ function handleDrop(e) {
                     geneMatrix[geneIndex].position -= 1;
                 }
             }
-            geneMatrix[geneIndexDragged].position = positionTarget
+            geneMatrix[geneIndexDragged].position = positionTarget;
         }
-        // if we want to move protein forward
+
+        // Move protein forward
         if (positionTarget < positionDragged) {
             for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                 if (geneMatrix[geneIndex].position <= positionDragged &&
@@ -403,42 +433,47 @@ function handleDrop(e) {
                     geneMatrix[geneIndex].position += 1;
                 }
             }
-            geneMatrix[geneIndexDragged].position = positionTarget
+            geneMatrix[geneIndexDragged].position = positionTarget;
         }
-        geneMatrix.sort((a, b) => {
-            return a.position - b.position;
-        });
-        geneMatrix.sort((a, b) => {
-            return a.position - b.position;
-        });
+
+        // Sort geneMatrix based on position
+        geneMatrix.sort((a, b) => a.position - b.position);
+
+        // Update visualizations
         updateProteins(geneMatrix, BGC);
-        if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}
-        else{ updateRiPPs(geneMatrix, BGC)};
+        if (RiPPStatus == 0) {
+            updateDomains(geneMatrix, BGC);
+        } else {
+            updateRiPPs(geneMatrix, BGC);
+        }
+
         addArrowClick(geneMatrix);
-        if (document.getElementById("real-time-button")
-            .checked) {
-            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+
+        // Fetch data from Raichu if "Real time calculation" button is checked
+        if (document.getElementById("real-time-button").checked) {
+            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
         }
     }
+
+    // Return false to prevent the browser's default behavior
     return false;
 }
-function handleDragEnd(e) {
-    /**
-   * Handles the drag /drop
-
-   */
-    this.style.opacity = '1';
+/**
+ * Handles the dragend event during a drag-and-drop operation.
+ */
+function handleDragEnd() {
+    this.style.opacity = '1'; // Reset the opacity of the dragged element to 1
     items.forEach(function (item) {
-        item.classList.remove('over');
+        item.classList.remove('over'); // Remove the 'over' class from all elements in the items collection
     });
 }
+/**
+ * Sets up drag-and-drop functionality for elements with the class '.protein-container .box'.
+ */
 function addDragDrop() {
-    /**
-   * Handles the drag /drop
-
-   */
-    items = document.querySelectorAll('.protein-container .box');
+    items = document.querySelectorAll('.protein-container .box'); // Select all elements with the specified classes
     items.forEach(function (item) {
+        // Add event listeners for drag-related events
         item.addEventListener('dragstart', handleDragStart, false);
         item.addEventListener('dragenter', handleDragEnter, false);
         item.addEventListener('dragover', handleDragOver, false);
@@ -447,48 +482,72 @@ function addDragDrop() {
         item.addEventListener('dragend', handleDragEnd, false);
     });
 }
+
+/**
+ * Finds an atom in an SVG, highlights it with the given coloring.
+ * If the selected option is atom selector, the function triggers hoverin/out_atom events.
+ * 
+ * @param {string} atom - The atom selector.
+ * @param {string} color - The desired color for highlighting.
+ * @param {number} width - The width for the stroke to highlight even more.
+ * @fires hoverin_atom - Fires when the mouse hovers over the highlighted atom.
+ * @fires hoverout_atom - Fires when the mouse leaves the highlighted atom.
+ */
 function highlight_atom_in_SVG(atom, color, width) {
-    /**
-   * finds atom in svg, if selected option is atom selector and highlights it with given colouring
-   * @parameters color: desired color, atom: atom selector, width: width for stroke to highlight even more
-  * @fire hoverin/out_atom
-   */
-    if (RiPPStatus){
-        let nameAtom = "atom_"+atom;
+    if (RiPPStatus) {
+        // Highlight atom in SVG for RiPPs
+        let nameAtom = "atom_" + atom;
         let group = document.getElementById(nameAtom);
-        group.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width)
-    }
-    else if (atom.toString().includes("_")) {
+        group.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width);
+
+    } else if (atom.toString().includes("_")) {
+        // Highlight atom in SVG for other cases
         let links = document.querySelectorAll('a[*|href=\x22' + atom + '\x22]');
         for (let linkIndex = 0; linkIndex < links.length; linkIndex++) {
-            let link = links[linkIndex]
-            if (link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailoring") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_cyclisation") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_precursor") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailored")) {
-                let text = link.childNodes[3]
-                text.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width)
+            let link = links[linkIndex];
+            if (
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailoring") ||
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_cyclisation") ||
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_precursor") ||
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailored")
+            ) {
+                let text = link.childNodes[3];
+                text.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width);
+
+                // Trigger hoverin/out_atom events
+                text.addEventListener('mouseenter', function () {
+                    document.dispatchEvent(new CustomEvent('hoverin_atom', { detail: atom }));
+                });
+                text.addEventListener('mouseleave', function () {
+                    document.dispatchEvent(new CustomEvent('hoverout_atom', { detail: atom }));
+                });
             }
         }
     }
-
 }
+/**
+ * Highlights an atom in SVG with a red color.
+ * 
+ * @param {string} atom - The atom selector.
+ */
 function hover_in_atom(atom) {
-    /**
-   * highlights atom in svg red
-
-   */
-    highlight_atom_in_SVG(atom, "#E11839", "5")
+    highlight_atom_in_SVG(atom, "#E11839", "5");
 }
+/**
+ * Makes carbon atoms transparent, other atoms back to black.
+ * 
+ * @param {string} atom - The atom selector.
+ */
 function hover_out_atom(atom) {
-    /**
-   * mkaes c atoms transparent, other atoms back to black.
-
-   */
-
     if (atom.indexOf("C") >= 0) {
-        highlight_atom_in_SVG(atom, "none", "0")
+        // Make carbon atoms transparent
+        highlight_atom_in_SVG(atom, "none", "0");
+    } else {
+        // Make other atoms black
+        highlight_atom_in_SVG(atom, "black", "0");
     }
-    else { highlight_atom_in_SVG(atom, "black", "0") }
-
 }
+
 function formatSVG_intermediates(svg) {
     /**
    * formats the SVGs of spaghetti diagram to look nice + remove the ACP
