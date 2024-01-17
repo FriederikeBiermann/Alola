@@ -548,233 +548,308 @@ function hover_out_atom(atom) {
     }
 }
 
+/**
+ * Formats the SVGs of the spaghetti diagram to look nice and removes the ACP.
+ * 
+ * @param {string} svg - The SVG content to be formatted.
+ * @returns {string} - The formatted SVG content.
+ */
 function formatSVG_intermediates(svg) {
-    /**
-   * formats the SVGs of spaghetti diagram to look nice + remove the ACP
-
-   */
+    // Convert the SVG to a string, perform replacements, and store the result in the 'svg' variable.
     svg = svg.toString()
+        // Replace white fills with 'none'
         .replaceAll("#ffffff", "none")
+        // Replace magenta fills with 'none'
         .replaceAll("#ff00ff", "none")
+        // Replace red fills with black
         .replaceAll("#ff0000", "#000000")
-        .replaceAll("#00ff00", "#000000")
-        //  .replaceAll("#000000", "#ffffff")
-        .replaceAll("<g transform='translate",
-            "<g style='fill: black' transform='translate");
-    svg = svg.toString()
-        .replaceAll("<!-- PCP -->    <g style='fill: black'",
-            "<!-- PCP -->    <g style='fill: transparent'")
-        .replaceAll("<!-- ACP -->    <g style='fill: black'",
-            "<!-- ACP -->    <g style='fill: transparent'");
-    return svg
-}
-function formatSVG(svg) {
-    /**
-   * formats the SVG to look nice
+        // Replace green fills with black
+        .replaceAll("#00ff00", "#000000");
 
-   */
+    // Perform additional replacements for transparency and styling.
     svg = svg.toString()
-        .replaceAll("#ffffff", "none")
-        .replaceAll("#000000", "#ffffff")
-        .replaceAll("stroke: #ffffff", "stroke: #ffffff; fill: #ffffff")
-        .replaceAll("<g transform='translate",
-            "<g style='fill: #ffffff' transform='translate");
-    svg = svg.toString()
-        .replaceAll("<!-- PCP -->    <g style='fill: #ffffff'",
-            "<!-- PCP -->    <g style='fill: transparent'")
-        .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'",
-            "<!-- ACP -->    <g style='fill: transparent'");
-    return svg
+        // Replace the transformation in the 'g' element with a style attribute for black fill
+        .replaceAll("<g transform='translate", "<g style='fill: black' transform='translate")
+        // Replace the style attribute in the PCP (Polyketide Chain) 'g' element with transparent fill
+        .replaceAll("<!-- PCP -->    <g style='fill: black'", "<!-- PCP -->    <g style='fill: transparent'")
+        // Replace the style attribute in the ACP (Amino Acid Chain) 'g' element with transparent fill
+        .replaceAll("<!-- ACP -->    <g style='fill: black'", "<!-- ACP -->    <g style='fill: transparent'");
+
+    // Return the modified SVG content.
+    return svg;
 }
-// fuctions to save svg of biosynthetic model
+/**
+ * Formats the SVG to look nice.
+ * 
+ * @param {string} svg - The SVG content to be formatted.
+ * @returns {string} - The formatted SVG content.
+ */
+function formatSVG(svg) {
+    // Convert the SVG to a string and perform replacements, then store the result in the 'svg' variable.
+    svg = svg.toString()
+        // Replace white fills with 'none'.
+        .replaceAll("#ffffff", "none")
+        // Replace black fills with white.
+        .replaceAll("#000000", "#ffffff")
+        // Add fill attribute to elements with stroke attribute set to white.
+        .replaceAll("stroke: #ffffff", "stroke: #ffffff; fill: #ffffff")
+        // Replace the transformation in the 'g' element with a style attribute for white fill.
+        .replaceAll("<g transform='translate", "<g style='fill: #ffffff' transform='translate");
+
+    // Perform additional replacements for transparency and styling.
+    svg = svg.toString()
+        // Replace the style attribute in the PCP (Polyketide Chain) 'g' element with transparent fill.
+        .replaceAll("<!-- PCP -->    <g style='fill: #ffffff'", "<!-- PCP -->    <g style='fill: transparent'")
+        // Replace the style attribute in the ACP (Amino Acid Chain) 'g' element with transparent fill.
+        .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'", "<!-- ACP -->    <g style='fill: transparent'");
+
+    // Return the modified SVG content.
+    return svg;
+}
+
+// Fuctions to save the SVG of the biosynthetic model
 function PrintSVGCluster(){
 
 }
+// Function to capture and download the biosynthetic model as a PNG
 function PrintDiv() {
     /**
-   * Download biosynthetic_model
-   * Transforms biosynthetic_model div to remove hidden areas, transforms it to canvas, and download a png of it
-   * @fires   save_biosynthetic_model_button
-   */
+     * Download biosynthetic_model
+     * Transforms biosynthetic_model div to remove hidden areas, transforms it to canvas, and download a PNG of it
+     * @fires   save_biosynthetic_model_button
+     */
     (async () => {
-        let div = document.getElementById("outerDomainExplorer")
-        let outer_div = document.getElementById("Domain_explorer")
+        // Get references to the div elements
+        let div = document.getElementById("outerDomainExplorer");
+        let outer_div = document.getElementById("Domain_explorer");
+
+        // Set class to indicate that saving is in progress
         div.setAttribute("class", "outerDomainExplorer_while_saving");
 
+        // Use html2canvas to capture the content of the div as a canvas
+        const canvas = await html2canvas(div, { scale: 5 });
 
-        const canvas = await html2canvas(div, { scale: 5 })
-
+        // Reset the class to its original state
         div.setAttribute("class", "outerDomainExplorer");
 
+        // Convert canvas content to a data URL representing the PNG image
         var myImage = canvas.toDataURL();
 
+        // Download the PNG image
         downloadURI(myImage, "biosynthetic_model.png");
-    })()
+    })();
 }
+// Function to download a URI as a file
 function downloadURI(uri, name) {
     /**
-   * Creates a link to download the png
-   * @fires   PrintDIV
-   */
+     * Creates a link to download the PNG
+     * @fires   PrintDiv
+     */
+    // Create a link element
     var link = document.createElement("a");
 
+    // Set the download attribute and the URL
     link.download = name;
     link.href = uri;
+    
+    // Append the link to the document
     document.body.appendChild(link);
+    // Trigger a click on the link to start the download
     link.click();
-    //after creating link you should delete dynamic link
+    //After creating the link, delete the dynamic link
     clearDynamicLink(link);
 }
+
 //functions for zooming
 function zoom_in() {
     /**
-   * Zooms into structure in structure explorer.
-   * gets actual dimensions, removes the automatic sizing and then resizes the svg.
+   * Zooms into the structure in the structure explorer.
+   * Gets actual dimensions, removes automatic sizing, and then resizes the SVG.
    * @fires   onclick-> zoom button
    */
-    let drawing = document.getElementById("final_drawing")
-    let drawingStyles = window.getComputedStyle(drawing)
+    // Get the SVG element for the structure
+    let drawing = document.getElementById("final_drawing");
+
+    // Get the computed styles for the SVG element
+    let drawingStyles = window.getComputedStyle(drawing);
+
+    // Get the height and width of the SVG
     let height = drawingStyles.height;
     let width = drawingStyles.width;
-    stringWidth = (parseInt(width) + 30).toString() + "px"
-    stringHeight = (parseInt(height) + 30).toString() + "px"
 
-    drawing.style["max-width"] = ""
-    drawing.style["max-height"] = ""
-    drawing.style["width"] = stringWidth
-    drawing.style["height"] = stringHeight
+    // Calculate new dimensions with a slight increase
+    let stringWidth = (parseInt(width) + 30).toString() + "px";
+    let stringHeight = (parseInt(height) + 30).toString() + "px";
 
+    // Remove automatic sizing constraints    
+    drawing.style["max-width"] = "";
+    drawing.style["max-height"] = "";
 
-
+    // Resize the SVG with the new dimensions
+    drawing.style["width"] = stringWidth;
+    drawing.style["height"] = stringHeight;
 }
+
 function zoom_out() {
     /**
-   * Zooms out of structure in structure explorer.
-   *
-   * gets actual dimensions, removes the automatic sizing and then resizes the svg.
+     * Zooms out of structure in structure explorer.
+     *
+     * - Gets the actual dimensions of the drawing.
+     * - Removes the automatic sizing.
+     * - Resizes the SVG by reducing its dimensions.
+     * 
+     * @fires   onclick-> zoom button
+     */
 
-   * @fires   onclick-> zoom button
+    // Get the reference to the drawing element with the ID "final_drawing"
+    let drawing = document.getElementById("final_drawing");
 
+    // Get the computed styles of the drawing element
+    let drawingStyles = window.getComputedStyle(drawing);
 
-   */
-    let drawing = document.getElementById("final_drawing")
-    let drawingStyles = window.getComputedStyle(drawing)
+    // Retrieve the current height and width of the drawing
     let height = drawingStyles.height;
     let width = drawingStyles.width;
-    stringWidth = (parseInt(width) - 30).toString() + "px"
-    stringHeight = (parseInt(height) - 30).toString() + "px"
 
-    drawing.style["max-width"] = ""
-    drawing.style["max-height"] = ""
-    drawing.style["width"] = stringWidth
-    drawing.style["height"] = stringHeight
+    // Calculate the new dimensions for zooming out (subtracting 30 pixels)
+    let stringWidth = (parseInt(width) - 30).toString() + "px";
+    let stringHeight = (parseInt(height) - 30).toString() + "px";
 
+    // Remove the maximum width and height constraints
+    drawing.style["max-width"] = "";
+    drawing.style["max-height"] = "";
 
-
-
+    // Apply the new dimensions to the drawing, effectively zooming out
+    drawing.style["width"] = stringWidth;
+    drawing.style["height"] = stringHeight;
 }
+
+/**
+ * Adds click events to every gene arrow.
+ *
+ * @fires onsiteload
+ * @param {Object[]} geneMatrix - The matrix containing information about genes.
+ * @yield {Event} - New click events for every arrow.
+ */
 function addArrowClick(geneMatrix) {
-    /**
-    *add click event to every gene arrow
-   * @fires onsiteload
-   *@input geneMatrix
-   *@yield new click events for every arrow
-   */
-    //
 
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        arrow_id = ("#" + geneMatrix[geneIndex].id.replace(".","_")+ "_gene_arrow")
-        protein_id = ("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein")
-        ripp_button_id = ("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_ripp_button")
+
+        // Generate IDs for arrow, protein, and RIPP button elements
+        const arrow_id = "#" + geneMatrix[geneIndex].id.replace(".", "_") + "_gene_arrow";
+        const protein_id = "#" + geneMatrix[geneIndex].id.replace(".", "_") + "_protein";
+        const ripp_button_id = "#" + geneMatrix[geneIndex].id.replace(".", "_") + "_ripp_button";
+
+        // Get references to the arrow, protein, and RIPP button elements
         let arrow_1 = document.querySelector(arrow_id);
-        let ripp_button = document.querySelector(ripp_button_id)
+        let ripp_button = document.querySelector(ripp_button_id);
+
+        // Clone and replace the arrow to ensure click events work correctly
         arrow_1.replaceWith(arrow_1.cloneNode(true));
         let arrow = document.querySelector(arrow_id);
         let protein = document.querySelector(protein_id);
+
+        // Get the original color of the arrow
         const originalColorArrow = getComputedStyle(arrow).fill;
+
+        // Add click event to the arrow
         arrow.addEventListener(
             'click',
-            function () { // anonyme Funktion
+            function () { // anonyme Funktion (Handle arrow click event)
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                 updateProteins(geneMatrix, BGC);
                 addArrowClick(geneMatrix);
-                if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
+                if (RiPPStatus == 0){ 
+                    updateDomains(geneMatrix, BGC);
+                }  else{ 
+                    updateRiPPs(geneMatrix, BGC)
+                }
                 
-                // change color on click
+                // Change color on click based on gene properties
                 const currentColor = getComputedStyle(arrow).fill;
                 if (geneMatrix[geneIndex].ko == true) {
                     arrow.style.fill = "#E11839";
                 } else {
                     arrow.style.fill = originalColorArrow;
                 }
-                if (document.getElementById("real-time-button")
-                    .checked) {
-                    fetchFromRaichu(details_data, regionName, geneMatrix,
-                        cluster_type, BGC)
-                };
+                // Perform additional actions based on conditions
+                if (document.getElementById("real-time-button").checked) {
+                    fetchFromRaichu(details_data, regionName, geneMatrix,cluster_type, BGC);
+                }
             },
             false
         );
+
+        // Add mouseenter event to the arrow
         arrow.addEventListener(
             'mouseenter',
-            function () { // anonyme Funktion
+            function () { // anonyme Funktion (Handle mouseenter event for arrow)
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                    "_protein", geneIndex)
+                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = "#E11839";
                 }
             },
             false
         );
+        // Add mouseleave event to the arrow
         arrow.addEventListener(
             'mouseleave',
-            function () { // anonyme Funktion
-                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                    "_protein", geneIndex);
+            function () { // anonyme Funktion (Handle mouseleave event for arrow)
+                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = originalColorArrow;
                 }
             },
             false
         );
+        // Add mouseenter and mouseleave events to RIPP button if present
         if (ripp_button){
         ripp_button.addEventListener(
             'mouseenter',
             function () { // anonyme Funktion
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_protein", geneIndex);
+                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = "#E11839";
                 }
             },
             false
         );
+
         ripp_button.addEventListener(
             'mouseleave',
             function () { // anonyme Funktion
-                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_protein", geneIndex);
+                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = originalColorArrow;
                 }
             },
             false
-        );}
+        );
+    }
+        // Check if the gene is displayed
         if (geneMatrix[geneIndex].displayed == true) {
+            // Add click and mouseenter/mouseleave events to protein
             protein.addEventListener(
                 'click',
-                function () { // anonyme Funktion
+                function () { // anonyme Funktion (Handle protein click event)
                     setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                     updateProteins(geneMatrix, BGC);
-                    if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
+                    if (RiPPStatus == 0){ 
+                        updateDomains(geneMatrix, BGC)
+                    }  else{ 
+                        updateRiPPs(geneMatrix, BGC);
+                    }
+                    // Change color on click based on gene properties
                     const currentColor = getComputedStyle(arrow).fill;
                     if (geneMatrix[geneIndex].ko == true) {
                         arrow.style.fill = "#E11839";
                     } else {
                         arrow.style.fill = originalColorArrow;
                     }
+
+                    // Perform additional actions based on conditions
                     addArrowClick(geneMatrix);
                     if (document.getElementById("real-time-button")
                         .checked) {
@@ -960,6 +1035,7 @@ function addArrowClick(geneMatrix) {
         }
     }
 }
+
 function changeColor(arrowId) {
     /**
     * Change color of an arrow.
