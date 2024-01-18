@@ -1947,19 +1947,26 @@ function setWildcardModule(moduleType) {
 
     return wildcardModule
 }
+/**
+ * Adds a wildcard module to the gene matrix and the raw data (BGC).
+ * This function modifies the gene matrix, BGC, and related data structures.
+ * It adds a custom gene with a wildcard tailoring enzyme, updating various properties.
+ * @fires wildcarddialog -> related UI element triggering the function
+ * @input geneMatrix - The existing gene matrix data structure
+ * @output Modifies geneMatrix, BGC, and related data structures
+ */
 function addWildcardTailoring(geneMatrix) {
-    /**
-    *adds a wildcard module to the gene Matrix+ to the raw data (BGC)
-   * @fires wildcarddialog
-   *@input geneMatrix)
-   *@output different BGC, geneMatrix
-   */
-    let endLastGene = 0
+    // Calculate the end position of the last gene in the BGC
+    let endLastGene = 0;
     if (BGC.orfs.length > 0) {
-        endLastGene = BGC.orfs[BGC.orfs.length - 1].end
+        endLastGene = BGC.orfs[BGC.orfs.length - 1].end;
     }
-    BGC.end += 900
-    nameWildcardEnzyme += "_I"
+
+    // Update BGC end position and wildcard enzyme name
+    BGC.end += 900;
+    nameWildcardEnzyme += "_I";
+
+    // Create a new wildcard gene object
     let wildcard_gene = {
         antismashArray: [],
         default_option: [],
@@ -1976,33 +1983,35 @@ function addWildcardTailoring(geneMatrix) {
         strand: 1,
         description: "Custom Gene",
         id: nameWildcardEnzyme,
-
         ko: false,
-
         options: [],
-
         position: geneMatrix.length + 1,
-
         position_in_BGC: geneMatrix.length + 1,
-
         selected_option: [],
         modules: []
-    }
-    geneMatrix.push(wildcard_gene)
-    BGC.orfs.push(wildcard_gene)
-    if (details_data.hasOwnProperty(cluster_type)) {
-        details_data[cluster_type][regionName].orfs.push(wildcard_gene)
-    }
-    else {
-        details_data[regionName].orfs.push(wildcard_gene)
-    }
-    displayGenes(BGC)
-    updateProteins(geneMatrix, BGC)
-    if (RiPPStatus == 0) { updateDomains(geneMatrix, BGC) } else { updateRiPPs(geneMatrix, BGC) }
-    addArrowClick(geneMatrix)
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    };
 
+    // Add the wildcard gene to geneMatrix, BGC, and details_data  
+    geneMatrix.push(wildcard_gene);
+    BGC.orfs.push(wildcard_gene);
+    if (details_data.hasOwnProperty(cluster_type)) {
+        details_data[cluster_type][regionName].orfs.push(wildcard_gene);
+    } else {
+        details_data[regionName].orfs.push(wildcard_gene);
+    }
+
+    // Update the UI and related components
+    displayGenes(BGC);
+    updateProteins(geneMatrix, BGC);
+    if (RiPPStatus == 0) { 
+        updateDomains(geneMatrix, BGC); 
+    } else { 
+        updateRiPPs(geneMatrix, BGC);
+    }
+    addArrowClick(geneMatrix);
+    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
+
 function addWildcard(geneMatrix) {
     /**
     *adds a wildcard module to the gene Matrix+ to the raw data (BGC)

@@ -1,25 +1,38 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
+
+<!-- Preconnect to external resources -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<!-- Include Google Fonts stylesheet -->
 <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@700&display=swap" rel="stylesheet">
+
+<!-- Include your main stylesheet -->
 <link rel="stylesheet" href="index.css">
+</head>
 
 <body>
+  <!-- Include external scripts -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.7.1/svg.min.js"></script>
   <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-
   <script type="text/javascript" src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.js"></script>
   <script type="text/javascript" src="./arrower.js"></script>
   <script type="text/javascript" src="./protein_drawer.js"></script>
   <!-- <script type="text/javascript" src="./regions-test.js"></script> -->
+
+  <!-- Main content of the page -->
   <div id="menu_bar">
     <!-- Rounded switch -->
 
+<!-- Buttons for various actions with tooltips -->
 <button class="start_button tooltip" data-tooltip="View Impressum" onclick="showImpressum()">
   <strong>Impressum</strong>
 </button>
 
+<!-- ... Other buttons ... -->
 <button type="button" class="start_button tooltip" id="uploadButton"
   data-tooltip="Please upload 'region.js' files from antiSMASH output. This can be found in the 'antiSMASH output' folder when clicking 'Download All Results' in the antiSMASH web server or in the results folder when using antiSMASH locally.">
   <strong> Upload file </strong>
@@ -58,23 +71,29 @@
   Real time calculation
 </div>
   </div>
+
+<!-- Tooltip for dropping 'region.js' files -->
 <div id="regionsBar" class="tooltip"
   data-tooltip="Please drop 'region.js' files from antiSMASH output. This can be found in the 'antiSMASH output' folder when clicking 'Download All Results' in the antiSMASH web server or in the results folder when using antiSMASH locally.">
-  Please drop 'region.js' files from antiSMASH output
-</div>
+  Please drop 'region.js' files from antiSMASH output.">
+</div> 
 
   <div id="BGC_explorer">
+    <!-- Biosynthetic gene cluster explorer -->
     <div class="heading-container tooltip" id="BGCHeading"
       data-tooltip="Knock out genes by clicking on them. Hover over them to get more information.">
       Biosynthetic gene cluster explorer
     </div>
     <div class="container" id="arrow_container"> </div>
   </div>
+
+  <!-- ... Gene_explorer section of the page ... -->
   <div id="Gene_explorer">
     <div class="heading-container"> Gene explorer</div>
     <div id="gene_container"></div>
   </div>
   
+  <!-- ... Protein_explorer section of the page ... -->
   <div id="Protein_explorer">
     <div class="heading-container tooltip"
       data-tooltip="Drag and drop the proteins to change the direction. This might be especially useful when parts of the gene cluster are on the reverse strand. Click on the proteins to knock them out, and click on the domains to knock them out as well.">
@@ -82,6 +101,8 @@
     </div>
     <div class="protein-container" id="protein_container"> </div>
   </div>
+
+  <!-- ... Biosynthetic_model section of the page ... -->
   <div id="Domain_explorer" class="Domain_explorer">
     <div class="heading-container">
       Biosynthetic model
@@ -106,19 +127,24 @@
         id="save_complete_cluster_svg"><strong> Save biosynthetic model withOUT tayloring enzymes
           (svg)</strong></a></button>
   </div>
+
+  <!-- ... Structure_explorer sections of the page ... -->
   <div id="Structure_explorer">
     <div class="heading-container"> Structure explorer</div>
     <div id="structure_container"> </div>
     <div id="button_container">
-      <button type="button" class="start_button tooltip-above" id="save_button" data-tooltip="Download the visualized structure as SVG."> <a id="save_svg"><strong> Download
-            SVG</strong></a></button>
-      <button type="button" class="start_button tooltip-above" id="Zoom_out_button" onclick="zoom_in()" data-tooltip="Zoom into the structure."><a><strong>Zoom
-            in</strong></a></button>
-      <button type="button" class="start_button tooltip-above" id="Zoom_in_button" onclick="zoom_out()" data-tooltip="Zoom out of the structure."><a><strong>Zoom
-            out</strong></a></button>
+
+      <!-- Buttons for structure actions with tooltips -->
+      <button type="button" class="start_button tooltip-above" id="save_button" data-tooltip="Download the visualized structure as SVG."> <a id="save_svg"><strong> Download SVG</strong></a></button>
+
+      <!-- ... Other buttons ... -->
+      <button type="button" class="start_button tooltip-above" id="Zoom_out_button" onclick="zoom_in()" data-tooltip="Zoom into the structure."><a><strong>Zoom in</strong></a></button>
+      <button type="button" class="start_button tooltip-above" id="Zoom_in_button" onclick="zoom_out()" data-tooltip="Zoom out of the structure."><a><strong>Zoom out</strong></a></button>
       <button type='button' class='start_button tooltip-above' id = "smiles_button" data-tooltip="Copy the structure's SMILES (Simplified Molecular Input Line Entry System) notation to the clipboard. SMILES is a standard way to represent a chemical structure using a text string. You can for instance directly copy the SMILES into ChemDraw or MarvinSketch to modify the structure."><a><strong> Copy SMILES to clipboard </strong></a></button>
   </div>
   </div>
+
+  <!-- ... Other sections of the page ... -->
   <div class="loginPopup">
     <div class="formPopup" id="popupForm">
       <form class="formContainer">
@@ -272,19 +298,24 @@
       <button type="button" class="btn cancel" onclick="closeRiPPForm()">Close</button>
     </form>
   </div> 
+
+  <!-- Popup for Impressum -->
   <div id="popupImpressum" class="formPopup" >
+
+    <!-- Impressum content -->
     <h2>Impressum and Contact Information</h2>
     <p>Alola is still in its alpha version. If you have any questions, suggestions or bugs to report, please contact Friederike Biermann</p>
     <p>Email: <a href="mailto:f.biermann@bio.uni-frankfurt.de">f.biermann@bio.uni-frankfurt.de</a></p>
     <p>Group Name: Medema Lab, Bioinformatics and Helfrich Lab, Natural Product Genomics</p>
-    <p>Address: Droevendaalsesteeg 1, 6708PB WAGENINGEN / Max-von-Laue-Straße 9
-    60438 FRANKFURT</p>
+    <p>Address: Droevendaalsesteeg 1, 6708PB WAGENINGEN / Max-von-Laue-Straße 960438 FRANKFURT</p>
+    </div>
   </div>
 
+  <!-- Include additional scripts and libraries -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.1.1/d3.js"></script>
   <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
-<script type="text/css" src="http://yui.yahooapis.com/3.18.1/build/cssreset/cssreset-min.css"></script>
+  <script type="text/css" src="http://yui.yahooapis.com/3.18.1/build/cssreset/cssreset-min.css"></script>
   <script type="text/javascript" src="./default_domains.js"></script>
   <script type="text/javascript" src="./protein_drawer.js"></script>
   <script type="text/javascript" src="./domain_drawer.js"></script>
@@ -294,3 +325,4 @@
   <script type="text/javascript" src="./index.js"></script>
   <script type="text/javascript" src="./arrower.js"></script>
 </body>
+</html>
