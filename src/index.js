@@ -12,7 +12,7 @@ var recordData = [];
 var details_data = {};
 let BGC ={};
 let fetching = false;
-let tailoringEnzymes = { "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
+let tailoringEnzymes = { "ARGINASE": "ARG","OXIDOREUCTASE": "OXRE","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
 let cluster_type = "nrpspks";
@@ -1263,6 +1263,8 @@ function fetchFromRaichuRiPP() {
 
         })
 }
+
+// Function to fetch data from the "raichu" backend based on conditions
 async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
  * Transforms and transfers all needed data through the api to the backend (raichu) and handles the output.
@@ -1282,34 +1284,47 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
 
         }
         else if (details_data.nrpspks.hasOwnProperty(regionName)) {
+            // Extract data for NRPS/PKS clusters
             let data = "";
             let starterACP = "";
             
-                let extracted_results = extractAntismashPredictionsFromRegion(details_data, regionName, geneMatrix);
-                data = extracted_results[0];
-                starterACP = extracted_results[1];
-                // add tailoring reactions
-                let tailoringArray = findTailoringReactions(geneMatrix);
-                let data_string = JSON.stringify({"clusterRepresentation": data, "cyclization": cyclization, "tailoring": tailoringArray});
-                let url = port +"api/alola/nrps_pks?antismash_input=";
-                let container = document.getElementById("structure_container");
-                container.innerHTML = "";
-                updateProteins(geneMatrix, BGC);
-                addDragDrop();
+            let extracted_results = extractAntismashPredictionsFromRegion(details_data, regionName, geneMatrix);
+            data = extracted_results[0];
+            starterACP = extracted_results[1];
+
+            // add tailoring reactions
+            let tailoringArray = findTailoringReactions(geneMatrix);
+            let data_string = JSON.stringify({"clusterRepresentation": data, "cyclization": cyclization, "tailoring": tailoringArray});
+
+             // Construct the URL for the raichu backend
+            let url = port +"api/alola/nrps_pks?antismash_input=";
+            let container = document.getElementById("structure_container");
+            container.innerHTML = "";
+            updateProteins(geneMatrix, BGC);
+            addDragDrop();
+
+            // Fetch data from raichu backend
             const response = await fetch(url + encodeURIComponent(data_string)); // use await to handle asynchronous request
                 const raichu_output = await response.json();
+
+                // Handle errors from the backend
                 if (raichu_output.hasOwnProperty("Error")) {
                     let module_container = document.getElementById("module_container");
                     module_container.innerHTML = "<strong>" + raichu_output.Error + "</strong>";
                     return 0;
                 }
+
+                // Update domain and tailoring enzyme options
                 OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')));
                 OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')));
                 updateDomains(geneMatrix, BGC);
                 addArrowClick(geneMatrix);
+
+                // Retrieve ACP list
                 let acpList = getACPList(geneMatrix);
                 let intermediates = raichu_output.hangingSvg;
-                // structure for tailoring container
+
+                // structure for tailoring container(Update intermediate container for tailoring enzymes)
                 if (typeof document.getElementById("innerIntermediateContainer_tailoring_enzymes") !== 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") !== null) {
                     let innerIntermediateContainer_tailoring_enzymes = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
                     innerIntermediateContainer_tailoring_enzymes.setAttribute("style", "width:150px");
@@ -1317,105 +1332,138 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
                     let structure_for_tailoring = document.getElementById("tailoring_drawing");
                     let bbox_structure_for_tailoring = structure_for_tailoring.getBBox();
                     let viewBox_structure_for_tailoring = [bbox_structure_for_tailoring.x, bbox_structure_for_tailoring.y, bbox_structure_for_tailoring.width, bbox_structure_for_tailoring.height].join(" ");
-                structure_for_tailoring.setAttribute("viewBox", viewBox_structure_for_tailoring);
-                structure_for_tailoring.setAttribute('id', "intermediate_drawing_tailoring");
-                structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
-            }
+                    structure_for_tailoring.setAttribute("viewBox", viewBox_structure_for_tailoring);
+                    structure_for_tailoring.setAttribute('id', "intermediate_drawing_tailoring");
+                    structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
+                }
+
             //hanging svgs for spaghetti diagram
             let carrier_x = 0
             var widths = intermediates.map(
-                function (element) { return element[3]; }
+                function (element) { 
+                    return element[3]; 
+                }
             );
-            max_width = Math.max(...widths)
+            max_width = Math.max(...widths);
             for (let intermediateIndex = 0; intermediateIndex <
                 intermediates.length; intermediateIndex++) {
                 intermediate = intermediates[intermediateIndex][0];
-                carrier_x = intermediates[intermediateIndex][1]
+                carrier_x = intermediates[intermediateIndex][1];
+
+                // Adjust starterACP if less than 1
                 if (starterACP < 1) {
-                    starterACP = 1
+                    starterACP = 1;
                 }
+
+                // Update intermediate container
                 let intermediate_container = document.getElementById(
                     'innerIntermediateContainer' + acpList[
-                    intermediateIndex + starterACP - 1].replace(".","_") )
-                intermediate_container.setAttribute("style", "width:5vw;")
+                    intermediateIndex + starterACP - 1].replace(".","_")
+                );
+                intermediate_container.setAttribute("style", "width:5vw;");
                 intermediate_container.innerHTML = formatSVG_intermediates(intermediate);
-                let intermediate_svg = document.getElementById("intermediate_drawing")
+                let intermediate_svg = document.getElementById("intermediate_drawing");
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y, max_width, intermediates[intermediateIndex][4]].join(" ");
-
-                intermediate_svg.setAttribute("viewBox", viewBox)
-                intermediate_svg.setAttribute("width", max_width)
+                intermediate_svg.setAttribute("viewBox", viewBox);
+                intermediate_svg.setAttribute("width", max_width);
                 intermediate_svg.setAttribute('id', "intermediate_drawing" + intermediateIndex);
                 intermediate_svg.setAttribute('class', "intermediate_drawing");
+
+                // Adjust style based on viewport width
                 if (0.05* viewPortWidth <= max_width){
                     intermediate_svg.setAttribute('style', "right: " + (((carrier_x - bbox.x) / max_width) * 5 -700/viewPortHeight) + "vw;");
-                }
-                else{
+                } else {
                     intermediate_svg.setAttribute('style', "right: " + (carrier_x - bbox.x - 13000/viewPortHeight)+ "px;");
                 }
 
             }
-            // add final drawing
+            // Add final drawing
             container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_button");
             var url_complete_cluster = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
-                .href = url_complete_cluster
+                .href = url_complete_cluster;
             document.getElementById("save_complete_cluster_svg")
                 .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+
+            // Create URL for SVG data from raichu_output
             var url_svg = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.svg);
-            document.getElementById("save_svg")
-                .href = url_svg
-            document.getElementById("save_svg")
-                .setAttribute("download", raichu_output.smiles + ".svg");
-            container.innerHTML = formatSVG(raichu_output.svg);
-            drawing = document.getElementById("final_drawing")
-            drawing.style["max-width"] = "100%"
-            drawing.style["max-height"] = "100%"
-            smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})}
-    else{
-    let module_container = document.getElementById("module_container");
-    module_container.innerHTML = "<strong>" + "This type of BGC is not implemented yet."+ "</strong>";
-    }}
 
+            // Set href attribute and download attribute for save_svg button
+            document.getElementById("save_svg").href = url_svg;
+            document.getElementById("save_svg").setAttribute("download", raichu_output.smiles + ".svg");
+
+            // Update container with formatted SVG data from raichu_output
+            container.innerHTML = formatSVG(raichu_output.svg);
+
+            // Update drawing element styles
+            drawing = document.getElementById("final_drawing");
+            drawing.style["max-width"] = "100%";
+            drawing.style["max-height"] = "100%";
+
+            // Add event listener for copying SMILES notation to clipboard
+            smiles_container.addEventListener("click", (event) => { 
+                navigator.clipboard.writeText(raichu_output.smiles);
+            });
+            // If BGC type is not implemented, show an error message
+            } else {
+                let module_container = document.getElementById("module_container");
+                module_container.innerHTML = "<strong>" + "This type of BGC is not implemented yet."+ "</strong>";
+            }
+
+// Function to update selected options after tailoring
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     /**
     * Change color of domain.
-   * @fires fetchFromRaichu
+   *@fires fetchFromRaichu
    *@input optionArray-> an array of the selected options
    *@output corrected option array after transformation
    */
 
-    let position_array = []
-    for (let tailoringEnzyme of optionArray) {
-        position_array = position_array.concat(tailoringEnzyme[1])
-    }
+   // Initialize position_array to store option positions
+    let position_array = [];
 
+    // Concatenate positions of tailoring enzymes
+    for (let tailoringEnzyme of optionArray) {
+        position_array = position_array.concat(tailoringEnzyme[1]);
+    }
+    // Sort position_array based on position
     position_array.sort(function (a, b) {
         return Number(a.split("_")[1]) - Number(b.split("_")[1]);
 
     });
-    let updated_positon_array = []
+
+    // Initialize updated_position_array to store updated positions
+    let updated_positon_array = [];
+
+    // Update positions based on the specified index
     for (let option of position_array) {
-        let splittedOption = option.split("_")
-        let position = Number(splittedOption[1])
-        let atom = splittedOption[0]
+        let splittedOption = option.split("_");
+        let position = Number(splittedOption[1]);
+        let atom = splittedOption[0];
         updated_positon_array.push(atom + "_" + (position + index).toString());
-        index++
+        index++;
     }
+
+    // Create a mapping dictionary for position updates
     let mappingDictionary = {};
-    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i])
+    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i]);
+
+    // Update selected options in geneMatrix
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
             for (let option of geneMatrix[geneIndex].selected_option) {
-                option = mappingDictionary[option]
+                option = mappingDictionary[option];
             }
         }
     }
-    return geneMatrix
+    return geneMatrix;
 }
+
+// Function to update optionArray positions
 function updateOptionArray(optionArray, index) {
     /**
     * Change color of domain.
@@ -1424,37 +1472,47 @@ function updateOptionArray(optionArray, index) {
    *@output corrected option array for transformation
 
    */
-    let position_array = []
+
+   // Initialize position_array to store option positions
+    let position_array = [];
     for (let tailoringEnzyme of optionArray) {
-        position_array = position_array.concat(tailoringEnzyme[1])
+        position_array = position_array.concat(tailoringEnzyme[1]);
     }
+
+    // Sort position_array based on position
     position_array.sort(function (a, b) {
         return Number(a.split("_")[1]) - Number(b.split("_")[1]);
 
     });
-    let updated_positon_array = []
+
+    // Initialize updated_position_array to store updated positions
+    let updated_positon_array = [];
     for (let option of position_array) {
-        let splittedOption = option.split("_")
-        let position = Number(splittedOption[1])
-        let atom = splittedOption[0]
-        updated_positon_array.push(atom + "_" + (position + index).toString())
-        index++
+        let splittedOption = option.split("_");
+        let position = Number(splittedOption[1]);
+        let atom = splittedOption[0];
+        updated_positon_array.push(atom + "_" + (position + index).toString());
+        index++;
     }
+
+    // Create a mapping dictionary for position updates
     let mappingDictionary = {};
-    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i])
-    for (let tailoringEnzyme of optionArray) {
-        let positions = tailoringEnzyme[1]
-        let new_positions = []
-        for (let position of positions) {
-            new_positions.push(mappingDictionary[position])
+    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i]);
 
+    // Update positions in optionArray
+    for (let tailoringEnzyme of optionArray) {
+        let positions = tailoringEnzyme[1];
+        let new_positions = [];
+        for (let position of positions) {
+            new_positions.push(mappingDictionary[position]);
         }
-        tailoringEnzyme.pop()
-        tailoringEnzyme.push(new_positions)
+        tailoringEnzyme.pop();
+        tailoringEnzyme.push(new_positions);
     }
 
-    return optionArray
+    return optionArray;
 }
+
 function findTailoringReactions(geneMatrix) {
     /**
    * Format an array of all tailoring Arrays of a gene cluster -> just formats all genes already annotated as tailoring enzymes.
@@ -1462,53 +1520,70 @@ function findTailoringReactions(geneMatrix) {
    * @input geneMatrix
    * @output array of all tayloring enzymes and their corresponding genes
    */
-    tailoringArray = []
+
+    // Initialize tailoringArray to store tailoring reactions
+    tailoringArray = [];
+
+    // Iterate through geneMatrix to find tailoring enzymes
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType
+        let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType;
+
+        // Check if gene is a tailoring enzyme
         if (geneMatrix[geneIndex].tailoringEnzymeStatus == false) {
-            continue }
+            continue;
+        }
+
+        // Iterate through selected_option to extract tailoring reactions
         for (var [firstparameter, atoms] of Object.entries(geneMatrix[geneIndex].selected_option)){
             let enzymeReactionArray;
-            let substrate
-            let enzymeNameReaction
+            let substrate;
+            let enzymeNameReaction;
+
+            // Check if enzyme type has a substrate
             if (tailoringEnzymesWithSubstrate.includes(enzymeType)){
-                substrate = firstparameter
-                enzymeNameReaction = enzymeType
+                substrate = firstparameter;
+                enzymeNameReaction = enzymeType;
+            } else {
+                enzymeNameReaction = firstparameter;
             }
-            else{
-                enzymeNameReaction = firstparameter
-            }
-              // put atoms for bond formation in pairs
+
+
+            // put atoms for bond formation in pairs
             if (["OXIDATIVE_BOND_FORMATION"].includes(enzymeNameReaction)){
-                atoms =atoms.flat(1)
+                atoms =atoms.flat(1);
                 if (atoms.length%2 == 1) {
-                    atoms.pop()
+                    atoms.pop();
                 }
                 let pairedAtoms = [];
                 while (atoms.length) pairedAtoms.push(atoms.splice(0, 2));
-                atoms = pairedAtoms
+                atoms = pairedAtoms;
             }
+
+            // Check if tailoringArray has existing entries
             if (tailoringArray.length > 0) {
                 for (const enzyme of tailoringArray) {
-                    enzymeReactionArray = enzyme.find(item => item.name == enzymeNameReaction)
-                    if (enzymeReactionArray) break
+                    enzymeReactionArray = enzyme.find(item => item.name == enzymeNameReaction);
+                    
+                    // If enzymeReactionArray is found, exit the loop
+                    if (enzymeReactionArray) break;
                 }
             }
+            // Check if enzymeReactionArray exists
             if (enzymeReactionArray) {
                 if (atoms.length > 0) {
                     enzymeReactionArray[1].push(atoms);
                 }
-                }
-
-            else {
+                } else {
+                // If enzymeReactionArray does not exist, create a new entry in tailoringArray
                 if (atoms.length > 0) {
                     tailoringArray.push([geneMatrix[geneIndex].id, enzymeNameReaction, atoms]);
                 }
 
-
+            }
         }}}
-        return tailoringArray}
-
+        return tailoringArray;
+    }
+// Function to remove padding before the first ORF and after the last ORF in BGC
 function removePaddingBGC(BGC) {
     /**
    * removes the space before the first orf and after last orf
@@ -1517,18 +1592,20 @@ function removePaddingBGC(BGC) {
 
    */
     let BGC_with_padding = JSON.parse(JSON.stringify(BGC));
+    // Check if the start of the first ORF is not at position 0
     if (BGC_with_padding.orfs.length != 0) {
         if (BGC_with_padding.orfs[0].start != 0) {
+            // Adjust the start and end positions of ORFs based on BGC start position
             for (let orfIndex = 0; orfIndex < BGC_with_padding.orfs.length; orfIndex++) {
-                BGC_with_padding.orfs[orfIndex].start = BGC_with_padding.orfs[
-                    orfIndex].start - BGC.start
-                BGC_with_padding.orfs[orfIndex].end = BGC_with_padding.orfs[
-                    orfIndex].end - BGC.start
+                BGC_with_padding.orfs[orfIndex].start -= BGC.start
+                BGC_with_padding.orfs[orfIndex].end -= BGC.start
             }
         }
     }
     return BGC_with_padding
 }
+
+// Function to remove space between proteins (ORFs) in BGC
 function removeSpaceBetweenProteins(BGC) {
     /**
    * removes the space between orfs
@@ -1538,60 +1615,62 @@ function removeSpaceBetweenProteins(BGC) {
    */
     let margin = 100;
     let BGC_without_space = JSON.parse(JSON.stringify(BGC));
+    // Iterate through each ORF to remove space
     for (let orfIndex = 0; orfIndex < BGC_without_space.orfs.length; orfIndex++) {
-        let orf_length = BGC_without_space.orfs[orfIndex].end -
-            BGC_without_space.orfs[orfIndex].start
-        BGC_without_space.orfs[orfIndex].start = 0
-        BGC_without_space.orfs[orfIndex].end = BGC_without_space.orfs[orfIndex]
-            .start + orf_length
+        let orf_length = BGC_without_space.orfs[orfIndex].end - BGC_without_space.orfs[orfIndex].start;
+
+        // Adjust the start and end positions of ORFs
+        BGC_without_space.orfs[orfIndex].start = 0;
+        BGC_without_space.orfs[orfIndex].end = BGC_without_space.orfs[orfIndex].start + orf_length;
 
     }
     return BGC_without_space;
 }
+
+// Function to update proteins based on geneMatrix and BGC
 function updateProteins(geneMatrix, BGC) {
     /**
    * update Proteins to geneMAtrix to remove for instance ko genes and then calls the proteiner to draw the proteins
    *@input BGC,geneMatrix
    */
+    
+    // Create a copy of BGC for display
     let proteinsForDisplay = JSON.parse(JSON.stringify(BGC));
-    delete proteinsForDisplay.orfs
-    proteinsForDisplay.orfs = []
+    delete proteinsForDisplay.orfs;
+    proteinsForDisplay.orfs = [];
+    // Sort geneMatrix based on position
     geneMatrix.sort((a, b) => {
         return a.position - b.position;
     });
+
+    // Iterate through geneMatrix to update proteinsForDisplay
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].displayed == true) {
-            proteinsForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC -
-                1]);
+            proteinsForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC -1]);
         }
     }
-    $("#protein_container")
-        .html(Proteiner.drawClusterSVG(removePaddingBGC(
-            removeSpaceBetweenProteins(proteinsForDisplay)), height =
-        viewPortHeight*0.07));
+    // Update HTML container with protein SVG
+    $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(proteinsForDisplay)), height = viewPortHeight*0.07));
+    // Add drag-and-drop functionality
     addDragDrop();
 }
+
+// Function to get a list of ACP/PCP domains from geneMatrix
 function getACPList(geneMatrix) {
     /**
    * Get list of ACP/PCP to attach the intermediates to it.
    *@input geneMatrix
    * @output acp List
    */
-    let acpList = []
+    let acpList = [];
+
+    // Iterate through geneMatrix to find ACP/PCP domains
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
-            0 && (geneMatrix[geneIndex].hasOwnProperty(
-                "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
-            for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
-                .length; domainIndex++) {
+        if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=0 && (geneMatrix[geneIndex].hasOwnProperty("modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+            for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains.length; domainIndex++) {
                 if (geneMatrix[geneIndex].domains[domainIndex].ko == false || geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
-                    if ((geneMatrix[geneIndex].domains[domainIndex].type.includes(
-                        "ACP") || geneMatrix[geneIndex].domains[domainIndex]
-                            .type.includes("PP") || geneMatrix[geneIndex].domains[domainIndex]
-                                .type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
-                                    .type.includes("ACPS"))) {
-                        acpList.push(geneMatrix[geneIndex].domains[domainIndex]
-                            .identifier)
+                    if ((geneMatrix[geneIndex].domains[domainIndex].type.includes("ACP") || geneMatrix[geneIndex].domains[domainIndex].type.includes("PP") || geneMatrix[geneIndex].domains[domainIndex].type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex].type.includes("ACPS"))) {
+                        acpList.push(geneMatrix[geneIndex].domains[domainIndex].identifier);
 
                     }
                 }
@@ -1600,6 +1679,8 @@ function getACPList(geneMatrix) {
     }
     return acpList;
 }
+
+
 // only display proteins with domains in domain explorer
 function updateDomains(geneMatrix, BGC) {
     /**
@@ -1803,14 +1884,16 @@ function closeForm() {
 function openTailoringForm() {
     /**
     *opens wildcard dialog
-
+    Select the HTML element with the ID "popupFormTailoring" and set its display style to "block"
    */
-    //
     document.getElementById("popupFormTailoring").style.display = "block";
 }
+
+// Get the element with the ID "" and set its display style to "none"
 function closeTailoringForm() {
     document.getElementById("popupFormTailoring").style.display = "none";
 }
+
 function showImpressum() {
     var popup = document.getElementById("popupImpressum");
     if (popup.style.display == "block"){
@@ -1931,20 +2014,29 @@ function setColorOfDropDown(button) {
     }
     button.setAttribute("style", "background-color: #E11839")
 }
-//everything to do with the wildcard modules
+// Function to set the wildcard substrate and update UI
 function setWildcardSubstrate(substrate) {
+    // Set the global variable wildcardSubstrate to the provided substrate
     wildcardSubstrate = substrate
+    // Find the button in the UI with the text content equal to the provided substrate
     let button = findButtonbyTextContent(substrate)
+    // Set the color of the dropdown to indicate the selection
     setColorOfDropDown(button)
 }
+// Function to set the wildcard tailoring enzyme and update UI
 function setWildcardTailoring(enzyme) {
+    // Set the global variable wildcardEnzyme to the provided enzyme
     wildcardEnzyme = enzyme
     let button = findButtonbyTextContent(enzyme)
+    // Set the color of the dropdown to indicate the selection
     setColorOfDropDown(button)
 }
+// Function to set the wildcard module type and return the updated value
 function setWildcardModule(moduleType) {
+    // Set the global variable wildcardModule to the provided moduleType
     wildcardModule = moduleType;
 
+    // Return the updated value of wildcardModule
     return wildcardModule
 }
 /**
