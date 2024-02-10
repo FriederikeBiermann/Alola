@@ -12,7 +12,7 @@ var recordData = [];
 var details_data = {};
 let BGC ={};
 let fetching = false;
-let tailoringEnzymes = { "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
+let tailoringEnzymes = { "ARGINASE": "ARG","OXIDOREUCTASE": "OXRE","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
 let cluster_type = "nrpspks";
@@ -26,6 +26,9 @@ let proteaseOptions = null;
 let cyclization = [];
 window.rippSelection = "";
 let  terpeneCyclaseOptions = [];
+
+// Mapping of chemical compound names to their corresponding structures
+
 let nameToStructure = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
     "malonyl_coa": "OC(=O)CC(S)=O",
@@ -120,16 +123,19 @@ let biosyntheticCoreEnzymes = ["alpha/beta fold hydrolase","acyl carrier protein
 const uploadButton = document.getElementById('uploadButton');
 const fileInput = document.getElementById('fileInput');
 
+// allowing users to select a file for upload by setting up a click event listener on the 'uploadButton' element.
 uploadButton.addEventListener('click', (event) => {
     fileInput.click();
 });
 
+// Event listener for the 'fileInput': When a file is selected,
+// retrieve the selected file and pass it to the 'readFile' function for processing.
 fileInput.addEventListener('change', (event) => {
     const input_file = event.target.files[0];
     readFile(input_file);
 });
 
-
+// Enable drag-and-drop file copying for a designated drop area ('regionsBar').
 const dropArea = document.getElementById('regionsBar');
 
 dropArea.addEventListener('dragover', (event) => {
@@ -147,15 +153,18 @@ dropArea.addEventListener('drop', (event) => {
     readFile(input_file);
 
 });
+
+// Capture selected text in a textarea on mouseup mouseleave ,storing it in 'window.rippSelection'.
 document.querySelector('textarea').addEventListener('mouseup', function () {
-    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd)
+    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd);
 });
 document.querySelector('textarea').addEventListener('mouseleave', function () {
-    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd); })
+    window.rippSelection = this.value.substring(this.selectionStart, this.selectionEnd); 
+});
 appendWildcardButtons(Object.keys(tailoringEnzymes));
-appendButtonsToDropdownTerpene(terpeneSubstrates)
+appendButtonsToDropdownTerpene(terpeneSubstrates);
 
-
+// Dynamically appends buttons to a dropdown element based on an array of entries, each triggering 'addTerpene' on click.
 function appendButtonsToDropdownTerpene(entries) {
     const dropdown = document.getElementById("dropdownContentTerpene");
 
@@ -169,6 +178,8 @@ function appendButtonsToDropdownTerpene(entries) {
         dropdown.appendChild(button);
     }
 }
+
+// Splits an array into pairs and logs the result.
 function splitArrayIntoPairs(array) {
     const pairs = [];
     for (let i = 0; i < array.length; i += 2) {
@@ -180,16 +191,27 @@ function splitArrayIntoPairs(array) {
     console.log(pairs)
     return pairs;
 }
+
+// Dynamically appending buttons to a dropdown element based on an array of entries, each triggering 'setWildcardTailoring' on click.
 function appendWildcardButtons(entries) {
+        // Get a reference to the dropdown element with the id "dropdownWildcard".
         const dropdown = document.getElementById("dropdownWildcard");
+        // Iterate over each entry in the 'entries' array.
         entries.forEach(entry => {
+            // Create a new button element
             const btn = document.createElement("button");
+            // Set the text content of the button to the current entry.
             btn.textContent = entry;
+            // Add a CSS class "wildcardsubstrate" to the button.
             btn.classList.add("wildcardsubstrate");
+            // Set the onclick event handler for the button.
             btn.onclick = () => setWildcardTailoring(entry);
+            // Append the button to the dropdown element.
             dropdown.appendChild(btn);
         });
-    }
+
+}
+
 function reformatSVGToBoundary(svg) {
         // Get the bounding box of the SVG
         const bbox = svg.getBBox();
@@ -204,7 +226,8 @@ function reformatSVGToBoundary(svg) {
         // Set the width and height attributes to match the bounding box
         svg.setAttribute("width", width);
         svg.setAttribute("height", height);
-      }
+}
+// Creates a file input element, restricts file type to .js, attaches an event listener for file selection, and triggers a click to open the file selection dialog.
 function selectFile() {
     const input = document.createElement('input');
     input.type = 'file';
@@ -212,13 +235,14 @@ function selectFile() {
     input.addEventListener('change', handleFileSelection, false);
     input.click();
 }
+// Handles the file selection event, retrieves the selected file, and if present, calls 'readFile'.
 function handleFileSelection(event) {
     const file = event.target.files[0];
 
     if (file) {readFile(file)
     }
 }
-
+// Asynchronously loads the content of "example_regions.js
 async function loadExampleFile() {
     const response = await fetch("./example_regions.js");
     const content = await response.text();
@@ -230,38 +254,58 @@ async function loadExampleFile() {
     readFile(blob);
 }
 
+// Function to read the content of a file and process it
 function readFile(file) {
+    // Create a FileReader object
     const reader = new FileReader();
+
+    // Event listener for when the file is loaded
     reader.addEventListener('load', (event) => {
+        // Split the result by "var " to extract specific data
         const result = event.target.result.split("var ")
+
+        // Check if the result has the expected structure
         if (result.length != 5){
+            // If not, display an error message
             const dropArea = document.getElementById('regionsBar');
             dropArea.innerHTML = "Input file not antiSMASH output"
         }
         else{
+            // Process the data if the structure is as expected
             var recordDataString = result[1].replace("recordData = ", "").trim().slice(0, -1)
             recordData = JSON.parse(recordDataString);
+            
+            // Parse details_data and call the reload_site_with_genecluster function
             details_data = JSON.parse(result[3].trim().replace("details_data = ", "").trim().slice(0, -1));
             reload_site_with_genecluster()
     }});
 
+    // Event listener for progress tracking during file reading
     reader.addEventListener('progress', (event) => {
         if (event.loaded && event.total) {
+            // Calculate and display the progress percentage
             const percent = (event.loaded / event.total) * 100;
             const dropArea = document.getElementById('regionsBar');
             dropArea.innerHTML = `Progress: ${Math.round(percent)}`  ;
         }
     });
+
+    // Read the contents of the file as text
     reader.readAsText(file)
     }
+
+// Function to convert a string representation of an array to an actual array
 function stringToArray(string){
-    return string.replaceAll(
-        "[", "")
+    // Remove opening '[' and closing ']', spaces, and single quotes from the input string
+    return string
+        .replaceAll("[", "")
         .replaceAll("]", "")
         .replaceAll(" ", "")
-        .replaceAll("''", "")
-        .split(",")
+        .replaceAll("'", "")
+        // Split the string into an array using commas
+        .split(",")             
 }
+// Function to find a button by its text content
 function findButtonbyTextContent(text) {
     var buttons = document.querySelectorAll('button');
     for (var i = 0, l = buttons.length; i < l; i++) {
@@ -269,90 +313,96 @@ function findButtonbyTextContent(text) {
             return buttons[i];
     }
 }
+
+/**
+ * Adds a string in front of every element in the array.
+ * 
+ * @param {string} string - The string to be added.
+ * @param {Array} array - The array to which the string will be prepended.
+ * @returns {Array} - A new array with the specified string added in front of each element.
+ */
 function addStringToArray(string, array) {
-    /**
-   * Adds a string in front of every instance of the array
-
-   * @input array and string that need to be attached
-   * @yield new array
-   */
-
-
-    let new_array = array.map(function (value, index, array) {
+    return array.map(function (value) {
         return string + value;
     });
-    return new_array
 }
-function removeAllInstances(arr, item) {
-    /**
-   * Removes all instances of an item in array.
 
-   * @input array and item that needs to be removed
-   * @yield cleaned up array
-   */
+/**
+ * Removes all instances of an item in array.
+ * 
+ * @param {Array} arr - The array from which instances of the item will be removed.
+ * @param {*} item - The item to be removed from the array.
+ * @returns {Array} - The cleaned up array with all instances of the item removed.
+ */
+function removeAllInstances(arr, item) {
     for (var i = arr.length; i--;) {
         if (arr[i] === item) arr.splice(i, 1);
     }
 }
+/**
+ * Handles the drag start by making the element transparent and movable.
+ * 
+ * @param {Event} e - The drag start event.
+ * @input {HTMLElement} element - The element that is being grabbed.
+ * @fires dragstart - Fires when the element is grabbed.
+ */
 function handleDragStart(e) {
-    /**
-   * Handles the drag start.
-   * Makes Item transparent, makes it movable.
-
-   * @input element thats grabbed
-   * @fire fires when element is grabbed
-   */
-
-
     this.style.opacity = '0.4';
     dragSrcEl = this;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/html', this.innerHTML);
 }
+/**
+ * Handles the dragover event during a drag-and-drop operation.
+ * 
+ * @param {Event} e - The dragover event.
+ */
 function handleDragOver(e) {
-    /**
-   * Handles the drag /drop
-
-   */
     if (e.preventDefault) {
         e.preventDefault();
     }
     e.dataTransfer.dropEffect = 'move';
     return false;
 }
-function handleDragEnter(e) {  /**
- * Handles the drag /drop
-
+/**
+ * Handles the dragenter event during a drag-and-drop operation.
  */
+function handleDragEnter() {
     this.classList.add('over');
 }
-function handleDragLeave(e) {
-    /**
-   * Handles the drag /drop
-
-   */
+/**
+ * Handles the dragleave event during a drag-and-drop operation.
+ */
+function handleDragLeave() {
     this.classList.remove('over');
 }
+/**
+ * Handles the drop event during a drag-and-drop operation.
+ * After the drop, the position of the genes is exchanged in the geneMatrix, and all visualizations are updated.
+ * If the "Real time calculation" button is checked, data will be automatically fetched from Raichu again.
+ * 
+ * @param {Event} e - The drop event.
+ * @returns {boolean} - Returns false to prevent the browser's default behavior.
+ */
 function handleDrop(e) {
-    /**
-   * Handles the drag /drop
-  * after the drop, the position of the genes are exchanged in the geneMAtrix, then all visualisations are done again. That way, not only the visualisation is changed, but also everything
-  * requested from the backend. If the "Real time calculation button is checked, it will be automatically fetched from Raichu again."
-   */
     if (e.stopPropagation) {
-        e.stopPropagation(); // stops the browser from redirecting.
+        e.stopPropagation(); // Stops the browser from redirecting.
     }
+
+    // Check if the dragged element is different from the drop target
     if (dragSrcEl != this) {
-        // change position in geneMatrix
-        geneMatrix.sort((a, b) => {
-            return a.position - b.position;
-        });
-        const locusTagDragged = dragSrcEl.id.substring(21)
-        const locusTagTarget = this.id.substring(21)
-        let positionDragged = 1
-        let geneIndexDragged = 1
-        let positionTarget = 1
-        let geneIndexTarget = 1
+        // Change position in geneMatrix
+        geneMatrix.sort((a, b) => a.position - b.position);
+
+        const locusTagDragged = dragSrcEl.id.substring(21);
+        const locusTagTarget = this.id.substring(21);
+
+        let positionDragged = 1;
+        let geneIndexDragged = 1;
+        let positionTarget = 1;
+        let geneIndexTarget = 1;
+
+        // Find positions and indices of the dragged and target elements in the geneMatrix
         for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
             if (geneMatrix[geneIndex].id == locusTagDragged) {
                 positionDragged = geneMatrix[geneIndex].position;
@@ -363,7 +413,8 @@ function handleDrop(e) {
                 geneIndexTarget = geneIndex;
             }
         }
-        // if we want to move protein back
+
+        // Move protein back
         if (positionTarget > positionDragged) {
             for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                 if (geneMatrix[geneIndex].position >= positionDragged &&
@@ -371,9 +422,10 @@ function handleDrop(e) {
                     geneMatrix[geneIndex].position -= 1;
                 }
             }
-            geneMatrix[geneIndexDragged].position = positionTarget
+            geneMatrix[geneIndexDragged].position = positionTarget;
         }
-        // if we want to move protein forward
+
+        // Move protein forward
         if (positionTarget < positionDragged) {
             for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
                 if (geneMatrix[geneIndex].position <= positionDragged &&
@@ -381,42 +433,47 @@ function handleDrop(e) {
                     geneMatrix[geneIndex].position += 1;
                 }
             }
-            geneMatrix[geneIndexDragged].position = positionTarget
+            geneMatrix[geneIndexDragged].position = positionTarget;
         }
-        geneMatrix.sort((a, b) => {
-            return a.position - b.position;
-        });
-        geneMatrix.sort((a, b) => {
-            return a.position - b.position;
-        });
+
+        // Sort geneMatrix based on position
+        geneMatrix.sort((a, b) => a.position - b.position);
+
+        // Update visualizations
         updateProteins(geneMatrix, BGC);
-        if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}
-        else{ updateRiPPs(geneMatrix, BGC)};
+        if (RiPPStatus == 0) {
+            updateDomains(geneMatrix, BGC);
+        } else {
+            updateRiPPs(geneMatrix, BGC);
+        }
+
         addArrowClick(geneMatrix);
-        if (document.getElementById("real-time-button")
-            .checked) {
-            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+
+        // Fetch data from Raichu if "Real time calculation" button is checked
+        if (document.getElementById("real-time-button").checked) {
+            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
         }
     }
+
+    // Return false to prevent the browser's default behavior
     return false;
 }
-function handleDragEnd(e) {
-    /**
-   * Handles the drag /drop
-
-   */
-    this.style.opacity = '1';
+/**
+ * Handles the dragend event during a drag-and-drop operation.
+ */
+function handleDragEnd() {
+    this.style.opacity = '1'; // Reset the opacity of the dragged element to 1
     items.forEach(function (item) {
-        item.classList.remove('over');
+        item.classList.remove('over'); // Remove the 'over' class from all elements in the items collection
     });
 }
+/**
+ * Sets up drag-and-drop functionality for elements with the class '.protein-container .box'.
+ */
 function addDragDrop() {
-    /**
-   * Handles the drag /drop
-
-   */
-    items = document.querySelectorAll('.protein-container .box');
+    items = document.querySelectorAll('.protein-container .box'); // Select all elements with the specified classes
     items.forEach(function (item) {
+        // Add event listeners for drag-related events
         item.addEventListener('dragstart', handleDragStart, false);
         item.addEventListener('dragenter', handleDragEnter, false);
         item.addEventListener('dragover', handleDragOver, false);
@@ -425,275 +482,374 @@ function addDragDrop() {
         item.addEventListener('dragend', handleDragEnd, false);
     });
 }
+
+/**
+ * Finds an atom in an SVG, highlights it with the given coloring.
+ * If the selected option is atom selector, the function triggers hoverin/out_atom events.
+ * 
+ * @param {string} atom - The atom selector.
+ * @param {string} color - The desired color for highlighting.
+ * @param {number} width - The width for the stroke to highlight even more.
+ * @fires hoverin_atom - Fires when the mouse hovers over the highlighted atom.
+ * @fires hoverout_atom - Fires when the mouse leaves the highlighted atom.
+ */
 function highlight_atom_in_SVG(atom, color, width) {
-    /**
-   * finds atom in svg, if selected option is atom selector and highlights it with given colouring
-   * @parameters color: desired color, atom: atom selector, width: width for stroke to highlight even more
-  * @fire hoverin/out_atom
-   */
-    if (RiPPStatus){
-        let nameAtom = "atom_"+atom;
+    if (RiPPStatus) {
+        // Highlight atom in SVG for RiPPs
+        let nameAtom = "atom_" + atom;
         let group = document.getElementById(nameAtom);
-        group.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width)
-    }
-    else if (atom.toString().includes("_")) {
+        group.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width);
+
+    } else if (atom.toString().includes("_")) {
+        // Highlight atom in SVG for other cases
         let links = document.querySelectorAll('a[*|href=\x22' + atom + '\x22]');
         for (let linkIndex = 0; linkIndex < links.length; linkIndex++) {
-            let link = links[linkIndex]
-            if (link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailoring") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_cyclisation") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_precursor") || link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailored")) {
-                let text = link.childNodes[3]
-                text.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width)
+            let link = links[linkIndex];
+            if (
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailoring") ||
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_cyclisation") ||
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_precursor") ||
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailored")
+            ) {
+                let text = link.childNodes[3];
+                text.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width);
+
+                // Trigger hoverin/out_atom events
+                text.addEventListener('mouseenter', function () {
+                    document.dispatchEvent(new CustomEvent('hoverin_atom', { detail: atom }));
+                });
+                text.addEventListener('mouseleave', function () {
+                    document.dispatchEvent(new CustomEvent('hoverout_atom', { detail: atom }));
+                });
             }
         }
     }
-
 }
+/**
+ * Highlights an atom in SVG with a red color.
+ * 
+ * @param {string} atom - The atom selector.
+ */
 function hover_in_atom(atom) {
-    /**
-   * highlights atom in svg red
-
-   */
-    highlight_atom_in_SVG(atom, "#E11839", "5")
+    highlight_atom_in_SVG(atom, "#E11839", "5");
 }
+/**
+ * Makes carbon atoms transparent, other atoms back to black.
+ * 
+ * @param {string} atom - The atom selector.
+ */
 function hover_out_atom(atom) {
-    /**
-   * mkaes c atoms transparent, other atoms back to black.
-
-   */
-
     if (atom.indexOf("C") >= 0) {
-        highlight_atom_in_SVG(atom, "none", "0")
+        // Make carbon atoms transparent
+        highlight_atom_in_SVG(atom, "none", "0");
+    } else {
+        // Make other atoms black
+        highlight_atom_in_SVG(atom, "black", "0");
     }
-    else { highlight_atom_in_SVG(atom, "black", "0") }
-
 }
+
+/**
+ * Formats the SVGs of the spaghetti diagram to look nice and removes the ACP.
+ * 
+ * @param {string} svg - The SVG content to be formatted.
+ * @returns {string} - The formatted SVG content.
+ */
 function formatSVG_intermediates(svg) {
-    /**
-   * formats the SVGs of spaghetti diagram to look nice + remove the ACP
-
-   */
+    // Convert the SVG to a string, perform replacements, and store the result in the 'svg' variable.
     svg = svg.toString()
+        // Replace white fills with 'none'
         .replaceAll("#ffffff", "none")
+        // Replace magenta fills with 'none'
         .replaceAll("#ff00ff", "none")
+        // Replace red fills with black
         .replaceAll("#ff0000", "#000000")
-        .replaceAll("#00ff00", "#000000")
-        //  .replaceAll("#000000", "#ffffff")
-        .replaceAll("<g transform='translate",
-            "<g style='fill: black' transform='translate");
-    svg = svg.toString()
-        .replaceAll("<!-- PCP -->    <g style='fill: black'",
-            "<!-- PCP -->    <g style='fill: transparent'")
-        .replaceAll("<!-- ACP -->    <g style='fill: black'",
-            "<!-- ACP -->    <g style='fill: transparent'");
-    return svg
-}
-function formatSVG(svg) {
-    /**
-   * formats the SVG to look nice
+        // Replace green fills with black
+        .replaceAll("#00ff00", "#000000");
 
-   */
+    // Perform additional replacements for transparency and styling.
     svg = svg.toString()
-        .replaceAll("#ffffff", "none")
-        .replaceAll("#000000", "#ffffff")
-        .replaceAll("stroke: #ffffff", "stroke: #ffffff; fill: #ffffff")
-        .replaceAll("<g transform='translate",
-            "<g style='fill: #ffffff' transform='translate");
-    svg = svg.toString()
-        .replaceAll("<!-- PCP -->    <g style='fill: #ffffff'",
-            "<!-- PCP -->    <g style='fill: transparent'")
-        .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'",
-            "<!-- ACP -->    <g style='fill: transparent'");
-    return svg
+        // Replace the transformation in the 'g' element with a style attribute for black fill
+        .replaceAll("<g transform='translate", "<g style='fill: black' transform='translate")
+        // Replace the style attribute in the PCP (Polyketide Chain) 'g' element with transparent fill
+        .replaceAll("<!-- PCP -->    <g style='fill: black'", "<!-- PCP -->    <g style='fill: transparent'")
+        // Replace the style attribute in the ACP (Amino Acid Chain) 'g' element with transparent fill
+        .replaceAll("<!-- ACP -->    <g style='fill: black'", "<!-- ACP -->    <g style='fill: transparent'");
+
+    // Return the modified SVG content.
+    return svg;
 }
-// fuctions to save svg of biosynthetic model
+/**
+ * Formats the SVG to look nice.
+ * 
+ * @param {string} svg - The SVG content to be formatted.
+ * @returns {string} - The formatted SVG content.
+ */
+function formatSVG(svg) {
+    // Convert the SVG to a string and perform replacements, then store the result in the 'svg' variable.
+    svg = svg.toString()
+        // Replace white fills with 'none'.
+        .replaceAll("#ffffff", "none")
+        // Replace black fills with white.
+        .replaceAll("#000000", "#ffffff")
+        // Add fill attribute to elements with stroke attribute set to white.
+        .replaceAll("stroke: #ffffff", "stroke: #ffffff; fill: #ffffff")
+        // Replace the transformation in the 'g' element with a style attribute for white fill.
+        .replaceAll("<g transform='translate", "<g style='fill: #ffffff' transform='translate");
+
+    // Perform additional replacements for transparency and styling.
+    svg = svg.toString()
+        // Replace the style attribute in the PCP (Polyketide Chain) 'g' element with transparent fill.
+        .replaceAll("<!-- PCP -->    <g style='fill: #ffffff'", "<!-- PCP -->    <g style='fill: transparent'")
+        // Replace the style attribute in the ACP (Amino Acid Chain) 'g' element with transparent fill.
+        .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'", "<!-- ACP -->    <g style='fill: transparent'");
+
+    // Return the modified SVG content.
+    return svg;
+}
+
+// Fuctions to save the SVG of the biosynthetic model
 function PrintSVGCluster(){
 
 }
+// Function to capture and download the biosynthetic model as a PNG
 function PrintDiv() {
     /**
-   * Download biosynthetic_model
-   * Transforms biosynthetic_model div to remove hidden areas, transforms it to canvas, and download a png of it
-   * @fires   save_biosynthetic_model_button
-   */
+     * Download biosynthetic_model
+     * Transforms biosynthetic_model div to remove hidden areas, transforms it to canvas, and download a PNG of it
+     * @fires   save_biosynthetic_model_button
+     */
     (async () => {
-        let div = document.getElementById("outerDomainExplorer")
-        let outer_div = document.getElementById("Domain_explorer")
+        // Get references to the div elements
+        let div = document.getElementById("outerDomainExplorer");
+        let outer_div = document.getElementById("Domain_explorer");
+
+        // Set class to indicate that saving is in progress
         div.setAttribute("class", "outerDomainExplorer_while_saving");
 
+        // Use html2canvas to capture the content of the div as a canvas
+        const canvas = await html2canvas(div, { scale: 5 });
 
-        const canvas = await html2canvas(div, { scale: 5 })
-
+        // Reset the class to its original state
         div.setAttribute("class", "outerDomainExplorer");
 
+        // Convert canvas content to a data URL representing the PNG image
         var myImage = canvas.toDataURL();
 
+        // Download the PNG image
         downloadURI(myImage, "biosynthetic_model.png");
-    })()
+    })();
 }
+// Function to download a URI as a file
 function downloadURI(uri, name) {
     /**
-   * Creates a link to download the png
-   * @fires   PrintDIV
-   */
+     * Creates a link to download the PNG
+     * @fires   PrintDiv
+     */
+    // Create a link element
     var link = document.createElement("a");
 
+    // Set the download attribute and the URL
     link.download = name;
     link.href = uri;
+    
+    // Append the link to the document
     document.body.appendChild(link);
+    // Trigger a click on the link to start the download
     link.click();
-    //after creating link you should delete dynamic link
+    //After creating the link, delete the dynamic link
     clearDynamicLink(link);
 }
+
 //functions for zooming
 function zoom_in() {
     /**
-   * Zooms into structure in structure explorer.
-   * gets actual dimensions, removes the automatic sizing and then resizes the svg.
+   * Zooms into the structure in the structure explorer.
+   * Gets actual dimensions, removes automatic sizing, and then resizes the SVG.
    * @fires   onclick-> zoom button
    */
-    let drawing = document.getElementById("final_drawing")
-    let drawingStyles = window.getComputedStyle(drawing)
+    // Get the SVG element for the structure
+    let drawing = document.getElementById("final_drawing");
+
+    // Get the computed styles for the SVG element
+    let drawingStyles = window.getComputedStyle(drawing);
+
+    // Get the height and width of the SVG
     let height = drawingStyles.height;
     let width = drawingStyles.width;
-    stringWidth = (parseInt(width) + 30).toString() + "px"
-    stringHeight = (parseInt(height) + 30).toString() + "px"
 
-    drawing.style["max-width"] = ""
-    drawing.style["max-height"] = ""
-    drawing.style["width"] = stringWidth
-    drawing.style["height"] = stringHeight
+    // Calculate new dimensions with a slight increase
+    let stringWidth = (parseInt(width) + 30).toString() + "px";
+    let stringHeight = (parseInt(height) + 30).toString() + "px";
 
+    // Remove automatic sizing constraints    
+    drawing.style["max-width"] = "";
+    drawing.style["max-height"] = "";
 
-
+    // Resize the SVG with the new dimensions
+    drawing.style["width"] = stringWidth;
+    drawing.style["height"] = stringHeight;
 }
+
 function zoom_out() {
     /**
-   * Zooms out of structure in structure explorer.
-   *
-   * gets actual dimensions, removes the automatic sizing and then resizes the svg.
+     * Zooms out of structure in structure explorer.
+     *
+     * - Gets the actual dimensions of the drawing.
+     * - Removes the automatic sizing.
+     * - Resizes the SVG by reducing its dimensions.
+     * 
+     * @fires   onclick-> zoom button
+     */
 
-   * @fires   onclick-> zoom button
+    // Get the reference to the drawing element with the ID "final_drawing"
+    let drawing = document.getElementById("final_drawing");
 
+    // Get the computed styles of the drawing element
+    let drawingStyles = window.getComputedStyle(drawing);
 
-   */
-    let drawing = document.getElementById("final_drawing")
-    let drawingStyles = window.getComputedStyle(drawing)
+    // Retrieve the current height and width of the drawing
     let height = drawingStyles.height;
     let width = drawingStyles.width;
-    stringWidth = (parseInt(width) - 30).toString() + "px"
-    stringHeight = (parseInt(height) - 30).toString() + "px"
 
-    drawing.style["max-width"] = ""
-    drawing.style["max-height"] = ""
-    drawing.style["width"] = stringWidth
-    drawing.style["height"] = stringHeight
+    // Calculate the new dimensions for zooming out (subtracting 30 pixels)
+    let stringWidth = (parseInt(width) - 30).toString() + "px";
+    let stringHeight = (parseInt(height) - 30).toString() + "px";
 
+    // Remove the maximum width and height constraints
+    drawing.style["max-width"] = "";
+    drawing.style["max-height"] = "";
 
-
-
+    // Apply the new dimensions to the drawing, effectively zooming out
+    drawing.style["width"] = stringWidth;
+    drawing.style["height"] = stringHeight;
 }
+
+/**
+ * Adds click events to every gene arrow.
+ *
+ * @fires onsiteload
+ * @param {Object[]} geneMatrix - The matrix containing information about genes.
+ * @yield {Event} - New click events for every arrow.
+ */
 function addArrowClick(geneMatrix) {
-    /**
-    *add click event to every gene arrow
-   * @fires onsiteload
-   *@input geneMatrix
-   *@yield new click events for every arrow
-   */
-    //
 
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        arrow_id = ("#" + geneMatrix[geneIndex].id.replace(".","_")+ "_gene_arrow")
-        protein_id = ("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein")
-        ripp_button_id = ("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_ripp_button")
+
+        // Generate IDs for arrow, protein, and RIPP button elements
+        const arrow_id = "#" + geneMatrix[geneIndex].id.replace(".", "_") + "_gene_arrow";
+        const protein_id = "#" + geneMatrix[geneIndex].id.replace(".", "_") + "_protein";
+        const ripp_button_id = "#" + geneMatrix[geneIndex].id.replace(".", "_") + "_ripp_button";
+
+        // Get references to the arrow, protein, and RIPP button elements
         let arrow_1 = document.querySelector(arrow_id);
-        let ripp_button = document.querySelector(ripp_button_id)
+        let ripp_button = document.querySelector(ripp_button_id);
+
+        // Clone and replace the arrow to ensure click events work correctly
         arrow_1.replaceWith(arrow_1.cloneNode(true));
         let arrow = document.querySelector(arrow_id);
         let protein = document.querySelector(protein_id);
+
+        // Get the original color of the arrow
         const originalColorArrow = getComputedStyle(arrow).fill;
+
+        // Add click event to the arrow
         arrow.addEventListener(
             'click',
-            function () { // anonyme Funktion
+            function () { // anonyme Funktion (Handle arrow click event)
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                 updateProteins(geneMatrix, BGC);
                 addArrowClick(geneMatrix);
-                if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
+                if (RiPPStatus == 0){ 
+                    updateDomains(geneMatrix, BGC);
+                }  else{ 
+                    updateRiPPs(geneMatrix, BGC)
+                }
                 
-                // change color on click
+                // Change color on click based on gene properties
                 const currentColor = getComputedStyle(arrow).fill;
                 if (geneMatrix[geneIndex].ko == true) {
                     arrow.style.fill = "#E11839";
                 } else {
                     arrow.style.fill = originalColorArrow;
                 }
-                if (document.getElementById("real-time-button")
-                    .checked) {
-                    fetchFromRaichu(details_data, regionName, geneMatrix,
-                        cluster_type, BGC)
-                };
+                // Perform additional actions based on conditions
+                if (document.getElementById("real-time-button").checked) {
+                    fetchFromRaichu(details_data, regionName, geneMatrix,cluster_type, BGC);
+                }
             },
             false
         );
+
+        // Add mouseenter event to the arrow
         arrow.addEventListener(
             'mouseenter',
-            function () { // anonyme Funktion
+            function () { // anonyme Funktion (Handle mouseenter event for arrow)
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                    "_protein", geneIndex)
+                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = "#E11839";
                 }
             },
             false
         );
+        // Add mouseleave event to the arrow
         arrow.addEventListener(
             'mouseleave',
-            function () { // anonyme Funktion
-                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") +
-                    "_protein", geneIndex);
+            function () { // anonyme Funktion (Handle mouseleave event for arrow)
+                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".","_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = originalColorArrow;
                 }
             },
             false
         );
+        // Add mouseenter and mouseleave events to RIPP button if present
         if (ripp_button){
         ripp_button.addEventListener(
             'mouseenter',
             function () { // anonyme Funktion
                 displayTextInGeneExplorer(geneMatrix[geneIndex].id);
-                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_protein", geneIndex);
+                changeProteinColorON("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = "#E11839";
                 }
             },
             false
         );
+
         ripp_button.addEventListener(
             'mouseleave',
             function () { // anonyme Funktion
-                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".", "_") +
-                    "_protein", geneIndex);
+                changeProteinColorOFF("#" + geneMatrix[geneIndex].id.replace(".", "_") + "_protein", geneIndex);
                 if (!geneMatrix[geneIndex].ko) {
                     arrow.style.fill = originalColorArrow;
                 }
             },
             false
-        );}
+        );
+    }
+        // Check if the gene is displayed
         if (geneMatrix[geneIndex].displayed == true) {
+            // Add click and mouseenter/mouseleave events to protein
             protein.addEventListener(
                 'click',
-                function () { // anonyme Funktion
+                function () { // anonyme Funktion (Handle protein click event)
                     setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                     updateProteins(geneMatrix, BGC);
-                    if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)};
+                    if (RiPPStatus == 0){ 
+                        updateDomains(geneMatrix, BGC)
+                    }  else{ 
+                        updateRiPPs(geneMatrix, BGC);
+                    }
+                    // Change color on click based on gene properties
                     const currentColor = getComputedStyle(arrow).fill;
                     if (geneMatrix[geneIndex].ko == true) {
                         arrow.style.fill = "#E11839";
                     } else {
                         arrow.style.fill = originalColorArrow;
                     }
+
+                    // Perform additional actions based on conditions
                     addArrowClick(geneMatrix);
                     if (document.getElementById("real-time-button")
                         .checked) {
@@ -879,6 +1035,7 @@ function addArrowClick(geneMatrix) {
         }
     }
 }
+
 function changeColor(arrowId) {
     /**
     * Change color of an arrow.
@@ -1106,6 +1263,8 @@ function fetchFromRaichuRiPP() {
 
         })
 }
+
+// Function to fetch data from the "raichu" backend based on conditions
 async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
  * Transforms and transfers all needed data through the api to the backend (raichu) and handles the output.
@@ -1125,34 +1284,47 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
 
         }
         else if (details_data.nrpspks.hasOwnProperty(regionName)) {
+            // Extract data for NRPS/PKS clusters
             let data = "";
             let starterACP = "";
             
-                let extracted_results = extractAntismashPredictionsFromRegion(details_data, regionName, geneMatrix);
-                data = extracted_results[0];
-                starterACP = extracted_results[1];
-                // add tailoring reactions
-                let tailoringArray = findTailoringReactions(geneMatrix);
-                let data_string = JSON.stringify({"clusterRepresentation": data, "cyclization": cyclization, "tailoring": tailoringArray});
-                let url = port +"api/alola/nrps_pks?antismash_input=";
-                let container = document.getElementById("structure_container");
-                container.innerHTML = "";
-                updateProteins(geneMatrix, BGC);
-                addDragDrop();
+            let extracted_results = extractAntismashPredictionsFromRegion(details_data, regionName, geneMatrix);
+            data = extracted_results[0];
+            starterACP = extracted_results[1];
+
+            // add tailoring reactions
+            let tailoringArray = findTailoringReactions(geneMatrix);
+            let data_string = JSON.stringify({"clusterRepresentation": data, "cyclization": cyclization, "tailoring": tailoringArray});
+
+             // Construct the URL for the raichu backend
+            let url = port +"api/alola/nrps_pks?antismash_input=";
+            let container = document.getElementById("structure_container");
+            container.innerHTML = "";
+            updateProteins(geneMatrix, BGC);
+            addDragDrop();
+
+            // Fetch data from raichu backend
             const response = await fetch(url + encodeURIComponent(data_string)); // use await to handle asynchronous request
                 const raichu_output = await response.json();
+
+                // Handle errors from the backend
                 if (raichu_output.hasOwnProperty("Error")) {
                     let module_container = document.getElementById("module_container");
                     module_container.innerHTML = "<strong>" + raichu_output.Error + "</strong>";
                     return 0;
                 }
+
+                // Update domain and tailoring enzyme options
                 OptionCreator.createOptionsDomains(geneMatrix, atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')));
                 OptionCreator.createOptionsTailoringEnzymes(geneMatrix, tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')));
                 updateDomains(geneMatrix, BGC);
                 addArrowClick(geneMatrix);
+
+                // Retrieve ACP list
                 let acpList = getACPList(geneMatrix);
                 let intermediates = raichu_output.hangingSvg;
-                // structure for tailoring container
+
+                // structure for tailoring container(Update intermediate container for tailoring enzymes)
                 if (typeof document.getElementById("innerIntermediateContainer_tailoring_enzymes") !== 'undefined' && document.getElementById("innerIntermediateContainer_tailoring_enzymes") !== null) {
                     let innerIntermediateContainer_tailoring_enzymes = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
                     innerIntermediateContainer_tailoring_enzymes.setAttribute("style", "width:150px");
@@ -1160,105 +1332,138 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
                     let structure_for_tailoring = document.getElementById("tailoring_drawing");
                     let bbox_structure_for_tailoring = structure_for_tailoring.getBBox();
                     let viewBox_structure_for_tailoring = [bbox_structure_for_tailoring.x, bbox_structure_for_tailoring.y, bbox_structure_for_tailoring.width, bbox_structure_for_tailoring.height].join(" ");
-                structure_for_tailoring.setAttribute("viewBox", viewBox_structure_for_tailoring);
-                structure_for_tailoring.setAttribute('id', "intermediate_drawing_tailoring");
-                structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
-            }
+                    structure_for_tailoring.setAttribute("viewBox", viewBox_structure_for_tailoring);
+                    structure_for_tailoring.setAttribute('id', "intermediate_drawing_tailoring");
+                    structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
+                }
+
             //hanging svgs for spaghetti diagram
             let carrier_x = 0
             var widths = intermediates.map(
-                function (element) { return element[3]; }
+                function (element) { 
+                    return element[3]; 
+                }
             );
-            max_width = Math.max(...widths)
+            max_width = Math.max(...widths);
             for (let intermediateIndex = 0; intermediateIndex <
                 intermediates.length; intermediateIndex++) {
                 intermediate = intermediates[intermediateIndex][0];
-                carrier_x = intermediates[intermediateIndex][1]
+                carrier_x = intermediates[intermediateIndex][1];
+
+                // Adjust starterACP if less than 1
                 if (starterACP < 1) {
-                    starterACP = 1
+                    starterACP = 1;
                 }
+
+                // Update intermediate container
                 let intermediate_container = document.getElementById(
                     'innerIntermediateContainer' + acpList[
-                    intermediateIndex + starterACP - 1].replace(".","_") )
-                intermediate_container.setAttribute("style", "width:5vw;")
+                    intermediateIndex + starterACP - 1].replace(".","_")
+                );
+                intermediate_container.setAttribute("style", "width:5vw;");
                 intermediate_container.innerHTML = formatSVG_intermediates(intermediate);
-                let intermediate_svg = document.getElementById("intermediate_drawing")
+                let intermediate_svg = document.getElementById("intermediate_drawing");
                 let bbox = intermediate_svg.getBBox();
                 let viewBox = [bbox.x, bbox.y, max_width, intermediates[intermediateIndex][4]].join(" ");
-
-                intermediate_svg.setAttribute("viewBox", viewBox)
-                intermediate_svg.setAttribute("width", max_width)
+                intermediate_svg.setAttribute("viewBox", viewBox);
+                intermediate_svg.setAttribute("width", max_width);
                 intermediate_svg.setAttribute('id', "intermediate_drawing" + intermediateIndex);
                 intermediate_svg.setAttribute('class', "intermediate_drawing");
+
+                // Adjust style based on viewport width
                 if (0.05* viewPortWidth <= max_width){
                     intermediate_svg.setAttribute('style', "right: " + (((carrier_x - bbox.x) / max_width) * 5 -700/viewPortHeight) + "vw;");
-                }
-                else{
+                } else {
                     intermediate_svg.setAttribute('style', "right: " + (carrier_x - bbox.x - 13000/viewPortHeight)+ "px;");
                 }
 
             }
-            // add final drawing
+            // Add final drawing
             container = document.getElementById("structure_container");
             let smiles_container = document.getElementById("smiles_button");
             var url_complete_cluster = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.completeClusterSvg);
             document.getElementById("save_complete_cluster_svg")
-                .href = url_complete_cluster
+                .href = url_complete_cluster;
             document.getElementById("save_complete_cluster_svg")
                 .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+
+            // Create URL for SVG data from raichu_output
             var url_svg = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.svg);
-            document.getElementById("save_svg")
-                .href = url_svg
-            document.getElementById("save_svg")
-                .setAttribute("download", raichu_output.smiles + ".svg");
-            container.innerHTML = formatSVG(raichu_output.svg);
-            drawing = document.getElementById("final_drawing")
-            drawing.style["max-width"] = "100%"
-            drawing.style["max-height"] = "100%"
-            smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})}
-    else{
-    let module_container = document.getElementById("module_container");
-    module_container.innerHTML = "<strong>" + "This type of BGC is not implemented yet."+ "</strong>";
-    }}
 
+            // Set href attribute and download attribute for save_svg button
+            document.getElementById("save_svg").href = url_svg;
+            document.getElementById("save_svg").setAttribute("download", raichu_output.smiles + ".svg");
+
+            // Update container with formatted SVG data from raichu_output
+            container.innerHTML = formatSVG(raichu_output.svg);
+
+            // Update drawing element styles
+            drawing = document.getElementById("final_drawing");
+            drawing.style["max-width"] = "100%";
+            drawing.style["max-height"] = "100%";
+
+            // Add event listener for copying SMILES notation to clipboard
+            smiles_container.addEventListener("click", (event) => { 
+                navigator.clipboard.writeText(raichu_output.smiles);
+            });
+            // If BGC type is not implemented, show an error message
+            } else {
+                let module_container = document.getElementById("module_container");
+                module_container.innerHTML = "<strong>" + "This type of BGC is not implemented yet."+ "</strong>";
+            }
+
+// Function to update selected options after tailoring
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     /**
     * Change color of domain.
-   * @fires fetchFromRaichu
+   *@fires fetchFromRaichu
    *@input optionArray-> an array of the selected options
    *@output corrected option array after transformation
    */
 
-    let position_array = []
-    for (let tailoringEnzyme of optionArray) {
-        position_array = position_array.concat(tailoringEnzyme[1])
-    }
+   // Initialize position_array to store option positions
+    let position_array = [];
 
+    // Concatenate positions of tailoring enzymes
+    for (let tailoringEnzyme of optionArray) {
+        position_array = position_array.concat(tailoringEnzyme[1]);
+    }
+    // Sort position_array based on position
     position_array.sort(function (a, b) {
         return Number(a.split("_")[1]) - Number(b.split("_")[1]);
 
     });
-    let updated_positon_array = []
+
+    // Initialize updated_position_array to store updated positions
+    let updated_positon_array = [];
+
+    // Update positions based on the specified index
     for (let option of position_array) {
-        let splittedOption = option.split("_")
-        let position = Number(splittedOption[1])
-        let atom = splittedOption[0]
+        let splittedOption = option.split("_");
+        let position = Number(splittedOption[1]);
+        let atom = splittedOption[0];
         updated_positon_array.push(atom + "_" + (position + index).toString());
-        index++
+        index++;
     }
+
+    // Create a mapping dictionary for position updates
     let mappingDictionary = {};
-    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i])
+    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i]);
+
+    // Update selected options in geneMatrix
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].tailoringEnzymeStatus == true) {
             for (let option of geneMatrix[geneIndex].selected_option) {
-                option = mappingDictionary[option]
+                option = mappingDictionary[option];
             }
         }
     }
-    return geneMatrix
+    return geneMatrix;
 }
+
+// Function to update optionArray positions
 function updateOptionArray(optionArray, index) {
     /**
     * Change color of domain.
@@ -1267,91 +1472,118 @@ function updateOptionArray(optionArray, index) {
    *@output corrected option array for transformation
 
    */
-    let position_array = []
+
+   // Initialize position_array to store option positions
+    let position_array = [];
     for (let tailoringEnzyme of optionArray) {
-        position_array = position_array.concat(tailoringEnzyme[1])
+        position_array = position_array.concat(tailoringEnzyme[1]);
     }
+
+    // Sort position_array based on position
     position_array.sort(function (a, b) {
         return Number(a.split("_")[1]) - Number(b.split("_")[1]);
 
     });
-    let updated_positon_array = []
+
+    // Initialize updated_position_array to store updated positions
+    let updated_positon_array = [];
     for (let option of position_array) {
-        let splittedOption = option.split("_")
-        let position = Number(splittedOption[1])
-        let atom = splittedOption[0]
-        updated_positon_array.push(atom + "_" + (position + index).toString())
-        index++
+        let splittedOption = option.split("_");
+        let position = Number(splittedOption[1]);
+        let atom = splittedOption[0];
+        updated_positon_array.push(atom + "_" + (position + index).toString());
+        index++;
     }
+
+    // Create a mapping dictionary for position updates
     let mappingDictionary = {};
-    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i])
-    for (let tailoringEnzyme of optionArray) {
-        let positions = tailoringEnzyme[1]
-        let new_positions = []
-        for (let position of positions) {
-            new_positions.push(mappingDictionary[position])
+    position_array.forEach((key, i) => mappingDictionary[key] = updated_positon_array[i]);
 
+    // Update positions in optionArray
+    for (let tailoringEnzyme of optionArray) {
+        let positions = tailoringEnzyme[1];
+        let new_positions = [];
+        for (let position of positions) {
+            new_positions.push(mappingDictionary[position]);
         }
-        tailoringEnzyme.pop()
-        tailoringEnzyme.push(new_positions)
+        tailoringEnzyme.pop();
+        tailoringEnzyme.push(new_positions);
     }
 
-    return optionArray
+    return optionArray;
 }
+
 function findTailoringReactions(geneMatrix) {
     /**
    * Format an array of all tailoring Arrays of a gene cluster -> just formats all genes already annotated as tailoring enzymes.
-   * @fires   fetchFromRaichu
+   * @fires   fetchFromRaichu, fetchFromRaichuRiPP, fetchFromRaichuTerpene
    * @input geneMatrix
    * @output array of all tayloring enzymes and their corresponding genes
    */
-    tailoringArray = []
+
+    // Initialize tailoringArray to store tailoring reactions
+    tailoringArray = [];
+
+    // Iterate through geneMatrix to find tailoring enzymes
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType
+        let enzymeType = geneMatrix[geneIndex].tailoringEnzymeType;
+
+        // Check if gene is a tailoring enzyme
         if (geneMatrix[geneIndex].tailoringEnzymeStatus == false) {
-            continue }
+            continue;
+        }
+
+        // Iterate through selected_option to extract tailoring reactions
         for (var [firstparameter, atoms] of Object.entries(geneMatrix[geneIndex].selected_option)){
             let enzymeReactionArray;
-            let substrate
-            let enzymeNameReaction
+            let substrate;
+            let enzymeNameReaction;
+
+            // Check if enzyme type has a substrate
             if (tailoringEnzymesWithSubstrate.includes(enzymeType)){
-                substrate = firstparameter
-                enzymeNameReaction = enzymeType
+                substrate = firstparameter;
+                enzymeNameReaction = enzymeType;
+            } else {
+                enzymeNameReaction = firstparameter;
             }
-            else{
-                enzymeNameReaction = firstparameter
-            }
-              // put atoms for bond formation in pairs
+
+
+            // put atoms for bond formation in pairs
             if (["OXIDATIVE_BOND_FORMATION"].includes(enzymeNameReaction)){
-                atoms =atoms.flat(1)
+                atoms =atoms.flat(1);
                 if (atoms.length%2 == 1) {
-                    atoms.pop()
+                    atoms.pop();
                 }
                 let pairedAtoms = [];
                 while (atoms.length) pairedAtoms.push(atoms.splice(0, 2));
-                atoms = pairedAtoms
+                atoms = pairedAtoms;
             }
+
+            // Check if tailoringArray has existing entries
             if (tailoringArray.length > 0) {
                 for (const enzyme of tailoringArray) {
-                    enzymeReactionArray = enzyme.find(item => item.name == enzymeNameReaction)
-                    if (enzymeReactionArray) break
+                    enzymeReactionArray = enzyme.find(item => item.name == enzymeNameReaction);
+                    
+                    // If enzymeReactionArray is found, exit the loop
+                    if (enzymeReactionArray) break;
                 }
             }
+            // Check if enzymeReactionArray exists
             if (enzymeReactionArray) {
                 if (atoms.length > 0) {
                     enzymeReactionArray[1].push(atoms);
                 }
-                }
-
-            else {
+                } else {
+                // If enzymeReactionArray does not exist, create a new entry in tailoringArray
                 if (atoms.length > 0) {
                     tailoringArray.push([geneMatrix[geneIndex].id, enzymeNameReaction, atoms]);
                 }
 
-
+            }
         }}}
-        return tailoringArray}
-
+        return tailoringArray;
+    }
+// Function to remove padding before the first ORF and after the last ORF in BGC
 function removePaddingBGC(BGC) {
     /**
    * removes the space before the first orf and after last orf
@@ -1360,18 +1592,20 @@ function removePaddingBGC(BGC) {
 
    */
     let BGC_with_padding = JSON.parse(JSON.stringify(BGC));
+    // Check if the start of the first ORF is not at position 0
     if (BGC_with_padding.orfs.length != 0) {
         if (BGC_with_padding.orfs[0].start != 0) {
+            // Adjust the start and end positions of ORFs based on BGC start position
             for (let orfIndex = 0; orfIndex < BGC_with_padding.orfs.length; orfIndex++) {
-                BGC_with_padding.orfs[orfIndex].start = BGC_with_padding.orfs[
-                    orfIndex].start - BGC.start
-                BGC_with_padding.orfs[orfIndex].end = BGC_with_padding.orfs[
-                    orfIndex].end - BGC.start
+                BGC_with_padding.orfs[orfIndex].start -= BGC.start
+                BGC_with_padding.orfs[orfIndex].end -= BGC.start
             }
         }
     }
     return BGC_with_padding
 }
+
+// Function to remove space between proteins (ORFs) in BGC
 function removeSpaceBetweenProteins(BGC) {
     /**
    * removes the space between orfs
@@ -1381,60 +1615,62 @@ function removeSpaceBetweenProteins(BGC) {
    */
     let margin = 100;
     let BGC_without_space = JSON.parse(JSON.stringify(BGC));
+    // Iterate through each ORF to remove space
     for (let orfIndex = 0; orfIndex < BGC_without_space.orfs.length; orfIndex++) {
-        let orf_length = BGC_without_space.orfs[orfIndex].end -
-            BGC_without_space.orfs[orfIndex].start
-        BGC_without_space.orfs[orfIndex].start = 0
-        BGC_without_space.orfs[orfIndex].end = BGC_without_space.orfs[orfIndex]
-            .start + orf_length
+        let orf_length = BGC_without_space.orfs[orfIndex].end - BGC_without_space.orfs[orfIndex].start;
+
+        // Adjust the start and end positions of ORFs
+        BGC_without_space.orfs[orfIndex].start = 0;
+        BGC_without_space.orfs[orfIndex].end = BGC_without_space.orfs[orfIndex].start + orf_length;
 
     }
     return BGC_without_space;
 }
+
+// Function to update proteins based on geneMatrix and BGC
 function updateProteins(geneMatrix, BGC) {
     /**
    * update Proteins to geneMAtrix to remove for instance ko genes and then calls the proteiner to draw the proteins
    *@input BGC,geneMatrix
    */
+    
+    // Create a copy of BGC for display
     let proteinsForDisplay = JSON.parse(JSON.stringify(BGC));
-    delete proteinsForDisplay.orfs
-    proteinsForDisplay.orfs = []
+    delete proteinsForDisplay.orfs;
+    proteinsForDisplay.orfs = [];
+    // Sort geneMatrix based on position
     geneMatrix.sort((a, b) => {
         return a.position - b.position;
     });
+
+    // Iterate through geneMatrix to update proteinsForDisplay
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].displayed == true) {
-            proteinsForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC -
-                1]);
+            proteinsForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC -1]);
         }
     }
-    $("#protein_container")
-        .html(Proteiner.drawClusterSVG(removePaddingBGC(
-            removeSpaceBetweenProteins(proteinsForDisplay)), height =
-        viewPortHeight*0.07));
+    // Update HTML container with protein SVG
+    $("#protein_container").html(Proteiner.drawClusterSVG(removePaddingBGC(removeSpaceBetweenProteins(proteinsForDisplay)), height = viewPortHeight*0.07));
+    // Add drag-and-drop functionality
     addDragDrop();
 }
+
+// Function to get a list of ACP/PCP domains from geneMatrix
 function getACPList(geneMatrix) {
     /**
    * Get list of ACP/PCP to attach the intermediates to it.
    *@input geneMatrix
    * @output acp List
    */
-    let acpList = []
+    let acpList = [];
+
+    // Iterate through geneMatrix to find ACP/PCP domains
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=
-            0 && (geneMatrix[geneIndex].hasOwnProperty(
-                "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
-            for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
-                .length; domainIndex++) {
+        if (geneMatrix[geneIndex].ko == false && geneMatrix[geneIndex].domains.length !=0 && (geneMatrix[geneIndex].hasOwnProperty("modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+            for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains.length; domainIndex++) {
                 if (geneMatrix[geneIndex].domains[domainIndex].ko == false || geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
-                    if ((geneMatrix[geneIndex].domains[domainIndex].type.includes(
-                        "ACP") || geneMatrix[geneIndex].domains[domainIndex]
-                            .type.includes("PP") || geneMatrix[geneIndex].domains[domainIndex]
-                                .type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
-                                    .type.includes("ACPS"))) {
-                        acpList.push(geneMatrix[geneIndex].domains[domainIndex]
-                            .identifier)
+                    if ((geneMatrix[geneIndex].domains[domainIndex].type.includes("ACP") || geneMatrix[geneIndex].domains[domainIndex].type.includes("PP") || geneMatrix[geneIndex].domains[domainIndex].type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex].type.includes("ACPS"))) {
+                        acpList.push(geneMatrix[geneIndex].domains[domainIndex].identifier);
 
                     }
                 }
@@ -1443,6 +1679,8 @@ function getACPList(geneMatrix) {
     }
     return acpList;
 }
+
+
 // only display proteins with domains in domain explorer
 function updateDomains(geneMatrix, BGC) {
     /**
@@ -1646,14 +1884,16 @@ function closeForm() {
 function openTailoringForm() {
     /**
     *opens wildcard dialog
-
+    Select the HTML element with the ID "popupFormTailoring" and set its display style to "block"
    */
-    //
     document.getElementById("popupFormTailoring").style.display = "block";
 }
+
+// Get the element with the ID "" and set its display style to "none"
 function closeTailoringForm() {
     document.getElementById("popupFormTailoring").style.display = "none";
 }
+
 function showImpressum() {
     var popup = document.getElementById("popupImpressum");
     if (popup.style.display == "block"){
@@ -1774,35 +2014,51 @@ function setColorOfDropDown(button) {
     }
     button.setAttribute("style", "background-color: #E11839")
 }
-//everything to do with the wildcard modules
+// Function to set the wildcard substrate and update UI
 function setWildcardSubstrate(substrate) {
+    // Set the global variable wildcardSubstrate to the provided substrate
     wildcardSubstrate = substrate
+    // Find the button in the UI with the text content equal to the provided substrate
     let button = findButtonbyTextContent(substrate)
+    // Set the color of the dropdown to indicate the selection
     setColorOfDropDown(button)
 }
+// Function to set the wildcard tailoring enzyme and update UI
 function setWildcardTailoring(enzyme) {
+    // Set the global variable wildcardEnzyme to the provided enzyme
     wildcardEnzyme = enzyme
     let button = findButtonbyTextContent(enzyme)
+    // Set the color of the dropdown to indicate the selection
     setColorOfDropDown(button)
 }
+// Function to set the wildcard module type and return the updated value
 function setWildcardModule(moduleType) {
+    // Set the global variable wildcardModule to the provided moduleType
     wildcardModule = moduleType;
 
+    // Return the updated value of wildcardModule
     return wildcardModule
 }
+/**
+ * Adds a wildcard module to the gene matrix and the raw data (BGC).
+ * This function modifies the gene matrix, BGC, and related data structures.
+ * It adds a custom gene with a wildcard tailoring enzyme, updating various properties.
+ * @fires wildcarddialog -> related UI element triggering the function
+ * @input geneMatrix - The existing gene matrix data structure
+ * @output Modifies geneMatrix, BGC, and related data structures
+ */
 function addWildcardTailoring(geneMatrix) {
-    /**
-    *adds a wildcard module to the gene Matrix+ to the raw data (BGC)
-   * @fires wildcarddialog
-   *@input geneMatrix)
-   *@output different BGC, geneMatrix
-   */
-    let endLastGene = 0
+    // Calculate the end position of the last gene in the BGC
+    let endLastGene = 0;
     if (BGC.orfs.length > 0) {
-        endLastGene = BGC.orfs[BGC.orfs.length - 1].end
+        endLastGene = BGC.orfs[BGC.orfs.length - 1].end;
     }
-    BGC.end += 900
-    nameWildcardEnzyme += "_I"
+
+    // Update BGC end position and wildcard enzyme name
+    BGC.end += 900;
+    nameWildcardEnzyme += "_I";
+
+    // Create a new wildcard gene object
     let wildcard_gene = {
         antismashArray: [],
         default_option: [],
@@ -1819,33 +2075,35 @@ function addWildcardTailoring(geneMatrix) {
         strand: 1,
         description: "Custom Gene",
         id: nameWildcardEnzyme,
-
         ko: false,
-
         options: [],
-
         position: geneMatrix.length + 1,
-
         position_in_BGC: geneMatrix.length + 1,
-
         selected_option: [],
         modules: []
-    }
-    geneMatrix.push(wildcard_gene)
-    BGC.orfs.push(wildcard_gene)
-    if (details_data.hasOwnProperty(cluster_type)) {
-        details_data[cluster_type][regionName].orfs.push(wildcard_gene)
-    }
-    else {
-        details_data[regionName].orfs.push(wildcard_gene)
-    }
-    displayGenes(BGC)
-    updateProteins(geneMatrix, BGC)
-    if (RiPPStatus == 0) { updateDomains(geneMatrix, BGC) } else { updateRiPPs(geneMatrix, BGC) }
-    addArrowClick(geneMatrix)
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    };
 
+    // Add the wildcard gene to geneMatrix, BGC, and details_data  
+    geneMatrix.push(wildcard_gene);
+    BGC.orfs.push(wildcard_gene);
+    if (details_data.hasOwnProperty(cluster_type)) {
+        details_data[cluster_type][regionName].orfs.push(wildcard_gene);
+    } else {
+        details_data[regionName].orfs.push(wildcard_gene);
+    }
+
+    // Update the UI and related components
+    displayGenes(BGC);
+    updateProteins(geneMatrix, BGC);
+    if (RiPPStatus == 0) { 
+        updateDomains(geneMatrix, BGC); 
+    } else { 
+        updateRiPPs(geneMatrix, BGC);
+    }
+    addArrowClick(geneMatrix);
+    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
+
 function addWildcard(geneMatrix) {
     /**
     *adds a wildcard module to the gene Matrix+ to the raw data (BGC)
