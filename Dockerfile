@@ -17,7 +17,7 @@ COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./Backend /code/app
 COPY --from=build-frontend /app/build /code/app/static
-RUN rm -rf /usr/share/doc
+RUN rm -rf /usr/share
 COPY --from=build-frontend /usr /usr 
 
 # Expose the port that the FastAPI application is listening on
