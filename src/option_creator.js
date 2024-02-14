@@ -70,6 +70,7 @@ domain.default_option=domain.predictions[1][1].replace(
 })
 OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSites) {
   let tailoringEnzymes_Reactions = {
+    'ARGINASE': { 'ARGINASE': tailoringSites['ARGINASE'] },
     'METHYLTRANSFERASE': { 'METHYLTRANSFERASE': tailoringSites['METHYLTRANSFERASE'] },
     'C_METHYLTRANSFERASE': { 'C_METHYLTRANSFERASE': tailoringSites['C_METHYLTRANSFERASE'] },
     'N_METHYLTRANSFERASE': { 'N_METHYLTRANSFERASE': tailoringSites['N_METHYLTRANSFERASE'] },
