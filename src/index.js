@@ -12,7 +12,8 @@ var recordData = [];
 var details_data = {};
 let BGC ={};
 let fetching = false;
-let tailoringEnzymes = {"SPLICEASE": "SPL", "ARGINASE": "ARG", "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
+let tailoringEnzymes = {"SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
+let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmatinase"]};
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
 let cluster_type = "nrpspks";
@@ -2626,13 +2627,26 @@ function findTailoringEnzymeStatus(orfFunction) {
         tailoringEnzymeStatus = orfFunction.toUpperCase().replaceAll("-", "_").search(enzymeName) == -1 ?
             false : true;
         if (tailoringEnzymeStatus == true) {
-            return [tailoringEnzymeStatus, enzymeName.trim(), tailoringEnzymes[enzymeName]]
+            return [tailoringEnzymeStatus, enzymeName.trim(), tailoringEnzymes[enzymeName]];
         }
 
     }
+
+     // If not found in the main dictionary, search in the synonyms dictionary (tailoringEnzymesSynonyms)
+     for (const mainEnzymeName in tailoringEnzymesSynonyms) {
+        const synonyms = tailoringEnzymesSynonyms[mainEnzymeName];
+        for (const synonym of synonyms) {
+            tailoringEnzymeStatus = orfFunction.toUpperCase().replaceAll("-", "_").search(synonym.toUpperCase()) == -1 ?
+                false : true;
+            if (tailoringEnzymeStatus == true) {
+                return [tailoringEnzymeStatus, mainEnzymeName.trim(), tailoringEnzymes[mainEnzymeName]];
+            }
+        }
+     }
     return [tailoringEnzymeStatus, "", ""]
 
 }
+
 function runAlola(regionIndex, recordIndex, details_data, recordData){
   RiPPStatus = 0;
     terpeneStatus = 0;

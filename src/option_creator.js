@@ -72,6 +72,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
   let tailoringEnzymes_Reactions = {
     'SPLICEASE': { 'SPLICEASE': tailoringSites['SPLICEASE'] },
     'ARGINASE': { 'ARGINASE': tailoringSites['ARGINASE'] },
+    'AGMATINASE': { 'ARGINASE': tailoringSites['ARGINASE'] },
     'METHYLTRANSFERASE': { 'METHYLTRANSFERASE': tailoringSites['METHYLTRANSFERASE'] },
     'C_METHYLTRANSFERASE': { 'C_METHYLTRANSFERASE': tailoringSites['C_METHYLTRANSFERASE'] },
     'N_METHYLTRANSFERASE': { 'N_METHYLTRANSFERASE': tailoringSites['N_METHYLTRANSFERASE'] },
