@@ -14,6 +14,7 @@ let BGC ={};
 let fetching = false;
 let tailoringEnzymes = {"SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
 let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmatinase"]};
+let tailoringEnzymesWithTwoAtoms = ["OXIDATIVE_BOND_FORMATION", "SPLICEASE"]
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
 let cluster_type = "nrpspks";
@@ -1480,7 +1481,7 @@ function findTailoringReactions(geneMatrix) {
                 enzymeNameReaction = firstparameter
             }
               // put atoms for bond formation in pairs
-            if (["OXIDATIVE_BOND_FORMATION"].includes(enzymeNameReaction)){
+            if (tailoringEnzymesWithTwoAtoms.includes(enzymeNameReaction)) {
                 atoms =atoms.flat(1)
                 if (atoms.length%2 == 1) {
                     atoms.pop()
@@ -1491,7 +1492,7 @@ function findTailoringReactions(geneMatrix) {
             }
             if (tailoringArray.length > 0) {
                 for (const enzyme of tailoringArray) {
-                    enzymeReactionArray = enzyme.find(item => item.name == enzymeNameReaction)
+                    enzymeReactionArray = enzyme.find(item => item.name === enzymeNameReaction)
                     if (enzymeReactionArray) break
                 }
             }
@@ -1499,15 +1500,15 @@ function findTailoringReactions(geneMatrix) {
                 if (atoms.length > 0) {
                     enzymeReactionArray[1].push(atoms);
                 }
-                }
+            }
 
             else {
                 if (atoms.length > 0) {
                     tailoringArray.push([geneMatrix[geneIndex].id, enzymeNameReaction, atoms]);
                 }
-
-
-        }}}
+           }
+        }
+    }
         return tailoringArray}
 
 function removePaddingBGC(BGC) {
