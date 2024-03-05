@@ -1818,9 +1818,17 @@ function showImpressum() {
     if (popup.style.display == "block"){
         popup.style.display = "none";
     }
-    else { popup.style.display = "block"; }
+    else { popup.style.display = "block";}
     
 }
+
+
+function showAlolaManual() {
+
+    window.open ("./ALOLA_Manual_1.html");
+}
+
+
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";
 }
