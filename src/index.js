@@ -12,9 +12,9 @@ var recordData = [];
 var details_data = {};
 let BGC ={};
 let fetching = false;
-let tailoringEnzymes = {"SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
-let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmatinase"]};
-let tailoringEnzymesWithTwoAtoms = ["OXIDATIVE_BOND_FORMATION", "SPLICEASE"]
+let tailoringEnzymes = {"RADICAL_SAM": "RSAM", "SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREDUCTASE": "OXRED","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "Amino-T", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "ALC-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DCARB", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
+let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmatinase"], "RADICAL_SAM": ["rSAM", "Radical_SAM", "radical_SAM", "R_SAM"]};
+let tailoringEnzymesWithTwoAtoms = ["OXIDATIVE_BOND_SYNTHASE", "SPLICEASE","LANTHIPEPTIDE_CYCLASE", "LANTHIONINE_SYNTHETASE", "OXIDATIVE_BOND_SYNTHASE"]
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
 let cluster_type = "nrpspks";
@@ -1818,16 +1818,13 @@ function showImpressum() {
     if (popup.style.display == "block"){
         popup.style.display = "none";
     }
-    else { popup.style.display = "block";}
+    else { popup.style.display = "block";}   
+}
+
+document.getElementById('openAlolaManual').addEventListener('click', function() {
+    window.location.href = ('./Alola_Manual_new.html');
+});
     
-}
-
-
-function showAlolaManual() {
-
-    window.open ("./ALOLA_Manual_1.html");
-}
-
 
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";

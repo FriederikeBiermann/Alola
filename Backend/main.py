@@ -126,44 +126,45 @@ async def alola_nrps_pks(antismash_input: str):
     :param antismash_input: JSON string containing antismash data.
     :return: Dictionary containing SVG representations, SMILES strings, and other molecular data.
     """
-    try:
-        assert antismash_input, "Input data is required."
+    #try:
+    assert antismash_input, "Input data is required."
 
-        # Decode the JSON input
-        input_data = json.loads(antismash_input)
+    # Decode the JSON input
+    input_data = json.loads(antismash_input)
 
-        # Extract and convert tailoring enzymes
-        tailoring_reactions = [
-            TailoringRepresentation(*enzyme) for enzyme in input_data["tailoring"]
-        ]
+    # Extract and convert tailoring enzymes
+    tailoring_reactions = [
+        TailoringRepresentation(*enzyme) for enzyme in input_data["tailoring"]
+    ]
 
-        # Format cluster data and handle fake booleans
-        raichu_input = format_cluster(
-            input_data["clusterRepresentation"], tailoring_reactions
-        )
+    # Format cluster data and handle fake booleans
+    raichu_input = format_cluster(
+        input_data["clusterRepresentation"], tailoring_reactions
+    )
 
-        # Initialize and compute cluster structures
-        cluster = build_cluster(raichu_input, strict=False)
-        cluster.compute_structures(compute_cyclic_products=False)
+    # Initialize and compute cluster structures
+    cluster = build_cluster(raichu_input, strict=False)
+    print(raichu_input)
+    cluster.compute_structures(compute_cyclic_products=False)
 
-        # Perform tailoring and cyclization if applicable
-        cluster.do_tailoring()
-        tailored_product = cluster.chain_intermediate.deepcopy()
-        cyclization = input_data["cyclization"]
-        final_product = perform_cyclization_nrps_pks(
-            cyclization, tailored_product, cluster
-        )
+    # Perform tailoring and cyclization if applicable
+    cluster.do_tailoring()
+    tailored_product = cluster.chain_intermediate.deepcopy()
+    cyclization = input_data["cyclization"]
+    final_product = perform_cyclization_nrps_pks(
+        cyclization, tailored_product, cluster
+    )
 
-        # Prepare data for response
-        response_data = prepare_response_data_nrps_pks(
-            cluster, final_product, tailored_product
-        )
+    # Prepare data for response
+    response_data = prepare_response_data_nrps_pks(
+        cluster, final_product, tailored_product
+    )
 
-        return response_data
+    return response_data
 
-    except Exception as e:
+    #except Exception as e:
         # Log and return error information
-        return log_error_nrps_pks(e)
+    #    return log_error_nrps_pks(e)
 
 
 def perform_cyclization_nrps_pks(cyclization, tailored_product, cluster):
@@ -213,7 +214,7 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
     structure_for_tailoring.draw_structure()
 
     svg_structure_for_tailoring = process_svg(
-        structure_for_tailoring.save_svg_string(), "tailoring_drawing"
+        structure_for_tailoring.get_svg_string_matplotlib(), "tailoring_drawing"
     )
     svg_final = process_svg(svg_string_from_structure(final_product), "final_drawing")
     return {
@@ -258,12 +259,12 @@ def log_error_nrps_pks(exception):
 
 @app.get("/api/alola/ripp/")
 async def alola_ripp(antismash_input: str):
-        """
-        Process input data from antismash for RiPP analysis.
-        :param antismash_input: JSON string containing antismash data.
-        :return: Dictionary containing SVG representations, SMILES strings, and other molecular data.
-        """
-        # try:
+    """
+    Process input data from antismash for RiPP analysis.
+    :param antismash_input: JSON string containing antismash data.
+    :return: Dictionary containing SVG representations, SMILES strings, and other molecular data.
+    """
+    try:
         assert antismash_input, "Input data is required."
 
         input_data = json.loads(antismash_input)
@@ -322,8 +323,8 @@ async def alola_ripp(antismash_input: str):
             "structureForTailoring": svg_structure_for_tailoring,
         }
 
-    # except Exception as e:
-    #     return log_error_ripps(e)
+    except Exception as e:
+         return log_error_ripps(e)
 
 
 def log_error_ripps(exception):
