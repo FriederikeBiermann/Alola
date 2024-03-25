@@ -357,7 +357,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                 domainIndex + ",\x22" +
                                                 short_option +
                                                 "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                                                option +
+                                                option.replaceAll("_", " ") +
                                                 "</button>";
                                             //format default option differently
 

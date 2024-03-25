@@ -17,6 +17,7 @@ let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmati
 let tailoringEnzymesWithTwoAtoms = ["OXIDATIVE_BOND_SYNTHASE", "SPLICEASE","LANTHIPEPTIDE_CYCLASE", "LANTHIONINE_SYNTHETASE", "OXIDATIVE_BOND_SYNTHASE"]
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
+let pksStarterSubstrates = ["PROPIONYL_COA","ACETYL_COA","BENZOYL_COA","METHYL_BUTYRYL_COA_3","METHYL_BUTYRYL_COA_2","TRANS_CYCLOPENTANE_DICARBOXYL_COA","CYCLOHEXANE_CARBOXYL_COA","HYDROXY_MALONYL_COA_2", "HYDROXY_MALONYL_COA_2R", "HYDROXY_MALONYL_COA_2S","CHLOROETHYL_MALONYL_COA", "ISOBUTYRYL_COA","GLYCINE","HYDROXY_PROPENOYL_COA_3_23E","HYDROXY_BUTENOYL_COA_3_23E","DIHYDROXY_BUTANOLYL_COA_2R3","TRIHYDROXY_PROPANOLYL_COA_233","O_METHYLACETYL_COA","HYDROXY_PROPENOYL_COA_3_23Z","OXOMALONYL_COA_2","METHYL_HYDROXY_PROPENOYL_COA_2_3_23Z","DIHYDROXY_BUTANOLYL_COA_23","DIHYDROXY_BUTANOLYL_COA_2S3S","HEPTATRIENOYL_COA","HYDROXYPROPIONYL_COA_2R","DIHYDROXY_PROPANOLYL_COA_33","LACTYL_COA","PHENYLACETYLCOA","METHOXYFORMYL_COA"]
 let cluster_type = "nrpspks";
 let terpeneStatus = 0;
 let terpeneSubstrate = "";
@@ -36,6 +37,7 @@ let nameToStructure = {
     "malonyl_coa": "OC(=O)CC(S)=O",
     'methoxymalonyl_acp': "SC(=O)C(C(=O)O)OC)O",
     'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
+    
 };
 let aminoacids= {
     "ala": 'alanine',
@@ -2896,6 +2898,23 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                 if (domain.abbreviation == "AT") {
                                     moduleType = "PKS"
                                     moduleSubtype = "PKS_CIS"
+                                    if (moduleIndex == 0){
+                                        if (domain.hasOwnProperty("predictions")) {
+                                            if (domain.predictions.length != 0) {
+                                                if (domain.predictions[1][1] !=
+                                                    "(unknown)" && pksStarterSubstrates.includes(domain.predictions[1][1])) {
+                                                    substrate = domain.predictions[1][1].replace("-",'_').toUpperCase()
+                                                }
+                                                else {
+                                                    substrate = "acetyl_coa".toUpperCase()
+                                                }
+
+                                    }}
+                                    else {
+                                        substrate = "acetyl_coa".toUpperCase()
+                                    }
+                                }
+                                    else {
                                     if (domain.hasOwnProperty("predictions")) {
                                         if (domain.predictions.length != 0) {
                                             if (domain.predictions[1][1] !=
@@ -2912,7 +2931,8 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                     }
                                     else {
                                         substrate = "malonyl_coa".toUpperCase()
-                                    }
+                                    }} 
+
                                     if (!(geneMatrix[geneIndex].domains[domainIndex].selected_option.length == 0)) {
                                         substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option.toUpperCase()
                                     }

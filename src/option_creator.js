@@ -23,6 +23,7 @@ OptionCreator.createOptionsTerpeneCyclase = (function(atomsForCyclisation = none
   
 })
 OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none) {
+  let AT_index = 0;
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
     for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains.length; domainIndex++) {
       let domain = geneMatrix[geneIndex].domains[domainIndex];
@@ -40,24 +41,29 @@ if (domain.abbreviation=="A") {
   "-", '').toLowerCase()];
 }
 //add substrate specifities for PKS
-
 if (domain.abbreviation=="AT") {
-domain.domainOptions=Object.keys(nameToStructure);
-domain.default_option=domain.predictions[1][1].replace(
-"-", '')
-.toLowerCase();
+  if (AT_index>0){domain.domainOptions=Object.keys(nameToStructure);
+    domain.default_option=domain.predictions[1][1].replace(
+    "-", '')
+    .toLowerCase();}
+  else{domain.domainOptions=pksStarterSubstrates;
+    domain.default_option=domain.predictions[1][1].replace(
+    "-", '')
+    .toLowerCase();}
+  AT_index += 1;
+  }
+
+//add specifities for Trans-AT-KS
+
+if (domain.abbreviation == "KS" && domain.predictions.length != 0) {
+  domain.domainOptions = Object.keys(TRANS_AT_KS_SUBTYPES);
+  for (const [key,value] of Object.entries(TRANS_AT_KS_SUBTYPES))
+  {
+    if (value == domain.predictions[0][1].toUpperCase().replaceAll("-", "_").replaceAll("/", "_"))
+    domain.default_option = key;
+  }
+
 }
-       //add specifities for Trans-AT-KS
-
-       if (domain.abbreviation == "KS" && domain.predictions.length != 0) {
-         domain.domainOptions = Object.keys(TRANS_AT_KS_SUBTYPES);
-         for (const [key,value] of Object.entries(TRANS_AT_KS_SUBTYPES))
-         {
-           if (value == domain.predictions[0][1].toUpperCase().replaceAll("-", "_").replaceAll("/", "_"))
-            domain.default_option = key;
-         }
-
-       }
 //add cyclisation options
        if (domain.abbreviation == "TE") {
          domain.domainOptions = addStringToArray("Cyclization at ", atomsForCyclisation);
