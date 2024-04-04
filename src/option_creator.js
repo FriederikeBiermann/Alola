@@ -101,6 +101,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
     },
 
     'YCAO': {
+      'THIOAMIDATION': tailoringSites['THIOAMIDATION'],
       'MACROLACTAM_SYNTHETASE': tailoringSites['MACROLACTAM_SYNTHETASE'],
       'CYCLODEHYDRASE': tailoringSites['CYCLODEHYDRASE'],
     },
