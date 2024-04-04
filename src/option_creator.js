@@ -83,6 +83,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
     'C_METHYLTRANSFERASE': { 'C_METHYLTRANSFERASE': tailoringSites['C_METHYLTRANSFERASE'] },
     'N_METHYLTRANSFERASE': { 'N_METHYLTRANSFERASE': tailoringSites['N_METHYLTRANSFERASE'] },
     'O_METHYLTRANSFERASE': { 'O_METHYLTRANSFERASE': tailoringSites['O_METHYLTRANSFERASE'] },
+    
     'P450': {
       'HYDROXYLASE': tailoringSites['HYDROXYLASE'],
       'OXIDATIVE_BOND_SYNTHASE': tailoringSites['OXIDATIVE_BOND_SYNTHASE'],
@@ -98,6 +99,12 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'LANTHIONINE_SYNTHETASE': tailoringSites['LANTHIONINE_SYNTHETASE'],
       
     },
+
+    'YCAO': {
+      'MACROLACTAM_SYNTHETASE': tailoringSites['MACROLACTAM_SYNTHETASE'],
+      'CYCLODEHYDRASE': tailoringSites['CYCLODEHYDRASE'],
+    },
+
     'OXIDOREDUCTASE':{
       'DOUBLE_BOND_REDUCTASE': tailoringSites['DOUBLE_BOND_REDUCTASE'],
       'KETO_REDUCTION': tailoringSites['KETO_REDUCTION'],
