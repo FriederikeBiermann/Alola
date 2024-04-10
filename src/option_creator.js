@@ -90,11 +90,15 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'EPOXIDASE': tailoringSites['EPOXIDASE'],
       'DEHYDROGENASE': tailoringSites['DEHYDROGENASE'] 
     },
+
+    'LANTHIBIOTIC_DEHYDRATASE': {
+      'THREONINE_SERINE_DEHYDRATASE': tailoringSites ['THREONINE_SERINE_DEHYDRATASE'],
+    },
+
     'RADICAL_SAM': {
       'METHYLTRANSFERASE': tailoringSites['METHYLTRANSFERASE'],
       'AMINO_ACID_EPIMERASE': tailoringSites['AMINO_ACID_EPIMERASE'],
       'OXIDATIVE_BOND_SYNTHASE': tailoringSites ['OXIDATIVE_BOND_SYNTHASE'],
-      'THREONINE_SERINE_DEHYDRATASE': tailoringSites ['THREONINE_SERINE_DEHYDRATASE'],
       'LANTHIPEPTIDE_CYCLASE': tailoringSites['LANTHIPEPTIDE_CYCLASE'],
       'LANTHIONINE_SYNTHETASE': tailoringSites['LANTHIONINE_SYNTHETASE'],
       
@@ -102,7 +106,6 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
 
     'YCAO': {
       'THIOAMIDATION': tailoringSites['THIOAMIDATION'],
-      'MACROLACTAM_SYNTHETASE': tailoringSites['MACROLACTAM_SYNTHETASE'],
       'CYCLODEHYDRASE': tailoringSites['CYCLODEHYDRASE'],
     },
 
