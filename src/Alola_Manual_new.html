@@ -12,27 +12,130 @@
     div.column{display: inline-block; vertical-align: top; width: 50%;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     ul.task-list{list-style: none;}
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: 'Catamaran', sans-serif;
+      font-size: 1,7vh;
+      line-height: 1.6;
+      margin: 0;
+      padding: 25px;
+      position: absolute;
+    }
+
+    h1, h2 {
+      color: #ffffff;
+      font-family: 'Catamaran', sans-serif;
+      font-weight: bold; /* Make <strong> text bold */
+    }
+
+    a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    figure {
+      background-color: #b5b2b2; /* grey background */
+      padding: 10px; /* Padding around the image */
+      border-radius: 10px; /* Rounded corners */
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Box shadow for depth */
+      margin-bottom: 20px; /* Spacing below the figure */
+      display: flex; /* Use flexbox */
+      justify-content: center; /* Center horizontally */
+      align-items: center; /* Center vertically */
+      flex-direction: column; /* Stack elements vertically */
+      max-width: 700px
+      
+    }
+    .figure-container {
+      max-width: 700px; /* Set the maximum width in pixels */
+      margin: 0 auto; /* Center the container horizontally */
+    }
+    img {
+      display: block; /* Make image a block element */
+      max-width: 100%; /* Ensure image does not exceed container width */
+      height: auto; /* Maintain aspect ratio */
+      border-radius: 8px; /* Rounded corners for the image */
+    }
+
+    figcaption {
+      text-align: center; /* Center-align caption */
+      font-style: italic; /* Italicize caption */
+      margin-top: 8px; /* Spacing above the caption */
+    }
+    /* Apply styles to the header container */
+    .header-container {
+      background-color: #403e3e; /* Dark gray background color */
+      color: #fff; /* Text color (white) */
+      padding: 20px; /* Add padding around the content */
+      border-radius: 10px; /* Rounded corners */
+      align-items: center; /* Center vertically */
+    }
+
+    /* Center the header content within the container */
+    .header-content {
+      text-align: center; /* Center text inside the container */
+      margin: 0 auto; /* Center the content horizontally */
+    }
+    .content-box {
+      padding: 20px; /* Padding around content */
+      background-color: #403e3e; /* Background color */
+      color: #fff; /* Text color (white) */
+      border-radius: 10px; /* Rounded corners */
+      justify-content: center; /* Center contents horizontally */
+      
+    }
+
+    .content-box a {
+      text-decoration: underline; /* Add underline to links */
+      text-align: center; /* Center contents inside figures */
+    }
+
+    p, li {
+      margin-bottom: 1em;
+    }
+
+    h1, h2 {
+      margin-bottom: 0.5em;
+    }
+
+    @media (max-width: 768px) {
+      div.column {
+      width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
-<h1>ALOLA Manual</h1>
-<p>ALOLA is a tool to provide a user-friendly interface designed for the visualization and customization of the natural products Biosynthetic Gene Clusters (BGCs) derived from antiSMASH results. Additionally, ALOLA facilitates the exploration and modification of the corresponding natural product structures.</p>
-<!-- Add more anchor links for other sections as needed -->
-<h1>Content</h1>
-<ul>
-  <li><a href="#alola_navigation">ALOLA Navigation</a></li>
-  <li><a href="#how_to_use_alola">How to use ALOLA</a></li>
-  <li><a href="#alola_tool_map">ALOLA Tool Map</a></li>
-  <li><a href="#pks_nrps">PKSs and NRPSs</a></li>
-  <li><a href="#creating_Ripp_bgc">Creating new RiPP BGC</a></li>
-  <li><a href="#terpene_bgc">Terpene BGCs</a></li>
-  <li><a href="#alola_output">ALOLA Output</a></li>
-  
-  
-</ul>
+  <div class="header-container">
+    <div class="header-content">
+        <h1>ALOLA Manual</h1>
+        <p>ALOLA is a tool to provide a user-friendly interface designed for the visualization and customization of the natural products Biosynthetic Gene Clusters (BGCs) derived from antiSMASH results. Additionally, ALOLA facilitates the exploration and modification of the corresponding natural product structures.</p>
+        <!-- Add more anchor links for other sections as needed -->
+    </div>
+</div>
+<br>
+<div class="content-box">
+  <h1>Content</h1>
+  <ul>
+    <li><a href="#alola_navigation">ALOLA Navigation</a></li>
+    <li><a href="#how_to_use_alola">How to use ALOLA</a></li>
+    <li><a href="#alola_tool_map">ALOLA Tool Map</a></li>
+    <li><a href="#pks_nrps">PKSs and NRPSs</a></li>
+    <li><a href="#creating_Ripp_bgc">Creating new RiPP BGC</a></li>
+    <li><a href="#terpene_bgc">Terpene BGCs</a></li>
+    <li><a href="#alola_output">ALOLA Output</a></li>
+  </ul>
+</div>
 <h2 id="alola_navigation">ALOLA Navigation</h2>
 <p>Upon uploading the input file on ALOLA, you'll be greeted with an overview of the ALOLA website. The following introductory photo serves as a visual guide, marked with numbered arrows, each pointing to a specific section or explorer on ALOLA to enhance user familiarity, providing a seamless experience as you explore and utilize the diverse functionalities within this tool.</p>
-<p><img src="1004B7D200006352000037EAC3FCE878D136A740.svg" style="width:7.6201in;height:3.9465in" />
+<figure>
+<img src="1004B7D200006352000037EAC3FCE878D136A740.svg" style="width:7.6201in;height:3.9465in" alt=""/>
+</figure>
 <p><strong>(1) ALOLA Tool bar:</strong> Providing different features enhancing the capabilities of ALOLA</p>
 <p><strong>(2) Identified secondary metabolite regions:</strong> Regions are Visible upon Uploading the input file</p>
 <p><strong>(3) BGC explorer:</strong> Exploring BGC of the selected region</p>
@@ -93,8 +196,10 @@
 <p><strong>Expanding BGC</strong></p>
 <p>You can additionally integrate diverse tailoring enzymes or modules into the biosynthetic model (Fig. 7). Hover over the "Tailoring Enzyme" (Fig. 7A) and choose your desired enzyme (Fig. 7B).</p>
 <figure>
-<img src="10000000000003C00000021CA699EDFE170F850F.jpg" style="width:3.5445in;height:2.8091in" />
-<img src="10000000000003C00000021C3CACF7918DBB3EC8.jpg" style="width:3.3335in;height:3.1819in" alt="" /><figcaption>Figure 7A and 7B</figcaption>
+<img src="10000000000003C00000021CA699EDFE170F850F.jpg" style="width:5.5445in;height:4.8091in" alt="" /><figcaption>Figure 7A</figcaption>
+</figure>
+<figure>
+<img src="10000000000003C00000021C3CACF7918DBB3EC8.jpg" style="width:5.3335in;height:5.1819in" alt="" /><figcaption>Figure 7B</figcaption>
 </figure>
 <p>- Once you've chosen the tailoring enzyme e.g. C-Methyltransferase, from the available range on ALOLA, you can easily select the region for methylation by hovering over the newly added enzyme with your mouse. Observe the dynamic methylation process and its effects on the final product in real time (Fig. 8).</p>
 <figure>
