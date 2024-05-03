@@ -20,7 +20,6 @@
       line-height: 1.6;
       margin: 0;
       padding: 25px;
-      position: absolute;
     }
 
     h1, h2 {
@@ -30,12 +29,12 @@
     }
 
     a {
-      color: #ffffff;
+      color: #b1adad;
       text-decoration: none;
     }
 
     a:hover {
-      text-decoration: underline;
+      color : #b60505;
     }
 
     figure {
@@ -52,7 +51,7 @@
       
     }
     .figure-container {
-      max-width: 700px; /* Set the maximum width in pixels */
+      max-width: 800px; /* Set the maximum width in pixels */
       margin: 0 auto; /* Center the container horizontally */
     }
     img {
@@ -67,45 +66,56 @@
       font-style: italic; /* Italicize caption */
       margin-top: 8px; /* Spacing above the caption */
     }
-    /* Apply styles to the header container */
+    
     .header-container {
       background-color: #403e3e; /* Dark gray background color */
       color: #fff; /* Text color (white) */
       padding: 20px; /* Add padding around the content */
       border-radius: 10px; /* Rounded corners */
-      align-items: center; /* Center vertically */
+      text-align: center; /* Center vertically */
     }
 
     /* Center the header content within the container */
     .header-content {
-      text-align: center; /* Center text inside the container */
       margin: 0 auto; /* Center the content horizontally */
+      font-weight: bold; /* Make <strong> text bold */
     }
     .content-box {
-      padding: 20px; /* Padding around content */
-      background-color: #403e3e; /* Background color */
-      color: #fff; /* Text color (white) */
+      background-color: #000000; /* Background color */
       border-radius: 10px; /* Rounded corners */
       justify-content: center; /* Center contents horizontally */
-      
+      text-decoration: none;
+      font-weight: bold; /* Make <strong> text bold */
+      align-content: center;
+      width: 20%;
+      float: left; /* Float left */
+      display: inline-block; /* Change display to inline-block */
     }
 
-    .content-box a {
-      text-decoration: underline; /* Add underline to links */
-      text-align: center; /* Center contents inside figures */
+    .content-box p,
+    .content-box ul,
+    .content-box li,
+    .content-box h1 {
+      color: grey; /* Set text color to grey for all text elements */
     }
 
+    .details {
+      float: right; /* Float right */
+      width: calc(80% - 20px); /* Width of details */
+      display: inline-block; /* Change display to inline-block */
+      margin-left: 20px; /* Add margin for spacing between boxes */
+
+    }
+   
     p, li {
       margin-bottom: 1em;
     }
 
-    h1, h2 {
-      margin-bottom: 0.5em;
-    }
-
+   
     @media (max-width: 768px) {
-      div.column {
-      width: 100%;
+      .content-box, .details {
+        width: 100%; /* Make them full-width on smaller screens */
+        float: none; /* Remove float */
       }
     }
   </style>
@@ -115,7 +125,6 @@
     <div class="header-content">
         <h1>ALOLA Manual</h1>
         <p>ALOLA is a tool to provide a user-friendly interface designed for the visualization and customization of the natural products Biosynthetic Gene Clusters (BGCs) derived from antiSMASH results. Additionally, ALOLA facilitates the exploration and modification of the corresponding natural product structures.</p>
-        <!-- Add more anchor links for other sections as needed -->
     </div>
 </div>
 <br>
@@ -131,10 +140,11 @@
     <li><a href="#alola_output">ALOLA Output</a></li>
   </ul>
 </div>
+<div class="details">
 <h2 id="alola_navigation">ALOLA Navigation</h2>
 <p>Upon uploading the input file on ALOLA, you'll be greeted with an overview of the ALOLA website. The following introductory photo serves as a visual guide, marked with numbered arrows, each pointing to a specific section or explorer on ALOLA to enhance user familiarity, providing a seamless experience as you explore and utilize the diverse functionalities within this tool.</p>
 <figure>
-<img src="1004B7D200006352000037EAC3FCE878D136A740.svg" style="width:7.6201in;height:3.9465in" alt=""/>
+<img src="1004B7D200006352000037EAC3FCE878D136A740.svg" style="width:6.6201in;height:3.9465in" alt=""/>
 </figure>
 <p><strong>(1) ALOLA Tool bar:</strong> Providing different features enhancing the capabilities of ALOLA</p>
 <p><strong>(2) Identified secondary metabolite regions:</strong> Regions are Visible upon Uploading the input file</p>
@@ -271,14 +281,15 @@ If the identified secondary metabolite regions involve Terpene, upon selecting t
 <p>- Access detailed gene information and annotations in the Gene Explorer by holding the mouse over each gene in the BGC Explorer or each domain in the Protein Explorer.</p>
 <p>- This iterative process enables users to visualize and fine-tune the cyclization reactions with precision, enhancing their ability to explore and modify terpene biosynthetic pathways effectively.</p>
 <p><strong>Structure Explorer</strong></p>
-<p>- Visualize the chemical structure of the final product in the Structure Explorer and download it in SVG format. Alternatively, copy the final structure"s SMILES directly into ChemDraw or MarvinSketch for structure modification.</p>
+<p>- Visualize the chemical structure of the final product in the Structure Explorer and download it in SVG format. Alternatively, copy the final structure's SMILES directly into ChemDraw or MarvinSketch for structure modification.</p>
 <h2 id="alola_output">ALOLA Output</h2>
-<p>- Once you"ve successfully modified and generated your desired Biosynthetic Gene Cluster (BGC) using ALOLA, you have the convenience of saving the output in various formats for future use. ALOLA provides users with flexibility by allowing the export of your customized BGC and the final chemical structure in three different file formats: PNG, SVG, and SMILIEs.</p>
+<p>- Once you've successfully modified and generated your desired Biosynthetic Gene Cluster (BGC) using ALOLA, you have the convenience of saving the output in various formats for future use. ALOLA provides users with flexibility by allowing the export of your customized BGC and the final chemical structure in three different file formats: PNG, SVG, and SMILIEs.</p>
 <p><strong><em>PNG Format</em></strong></p>
 <p>- The PNG format (Portable Network Graphics) is a widely supported image format. Saving your BGC in PNG ensures compatibility with various image viewing and editing tools. This raster image format preserves the visual details of your modified BGC, making it suitable for documentation, presentations, and further analysis.</p>
 <p><strong><em>SVG Format</em></strong></p>
 <p>- SVG, Scalable Vector Graphics, is a versatile and editable vector image format. Saving your modified BGC in SVG allows for easy scaling without loss of quality. This format is particularly useful if you plan to make additional adjustments or if you require a scalable image for publication or collaborative work.</p>
 <p><strong><em>SMILIES Format</em></strong></p>
 <p>- ALOLA offers the unique option to save your modified BGC in the SMILIES (Simplified Molecular Input Line Entry System) format. SMILIEs allows chemists to describe the structure of a molecule using a simple and standardized text string.</p>
+</div>
 </body>
 </html>
