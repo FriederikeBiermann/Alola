@@ -2494,6 +2494,7 @@ function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, o
         .checked) {
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
     }
+    /// todo: set all tailoring options + cyclization option to empty + cleavage options -> to default
 }
 function changeSelectedOptionTailoring(geneMatrix, geneIndex, reactionOption, atomOption) {
     /**
@@ -2710,6 +2711,83 @@ function runAlola(regionIndex, recordIndex, details_data, recordData){
         openFormTerpene()
     }
     fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+
+}
+
+function reverseBGC(regionIndex, recordIndex, details_data, recordData){
+    RiPPStatus = 0;
+    terpeneStatus = 0;
+  rippPrecursor = "";
+    document.getElementById("add_module_button").style.display = "none";
+  cyclization = "None";
+  regionName = getRegionName(regionIndex, recordIndex);
+  cluster_type = getClusterType(regionIndex);
+    document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${recordData[recordIndex].regions[regionIndex].type} BGC`;
+    document.getElementById('model_gene_container').innerHTML = "";
+  document.getElementById('module_container').innerHTML = "";
+  document.getElementById('domain_container').innerHTML = "";
+    document.getElementById('structure_container').innerHTML = "";
+  geneMatrix = {}
+  moduleMatrix = []
+  BGC = Object.keys(recordData[recordIndex].regions[regionIndex])
+      .reduce(function (obj, k) {
+          if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
+              recordIndex].regions[regionIndex][k];
+          return obj;
+      }, {});
+  for (const [key_1, value_1] of Object.entries(details_data)) {
+      if (value_1.id == regionName) {
+          for (let orf_index = 0; orf_index < value_1.orfs.length; orf_index++) {
+              orf = value_1.orfs[orf_index]
+              for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
+                  if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
+                      BGC.orfs[BGC_orf_index]["domains"] = orf.domains
+                  }
+              }
+          }
+      }
+      else if (value_1.hasOwnProperty([regionName])) {
+          for (let orf_index = 0; orf_index < value_1[regionName].orfs.length; orf_index++) {
+              orf = value_1[regionName].orfs[orf_index]
+              for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
+                  if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
+                      BGC.orfs[BGC_orf_index]["domains"] = orf.domains
+                  }
+              }
+          }
+      }
+  }
+
+  for (let orf_index = 0; orf_index < BGC.orfs.length; orf_index++) {
+    let new_start = BGC.end - BGC.orfs[orf_index].end + BGC.start
+    let new_end = BGC.end - BGC.orfs[orf_index].start + BGC.start
+    let new_strand = -(BGC.orfs[orf_index].strand)
+
+    BGC.orfs[orf_index].start = new_start;
+    BGC.orfs[orf_index].end = new_end;
+    BGC.orfs[orf_index].strand = new_strand;
+}
+    // Reverse the BGC.orfs array
+    let reversedOrfsArray = [];
+    // Iteriere rückwärts durch das ORF-Array im BGC-Objekt
+    for (let i = BGC.orfs.length-1 ; i >= 0; i--) {
+        // Füge das aktuelle ORF-Objekt in das neue Array ein
+        reversedOrfsArray.push({ ...BGC.orfs[i] });   
+}
+BGC.orfs = reversedOrfsArray;
+
+geneMatrix = createGeneMatrix(BGC, regionName)
+BGCForDisplay = displayGenes(BGC)
+addRiPPPrecursorOptions(geneMatrix)
+//remove all checkboxes
+$('input[type=checkbox]').removeAttr('checked');
+updateProteins(geneMatrix, BGC)
+updateDomains(geneMatrix,BGC)
+addArrowClick(geneMatrix)
+if (recordData[recordIndex].regions[regionIndex].type.includes("terpene")){
+    openFormTerpene()
+}
+fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 
 }
 
