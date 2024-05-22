@@ -1,5 +1,6 @@
 let port = "http://127.0.0.1:8000/"
 let regionIndex = 0;
+let reversed = false;
 let recordIndex = 0;
 let regionName = "";
 let viewPortHeight = window.innerHeight;
@@ -12,8 +13,8 @@ var recordData = [];
 var details_data = {};
 let BGC ={};
 let fetching = false;
-let tailoringEnzymes = {"YCAO":"YcaO", "LANTHIBIOTIC_DEHYDRATASE":"L-DH", "RADICAL_SAM": "rSAM", "SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREDUCTASE": "OXRE","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "AMT", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "AL-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DC", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
-let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmatinase"], "RADICAL_SAM": ["rSAM", "Radical_SAM", "radical_SAM", "R_SAM"], "YCAO": ["ycao","Ycao","YcaO"], "LANTHIBIOTIC_DEHYDRATASE": ["lanthibiotic dehydratase","serine/threoninedehydratase", "serine dehydratase", "threonine dehydratase"]};
+let tailoringEnzymes = {"ATP-GRASP":"ATP-G", "YCAO":"YcaO", "LANTHIBIOTIC_DEHYDRATASE":"L-DH", "RADICAL_SAM": "rSAM", "SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREDUCTASE": "OXRE","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "AMT", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOLE_DEHYDROGENASE": "AL-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DC", "MONOAMINE_OXIDASE": "MAO", "HALOGENASE": "HAL", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
+let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmatinase"], "RADICAL_SAM": ["rSAM", "Radical_SAM", "radical_SAM", "R_SAM"], "YCAO": ["ycao","Ycao","YcaO"], "LANTHIBIOTIC_DEHYDRATASE": ["lanthibiotic dehydratase","serine/threoninedehydratase", "serine dehydratase", "threonine dehydratase"],"ATP-GRASP": ["ATP-grasp","atp-grasp","atp grasp", "ATP grasp"]};
 let tailoringEnzymesWithTwoAtoms = ["OXIDATIVE_BOND_SYNTHASE", "SPLICEASE","LANTHIPEPTIDE_CYCLASE", "LANTHIONINE_SYNTHETASE", "OXIDATIVE_BOND_SYNTHASE"]
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE"];
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
@@ -2657,6 +2658,8 @@ function findTailoringEnzymeStatus(orfFunction) {
 }
 
 function runAlola(regionIndex, recordIndex, details_data, recordData){
+    BGC = {};
+ reversed = false;
   RiPPStatus = 0;
     terpeneStatus = 0;
   rippPrecursor = "";
@@ -2715,6 +2718,12 @@ function runAlola(regionIndex, recordIndex, details_data, recordData){
 }
 
 function reverseBGC(regionIndex, recordIndex, details_data, recordData){
+    if (reversed == true){
+        runAlola(regionIndex,recordIndex,details_data, recordData)
+    }
+    else{
+    reversed = true;
+    BGC = {};
     RiPPStatus = 0;
     terpeneStatus = 0;
   rippPrecursor = "";
@@ -2722,26 +2731,28 @@ function reverseBGC(regionIndex, recordIndex, details_data, recordData){
   cyclization = "None";
   regionName = getRegionName(regionIndex, recordIndex);
   cluster_type = getClusterType(regionIndex);
-    document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${recordData[recordIndex].regions[regionIndex].type} BGC`;
+    document.getElementById("BGCHeading").innerHTML = `BGC explorer: ${regionName.toUpperCase()} - ${recordData[recordIndex].regions[regionIndex].type} BGC - reversed`;
     document.getElementById('model_gene_container').innerHTML = "";
   document.getElementById('module_container').innerHTML = "";
   document.getElementById('domain_container').innerHTML = "";
     document.getElementById('structure_container').innerHTML = "";
-  geneMatrix = {}
-  moduleMatrix = []
-  BGC = Object.keys(recordData[recordIndex].regions[regionIndex])
+    document.getElementById('protein_container').innerHTML = "";
+    document.getElementById('gene_container').innerHTML = "";
+  geneMatrix = {};
+  moduleMatrix = [];
+  BGC = JSON.parse(JSON.stringify(Object.keys(recordData[recordIndex].regions[regionIndex])
       .reduce(function (obj, k) {
           if (k == "start" || k == "end" || k == "orfs") obj[k] = recordData[
               recordIndex].regions[regionIndex][k];
           return obj;
-      }, {});
+      }, {})));
   for (const [key_1, value_1] of Object.entries(details_data)) {
       if (value_1.id == regionName) {
           for (let orf_index = 0; orf_index < value_1.orfs.length; orf_index++) {
               orf = value_1.orfs[orf_index]
               for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
                   if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
-                      BGC.orfs[BGC_orf_index]["domains"] = orf.domains
+                      BGC.orfs[BGC_orf_index]["domains"] = JSON.parse(JSON.stringify(orf.domains))
                   }
               }
           }
@@ -2751,14 +2762,14 @@ function reverseBGC(regionIndex, recordIndex, details_data, recordData){
               orf = value_1[regionName].orfs[orf_index]
               for (let BGC_orf_index = 0; BGC_orf_index < BGC.orfs.length; BGC_orf_index++) {
                   if (orf.id == BGC.orfs[BGC_orf_index].locus_tag) {
-                      BGC.orfs[BGC_orf_index]["domains"] = orf.domains
+                      BGC.orfs[BGC_orf_index]["domains"] = JSON.parse(JSON.stringify(orf.domains))
                   }
               }
           }
       }
   }
 
-  for (let orf_index = 0; orf_index < BGC.orfs.length; orf_index++) {
+for (let orf_index = 0; orf_index < BGC.orfs.length; orf_index++) {
     let new_start = BGC.end - BGC.orfs[orf_index].end + BGC.start
     let new_end = BGC.end - BGC.orfs[orf_index].start + BGC.start
     let new_strand = -(BGC.orfs[orf_index].strand)
@@ -2766,16 +2777,16 @@ function reverseBGC(regionIndex, recordIndex, details_data, recordData){
     BGC.orfs[orf_index].start = new_start;
     BGC.orfs[orf_index].end = new_end;
     BGC.orfs[orf_index].strand = new_strand;
+
 }
     // Reverse the BGC.orfs array
     let reversedOrfsArray = [];
-    // Iteriere rückwärts durch das ORF-Array im BGC-Objekt
     for (let i = BGC.orfs.length-1 ; i >= 0; i--) {
-        // Füge das aktuelle ORF-Objekt in das neue Array ein
         reversedOrfsArray.push({ ...BGC.orfs[i] });   
 }
-BGC.orfs = reversedOrfsArray;
 
+
+BGC.orfs = reversedOrfsArray;
 geneMatrix = createGeneMatrix(BGC, regionName)
 BGCForDisplay = displayGenes(BGC)
 addRiPPPrecursorOptions(geneMatrix)
@@ -2789,7 +2800,7 @@ if (recordData[recordIndex].regions[regionIndex].type.includes("terpene")){
 }
 fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 
-}
+}}
 
 function addModulesGeneMatrix(geneMatrix, regionIndex) {
     /**
