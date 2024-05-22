@@ -107,6 +107,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
     'ATP-GRASP' : {
       'OMEGA_AMIDE': tailoringSites['OMEGA_AMIDE'],
       'OMEGA_ESTER': tailoringSites['OMEGA_ESTER'],
+      'OMEGA_THIOESTER': tailoringSites['OMEGA_THIOESTER'],
 
     },
 
