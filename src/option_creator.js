@@ -103,8 +103,15 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'LANTHIONINE_SYNTHETASE': tailoringSites['LANTHIONINE_SYNTHETASE'],
       
     },
+    
+    'ATP-GRASP' : {
+      'OMEGA_AMIDE': tailoringSites['OMEGA_AMIDE'],
+      'OMEGA_ESTER': tailoringSites['OMEGA_ESTER'],
+
+    },
 
     'YCAO': {
+      'PEPTIDASE': tailoringSites['PEPTIDASE'],
       'THIOAMIDATION': tailoringSites['THIOAMIDATION'],
       'CYCLODEHYDRASE': tailoringSites['CYCLODEHYDRASE'],
       'MACROLACTAMIDINATION': tailoringSites['MACROLACTAMIDINATION'],
