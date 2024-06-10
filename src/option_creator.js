@@ -103,6 +103,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'LANTHIONINE_SYNTHETASE': tailoringSites['LANTHIONINE_SYNTHETASE'],
       
     },
+    'MACROLACTAM_SYNTHETASE': { 'MACROLACTAM_SYNTHETASE': tailoringSites['MACROLACTAM_SYNTHETASE'] },
     
     'ATP-GRASP' : {
       'OMEGA_AMIDE': tailoringSites['OMEGA_AMIDE'],
@@ -133,6 +134,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
     'ISOMERASE': { 'DOUBLE_BOND_ISOMERASE': tailoringSites['DOUBLE_BOND_ISOMERASE'], },
     'PRENYLTRANSFERASE': {
       'DIMETHYLALLYL': tailoringSites['PRENYLTRANSFERASE'],
+      '3_METHYL_1_BUTENYL': tailoringSites['PRENYLTRANSFERASE'],
       'GERANYL': tailoringSites['PRENYLTRANSFERASE'],
       'FARNESYL': tailoringSites['PRENYLTRANSFERASE'],
       'GERANYLGERANYL': tailoringSites['PRENYLTRANSFERASE'],
