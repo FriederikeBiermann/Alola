@@ -104,7 +104,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       
     },
     'MACROLACTAM_SYNTHETASE': { 'MACROLACTAM_SYNTHETASE': tailoringSites['MACROLACTAM_SYNTHETASE'] },
-    
+
     'ATP-GRASP' : {
       'OMEGA_AMIDE': tailoringSites['OMEGA_AMIDE'],
       'OMEGA_ESTER': tailoringSites['OMEGA_ESTER'],
@@ -142,7 +142,8 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'PHYTOENE': tailoringSites['PRENYLTRANSFERASE']
     },
     'ACETYLTRANSFERASE': { 'ACETYLTRANSFERASE': tailoringSites['ACETYLTRANSFERASE'] },
-    'ACYLTRANSFERASE': { 'ACYLTRANSFERASE': tailoringSites['ACYLTRANSFERASE'] },
+    'ACYLTRANSFERASE': { 
+      'ACYL': tailoringSites['ACYLTRANSFERASE'] },
     'AMINOTRANSFERASE': { 'AMINOTRANSFERASE': tailoringSites['AMINOTRANSFERASE'] },
     'OXIDASE': { 'DEHYDROGENASE': tailoringSites['DEHYDROGENASE'] },
     'ALCOHOLE_DEHYDROGENASE': { 'ALCOHOLE_DEHYDROGENASE': tailoringSites['ALCOHOLE_DEHYDROGENASE'] },
