@@ -1474,8 +1474,8 @@ function findTailoringReactions(geneMatrix) {
             continue }
         for (var [firstparameter, atoms] of Object.entries(geneMatrix[geneIndex].selected_option)){
             let enzymeReactionArray;
-            let substrate
-            let enzymeNameReaction
+            let substrate = "None";
+            let enzymeNameReaction;
             if (tailoringEnzymesWithSubstrate.includes(enzymeType)){
                 substrate = firstparameter
                 enzymeNameReaction = enzymeType
@@ -1507,7 +1507,7 @@ function findTailoringReactions(geneMatrix) {
 
             else {
                 if (atoms.length > 0) {
-                    tailoringArray.push([geneMatrix[geneIndex].id, enzymeNameReaction, atoms]);
+                    tailoringArray.push([geneMatrix[geneIndex].id, enzymeNameReaction, atoms, substrate]);
                 }
            }
         }
