@@ -5,6 +5,7 @@ from starlette.middleware import Middleware
 from typing import List, Optional
 
 import traceback
+import logging
 import json
 
 from pikachu.chem.structure import Structure
@@ -36,6 +37,13 @@ middleware = [Middleware(CORSMiddleware, allow_origins=origins)]
 app = FastAPI(middleware=middleware)
 app.mount("/static", StaticFiles(directory="app"), name="static")
 
+logging.basicConfig(level=logging.INFO, filemode="w", format="%(asctime)s - %(levelname)s - %(message)s")
+
+logging.debug("debug")
+logging.info("info")
+logging.warning("warning")
+logging.error("error")
+logging.critical("critical")
 
 def get_drawings(cluster):
     drawings, widths = cluster.get_spaghettis()
@@ -134,13 +142,15 @@ async def alola_nrps_pks(antismash_input: str):
 
         # Extract and convert tailoring enzymes
         tailoring_reactions = [
-            TailoringRepresentation(*enzyme) for enzyme in input_data["tailoring"]
-        ]
+            TailoringRepresentation(*enzyme) for enzyme in input_data["tailoring"]]
 
         # Format cluster data and handle fake booleans
         raichu_input = format_cluster(
-            input_data["clusterRepresentation"], tailoring_reactions
-        )
+            input_data["clusterRepresentation"], tailoring_reactions)
+
+        logging.info(f"The input_data is: {input_data}")
+        logging.info(f"The tailoring_reactions are: {tailoring_reactions}")
+        logging.info(f"The raichu_input is: {raichu_input}")
 
         # Initialize and compute cluster structures
         cluster = build_cluster(raichu_input, strict=False)
@@ -151,13 +161,11 @@ async def alola_nrps_pks(antismash_input: str):
         tailored_product = cluster.chain_intermediate.deepcopy()
         cyclization = input_data["cyclization"]
         final_product = perform_cyclization_nrps_pks(
-            cyclization, tailored_product, cluster
-        )
+            cyclization, tailored_product, cluster)
 
         # Prepare data for response
         response_data = prepare_response_data_nrps_pks(
-            cluster, final_product, tailored_product
-        )
+            cluster, final_product, tailored_product)
 
         return response_data
 
@@ -213,7 +221,7 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
     structure_for_tailoring.draw_structure()
 
     svg_structure_for_tailoring = process_svg(
-        structure_for_tailoring.save_svg_string(), "tailoring_drawing"
+        structure_for_tailoring.get_svg_string_matplotlib(), "tailoring_drawing"
     )
     svg_final = process_svg(svg_string_from_structure(final_product), "final_drawing")
     return {
@@ -249,8 +257,9 @@ def log_error_nrps_pks(exception):
     """
     tb = traceback.extract_tb(exception.__traceback__)
     exc_type = type(exception).__name__
-    filename, lineno, _, _ = tb[-1]
-    print(f"{exc_type} occurred at {filename}:{lineno}")
+    filename, lineno, func_name, line_code = tb[-1]
+    logging.error(f"{exc_type} occurred in {func_name} at {filename}:{lineno} and line_code: {line_code}")
+    #print(f"{exc_type} occurred at {filename}:{lineno}")
     return {
         "Error": "The Cluster is not biosynthetically correct, try removing domains to include only complete modules or changing the order of proteins."
     }
@@ -263,11 +272,17 @@ async def alola_ripp(antismash_input: str):
     :param antismash_input: JSON string containing antismash data.
     :return: Dictionary containing SVG representations, SMILES strings, and other molecular data.
     """
-    # try:
-    assert antismash_input, "Input data is required."
 
-    input_data = json.loads(antismash_input)
-    tailoring_reactions, macrocyclisations = parse_ripp_input_data(input_data)
+    try:
+        assert antismash_input, "Input data is required."
+
+        input_data = json.loads(antismash_input)
+        tailoring_reactions, macrocyclisations = parse_ripp_input_data(input_data)
+        logging.info(f"The input_data is: {input_data}")
+        logging.info(f"The tailoring_reactions are: {tailoring_reactions}")
+        logging.info(f"The macrocyclisations are: {macrocyclisations}")
+
+
 
     ripp_cluster = create_ripp_cluster_from_data(
         input_data, macrocyclisations, tailoring_reactions
@@ -314,9 +329,9 @@ async def alola_ripp(antismash_input: str):
     }
 
 
-# except Exception as e:
-#     return log_error_ripps(e)
-
+    except Exception as e:
+        return log_error_ripps(e)
+        #logging.exception("ERROR")
 
 def log_error_ripps(exception):
     """
@@ -326,8 +341,9 @@ def log_error_ripps(exception):
     """
     tb = traceback.extract_tb(exception.__traceback__)
     exc_type = type(exception).__name__
-    filename, lineno, _, _ = tb[-1]
-    print(f"{exc_type} occurred at {filename}:{lineno}")
+    filename, lineno, func_name, line_code = tb[-1]
+    logging.error(f"{exc_type} occurred in {func_name} at {filename}:{lineno} and line_code: {line_code}")
+    #print(f"{exc_type} occurred at {filename}:{lineno}")
     return {
         "Error": "The Cluster is not biosynthetically correct, try reloading and incoperating other tailoring reactions."
     }
@@ -425,6 +441,12 @@ async def alola_terpene(antismash_input: str):
         tailoringReactions = []
         macrocyclisations = []
         precursor = antismash_input_transformed["substrate"]
+
+        logging.info(f"The input_data is: {antismash_input_transformed}")
+        
+        logging.info(f"The selected precursor is: {precursor}")
+
+
         gene_name_terpene_synthase = antismash_input_transformed["gene_name_precursor"]
         terpene_cyclase_type = antismash_input_transformed["terpene_cyclase_type"]
         if antismash_input_transformed["cyclization"] != "None":
@@ -433,9 +455,12 @@ async def alola_terpene(antismash_input: str):
                     macrocyclisations.append(
                         MacrocyclizationRepresentation(cyclization[0], cyclization[1])
                     )
-        for enzyme in antismash_input_transformed["tailoring"]:
-            if len(enzyme) > 0:
-                tailoringReactions.append(TailoringRepresentation(*enzyme))
+        tailoring_reactions = [
+            TailoringRepresentation(*enzyme) for enzyme in antismash_input_transformed["tailoring"]]
+        logging.info(f"The tailoring_reactions are: {tailoringReactions}")
+        logging.info(f"Amount of tailoring reactions={len(tailoringReactions)}")
+        if len(tailoringReactions) == 0:
+            tailoringReactions=None
         terpene_cluster = TerpeneCluster(
             gene_name_terpene_synthase,
             precursor,
@@ -470,6 +495,7 @@ async def alola_terpene(antismash_input: str):
             ]
         )
         if len(tailoringReactions) > 0:
+            logging.info("Performing tailoring")
             terpene_cluster.do_tailoring()
         svg_final_product_raw = terpene_cluster.draw_product(as_string=True)
         svg_tailoring = (
@@ -500,6 +526,6 @@ async def alola_terpene(antismash_input: str):
     except Exception as e:
         tb = traceback.extract_tb(e.__traceback__)
         exc_type = type(e).__name__
-        filename, lineno, _, _ = tb[-1]
-        print(f"{exc_type} occurred at {filename}:{lineno}")
+        filename, lineno, func_name, line_code = tb[-1]
+        logging.error(f"{exc_type} occurred in {func_name} at {filename}:{lineno} and line_code: {line_code}")
         return {"Error": "An error occured, try selecting a different precursor."}

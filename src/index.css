@@ -484,8 +484,8 @@ svg text {
 .dropbtn-tailoring {
   position: relative;
   background-color: transparent;
-  font-size: 1.6vh;
-  text-transform: capitalize;
+  font-size: 1.4vh;
+  text-transform: none;
   border: none;
 }
 
@@ -536,7 +536,7 @@ svg text {
   text-decoration: none;
   display: block;
   width: 100%;
-  text-transform: capitalize;
+  text-transform: lowercase;
   text-align: start;
 }
 
