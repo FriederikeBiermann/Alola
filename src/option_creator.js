@@ -159,11 +159,12 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
     'DEHYDRATASE': { 'DEHYDRATASE': tailoringSites['DEHYDRATASE'] },
     'DECARBOXYLASE': { 'DECARBOXYLASE': tailoringSites['DECARBOXYLASE'] },
     'MONOAMINE_OXIDASE': { 'MONOAMINE_OXIDASE': tailoringSites['MONOAMINE_OXIDASE'] },
-    'HALOGENASE': { 'Fl': tailoringSites['HALOGENASE'],
+    'HALOGENASE': { 'F': tailoringSites['HALOGENASE'],
       'Cl': tailoringSites['HALOGENASE'],
       'I': tailoringSites['HALOGENASE'],
       'Br': tailoringSites['HALOGENASE'],
    },
+    'HYDROLASE': { 'HYDROLASE': tailoringSites['HYDROLASE'] },
     'PEPTIDASE': { 'PEPTIDASE': tailoringSites['PEPTIDASE'] },
     'PROTEASE': { 'PROTEASE': tailoringSites['PROTEASE'] }}
 
