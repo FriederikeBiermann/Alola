@@ -104,6 +104,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       
     },
     'MACROLACTAM_SYNTHETASE': { 'MACROLACTAM_SYNTHETASE': tailoringSites['MACROLACTAM_SYNTHETASE'] },
+    'THIOPEPTIDE_CYCLASE': { 'THIOPEPTIDE_CYCLASE': tailoringSites['THIOPEPTIDE_CYCLASE'] },
 
     'ATP-GRASP' : {
       'OMEGA_AMIDE': tailoringSites['OMEGA_AMIDE'],
