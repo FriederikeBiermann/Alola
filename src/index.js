@@ -1270,7 +1270,6 @@ function fetchFromRaichuRiPP() {
 }
 
 let historyStack = [];
-let historyStack2 = [];
 async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
  * Transforms and transfers all needed data through the api to the backend (raichu) and handles the output.
@@ -2813,6 +2812,41 @@ if (recordData[recordIndex].regions[regionIndex].type.includes("terpene")){
 fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
 
 }}
+
+let historyStack2 = [];
+function unDoButton() {
+    if (historyStack.length > 1) {
+        // Move the current state to the redo stack
+        let newState = historyStack.pop();
+        historyStack2.push(newState);
+        
+        // Get the second to last state
+        let lastState = historyStack[historyStack.length - 1];
+
+        // Destructure the last state to get the original parameters
+        const { details_data, regionName, geneMatrix, cluster_type, BGC } = lastState;
+        
+        // Re-run fetchFromRaichu with the second to last state to update the UI
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+        //historyStack2.push(historyStack.pop());
+    } else {
+        console.log("No more actions to undo"); // Message if there's nothing to undo
+    }
+} 
+function reDoButton() {
+    if (historyStack2.length >= 1) {
+        // Get the last undone state
+        const redoState = historyStack2.pop();
+
+        // Destructure the redo state to get the original parameters
+        const { details_data, regionName, geneMatrix, cluster_type, BGC } = redoState;
+
+        // Re-run fetchFromRaichu with the redo state to update the UI
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+    } else {
+        console.log("No more actions to redo"); // Message if there's nothing to redo
+    }
+}
 
 function addModulesGeneMatrix(geneMatrix, regionIndex) {
     /**
