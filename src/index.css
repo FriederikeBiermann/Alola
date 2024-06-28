@@ -180,6 +180,22 @@ label {
   text-decoration: none;
   font-size: 0.7vw;
 }
+.redoUndo_button {
+  position: relative;
+  float: left;
+  margin: 0.2vh;
+  color: #2B2B2B;
+  text-align: center;
+  padding: 0.1vh 0.1vh;
+  text-decoration: none;
+  font-size: 0.7vw;
+
+}
+.redoUndo_button:hover {
+  background-color: #E11839;
+  color: black;
+
+}
 
 .regionButton {
   margin: 0.3vh;

@@ -27,8 +27,15 @@
   <!-- <script type="text/javascript" src="./regions-test.js"></script> -->
 
   <!-- Main content of the page -->
-  <div id="menu_bar">
+<div id="menu_bar">
     <!-- Rounded switch -->
+<button type="button" class="redoUndo_button tooltip" data-tooltip="Click to revert your last action." onclick="unDoButton()">
+  <strong>Undo</strong>
+</button>
+  
+<button type="button" class="redoUndo_button tooltip" data-tooltip="Click to reapply an action you have undone." onclick="reDoButton()">
+  <strong>Redo</strong>
+</button>
 
 <!-- Buttons for various actions with tooltips -->
 <button type="button" class="start_button tooltip" id="openAlolaManual" data-tooltip="Click to access the Alola manual" >
@@ -52,7 +59,7 @@
   <strong>Create empty BGC</strong>
 </button>
 
-<button type="button" class="start_button tooltip" id="load_example_button" data-tooltip="Loads an example antiSMASH output from Saccharopolyspora erythraea NRRL 2338." onclick="loadExampleFile()">
+<button type="button" class="start_button tooltip" id="load_example_button" data-tooltip="Loads an example antiSMASH output from Streptomyces physcomitrii strain LD120." onclick="loadExampleFile()">
   <strong>Load Example</strong>
 </button>
 
@@ -77,7 +84,7 @@
   data-tooltip="Toggle to enable real-time calculations. If not activated, spaghetti diagrams and structures are only fetched when pressing the 'Refresh Structures' button. This might be useful when implementing a lot of changes.">
   Real time calculation
 </div>
-  </div>
+</div>
 
 <!-- Tooltip for dropping 'region.js' files -->
 <div id="regionsBar" class="tooltip"
