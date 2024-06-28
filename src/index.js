@@ -1268,6 +1268,9 @@ function fetchFromRaichuRiPP() {
 
         })
 }
+
+let historyStack = [];
+let historyStack2 = [];
 async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
  * Transforms and transfers all needed data through the api to the backend (raichu) and handles the output.
@@ -1279,6 +1282,14 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
  * @param {string} BGC - the BGC that is being worked on
  * @returns {Promise<void>}
  */
+    historyStack.push(JSON.parse(JSON.stringify({
+        details_data: details_data,
+        regionName: regionName,
+        geneMatrix: geneMatrix,
+        cluster_type: cluster_type,
+        BGC: BGC
+    })));
+
         if (RiPPStatus == 1) {
             fetchFromRaichuRiPP();
         }
@@ -1385,6 +1396,7 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
     module_container.innerHTML = "<strong>" + "This type of BGC is not implemented yet."+ "</strong>";
     }}
 
+   
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
     /**
     * Change color of domain.

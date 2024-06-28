@@ -150,7 +150,7 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'OLEIC_ACID' : tailoringSites['ACYLTRANSFERASE'],
       'RICINOLEIC_ACID' : tailoringSites['ACYLTRANSFERASE'],
       'LINOLEIC_ACID' : tailoringSites['ACYLTRANSFERASE'],
-      'LINOLEnIC_ACID' : tailoringSites['ACYLTRANSFERASE'],
+      'LINOLENIC_ACID' : tailoringSites['ACYLTRANSFERASE'],
       'BEHENIC_ACID' : tailoringSites['ACYLTRANSFERASE'],
     },
     'AMINOTRANSFERASE': { 'AMINOTRANSFERASE': tailoringSites['AMINOTRANSFERASE'] },
@@ -164,6 +164,8 @@ OptionCreator.createOptionsTailoringEnzymes = (function (geneMatrix, tailoringSi
       'I': tailoringSites['HALOGENASE'],
       'Br': tailoringSites['HALOGENASE'],
    },
+    'METHYL_MUTASE': {'METHYL_MUTASE': tailoringSites['METHYL_MUTASE']},
+    'REDUCTIVE_LYASE' : {'REDUCTIVE_LYASE': tailoringSites['REDUCTIVE_LYASE']}, 
     'HYDROLASE': { 'HYDROLASE': tailoringSites['HYDROLASE'] },
     'PEPTIDASE': { 'PEPTIDASE': tailoringSites['PEPTIDASE'] },
     'PROTEASE': { 'PROTEASE': tailoringSites['PROTEASE'] }}
