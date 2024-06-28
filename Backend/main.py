@@ -208,7 +208,7 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
     :param tailored_product: The tailored product from the cluster.
     :return: A dictionary containing the response data.
     """
-    smiles = structure_to_smiles(final_product, kekule=False)
+    
     atoms_for_cyclisation = [
         str(atom)
         for atom in find_all_o_n_atoms_for_cyclization(tailored_product)
@@ -219,11 +219,14 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
         tailored_product, dont_show=True, add_url=True, make_linear=False
     )
     structure_for_tailoring.draw_structure()
-
     svg_structure_for_tailoring = process_svg(
         structure_for_tailoring.get_svg_string_matplotlib(), "tailoring_drawing"
     )
     svg_final = process_svg(svg_string_from_structure(final_product), "final_drawing")
+    try:
+        smiles = structure_to_smiles(final_product, kekule=False)
+    except:
+        smiles = "not_able_to_compute_smiles"
     return {
         "svg": svg_final,
         "hangingSvg": get_drawings(cluster),
