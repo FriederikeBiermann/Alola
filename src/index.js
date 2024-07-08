@@ -1386,6 +1386,7 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
             drawing = document.getElementById("final_drawing")
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
+            molecularMass(raichu_output.mass)
             smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})}
     else{
     let module_container = document.getElementById("module_container");
@@ -1837,11 +1838,10 @@ document.getElementById('openAlolaManual').addEventListener('click', function() 
 });
 
 function molecularMass(mass) {
-    document.getElementById("molecular_mass_value").innerHTML = `${mass} m/z`;
+    let reoundedmass = mass.toFixed(4);
+    document.getElementById("molecular_mass_value").innerHTML = `${reoundedmass} Da`;
 }
-       
-
-    
+        
 
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";

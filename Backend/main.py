@@ -223,6 +223,8 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
         structure_for_tailoring.get_svg_string_matplotlib(), "tailoring_drawing"
     )
     svg_final = process_svg(svg_string_from_structure(final_product), "final_drawing")
+    mass = final_product.get_mass()
+    #pathway_svg = cluster.draw_pathway()
     try:
         smiles = structure_to_smiles(final_product, kekule=False)
     except:
@@ -231,6 +233,8 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
         "svg": svg_final,
         "hangingSvg": get_drawings(cluster),
         "smiles": smiles,
+        "mass": mass,
+        #"pathway_svg": pathway_svg,
         "atomsForCyclisation": str(atoms_for_cyclisation),
         "tailoringSites": str(get_tailoring_sites_atom_names(tailored_product)),
         "completeClusterSvg": cluster.draw_cluster(),
@@ -326,10 +330,12 @@ async def alola_ripp(antismash_input: str):
             input_data["rippPrecursor"]
 
         )
+        mass = final_product.get_mass()
 
         return {
             "svg": cleaved_ripp_svg,
             "smiles": smiles,
+            "mass": mass,
             "atomsForCyclisation": atoms_for_cyclisation,
             "tailoringSites": tailoring_sites,
             "rawPeptideChain": peptide_svg,
@@ -521,6 +527,7 @@ async def alola_terpene(antismash_input: str):
             .replace('"', "'")
             .replace("<svg", " <svg id='final_drawing'")
         )
+        mass = final_product.get_mass()
         smiles = structure_to_smiles(terpene_cluster.chain_intermediate, kekule=False)
         tailoring_sites = get_tailoring_sites_atom_names(
             terpene_cluster.chain_intermediate
@@ -528,6 +535,7 @@ async def alola_terpene(antismash_input: str):
         return {
             "svg": svg_final_product,
             "smiles": smiles,
+            "mass": mass,
             "atomsForCyclisation": atoms_for_cyclisation,
             "tailoringSites": str(tailoring_sites),
             "precursor": precursor_svg,
