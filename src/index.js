@@ -1282,10 +1282,7 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
  * @returns {Promise<void>}
  */
     historyStack.push(JSON.parse(JSON.stringify({
-        details_data: details_data,
-        regionName: regionName,
         geneMatrix: geneMatrix,
-        cluster_type: cluster_type,
         BGC: BGC
     })));
 
@@ -1838,6 +1835,12 @@ function showImpressum() {
 document.getElementById('openAlolaManual').addEventListener('click', function() {
     window.location.href = ('./Alola_Manual_new.html');
 });
+
+function molecularMass(mass) {
+    document.getElementById("molecular_mass_value").innerHTML = `${mass} m/z`;
+}
+       
+
     
 
 function openNRPSForm() {
@@ -2824,10 +2827,14 @@ function unDoButton() {
         let lastState = historyStack[historyStack.length - 1];
 
         // Destructure the last state to get the original parameters
-        const { details_data, regionName, geneMatrix, cluster_type, BGC } = lastState;
+        ({ geneMatrix, BGC } = lastState);
         
         // Re-run fetchFromRaichu with the second to last state to update the UI
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+        if (document.getElementById("real-time-button").checked) {
+            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+            historyStack.pop();
+        }
+        
         //historyStack2.push(historyStack.pop());
     } else {
         console.log("No more actions to undo"); // Message if there's nothing to undo
@@ -2839,7 +2846,7 @@ function reDoButton() {
         const redoState = historyStack2.pop();
 
         // Destructure the redo state to get the original parameters
-        const { details_data, regionName, geneMatrix, cluster_type, BGC } = redoState;
+        ({ geneMatrix, BGC } = redoState);
 
         // Re-run fetchFromRaichu with the redo state to update the UI
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);

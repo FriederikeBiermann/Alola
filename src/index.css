@@ -197,6 +197,17 @@ label {
 
 }
 
+.molecular_mass {
+  position: relative;
+  text-decoration: none;
+  font-size: 0.8vw;
+}
+
+.molecular_mass .mass_value {
+  font-size: 0.8vw; 
+  font-weight: normal; 
+}
+
 .regionButton {
   margin: 0.3vh;
   float: right;
