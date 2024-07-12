@@ -55,7 +55,7 @@ if (domain.abbreviation=="AT") {
 
 //add specifities for Trans-AT-KS
 
-if (domain.abbreviation == "KS" && domain.predictions.length != 0) {
+if (domain.abbreviation == "KS" && domain.predictions.length != 0) {  
   domain.domainOptions = Object.keys(TRANS_AT_KS_SUBTYPES);
   for (const [key,value] of Object.entries(TRANS_AT_KS_SUBTYPES))
   {
