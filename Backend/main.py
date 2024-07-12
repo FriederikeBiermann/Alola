@@ -224,7 +224,17 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
     )
     svg_final = process_svg(svg_string_from_structure(final_product), "final_drawing")
     mass = final_product.get_mass()
-    #pathway_svg = cluster.draw_pathway()
+    reactions = []
+    if cluster.tailoring_representations:
+        reactions.append("tailoring")
+    if cluster.macrocyclisation_representations:
+        reactions.append("cyclisation")
+    if cluster.cleaved_intermediates:
+        reactions.append("cleavage")
+    if cluster.tailoring_representations:
+        pathway_svg = cluster.draw_pathway(order=reactions, as_string=True)
+    else:
+        pathway_svg = "not_able_to_draw_pathway"
     try:
         smiles = structure_to_smiles(final_product, kekule=False)
     except:
@@ -234,7 +244,7 @@ def prepare_response_data_nrps_pks(cluster, final_product, tailored_product):
         "hangingSvg": get_drawings(cluster),
         "smiles": smiles,
         "mass": mass,
-        #"pathway_svg": pathway_svg,
+        "pathway_svg": pathway_svg,
         "atomsForCyclisation": str(atoms_for_cyclisation),
         "tailoringSites": str(get_tailoring_sites_atom_names(tailored_product)),
         "completeClusterSvg": cluster.draw_cluster(),
@@ -331,11 +341,23 @@ async def alola_ripp(antismash_input: str):
 
         )
         mass = final_product.get_mass()
+        reactions = []
+        if cluster.tailoring_representations:
+            reactions.append("tailoring")
+        if cluster.macrocyclisation_representations:
+            reactions.append("cyclisation")
+        if cluster.cleaved_intermediates:
+            reactions.append("cleavage")
+        if cluster.tailoring_representations:
+            pathway_svg = cluster.draw_pathway(order=reactions, as_string=True)
+        else:
+            pathway_svg = "not_able_to_draw_pathway"
 
         return {
             "svg": cleaved_ripp_svg,
             "smiles": smiles,
             "mass": mass,
+            "pathway_svg": pathway_svg,
             "atomsForCyclisation": atoms_for_cyclisation,
             "tailoringSites": tailoring_sites,
             "rawPeptideChain": peptide_svg,
@@ -528,6 +550,18 @@ async def alola_terpene(antismash_input: str):
             .replace("<svg", " <svg id='final_drawing'")
         )
         mass = final_product.get_mass()
+        reactions = []
+        if cluster.tailoring_representations:
+            reactions.append("tailoring")
+        if cluster.macrocyclisation_representations:
+            reactions.append("cyclisation")
+        if cluster.cleaved_intermediates:
+            reactions.append("cleavage")
+        if cluster.tailoring_representations:
+            pathway_svg = cluster.draw_pathway(order=reactions, as_string=True)
+        else:
+            pathway_svg = "not_able_to_draw_pathway"
+        
         smiles = structure_to_smiles(terpene_cluster.chain_intermediate, kekule=False)
         tailoring_sites = get_tailoring_sites_atom_names(
             terpene_cluster.chain_intermediate
@@ -536,6 +570,7 @@ async def alola_terpene(antismash_input: str):
             "svg": svg_final_product,
             "smiles": smiles,
             "mass": mass,
+            "pathway_svg": pathway_svg,
             "atomsForCyclisation": atoms_for_cyclisation,
             "tailoringSites": str(tailoring_sites),
             "precursor": precursor_svg,
