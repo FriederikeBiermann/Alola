@@ -1376,6 +1376,14 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
                 .href = url_complete_cluster
             document.getElementById("save_complete_cluster_svg")
                 .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+
+            var url_pathway = "data:image/svg+xml;charset=utf-8," + 
+                encodeURIComponent(raichu_output.pathway_svg);
+            document.getElementById("save_enzymatic_pathway_svg")
+                .href = url_pathway 
+            document.getElementById("save_enzymatic_pathway_svg")
+                .setAttribute("download", raichu_output.smiles + "_pathway.svg");
+
             var url_svg = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.svg);
             document.getElementById("save_svg")
@@ -1387,6 +1395,7 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
             molecularMass(raichu_output.mass)
+
             smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})}
     else{
     let module_container = document.getElementById("module_container");
@@ -1841,7 +1850,8 @@ function molecularMass(mass) {
     let reoundedmass = mass.toFixed(4);
     document.getElementById("molecular_mass_value").innerHTML = `${reoundedmass} Da`;
 }
-        
+
+      
 
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";
