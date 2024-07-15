@@ -1412,7 +1412,9 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
     else{
     let module_container = document.getElementById("module_container");
     module_container.innerHTML = "<strong>" + "This type of BGC is not implemented yet."+ "</strong>";
-    }}
+    }
+    updateButtonStates();
+}
 
    
 function updateSelectedOptionsAfterTailoring(optionArray, geneMatrix, index) {
@@ -2856,6 +2858,8 @@ function unDoButton() {
             fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
             historyStack.pop();
         }
+        // Update button states
+        updateButtonStates();
         
         //historyStack2.push(historyStack.pop());
     } else {
@@ -2872,8 +2876,28 @@ function reDoButton() {
 
         // Re-run fetchFromRaichu with the redo state to update the UI
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+
+        // Update button states
+        updateButtonStates();
     } else {
         console.log("No more actions to redo"); // Message if there's nothing to redo
+    }
+}
+
+function updateButtonStates() {
+    const undoButton = document.querySelector('.redoUndo_button[onclick="unDoButton()"]');
+    const redoButton = document.querySelector('.redoUndo_button[onclick="reDoButton()"]');
+    
+    if (historyStack.length <= 1) {
+        undoButton.classList.add('disabled');
+    } else {
+        undoButton.classList.remove('disabled');
+    }
+    
+    if (historyStack2.length === 0) {
+        redoButton.classList.add('disabled');
+    } else {
+        redoButton.classList.remove('disabled');
     }
 }
 

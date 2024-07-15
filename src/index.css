@@ -195,10 +195,15 @@ label {
   font-size: 0.7vw;
 
 }
-.redoUndo_button:hover {
-  background-color: #E11839;
+.redoUndo_button:hover:not(.disabled) {
+  background-color: #E11839; /* Hover color for enabled state */
   color: black;
+}
 
+.redoUndo_button.disabled {
+  background-color: white; /* No background color change for disabled state */
+  color: #2B2B2B; /* Keep the text color same as the default */
+  cursor: not-allowed; /* Change cursor to indicate the button is not clickable */
 }
 
 .molecular_mass {
