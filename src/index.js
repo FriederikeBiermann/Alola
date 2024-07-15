@@ -1141,6 +1141,12 @@ function fetchFromRaichuTerpene(){
                 .href = url
             document.getElementById("save_complete_cluster_svg")
                 .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+            var url_pathway = "data:image/svg+xml;charset=utf-8," + 
+                encodeURIComponent(raichu_output.pathway_svg);
+            document.getElementById("save_enzymatic_pathway_svg")
+                .href = url_pathway 
+            document.getElementById("save_enzymatic_pathway_svg")
+                .setAttribute("download", raichu_output.smiles + "_pathway.svg");
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.svg);
             document.getElementById("save_svg")
@@ -1227,6 +1233,12 @@ function fetchFromRaichuRiPP() {
                 .href = url
             document.getElementById("save_complete_cluster_svg")
                 .setAttribute("download", raichu_output.smiles + "_cluster.svg");
+            var url_pathway = "data:image/svg+xml;charset=utf-8," + 
+                encodeURIComponent(raichu_output.pathway_svg);
+            document.getElementById("save_enzymatic_pathway_svg")
+                .href = url_pathway 
+            document.getElementById("save_enzymatic_pathway_svg")
+                .setAttribute("download", raichu_output.smiles + "_pathway.svg");
             var url = "data:image/svg+xml;charset=utf-8," +
                 encodeURIComponent(raichu_output.svg);
             document.getElementById("save_svg")
@@ -3093,7 +3105,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                 type = "DH"
                             }
 
-                                if (domain.abbreviation == "A") {
+                                if (domain.abbreviation == "A" || domain.abbreviation == "CAL") {
                                     if (domain.hasOwnProperty("predictions")) {
                                         if (domain.predictions.length != 0) {
                                             if (domain.predictions[0][1] !=
@@ -3102,18 +3114,18 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                                     domain.predictions[
                                                         0][1].toLowerCase()]
                                                 if (substrate === undefined) {
-                                                            substrate = "glycine"}
+                                                            substrate = "**Unknown**"}
                                             }
                                             else {
-                                                substrate = "glycine"
+                                                substrate = "**Unknown**"
                                             }
                                         }
                                         else {
-                                            substrate = "glycine"
+                                            substrate = "**Unknown**"
                                         }
                                     }
                                     else {
-                                        substrate = "glycine"
+                                        substrate = "**Unknown**"
                                     }
                                     geneMatrix[geneIndex].domains[domainIndex].substrate = substrate
                                     // overrule by user selected option
@@ -3122,16 +3134,18 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                         substrate = geneMatrix[geneIndex].domains[domainIndex].selected_option
                                     }
                                 }
-                                if (["A", "C", "PCP", "E"].includes(domain.abbreviation)){
+                                if (["A", "C", "PCP", "E", "CAL"].includes(domain.abbreviation)){
                                     moduleType = "NRPS";
                                     moduleSubtype = "None";
                                 }
                                 if (["AT", "KS", "ACP", "KR"].includes(domain.abbreviation)){
                                     moduleType = "PKS";
-                                    if (moduleSubtype == "None"){
+                                    if (moduleSubtype == "None" ){
                                     moduleSubtype = "PKS_TRANS";
                                     }
                                 }
+
+
                                 // select right kind of acp/pcp depending on module type
                                 if ((domain.type.includes("ACP") || domain.type
                                     .includes("PP") || domain.type.includes("PCP")) && !(geneMatrix[geneIndex].domains[domainIndex]
@@ -3164,7 +3178,7 @@ function extractAntismashPredictionsFromRegion(details_data, regionIndex,
                                         substrate = "MALONYL_COA";
                                     }
                                     if (substrate === "" && moduleType == "NRPS") {
-                                        substrate = "glycine";
+                                        substrate = "**Unknown**";
                                     }
                                     // remove falsely assigned domains for prediciton
                                     let domainArrayFiltered =  []
