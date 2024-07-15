@@ -2889,14 +2889,18 @@ function updateButtonStates() {
     const redoButton = document.querySelector('.redoUndo_button[onclick="reDoButton()"]');
     
     if (historyStack.length <= 1) {
+        undoButton.setAttribute('data-tooltip', 'No job to revert!');
         undoButton.classList.add('disabled');
     } else {
+        undoButton.setAttribute('data-tooltip', 'Click to revert your last action.');
         undoButton.classList.remove('disabled');
     }
     
     if (historyStack2.length === 0) {
+        redoButton.setAttribute('data-tooltip', 'No job to reapply!');
         redoButton.classList.add('disabled');
     } else {
+        redoButton.setAttribute('data-tooltip', 'Click to reapply an action you have undone.');
         redoButton.classList.remove('disabled');
     }
 }
