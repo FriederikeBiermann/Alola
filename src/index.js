@@ -41,7 +41,7 @@ let nameToStructure = {
     
 };
 let aminoacids= {
-    "ala": 'alanine',
+    "ala": "alanine",
     "arg": "arginine",
     "asn": "asparagine",
     "asp": "aspartic acid",
@@ -65,12 +65,12 @@ let aminoacids= {
     "4ppro": "**Unknown**",
     "aad": "2-aminoadipicacid",
     'abu': "2-aminobutyricacid",
-    'aeo': '2-amino-9,10-epoxy-8-oxodecanoidacid',
-    'ala-b': 'beta-alanine',
-    'ala-d': 'd-alanine',
+    'aeo': "2-amino-9,10-epoxy-8-oxodecanoidacid",
+    'ala-b': "beta-alanine",
+    'ala-d': "d-alanine",
     'allo-thr': "allo-threonine",
-    'b-ala': 'beta-alanine',
-    'beta-ala': 'beta-alanine',
+    'b-ala': "beta-alanine",
+    'beta-ala': "beta-alanine",
     'bmt': "4-butenyl-4-methylthreonine",
     'cap': "capreomycidine",
     'bht': "**Unknown**",
@@ -112,7 +112,7 @@ let aminoacids= {
     '2-oxo-isovaleric-acid': "alpha-ketoisovalericacid",
     'aoda': "**Unknown**",
     'x': "**Unknown**",
-    'foh-orn': 'N5-formyl-N5-hydroxyornithine'
+    'foh-orn': "N5-formyl-N5-hydroxyornithine"
 };
 let items = document.querySelectorAll('.test-container .box');
 var dragSrcEl = null;
@@ -2108,8 +2108,8 @@ function addWildcard(geneMatrix) {
             "arginine",
             "histidine",
             "lysine",
-            "asparticacid",
-            "glutamicacid",
+            "aspartic acid",
+            "glutamic acid",
             "serine",
             "threonine",
             "asparagine",
