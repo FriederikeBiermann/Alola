@@ -29,11 +29,11 @@
   <!-- Main content of the page -->
 <div id="menu_bar">
     <!-- Rounded switch -->
-<button type="button" class="redoUndo_button tooltip" data-tooltip="Click to revert your last action." onclick="unDoButton()">
+<button type="button" id="undoButton" class="redoUndo_button tooltip" data-tooltip="Click to revert your last action." onclick="unDoButton()">
   <strong>Undo</strong>
 </button>
   
-<button type="button" class="redoUndo_button tooltip" data-tooltip="Click to reapply an action you have undone." onclick="reDoButton()">
+<button type="button" id="redoButton" class="redoUndo_button tooltip" data-tooltip="Click to reapply an action you have undone." onclick="reDoButton()">
   <strong>Redo</strong>
 </button>
 
