@@ -341,20 +341,14 @@ Proteiner.getproteinPoints = (function(orf, cluster, height, scale) {
         x: pts.x[0],
         y: pts.y[3]
     });
-    if (orf.strand < 0) {
-        points = Proteiner.flipHorizontal(points, scale(orf.start), (
-            scale(orf.start) + scale(orf.end - orf.start)));
-    }
+   
     return points;
 });
 Proteiner.getDomainPoints = (function(domain, orf, cluster, height, scale) {
     var points = [];
     var protein_pts = Proteiner.getproteinPoints(orf, cluster, height,
         scale);
-    if (orf.strand < 0) {
-        protein_pts = Proteiner.flipHorizontal(protein_pts, scale(orf.start),
-            (scale(orf.start) + scale(orf.end - orf.start)));
-    }
+   
     protein_pts.splice(3, 0, protein_pts[3]); // convert into bluntish-end protein
     var domain_x = {
         start: (scale(orf.start) + scale(domain.start * 3)),
@@ -389,10 +383,7 @@ Proteiner.getDomainPoints = (function(domain, orf, cluster, height, scale) {
         }
         points.push(new_point);
     }
-    if (orf.strand < 0) {
-        points = Proteiner.flipHorizontal(points, scale(orf.start), (
-            scale(orf.start) + scale(orf.end - orf.start)));
-    }
+   
     return points;
 });
 Proteiner.flipHorizontal = (function(points, leftBound, rightBound) {
