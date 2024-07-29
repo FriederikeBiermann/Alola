@@ -466,7 +466,6 @@ input:checked+.slider:before {
 .dropdown {
   position: relative;
   display: inline-block;
-
 }
 
 /* Dropdown Content (Hidden by Default) */
@@ -474,12 +473,15 @@ input:checked+.slider:before {
   opacity: 0.9;
   display: none;
   position: absolute;
-  background-color: white;
+  background-color: rgb(188, 185, 185);
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   min-width: 3.75vw;
   margin-top: -0.5vw;
-  
+  max-height: 200px; /* Feste Höhe */
+  overflow-y: auto; /* Vertikale Scrollbar hinzufügen, wenn der Inhalt zu groß ist */
+  scrollbar-width: auto; /* Scrollbar-Breite: auto, thin, oder none */
+  scrollbar-color: red #f1f1f1;
 }
 
 svg text {
@@ -639,10 +641,8 @@ svg text {
   background-color: #fff;
   color: black;
   font-size: 1.6vh;
-  overflow-y: auto;
-  max-height: auto;
+  max-height: 250px; /* Feste Höhe */
 
-  
 }
 
 .formContainer .btn {
