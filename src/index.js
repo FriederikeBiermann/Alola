@@ -1109,6 +1109,10 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
 
 function fetchFromRaichuTerpene(){
     updateTerpenes(geneMatrix, BGC)
+    historyStack.push(JSON.parse(JSON.stringify({
+        geneMatrix: geneMatrix,
+        BGC: BGC
+    })));
     let data_string = JSON.stringify({"gene_name_precursor": "terpene-cyclase", "substrate": terpeneSubstrate, "cyclization": splitArrayIntoPairs(cyclization),"tailoring": findTailoringReactions(geneMatrix), "terpene_cyclase_type": "Class_1"})
     let url = port +"api/alola/terpene?antismash_input=";
     let container = document.getElementById("structure_container")
@@ -1200,6 +1204,10 @@ function fetchFromRaichuTerpene(){
 }
 function fetchFromRaichuRiPP() {
     updateRiPPs(geneMatrix, BGC)
+    historyStack.push(JSON.parse(JSON.stringify({
+        geneMatrix: geneMatrix,
+        BGC: BGC
+    })));
     let data_string = JSON.stringify({"rippPrecursor":rippPrecursor, "cyclization": cyclization, "tailoring": findTailoringReactions(geneMatrix), "rippPrecursorName": rippPrecursorGene, "rippFullPrecursor": rippFullPrecursor})
     let url = port +"api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
