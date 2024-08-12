@@ -18,7 +18,8 @@ var OptionCreator = {
 };
 OptionCreator.createOptionsTerpeneCyclase = (function(atomsForCyclisation = none, tailoringSites = none){
   options = {"Cyclization": atomsForCyclisation,
-    "Isomerization": tailoringSites['DOUBLE_BOND_SHIFT']};
+    "DOUBLE_BOND_ISOMERASE": tailoringSites['DOUBLE_BOND_ISOMERASE'],
+    "Methyl_shift" : tailoringSites['METHYL_MUTASE']};
   return options
   
 })
