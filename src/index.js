@@ -13,7 +13,7 @@ var recordData = [];
 var details_data = {};
 let BGC ={};
 let fetching = false;
-let tailoringEnzymes = {"THIOPEPTIDE_CYCLASE": "T_CYL", "MACROLACTAM_SYNTHETASE":"M_SY", "ATP-GRASP":"ATP-G", "YCAO":"YcaO", "LANTHIBIOTIC_DEHYDRATASE":"L-DH", "RADICAL_SAM": "rSAM", "SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREDUCTASE": "OXRE","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "AMT", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOL_DEHYDROGENASE": "AL-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DC", "MONOAMINE_OXIDASE": "MAO","REDUCTIVE_LYASE":"RL", "METHYL_MUTASE":"MUT", "HALOGENASE": "HAL","HYDROLASE": "HYD", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
+let tailoringEnzymes = {"THIOPEPTIDE_CYCLASE": "T_CYL", "MACROLACTAM_SYNTHETASE":"M_SY", "ATP-GRASP":"ATP-G", "YCAO":"YcaO", "LANTHIBIOTIC_DEHYDRATASE":"L-DH", "DOUBLE_BOND_ISOMERASE" : "DB-I",  "RADICAL_SAM": "rSAM", "SPLICEASE": "SPL", "ARGINASE": "ARG", "AGMATINASE": "AGM", "OXIDOREDUCTASE": "OXRE","METHYLTRANSFERASE": "MT", "C_METHYLTRANSFERASE": "C-MT", "N_METHYLTRANSFERASE": "N-MT", "O_METHYLTRANSFERASE": "O-MT", "P450": "P450", "ISOMERASE": "ISO", "PRENYLTRANSFERASE": "Pren-T", "ACETYLTRANSFERASE": "Acet-T", "ACYLTRANSFERASE": "Acyl-T", "AMINOTRANSFERASE": "AMT", "OXIDASE": "OX", "REDUCTASE": "RED", "ALCOHOL_DEHYDROGENASE": "AL-DH", "DEHYDRATASE":"DH", "DECARBOXYLASE":"DC", "MONOAMINE_OXIDASE": "MAO","REDUCTIVE_LYASE":"RL", "METHYL_MUTASE":"MUT", "HALOGENASE": "HAL","HYDROLASE": "HYD", "PEPTIDASE": "PEP", "PROTEASE": "PROT"};
 let tailoringEnzymesSynonyms = {"ARGINASE": ["arginase"], "AGMATINASE": ["agmatinase"], "RADICAL_SAM": ["rSAM", "Radical_SAM", "radical_SAM", "R_SAM"], "YCAO": ["ycao","Ycao","YcaO"], "LANTHIBIOTIC_DEHYDRATASE": ["lanthibiotic dehydratase","serine/threoninedehydratase", "serine dehydratase", "threonine dehydratase"],"ATP-GRASP": ["ATP-grasp","atp-grasp","atp grasp", "ATP grasp"], "MACROLACTAM_SYNTHETASE": ["ATP dependent macrolactam synthetase"]};
 let tailoringEnzymesWithTwoAtoms = ["OXIDATIVE_BOND_SYNTHASE", "SPLICEASE","LANTHIPEPTIDE_CYCLASE", "LANTHIONINE_SYNTHETASE", "OXIDATIVE_BOND_SYNTHASE"]
 let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE", "ACYLTRANSFERASE"];
@@ -1106,13 +1106,10 @@ function changeProteinColorOFF(ProteinId, geneIndex) {
         arrow.removeAttribute("style");
     }
 }
-
+let historyStack = [];
 function fetchFromRaichuTerpene(){
     updateTerpenes(geneMatrix, BGC)
-    historyStack.push(JSON.parse(JSON.stringify({
-        geneMatrix: geneMatrix,
-        BGC: BGC
-    })));
+
     let data_string = JSON.stringify({"gene_name_precursor": "terpene-cyclase", "substrate": terpeneSubstrate, "cyclization": splitArrayIntoPairs(cyclization),"tailoring": findTailoringReactions(geneMatrix), "terpene_cyclase_type": "Class_1"})
     let url = port +"api/alola/terpene?antismash_input=";
     let container = document.getElementById("structure_container")
@@ -1201,13 +1198,12 @@ function fetchFromRaichuTerpene(){
             }
 
         })
+    updateButtonStates();
 }
+
 function fetchFromRaichuRiPP() {
     updateRiPPs(geneMatrix, BGC)
-    historyStack.push(JSON.parse(JSON.stringify({
-        geneMatrix: geneMatrix,
-        BGC: BGC
-    })));
+
     let data_string = JSON.stringify({"rippPrecursor":rippPrecursor, "cyclization": cyclization, "tailoring": findTailoringReactions(geneMatrix), "rippPrecursorName": rippPrecursorGene, "rippFullPrecursor": rippFullPrecursor})
     let url = port +"api/alola/ripp?antismash_input=";
     let container = document.getElementById("structure_container")
@@ -1287,9 +1283,9 @@ function fetchFromRaichuRiPP() {
             }
 
         })
+    updateButtonStates();
 }
 
-let historyStack = [];
 async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
     /**
  * Transforms and transfers all needed data through the api to the backend (raichu) and handles the output.
@@ -2596,15 +2592,39 @@ function changeSelectedOptionCleavageSites(option){
 function displayTextInGeneExplorer(geneId) {
     /**
     * Displays the description of the gene in the gene explorer.
-   * @fires hovergene
-   *@input geneID
-   *@yield changes text in gene explorer
-   */
-    for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++)
-        if (BGCForDisplay["orfs"][geneIndex].locus_tag == geneId) {
-            gene_container.innerHTML = BGCForDisplay["orfs"][geneIndex].description
+    * @fires hovergene
+    * @input geneID
+    * @yield changes text in gene explorer
+    */
+    for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
+        if (BGCForDisplay["orfs"][geneIndex].locus_tag === geneId) {
+            let description = BGCForDisplay["orfs"][geneIndex].description;
+
+            // Remove unwanted text sections and their contents
+            const unwantedTextPatterns = [
+                /NCBI BlastP on this gene.*?/gis,
+                /Blast against antiSMASH-database *?/gis,
+                /MiBIG Hits.*?/gis,
+                /TransportDB BLAST on this gene.*?/gis,
+                /AA sequence: *?/gis,
+                /Copy to clipboard *?/gis,
+                /Nucleotide sequence: *?/gis,
+                /Copy to clipboard *?/gis,
+            ];
+
+            unwantedTextPatterns.forEach(pattern => {
+                description = description.replace(pattern, '');
+            });
+
+            // Remove extra whitespace if necessary
+            description = description.trim();
+
+            // Set the cleaned description to the gene container
+            gene_container.innerHTML = description;
         }
+    }
 }
+
 function createGeneMatrix(BGC, regionName) {
     /**
     * extract the information and predictions from region.js+ creates a easier to handle matrix (object) from it that can be modified easier
