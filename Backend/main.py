@@ -433,8 +433,8 @@ def perform_ripp_tailoring(ripp_cluster, tailoring_reactions):
     """
     if tailoring_reactions:
         ripp_cluster.do_tailoring()
-        return ripp_cluster.tailored_product
-    return ripp_cluster.linear_product
+        return ripp_cluster.chain_intermediate
+    return ripp_cluster.chain_intermediate
 
 
 def perform_ripp_macrocyclization(ripp_cluster, macrocyclisations):
@@ -478,8 +478,11 @@ async def alola_terpene(antismash_input: str):
         assert antismash_input
         # handle input data
         antismash_input_transformed = json.loads(antismash_input)
-        tailoringReactions = []
         macrocyclisations = []
+        double_bond_isomerase = []
+        methyl_mutase = []
+        tailoringReactions = [] 
+
         precursor = antismash_input_transformed["substrate"]
 
         logging.info(f"The input_data is: {antismash_input_transformed}")
@@ -495,17 +498,27 @@ async def alola_terpene(antismash_input: str):
                     macrocyclisations.append(
                         MacrocyclizationRepresentation(cyclization[0], cyclization[1])
                     )
-        tailoring_reactions = [
-            TailoringRepresentation(*enzyme) for enzyme in antismash_input_transformed["tailoring"]]
+        
+        tailoringReactions = [TailoringRepresentation(*enzyme) for enzyme in antismash_input_transformed["tailoring"]]
         logging.info(f"The tailoring_reactions are: {tailoringReactions}")
         logging.info(f"Amount of tailoring reactions={len(tailoringReactions)}")
-        if len(tailoringReactions) == 0:
-            tailoringReactions=None
+        print(tailoringReactions, len(tailoringReactions))
+        # if len(tailoringReactions) == 0:
+        #     tailoringReactions = None
+        # print(tailoringReactions)
+        print(gene_name_terpene_synthase,
+            precursor,
+            macrocyclisations,
+            terpene_cyclase_type,
+            tailoringReactions)
         terpene_cluster = TerpeneCluster(
             gene_name_terpene_synthase,
             precursor,
-            macrocyclisations=macrocyclisations,
             cyclase_type=terpene_cyclase_type,
+
+            macrocyclisations=macrocyclisations,
+            double_bond_isomerisations = double_bond_isomerase,
+            methyl_shifts = methyl_mutase,
             tailoring_representations=tailoringReactions,
         )
         terpene_cluster.create_precursor()
@@ -524,7 +537,7 @@ async def alola_terpene(antismash_input: str):
             .replace("<svg", " <svg id='cyclized_drawing'")
         )
         # get options for cyclisation
-        cyclase = TailoringEnzyme("gene", "OXIDATIVE_BOND_FORMATION")
+        cyclase = TailoringEnzyme("gene", "OXIDATIVE_BOND_SYNTHASE")
         atoms_for_cyclisation = str(
             [
                 str(atom[0])
@@ -534,9 +547,7 @@ async def alola_terpene(antismash_input: str):
                 if str(atom[0]) != "O_0"
             ]
         )
-        if len(tailoringReactions) > 0:
-            logging.info("Performing tailoring")
-            terpene_cluster.do_tailoring()
+        perform_terpene_tailoring(terpene_cluster, tailoringReactions)
         svg_final_product_raw = terpene_cluster.draw_product(as_string=True)
         svg_tailoring = (
             svg_final_product_raw.replace("\n", "")
@@ -549,20 +560,22 @@ async def alola_terpene(antismash_input: str):
             .replace('"', "'")
             .replace("<svg", " <svg id='final_drawing'")
         )
-        mass = final_product.get_mass()
+        mass = terpene_cluster.chain_intermediate.get_mass()
         reactions = []
-        if cluster.tailoring_representations:
+        if terpene_cluster.tailoring_representations:
             reactions.append("tailoring")
-        if cluster.macrocyclisation_representations:
+        if terpene_cluster.macrocyclisation_representations:
             reactions.append("cyclisation")
-        if cluster.cleaved_intermediates:
+        if terpene_cluster.cleaved_intermediates:
             reactions.append("cleavage")
-        if cluster.tailoring_representations:
-            pathway_svg = cluster.draw_pathway(order=reactions, as_string=True)
+        if terpene_cluster.tailoring_representations:
+            pathway_svg = terpene_cluster.draw_pathway(order=reactions, as_string=True)
         else:
             pathway_svg = "not_able_to_draw_pathway"
-        
-        smiles = structure_to_smiles(terpene_cluster.chain_intermediate, kekule=False)
+        try:
+            smiles = structure_to_smiles(terpene_cluster.chain_intermediate, kekule=False)
+        except:
+            smiles = "not_able_to_compute_smiles"
         tailoring_sites = get_tailoring_sites_atom_names(
             terpene_cluster.chain_intermediate
         )
@@ -584,3 +597,15 @@ async def alola_terpene(antismash_input: str):
         filename, lineno, func_name, line_code = tb[-1]
         logging.error(f"{exc_type} occurred in {func_name} at {filename}:{lineno} and line_code: {line_code}")
         return {"Error": "An error occured, try selecting a different precursor."}
+
+def perform_terpene_tailoring(terpene_cluster, tailoring_reactions):
+    """
+    Perform tailoring on the Terpene cluster if applicable.
+    :param terpene_cluster: TerpeneCluster instance.
+    :param tailoring_reactions: List of tailoring reactions.
+    :return: Tailored product.
+    """
+    if tailoring_reactions:
+        terpene_cluster.do_tailoring()
+        return terpene_cluster.chain_intermediate
+    return terpene_cluster.chain_intermediate
