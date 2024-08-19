@@ -2509,6 +2509,9 @@ function addWildcard(geneMatrix) {
 }
 function changeCyclization(atom){
     cyclization.push(atom)
+    if (document.querySelector('input[type=checkbox]').checked) {
+        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    }
 }
 function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, option, optionIndex) {
     /**
