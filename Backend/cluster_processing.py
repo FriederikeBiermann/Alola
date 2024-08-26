@@ -1,0 +1,471 @@
+import json
+import logging
+from typing import Any, Dict, List, Optional
+
+from pikachu.chem.structure import Structure
+from pikachu.general import structure_to_smiles, svg_string_from_structure
+
+from raichu.run_raichu import (
+    build_cluster,
+    TailoringRepresentation,
+    get_tailoring_sites_atom_names,
+)
+from raichu.drawing.drawer import RaichuDrawer
+from raichu.cluster.terpene_cluster import TerpeneCluster
+from raichu.cluster.base_cluster import Cluster
+from raichu.cluster.ripp_cluster import RiPPCluster
+from raichu.cluster.modular_cluster import ModularCluster
+from raichu.reactions.chain_release import find_all_o_n_atoms_for_cyclization
+from raichu.tailoring_enzymes import TailoringEnzyme
+from raichu.representations import (
+    ModuleRepresentation,
+    DomainRepresentation,
+    ClusterRepresentation,
+    MacrocyclizationRepresentation,
+    IsomerizationRepresentation,
+    MethylShiftRepresentation,
+)
+
+
+def process_svg(svg_string, svg_id):
+    """
+    Process and format an SVG string with a specific ID.
+    :param svg_string: The raw SVG string.
+    :param svg_id: The ID to be assigned to the SVG.
+    :return: Formatted SVG string with the specified ID.
+    """
+    return (
+        svg_string.replace("\n", "")
+        .replace('"', "'")
+        .replace("<svg", f" <svg id='{svg_id}'")
+    )
+
+
+class BasePathway:
+    def __init__(self, antismash_input: str):
+        """Initializes the BasePathway with given antiSMASH input data.
+
+        Args:
+            antismash_input (str): JSON string containing antiSMASH output data.
+
+        Raises:
+            ValueError: If the input JSON string is invalid or cannot be parsed.
+        """
+        try:
+            self.antismash_input: Dict[str, Any] = json.loads(antismash_input)
+            logging.info("Successfully parsed antiSMASH input.")
+        except json.JSONDecodeError as e:
+            logging.error(f"Failed to parse antiSMASH input: {e}")
+            raise ValueError("Invalid JSON input provided.") from e
+
+        self.cluster: Optional[Cluster] = None
+        self.tailoring_reactions: List[TailoringRepresentation] = [
+            TailoringRepresentation(*enzyme)
+            for enzyme in self.antismash_input.get("tailoring", [])
+        ]
+        self.cyclization: Optional[str] = self.antismash_input.get("cyclization", None)
+        self.tailored_product: Optional[Structure] = None
+        self.final_product: Optional[Structure] = None
+        self.svg_structure_for_tailoring: Optional[str] = None
+        self.svg_final: Optional[str] = None
+        self.mass: Optional[float] = None
+        self.pathway_svg: Optional[str] = None
+        self.smiles: Optional[str] = None
+        self.tailoring_sites: Optional[List[str]] = None
+        self.atoms_for_cyclisation: Optional[List[str]] = None
+
+        logging.info(f"Initialized BasePathway with cyclization: {self.cyclization}")
+
+    def _draw_pathway_mass_smiles_tailoring_sites(self):
+        """Generates mass, pathway SVG, SMILES, and tailoring sites for the final product.
+
+        This method processes the final product to compute its mass, generate the SVG representations,
+        and retrieve the tailoring sites and potential atoms for cyclization.
+
+        Raises:
+            ValueError: If `final_product` or `cluster` is not set before calling this method.
+        """
+        if not self.final_product or not self.cluster:
+            logging.error("Final product or cluster is not initialized before drawing.")
+            raise ValueError("Final product and cluster must be initialized.")
+
+        self.mass = self.final_product.get_mass()
+        logging.debug(f"Computed mass: {self.mass}")
+
+        reactions = []
+        if self.cluster.tailoring_representations:
+            reactions.append("tailoring")
+        if self.cluster.macrocyclisation_representations:
+            reactions.append("cyclisation")
+        if self.cluster.cleaved_intermediates:
+            reactions.append("cleavage")
+
+        if reactions:
+            self.pathway_svg = self.cluster.draw_pathway(
+                order=reactions, as_string=True
+            )
+            logging.debug("Generated pathway SVG.")
+        else:
+            self.pathway_svg = "not_able_to_draw_pathway"
+            logging.warning("No pathway SVG could be generated.")
+
+        try:
+            self.smiles = structure_to_smiles(self.final_product, kekule=False)
+            logging.debug(f"Generated SMILES: {self.smiles}")
+        except Exception as e:
+            logging.error(f"Failed to generate SMILES: {e}")
+            self.smiles = "not_able_to_compute_smiles"
+
+        self.tailoring_sites = get_tailoring_sites_atom_names(
+            self.cluster.chain_intermediate
+        )
+        logging.debug(f"Identified tailoring sites: {self.tailoring_sites}")
+
+        self.atoms_for_cyclisation = [
+            str(atom)
+            for atom in find_all_o_n_atoms_for_cyclization(self.tailored_product)
+            if str(atom) != "O_0"
+        ]
+        logging.debug(f"Identified atoms for cyclisation: {self.atoms_for_cyclisation}")
+
+    def process_svg(self, svg_string: str, svg_id: str) -> str:
+        """Processes and formats an SVG string by adding an ID.
+
+        Args:
+            svg_string (str): The raw SVG string.
+            svg_id (str): The ID to be assigned to the SVG.
+
+        Returns:
+            str: The processed SVG string.
+        """
+        return (
+            svg_string.replace("\n", "")
+            .replace('"', "'")
+            .replace("<svg", f" <svg id='{svg_id}'")
+        )
+
+
+class RiPPPathway(BasePathway):
+    def __init__(self, antismash_input: str):
+        """Initializes the RiPPPathway with given antiSMASH input data.
+
+        Args:
+            antismash_input (str): JSON string containing antiSMASH output data.
+        """
+        super().__init__(antismash_input)
+        self.macrocyclisations: List[MacrocyclizationRepresentation] = [
+            MacrocyclizationRepresentation(*cyclization)
+            for cyclization in self.cyclization
+            if len(cyclization) > 0
+        ]
+
+        self.cluster: RiPPCluster = RiPPCluster(
+            self.antismash_input["rippPrecursorName"],
+            self.antismash_input["rippFullPrecursor"],
+            self.antismash_input["rippPrecursor"],
+            macrocyclisations=self.macrocyclisations,
+            tailoring_representations=self.tailoring_reactions,
+        )
+        logging.info("RiPPPathway initialized and cluster built.")
+
+    def process(self) -> Dict[str, Any]:
+        """Processes the RiPP pathway and generates the necessary outputs.
+
+        Returns:
+            Dict[str, Any]: The response data containing SVGs, SMILES, mass, and other molecular information.
+        """
+
+        logging.info("Processing RiPP pathway.")
+        self.cluster.make_peptide()
+        peptide_svg = self.process_svg(
+            self.cluster.draw_cluster(fold=10, size=7, as_string=True),
+            "precursor_drawing",
+        )
+        if self.tailoring_reactions:
+            self.cluster.do_tailoring()
+        self.tailored_product = self.cluster.chain_intermediate
+        svg_structure_for_tailoring = self.process_svg(
+            self.cluster.draw_cluster(fold=10, size=7, as_string=True),
+            "intermediate_drawing",
+        )
+        if self.macrocyclisations:
+            self.cluster.do_macrocyclization()
+        cyclised_product_svg = self.process_svg(
+            self.cluster.draw_cluster(fold=5, size=7, as_string=True),
+            "cyclised_drawing",
+        )
+        self.final_product = self.cluster.chain_intermediate
+        cleaved_ripp_svg = self.process_svg(
+            self.cluster.draw_product(as_string=True), "final_drawing"
+        )
+        self._draw_pathway_mass_smiles_tailoring_sites()
+
+        amino_acids_for_cleavage = [
+            aa.upper() + str(index)
+            for index, aa in enumerate(self.antismash_input["rippPrecursor"])
+        ]
+
+        return {
+            "svg": cleaved_ripp_svg,
+            "smiles": self.smiles,
+            "mass": self.mass,
+            "pathway_svg": self.pathway_svg,
+            "atomsForCyclisation": str(self.atoms_for_cyclisation),
+            "tailoringSites": self.tailoring_sites,
+            "rawPeptideChain": peptide_svg,
+            "cyclisedStructure": cyclised_product_svg,
+            "aminoAcidsForCleavage": str(amino_acids_for_cleavage),
+            "structureForTailoring": svg_structure_for_tailoring,
+        }
+
+
+class NRPSPKSPathway(BasePathway):
+    def __init__(self, antismash_input: str):
+        """Initializes the NRPSPKSPathway with given antiSMASH input data.
+
+        Args:
+            antismash_input (str): JSON string containing antiSMASH output data.
+        """
+        super().__init__(antismash_input)
+        self.cluster_representation = self._format_modular_cluster(
+            self.antismash_input.get("clusterRepresentation", [])
+        )
+        self.cluster: ModularCluster = build_cluster(
+            self.cluster_representation, strict=False
+        )
+        logging.info("NRPSPKSPathway initialized and cluster built.")
+
+    def _format_modular_cluster(self, raw_cluster: List[Any]) -> ClusterRepresentation:
+        """Formats the raw cluster data into a ClusterRepresentation.
+
+        Args:
+            raw_cluster (List[Any]): The raw cluster data from antiSMASH.
+
+        Returns:
+            ClusterRepresentation: The formatted cluster representation.
+        """
+        formatted_modules = []
+        for module in raw_cluster:
+            formatted_domains = [DomainRepresentation(*domain) for domain in module[3]]
+            formatted_modules.append(
+                ModuleRepresentation(
+                    module[0],
+                    None if module[1] == "None" else module[1],
+                    module[2],
+                    formatted_domains,
+                )
+            )
+        logging.debug("Modular cluster formatted.")
+        return ClusterRepresentation(formatted_modules, self.tailoring_reactions)
+
+    def process(self) -> Dict[str, Any]:
+        """Processes the NRPS/PKS pathway and generates the necessary outputs.
+
+        Returns:
+            Dict[str, Any]: The response data containing SVGs, SMILES, mass, and other molecular information.
+        """
+        logging.info("Processing NRPS/PKS pathway.")
+        self.cluster.compute_structures(compute_cyclic_products=False)
+        self.cluster.do_tailoring()
+        self.tailored_product = self.cluster.chain_intermediate.deepcopy()
+        self.final_product = self._perform_cyclization()
+        self._draw_pathway_mass_smiles_tailoring_sites()
+        self._prepare_svgs()
+        return self._prepare_response()
+
+    def _perform_cyclization(self) -> Structure:
+        """Performs cyclization if specified.
+
+        Returns:
+            Structure: The final product after cyclization.
+
+        Raises:
+            ValueError: If the specified cyclization atom does not exist.
+        """
+        if self.cyclization and self.cyclization != "None":
+            atom_cyclization = next(
+                (
+                    atom
+                    for atom in self.tailored_product.atoms.values()
+                    if str(atom) == self.cyclization
+                ),
+                None,
+            )
+            if not atom_cyclization:
+                logging.error(f"Cyclization atom {self.cyclization} does not exist.")
+                raise ValueError(
+                    f"Atom {self.cyclization} for cyclization does not exist."
+                )
+            self.cluster.cyclise(atom_cyclization)
+            logging.info(f"Cyclization performed on atom {self.cyclization}.")
+            return self.cluster.cyclic_product
+        logging.info("No cyclization performed.")
+        return self.cluster.chain_intermediate
+
+    def _prepare_svgs(self):
+        """Prepares the SVG representations for the tailored and final products."""
+        logging.info("Preparing SVGs.")
+        structure_for_tailoring = RaichuDrawer(
+            self.tailored_product, dont_show=True, add_url=True, make_linear=False
+        )
+        structure_for_tailoring.draw_structure()
+        self.svg_structure_for_tailoring = self.process_svg(
+            structure_for_tailoring.get_svg_string_matplotlib(), "tailoring_drawing"
+        )
+        self.svg_final = self.process_svg(
+            svg_string_from_structure(self.final_product), "final_drawing"
+        )
+        logging.debug("SVGs prepared.")
+
+    def _prepare_response(self) -> Dict[str, Any]:
+        """Prepares the response data after processing.
+
+        Returns:
+            Dict[str, Any]: The response data with molecular information.
+        """
+        logging.info("Preparing response data.")
+        return {
+            "svg": self.svg_final,
+            "hangingSvg": self._get_drawings(self.cluster),
+            "smiles": self.smiles,
+            "mass": self.mass,
+            "pathway_svg": self.pathway_svg,
+            "atomsForCyclisation": str(self.atoms_for_cyclisation),
+            "tailoringSites": str(
+                get_tailoring_sites_atom_names(self.tailored_product)
+            ),
+            "completeClusterSvg": self.cluster.draw_cluster(),
+            "structureForTailoring": self.svg_structure_for_tailoring,
+        }
+
+    def _get_drawings(self, cluster: Cluster) -> List[List[Any]]:
+        """Generates SVG representations of the cluster's intermediates.
+
+        Args:
+            cluster (Cluster): The cluster object to generate drawings for.
+
+        Returns:
+            List[List[Any]]: A list of SVG strings and their associated data.
+        """
+        logging.info("Generating intermediate drawings.")
+        drawings, widths = cluster.get_spaghettis()
+        svg_strings = []
+        for i, drawing in enumerate(drawings):
+            max_x, min_x = 0, 100000000
+            max_y, min_y = 0, 100000000
+            drawing.set_structure_id(f"s{i}")
+            padding = 0
+            drawing.options.padding = 0
+            carrier_domain_pos = None
+            for atom in drawing.structure.graph:
+                if atom.annotations.domain_type:
+                    carrier_domain_pos = atom.draw.position
+                    atom.draw.positioned = False
+                    sulphur_pos = atom.get_neighbour("S").draw.position
+                if atom.draw.positioned:
+                    min_x = min(min_x, atom.draw.position.x)
+                    min_y = min(min_y, atom.draw.position.y)
+                    max_x = max(max_x, atom.draw.position.x)
+                    max_y = max(max_y, atom.draw.position.y)
+            if not carrier_domain_pos:
+                logging.error("Carrier domain position not found in drawing.")
+                raise ValueError("Carrier domain position not found in drawing.")
+
+            x1, x2 = 0, max_x + padding
+            y1, y2 = padding, max_y + padding
+            width, height = x2, y2
+            svg_style = r" <style> line {stroke: black; stroke_width: 1px;} </style> "
+            svg_header = f"""<svg width="{width}" height="{height}" viewBox="{x1} {y1} {x2} {y2}" xmlns="http://www.w3.org/2000/svg">\n {svg_style}\n"""
+            squiggly_svg = f'<path d="M {sulphur_pos.x} {sulphur_pos.y - 5} Q {sulphur_pos.x - 5} {sulphur_pos.y - (sulphur_pos.y - 5 - carrier_domain_pos.y)/2}, {carrier_domain_pos.x} {sulphur_pos.y - 5 - (sulphur_pos.y - 5 - carrier_domain_pos.y)/2} T {carrier_domain_pos.x} {carrier_domain_pos.y}" stroke="grey" fill="white"/>'
+            svg = (
+                f"{svg_header}{drawing.draw_svg()}{squiggly_svg}".replace("\n", "")
+                .replace('"', "'")
+                .replace("<svg", " <svg id='intermediate_drawing'")
+            )
+            svg_strings.append(
+                [svg, carrier_domain_pos.x, carrier_domain_pos.y, width, height]
+            )
+
+        logging.debug("Intermediate drawings generated.")
+        return svg_strings
+
+
+class TerpenePathway(BasePathway):
+    def __init__(self, antismash_input: str):
+        """Initializes the TerpenePathway with given antiSMASH input data.
+
+        Args:
+            antismash_input (str): JSON string containing antiSMASH output data.
+        """
+        super().__init__(antismash_input)
+        self.macrocyclisations: List[MacrocyclizationRepresentation] = [
+            MacrocyclizationRepresentation(*cyclization)
+            for cyclization in self.cyclization
+            if len(cyclization) > 0
+        ]
+        self.precursor: str = self.antismash_input["substrate"]
+        self.double_bond_isomerase: List[IsomerizationRepresentation] = [
+            IsomerizationRepresentation(*isomerization)
+            for isomerization in self.antismash_input.get("double_bond_isomerase", [])
+            if len(isomerization) > 0
+        ]
+        self.methyl_mutase: List[MethylShiftRepresentation] = [
+            MethylShiftRepresentation(*methyl_shift)
+            for methyl_shift in self.antismash_input.get("methyl_mutase", [])
+            if len(methyl_shift) > 0
+        ]
+        self.cluster: TerpeneCluster = TerpeneCluster(
+            self.antismash_input["gene_name_precursor"],
+            self.precursor,
+            cyclase_type=self.antismash_input["terpene_cyclase_type"],
+            macrocyclisations=self.macrocyclisations,
+            double_bond_isomerisations=self.double_bond_isomerase,
+            methyl_shifts=self.methyl_mutase,
+            tailoring_representations=self.tailoring_reactions,
+        )
+        logging.info("TerpenePathway initialized and cluster built.")
+
+    def process(self) -> Dict[str, Any]:
+        """Processes the Terpene pathway and generates the necessary outputs.
+
+        Returns:
+            Dict[str, Any]: The response data containing SVGs, SMILES, mass, and other molecular information.
+        """
+
+        logging.info("Processing Terpene pathway.")
+        self.cluster.create_precursor()
+        precursor_svg = self.process_svg(
+            self.cluster.draw_product(as_string=True), "precursor_drawing"
+        )
+        if self.macrocyclisations:
+            self.cluster.do_macrocyclization()
+        cyclised_product_svg = self.process_svg(
+            self.cluster.draw_product(as_string=True), "cyclized_drawing"
+        )
+
+        self._draw_pathway_mass_smiles_tailoring_sites()
+        cyclase = TailoringEnzyme("gene", "OXIDATIVE_BOND_SYNTHASE")
+        self.atoms_for_cyclisation = str(
+            [
+                str(atom[0])
+                for atom in cyclase.get_possible_sites(self.cluster.chain_intermediate)
+                if str(atom[0]) != "O_0"
+            ]
+        )
+        if self.tailoring_reactions:
+            self.cluster.do_tailoring()
+        svg_final_product = self.process_svg(
+            self.cluster.draw_product(as_string=True), "final_drawing"
+        )
+        svg_tailoring = self.process_svg(svg_final_product, "intermediate_drawing")
+        return {
+            "svg": svg_final_product,
+            "smiles": self.smiles,
+            "mass": self.mass,
+            "pathway_svg": self.pathway_svg,
+            "atomsForCyclisation": self.atoms_for_cyclisation,
+            "tailoringSites": str(self.tailoring_sites),
+            "precursor": precursor_svg,
+            "cyclizedStructure": cyclised_product_svg,
+            "structureForTailoring": svg_tailoring,
+        }
