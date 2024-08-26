@@ -85,7 +85,7 @@ class BasePathway:
         Raises:
             ValueError: If `final_product` or `cluster` is not set before calling this method.
         """
-        if not self.final_product or not self.cluster:
+        if not self.final_product or not self.cluster or not self.tailored_product:
             logging.error("Final product or cluster is not initialized before drawing.")
             raise ValueError("Final product and cluster must be initialized.")
 
@@ -246,16 +246,21 @@ class NRPSPKSPathway(BasePathway):
         """
         formatted_modules = []
         for module in raw_cluster:
-            formatted_domains = [DomainRepresentation(*domain) for domain in module[3]]
-            formatted_modules.append(
+            formatted_domains = []
+            for domain in module[3]:
+                # Format fake booleans
+                domain = map(lambda x: x if x != "None" else None, domain)
+                domain = map(lambda x: x if x != "True" else True, domain)
+                domain = map(lambda x: x if x != "False" else False, domain)
+                formatted_domains += [DomainRepresentation(*domain)]
+            formatted_modules += [
                 ModuleRepresentation(
                     module[0],
                     None if module[1] == "None" else module[1],
                     module[2],
                     formatted_domains,
                 )
-            )
-        logging.debug("Modular cluster formatted.")
+            ]
         return ClusterRepresentation(formatted_modules, self.tailoring_reactions)
 
     def process(self) -> Dict[str, Any]:
@@ -424,6 +429,17 @@ class TerpenePathway(BasePathway):
             tailoring_representations=self.tailoring_reactions,
         )
         logging.info("TerpenePathway initialized and cluster built.")
+        logging.debug(
+            "Gene Name Precursor: %s, Precursor: %s, Terpene Cyclase Type: %s, "
+            "Macrocyclisations: %s, Double Bond Isomerase: %s, Methyl Mutase: %s, Tailoring Reactions: %s",
+            self.antismash_input["gene_name_precursor"],
+            self.precursor,
+            self.antismash_input["terpene_cyclase_type"],
+            self.macrocyclisations,
+            self.double_bond_isomerase,
+            self.methyl_mutase,
+            self.tailoring_reactions,
+        )
 
     def process(self) -> Dict[str, Any]:
         """Processes the Terpene pathway and generates the necessary outputs.
@@ -433,6 +449,7 @@ class TerpenePathway(BasePathway):
         """
 
         logging.info("Processing Terpene pathway.")
+
         self.cluster.create_precursor()
         precursor_svg = self.process_svg(
             self.cluster.draw_product(as_string=True), "precursor_drawing"
@@ -443,6 +460,14 @@ class TerpenePathway(BasePathway):
             self.cluster.draw_product(as_string=True), "cyclized_drawing"
         )
 
+        if self.tailoring_reactions:
+            self.cluster.do_tailoring()
+        self.tailored_product = self.cluster.chain_intermediate
+        self.final_product = self.cluster.chain_intermediate
+        svg_final_product = self.process_svg(
+            self.cluster.draw_product(as_string=True), "final_drawing"
+        )
+        svg_tailoring = self.process_svg(svg_final_product, "intermediate_drawing")
         self._draw_pathway_mass_smiles_tailoring_sites()
         cyclase = TailoringEnzyme("gene", "OXIDATIVE_BOND_SYNTHASE")
         self.atoms_for_cyclisation = str(
@@ -452,12 +477,21 @@ class TerpenePathway(BasePathway):
                 if str(atom[0]) != "O_0"
             ]
         )
-        if self.tailoring_reactions:
-            self.cluster.do_tailoring()
-        svg_final_product = self.process_svg(
-            self.cluster.draw_product(as_string=True), "final_drawing"
+        logging.debug(
+            "Returning the following data: SVG Final Product: %s, SMILES: %s, Mass: %s, Pathway SVG: %s, "
+            "Atoms for Cyclisation: %s, Tailoring Sites: %s, Precursor SVG: %s, Cyclized Structure SVG: %s, "
+            "Structure for Tailoring SVG: %s",
+            svg_final_product,
+            self.smiles,
+            self.mass,
+            self.pathway_svg,
+            self.atoms_for_cyclisation,
+            str(self.tailoring_sites),
+            precursor_svg,
+            cyclised_product_svg,
+            svg_tailoring,
         )
-        svg_tailoring = self.process_svg(svg_final_product, "intermediate_drawing")
+
         return {
             "svg": svg_final_product,
             "smiles": self.smiles,

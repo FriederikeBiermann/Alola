@@ -6,6 +6,11 @@ import functools
 from typing import List, Optional, Callable
 import logging
 import traceback
+import sys
+import os
+
+# Adding the path to the cluster_processing module in the docker container
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from cluster_processing import NRPSPKSPathway, RiPPPathway, TerpenePathway
 
 
@@ -39,7 +44,9 @@ app = FastAPI(middleware=middleware)
 app.mount("/static", StaticFiles(directory="app"), name="static")
 
 logging.basicConfig(
-    level=logging.INFO, filemode="w", format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.DEBUG,
+    filemode="w",
+    format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
 
@@ -48,10 +55,10 @@ logging.info("info")
 logging.warning("warning")
 logging.error("error")
 logging.critical("critical")
+logging.getLogger("matplotlib").setLevel(logging.WARNING)
+
 
 # FastAPI Endpoints
-
-
 @app.get("/")
 async def root():
     return {
