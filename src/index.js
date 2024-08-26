@@ -489,21 +489,122 @@ function addDragDrop() {
 }
 
 /**
+ * Adds a drop shadow filter to the given SVG element.
+ * 
+ * @param {Element} svgElement - The SVG element to which the filter should be added.
+ */
+/**
+ * Adds a drop shadow filter and an intense glow filter to the given SVG element.
+ * 
+ * @param {Element} svgElement - The SVG element to which the filters should be added.
+ */
+function addDropShadowFilterToSVG(svgElement) {
+    // Create the <defs> element if it doesn't exist
+    let defs = svgElement.querySelector('defs');
+    if (!defs) {
+        defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        svgElement.insertBefore(defs, svgElement.firstChild);
+    }
+
+    // Create the drop shadow filter
+    let dropShadowFilter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+    dropShadowFilter.setAttribute("id", "dropShadow");
+    dropShadowFilter.setAttribute("x", "-50%");
+    dropShadowFilter.setAttribute("y", "-50%");
+    dropShadowFilter.setAttribute("width", "200%");
+    dropShadowFilter.setAttribute("height", "200%");
+
+    let feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+    feGaussianBlur.setAttribute("in", "SourceAlpha");
+    feGaussianBlur.setAttribute("stdDeviation", "3");
+
+    let feOffset = document.createElementNS("http://www.w3.org/2000/svg", "feOffset");
+    feOffset.setAttribute("dx", "5");
+    feOffset.setAttribute("dy", "5");
+    feOffset.setAttribute("result", "offsetblur");
+
+    let feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+    feFlood.setAttribute("flood-color", "red");
+
+    let feComposite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+    feComposite.setAttribute("in2", "offsetblur");
+    feComposite.setAttribute("operator", "in");
+
+    let feMerge = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+    let feMergeNode1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    let feMergeNode2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    feMergeNode2.setAttribute("in", "SourceGraphic");
+
+    // Append elements to the drop shadow filter
+    feMerge.appendChild(feMergeNode1);
+    feMerge.appendChild(feMergeNode2);
+    dropShadowFilter.appendChild(feGaussianBlur);
+    dropShadowFilter.appendChild(feOffset);
+    dropShadowFilter.appendChild(feFlood);
+    dropShadowFilter.appendChild(feComposite);
+    dropShadowFilter.appendChild(feMerge);
+
+    // Append the drop shadow filter to the <defs> section
+    defs.appendChild(dropShadowFilter);
+
+    // Create the intense glow filter
+    let intenseGlowFilter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+    intenseGlowFilter.setAttribute("id", "intenseGlowShadow");
+    intenseGlowFilter.setAttribute("x", "-50%");
+    intenseGlowFilter.setAttribute("y", "-50%");
+    intenseGlowFilter.setAttribute("width", "200%");
+    intenseGlowFilter.setAttribute("height", "200%");
+
+    let feGaussianBlur1 = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+    feGaussianBlur1.setAttribute("in", "SourceAlpha");
+    feGaussianBlur1.setAttribute("stdDeviation", "5");
+    feGaussianBlur1.setAttribute("result", "blur");
+
+    let feFlood1 = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+    feFlood1.setAttribute("flood-color", "#E11839");
+    feFlood1.setAttribute("flood-opacity", "1");
+
+    let feComposite1 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+    feComposite1.setAttribute("in2", "blur");
+    feComposite1.setAttribute("operator", "in");
+
+    let feMergeGlow = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+    let feMergeNodeGlow1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    let feMergeNodeGlow2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+    feMergeNodeGlow2.setAttribute("in", "SourceGraphic");
+
+    // Append elements to the intense glow filter
+    feMergeGlow.appendChild(feMergeNodeGlow1);
+    feMergeGlow.appendChild(feMergeNodeGlow2);
+    intenseGlowFilter.appendChild(feGaussianBlur1);
+    intenseGlowFilter.appendChild(feFlood1);
+    intenseGlowFilter.appendChild(feComposite1);
+    intenseGlowFilter.appendChild(feMergeGlow);
+
+    // Append the intense glow filter to the <defs> section
+    defs.appendChild(intenseGlowFilter);
+}
+
+
+
+
+/**
  * Finds an atom in an SVG, highlights it with the given coloring.
  * If the selected option is atom selector, the function triggers hoverin/out_atom events.
  * 
  * @param {string} atom - The atom selector.
  * @param {string} color - The desired color for highlighting.
  * @param {number} width - The width for the stroke to highlight even more.
+ * @param {string} shadowId - The ID of the shadow filter to apply.
  * @fires hoverin_atom - Fires when the mouse hovers over the highlighted atom.
  * @fires hoverout_atom - Fires when the mouse leaves the highlighted atom.
  */
-function highlight_atom_in_SVG(atom, color, width) {
+function highlight_atom_in_SVG(atom, color, width, shadowId = "dropShadow") {
     if (RiPPStatus) {
         // Highlight atom in SVG for RiPPs
         let nameAtom = "atom_" + atom;
-        let group = document.getElementById(nameAtom);
-        group.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width);
+        let path = document.getElementById(nameAtom);
+        path.setAttribute('style', `fill:${color}; stroke:${color}; stroke-width:${width}; filter:url(#${shadowId});`);
 
     } else if (atom.toString().includes("_")) {
         // Highlight atom in SVG for other cases
@@ -516,42 +617,45 @@ function highlight_atom_in_SVG(atom, color, width) {
                 link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_precursor") ||
                 link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailored")
             ) {
-                let text = link.childNodes[3];
-                text.setAttribute('style', "fill:" + color + "; stroke:" + color + "; stroke-width:" + width);
+                let path = link.childNodes[3];
+                path.setAttribute('style', `fill:${color}; stroke:${color}; stroke-width:${width}; filter:url(#${shadowId});`);
 
                 // Trigger hoverin/out_atom events
-                text.addEventListener('mouseenter', function () {
+                path.addEventListener('mouseenter', function () {
                     document.dispatchEvent(new CustomEvent('hoverin_atom', { detail: atom }));
                 });
-                text.addEventListener('mouseleave', function () {
+                path.addEventListener('mouseleave', function () {
                     document.dispatchEvent(new CustomEvent('hoverout_atom', { detail: atom }));
                 });
             }
         }
     }
 }
+
 /**
- * Highlights an atom in SVG with a red color.
+ * Highlights an atom in SVG with a red color and strong shadow.
  * 
  * @param {string} atom - The atom selector.
  */
 function hover_in_atom(atom) {
-    highlight_atom_in_SVG(atom, "#E11839", "5");
+    highlight_atom_in_SVG(atom, "#E11839", "50", "intenseGlowShadow");
 }
+
 /**
- * Makes carbon atoms transparent, other atoms back to black.
+ * Removes the highlight and text shadow from the atom.
  * 
  * @param {string} atom - The atom selector.
  */
 function hover_out_atom(atom) {
     if (atom.indexOf("C") >= 0) {
         // Make carbon atoms transparent
-        highlight_atom_in_SVG(atom, "none", "0");
+        highlight_atom_in_SVG(atom, "none", "0", "none");
     } else {
         // Make other atoms black
-        highlight_atom_in_SVG(atom, "black", "0");
+        highlight_atom_in_SVG(atom, "black", "0", "none");
     }
 }
+
 
 /**
  * Formats the SVGs of the spaghetti diagram to look nice and removes the ACP.
@@ -1187,6 +1291,7 @@ function fetchFromRaichuTerpene(){
                 let tailored_product = document.getElementById("innerIntermediateContainer_tailoredProduct");
                 tailored_product.setAttribute("style", "width:15vw")
                 tailored_product.innerHTML = formatSVG_intermediates(raichu_output.structureForTailoring)
+                
                 let tailored_svg = document.getElementById("intermediate_drawing")
                 let tailored_bbox = intermediate_svg.getBBox();
                 let tailored_viewBox = [tailored_bbox.x, tailored_bbox.y, tailored_bbox.width, tailored_bbox.height].join(" ");
@@ -1195,6 +1300,7 @@ function fetchFromRaichuTerpene(){
 
                 tailored_svg.setAttribute('id', "intermediate_drawing_tailored");
                 tailored_svg.setAttribute('class', "intermediate_drawing_tailored");
+                addDropShadowFilterToSVG(tailored_svg);
             }
 
         })
@@ -1263,6 +1369,7 @@ function fetchFromRaichuRiPP() {
 
                 intermediate_svg.setAttribute('id', "intermediate_drawing_tailoring");
                 intermediate_svg.setAttribute('class', "intermediate_drawing_protease");
+                addDropShadowFilterToSVG(intermediate_svg);
                 // add precursor
                 let precursor = document.getElementById("innerIntermediateContainer_precursor");
                 precursor.setAttribute("style", "width:25vw")
@@ -1348,6 +1455,8 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
                 structure_for_tailoring.setAttribute("viewBox", viewBox_structure_for_tailoring);
                 structure_for_tailoring.setAttribute('id', "intermediate_drawing_tailoring");
                 structure_for_tailoring.setAttribute('class', "intermediate_drawing_tailoring");
+                addDropShadowFilterToSVG(structure_for_tailoring);
+
             }
             //hanging svgs for spaghetti diagram
             let carrier_x = 0

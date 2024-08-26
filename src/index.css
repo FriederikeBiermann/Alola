@@ -581,7 +581,6 @@ svg text {
   text-decoration: none;
   display: block;
   width: 100%;
-  text-transform: lowercase;
   text-align: start;
 }
 
