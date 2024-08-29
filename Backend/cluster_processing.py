@@ -185,7 +185,9 @@ class RiPPPathway(BasePathway):
             self.cluster.do_tailoring()
         self.tailored_product = self.cluster.chain_intermediate
         svg_structure_for_tailoring = self.process_svg(
-            self.cluster.draw_cluster(fold=10, size=7, as_string=True),
+            self.cluster.draw_cluster(
+                fold=10, size=7, as_string=True, draw_Cs_in_pink=True
+            ),
             "intermediate_drawing",
         )
         if self.macrocyclisations:
@@ -311,7 +313,11 @@ class NRPSPKSPathway(BasePathway):
         """Prepares the SVG representations for the tailored and final products."""
         logging.info("Preparing SVGs.")
         structure_for_tailoring = RaichuDrawer(
-            self.tailored_product, dont_show=True, add_url=True, make_linear=False
+            self.tailored_product,
+            dont_show=True,
+            add_url=True,
+            make_linear=False,
+            draw_Cs_in_pink=True,
         )
         structure_for_tailoring.draw_structure()
         self.svg_structure_for_tailoring = self.process_svg(
@@ -452,12 +458,14 @@ class TerpenePathway(BasePathway):
 
         self.cluster.create_precursor()
         precursor_svg = self.process_svg(
-            self.cluster.draw_product(as_string=True), "precursor_drawing"
+            self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
+            "precursor_drawing",
         )
         if self.macrocyclisations:
             self.cluster.do_macrocyclization()
         cyclised_product_svg = self.process_svg(
-            self.cluster.draw_product(as_string=True), "cyclized_drawing"
+            self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
+            "cyclized_drawing",
         )
 
         if self.tailoring_reactions:
@@ -465,7 +473,8 @@ class TerpenePathway(BasePathway):
         self.tailored_product = self.cluster.chain_intermediate
         self.final_product = self.cluster.chain_intermediate
         svg_final_product = self.process_svg(
-            self.cluster.draw_product(as_string=True), "final_drawing"
+            self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
+            "final_drawing",
         )
         svg_tailoring = self.process_svg(svg_final_product, "intermediate_drawing")
         self._draw_pathway_mass_smiles_tailoring_sites()
