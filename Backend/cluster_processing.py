@@ -186,7 +186,7 @@ class RiPPPathway(BasePathway):
         self.tailored_product = self.cluster.chain_intermediate
         svg_structure_for_tailoring = self.process_svg(
             self.cluster.draw_cluster(
-                fold=10, size=7, as_string=True, draw_Cs_in_pink=True
+                fold=10, size=7, as_string=True, draw_cs_in_pink=True
             ),
             "intermediate_drawing",
         )
