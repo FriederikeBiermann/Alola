@@ -319,6 +319,19 @@ function findButtonbyTextContent(text) {
     }
 }
 
+// Removes the tailoring enzymes and their selected options
+function removeTailoringEnzymes(geneMatrix) {
+    /**
+     * Set the selected_option property of each gene in the geneMatrix to an empty array
+     * only if the tailoringEnzymeStatus is true.
+     * @input geneMatrix
+     */
+    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+        if (geneMatrix[geneIndex].tailoringEnzymeStatus === true) {
+            geneMatrix[geneIndex].selected_option = [];
+        }
+    }
+}
 /**
  * Adds a string in front of every element in the array.
  * 
@@ -455,6 +468,7 @@ function handleDrop(e) {
         addArrowClick(geneMatrix);
 
         // Fetch data from Raichu if "Real time calculation" button is checked
+        removeTailoringEnzymes(geneMatrix);
         if (document.getElementById("real-time-button").checked) {
             fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
         }
@@ -868,6 +882,7 @@ function addArrowClick(geneMatrix) {
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
                 updateProteins(geneMatrix, BGC);
                 addArrowClick(geneMatrix);
+                removeTailoringEnzymes(geneMatrix);
                 if (RiPPStatus == 0){ 
                     updateDomains(geneMatrix, BGC);
                 }  else{ 
@@ -1833,6 +1848,7 @@ function setKoStatus(geneIndex, domainIndex, geneMatrix) {
     else {
         geneMatrix[geneIndex].domains[domainIndex].ko = false;
     }
+    removeTailoringEnzymes(geneMatrix);
     if (document.querySelector('input[type=checkbox]')
         .checked) {
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
@@ -2618,6 +2634,7 @@ function addWildcard(geneMatrix) {
 }
 function changeCyclization(atom){
     cyclization.push(atom)
+    removeTailoringEnzymes(geneMatrix);
     if (document.querySelector('input[type=checkbox]').checked) {
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
     }
@@ -2644,7 +2661,7 @@ function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, o
         else { cyclization = option }
 
     }
-
+    removeTailoringEnzymes(geneMatrix);
     if (document.querySelector('input[type=checkbox]')
         .checked) {
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
@@ -2695,7 +2712,7 @@ function changeSelectedOptionCleavageSites(option){
     }
     let cleavageNumber = parseInt(option.replace(/\D/g, ''));
     rippPrecursor = translation.slice(-cleavageNumber);//
-
+    removeTailoringEnzymes(geneMatrix);
      if (document.querySelector('input[type=checkbox]')
         .checked) {
         fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
