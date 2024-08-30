@@ -1,4 +1,5 @@
 import logging
+from pythonjsonlogger import jsonlogger
 import traceback
 import sys
 import os
@@ -97,6 +98,13 @@ app.add_middleware(SlowAPIMiddleware)
 # Mount static files
 app.mount("/static", StaticFiles(directory="app"), name="static")
 
+# Configure logging
+logHandler = logging.StreamHandler()
+formatter = jsonlogger.JsonFormatter(
+    "%(asctime)s %(levelname)s %(message)s %(funcName)s %(lineno)d"
+)
+logHandler.setFormatter(formatter)
+
 logging.basicConfig(
     level=logging.DEBUG,
     filemode="w",
@@ -128,7 +136,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     tb = traceback.format_exc()
     exc_type = type(exc).__name__
     UNHANDLED_EXCEPTION_COUNT.inc()  # Increment unhandled exception counter
-    logging.error(f"Unhandled {exc_type} occurred: {exc}\nTraceback:\n{tb}")
+    logging.error({"error": f"Unhandled {exc_type} occurred: {exc}", "traceback": tb})
     return JSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
         content={"Error": "An unexpected error occurred. Please try again later."},
@@ -151,7 +159,10 @@ async def process_with_error_handling(func, *args, **kwargs):
         )
     except AssertionError as ae:
         logging.error(
-            f"AssertionError occurred: {ae}\nTraceback:\n{traceback.format_exc()}"
+            {
+                "error": f"AssertionError occurred: {ae}",
+                "traceback": traceback.format_exc(),
+            }
         )
         return JSONResponse(
             status_code=HTTP_400_BAD_REQUEST,
@@ -162,7 +173,10 @@ async def process_with_error_handling(func, *args, **kwargs):
     except Exception as e:
         UNHANDLED_EXCEPTION_COUNT.inc()  # Increment unhandled exception counter
         logging.error(
-            f"Unhandled exception occurred: {e}\nTraceback:\n{traceback.format_exc()}"
+            {
+                "error": f"Unhandled exception occurred: {e}",
+                "traceback": traceback.format_exc(),
+            }
         )
         return JSONResponse(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
@@ -199,7 +213,12 @@ async def alola_nrps_pks(request: Request, antismash_input: str):
         VALIDATION_ERROR_COUNT.inc()  # Increment validation error counter
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.errors())
 
-    logging.debug(f"Processing NRPS/PKS pathway with input: {validated_input}")
+    logging.debug(
+        {
+            "message": f"Processing NRPS/PKS pathway with input: {validated_input}",
+            "input_data": validated_input.dict(),
+        }
+    )
     return await process_with_error_handling(
         NRPSPKSPathway(validated_input.dict()).process
     )
@@ -220,7 +239,12 @@ async def alola_ripp(request: Request, antismash_input: str):
         VALIDATION_ERROR_COUNT.inc()  # Increment validation error counter
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.errors())
 
-    logging.debug(f"Processing RiPP pathway with input: {validated_input}")
+    logging.debug(
+        {
+            "message": f"Processing RiPP pathway with input: {validated_input}",
+            "input_data": validated_input.dict(),
+        }
+    )
     return await process_with_error_handling(
         RiPPPathway(validated_input.dict()).process
     )
@@ -241,7 +265,12 @@ async def alola_terpene(request: Request, antismash_input: str):
         VALIDATION_ERROR_COUNT.inc()  # Increment validation error counter
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.errors())
 
-    logging.debug(f"Processing Terpene pathway with input: {validated_input}")
+    logging.debug(
+        {
+            "message": f"Processing Terpene pathway with input: {validated_input}",
+            "input_data": validated_input.dict(),
+        }
+    )
     return await process_with_error_handling(
         TerpenePathway(validated_input.dict()).process
     )
