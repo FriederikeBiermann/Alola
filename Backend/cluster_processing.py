@@ -1,4 +1,3 @@
-import json
 import logging
 import asyncio
 from typing import Any, Dict, List, Optional
@@ -52,12 +51,8 @@ class BasePathway:
         Raises:
             ValueError: If the input JSON string is invalid or cannot be parsed.
         """
-        try:
-            self.antismash_input: Dict[str, Any] = json.loads(antismash_input)
-            logging.info("Successfully parsed antiSMASH input.")
-        except json.JSONDecodeError as e:
-            logging.error(f"Failed to parse antiSMASH input: {e}")
-            raise ValueError("Invalid JSON input provided.") from e
+
+        self.antismash_input: Dict[str, Any] = antismash_input
 
         self.cluster: Optional[Cluster] = None
         self.tailoring_reactions: List[TailoringRepresentation] = [
