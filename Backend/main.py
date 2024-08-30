@@ -1,39 +1,16 @@
-from fastapi import FastAPI, Query
-from fastapi.staticfiles import StaticFiles
-from starlette.middleware.cors import CORSMiddleware
-from starlette.middleware import Middleware
-import functools
-from typing import List, Optional, Callable
 import logging
 import traceback
 import sys
 import os
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware import Middleware
 
 # Adding the path to the cluster_processing module in the docker container
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from cluster_processing import NRPSPKSPathway, RiPPPathway, TerpenePathway
-
-
-def log_and_handle_errors(func: Callable):
-    """Decorator to log errors and return a standardized error response."""
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            tb = traceback.extract_tb(e.__traceback__)
-            exc_type = type(e).__name__
-            if tb:
-                filename, lineno, func_name, line_code = tb[-1]
-                logging.error(
-                    f"{exc_type} occurred in {func_name} at {filename}:{lineno} with line code: {line_code}"
-                )
-            else:
-                logging.error(f"{exc_type} occurred: {e}")
-            return {"Error": "An error occurred. Please check the input and try again."}
-
-    return wrapper
 
 
 # FastAPI app setup
@@ -49,13 +26,44 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
 )
 
-
-logging.debug("debug")
-logging.info("info")
-logging.warning("warning")
-logging.error("error")
-logging.critical("critical")
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    tb = traceback.format_exc()
+    exc_type = type(exc).__name__
+    logging.error(f"Unhandled {exc_type} occurred: {exc}\nTraceback:\n{tb}")
+    return JSONResponse(
+        status_code=500,
+        content={"Error": "An unexpected error occurred. Please try again later."},
+    )
+
+
+# Error handling function
+async def process_with_error_handling(func, *args, **kwargs):
+    try:
+        return await func(*args, **kwargs)
+    except AssertionError as ae:
+        logging.error(
+            f"AssertionError occurred: {ae}\nTraceback:\n{traceback.format_exc()}"
+        )
+        return JSONResponse(
+            status_code=400,
+            content={
+                "Error": "The Cluster is not biosynthetically correct, try undoing and incoperating other tailoring reactions."
+            },
+        )
+    except Exception as e:
+        logging.error(
+            f"Unhandled exception occurred: {e}\nTraceback:\n{traceback.format_exc()}"
+        )
+        return JSONResponse(
+            status_code=500,
+            content={
+                "Error": "The Cluster is not biosynthetically correct, try undoing and incoperating other tailoring reactions."
+            },
+        )
 
 
 # FastAPI Endpoints
@@ -69,22 +77,20 @@ async def root():
     }
 
 
-@log_and_handle_errors
+# Decorators with error handling do not work
+
+
 @app.get("/api/alola/nrps_pks/")
 async def alola_nrps_pks(antismash_input: str):
-    pathway = NRPSPKSPathway(antismash_input)
-    return pathway.process()
+    return await process_with_error_handling(NRPSPKSPathway(antismash_input).process)
 
 
-@log_and_handle_errors
 @app.get("/api/alola/ripp/")
 async def alola_ripp(antismash_input: str):
-    pathway = RiPPPathway(antismash_input)
-    return pathway.process()
+    logging.debug(f"Processing RiPP pathway with input: {antismash_input}")
+    return await process_with_error_handling(RiPPPathway(antismash_input).process)
 
 
-@log_and_handle_errors
 @app.get("/api/alola/terpene/")
 async def alola_terpene(antismash_input: str):
-    pathway = TerpenePathway(antismash_input)
-    return pathway.process()
+    return await process_with_error_handling(TerpenePathway(antismash_input).process)
