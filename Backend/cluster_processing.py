@@ -93,10 +93,13 @@ class BasePathway:
         logging.debug(f"Computed mass: {self.mass}")
 
         reactions = []
-        if self.cluster.tailoring_representations:
-            reactions.append("tailoring")
+
         if self.cluster.macrocyclisation_representations:
             reactions.append("cyclisation")
+
+        if self.cluster.tailoring_representations:
+            reactions.append("tailoring")
+
         if self.cluster.cleaved_intermediates:
             reactions.append("cleavage")
 
@@ -178,7 +181,9 @@ class RiPPPathway(BasePathway):
         logging.info("Processing RiPP pathway.")
         self.cluster.make_peptide()
         peptide_svg = self.process_svg(
-            self.cluster.draw_cluster(fold=10, size=7, as_string=True),
+            self.cluster.draw_cluster(
+                fold=10, size=7, as_string=True, draw_cs_in_pink=True
+            ),
             "precursor_drawing",
         )
         if self.tailoring_reactions:
@@ -193,7 +198,9 @@ class RiPPPathway(BasePathway):
         if self.macrocyclisations:
             self.cluster.do_macrocyclization()
         cyclised_product_svg = self.process_svg(
-            self.cluster.draw_cluster(fold=5, size=7, as_string=True),
+            self.cluster.draw_cluster(
+                fold=5, size=7, as_string=True, draw_cs_in_pink=True
+            ),
             "cyclised_drawing",
         )
         self.final_product = self.cluster.chain_intermediate
@@ -216,7 +223,7 @@ class RiPPPathway(BasePathway):
             "tailoringSites": self.tailoring_sites,
             "rawPeptideChain": peptide_svg,
             "cyclisedStructure": cyclised_product_svg,
-            "aminoAcidsForCleavage": str(amino_acids_for_cleavage),
+            "aminoAcidsForCleavage": amino_acids_for_cleavage,
             "structureForTailoring": svg_structure_for_tailoring,
         }
 
@@ -473,7 +480,7 @@ class TerpenePathway(BasePathway):
         self.tailored_product = self.cluster.chain_intermediate
         self.final_product = self.cluster.chain_intermediate
         svg_final_product = self.process_svg(
-            self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
+            self.cluster.draw_product(as_string=True),
             "final_drawing",
         )
         svg_tailoring = self.process_svg(svg_final_product, "intermediate_drawing")
