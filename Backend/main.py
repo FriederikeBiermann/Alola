@@ -18,7 +18,7 @@ from starlette.status import (
     HTTP_429_TOO_MANY_REQUESTS,
 )
 from pydantic import BaseModel, Field, ValidationError
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union, Type
 from prometheus_client import Counter, Histogram, generate_latest
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -28,7 +28,9 @@ from slowapi.util import get_remote_address
 
 class NRPSPKSPathwayInput(BaseModel):
     clusterRepresentation: List[List[Any]]
-    tailoring: Optional[List[List[str]]] = Field(default_factory=list)
+    tailoring: Optional[List[List[Union[str, List[List[str]]]]]] = Field(
+        default_factory=list
+    )
     cyclization: Optional[str] = None
 
 
@@ -37,7 +39,9 @@ class RiPPPathwayInput(BaseModel):
     rippFullPrecursor: str
     rippPrecursor: str
     cyclization: Optional[List[List[str]]] = Field(default_factory=list)
-    tailoring: Optional[List[List[str]]] = Field(default_factory=list)
+    tailoring: Optional[List[List[Union[str, List[List[str]]]]]] = Field(
+        default_factory=list
+    )
 
 
 class TerpenePathwayInput(BaseModel):
@@ -46,7 +50,9 @@ class TerpenePathwayInput(BaseModel):
     terpene_cyclase_type: str
     cyclization: Optional[List[List[str]]] = Field(default_factory=list)
     double_bond_isomerase: Optional[List[List[str]]] = Field(default_factory=list)
-    tailoring: Optional[List[List[str]]] = Field(default_factory=list)
+    tailoring: Optional[List[List[Union[str, List[List[str]]]]]] = Field(
+        default_factory=list
+    )
     methyl_mutase: Optional[List[List[str]]] = Field(default_factory=list)
 
 
@@ -92,7 +98,8 @@ app.add_middleware(
 
 # Add the SlowAPI middleware for rate limiting
 app.state.limiter = limiter
-app.add_exception_handler(HTTPException, _rate_limit_exceeded_handler)
+app.add_exception_handler(HTTP_429_TOO_MANY_REQUESTS, _rate_limit_exceeded_handler)
+
 app.add_middleware(SlowAPIMiddleware)
 
 # Mount static files
@@ -143,7 +150,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-@app.exception_handler(HTTP_429_TOO_MANY_REQUESTS)
 async def rate_limit_exceeded_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=HTTP_429_TOO_MANY_REQUESTS,
@@ -186,9 +192,40 @@ async def process_with_error_handling(func, *args, **kwargs):
         )
 
 
+async def process_pathway(
+    request: Request,
+    antismash_input: str,
+    input_model: Type[BaseModel],
+    pathway_class: Type[Any],
+):
+    try:
+        input_data = json.loads(antismash_input)
+        logging.debug(f"JSON input {input_data}")
+        validated_input = input_model(**input_data)
+    except json.JSONDecodeError:
+        JSON_DECODE_ERROR_COUNT.inc()  # Increment JSON decoding error counter
+        logging.error(f"Invalid JSON input {antismash_input}")
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="Invalid JSON input"
+        )
+    except ValidationError as e:
+        VALIDATION_ERROR_COUNT.inc()  # Increment validation error counter
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.errors())
+
+    logging.debug(
+        {
+            "message": f"Processing pathway with input: {validated_input}",
+            "input_data": validated_input.dict(),
+        }
+    )
+    return await process_with_error_handling(
+        pathway_class(validated_input.dict()).process
+    )
+
+
 # FastAPI Endpoints
 @app.get("/")
-@limiter.limit("1/second")
+# @limiter.limit("1/second")
 async def root(request: Request):
     return {
         "message": "This is the first Version of the Alola Api for integrating Alola into the web",
@@ -198,86 +235,35 @@ async def root(request: Request):
     }
 
 
-@app.get("/api/alola/nrps_pks/")
-@limiter.limit("1/second")
-async def alola_nrps_pks(request: Request, antismash_input: str):
-    try:
-        input_data = json.loads(antismash_input)
-        validated_input = NRPSPKSPathwayInput(**input_data)
-    except json.JSONDecodeError:
-        JSON_DECODE_ERROR_COUNT.inc()  # Increment JSON decoding error counter
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail="Invalid JSON input"
-        )
-    except ValidationError as e:
-        VALIDATION_ERROR_COUNT.inc()  # Increment validation error counter
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.errors())
-
-    logging.debug(
-        {
-            "message": f"Processing NRPS/PKS pathway with input: {validated_input}",
-            "input_data": validated_input.dict(),
-        }
-    )
-    return await process_with_error_handling(
-        NRPSPKSPathway(validated_input.dict()).process
-    )
-
-
-@app.get("/api/alola/ripp/")
-@limiter.limit("1/second")
-async def alola_ripp(request: Request, antismash_input: str):
-    try:
-        input_data = json.loads(antismash_input)
-        validated_input = RiPPPathwayInput(**input_data)
-    except json.JSONDecodeError:
-        JSON_DECODE_ERROR_COUNT.inc()  # Increment JSON decoding error counter
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail="Invalid JSON input"
-        )
-    except ValidationError as e:
-        VALIDATION_ERROR_COUNT.inc()  # Increment validation error counter
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.errors())
-
-    logging.debug(
-        {
-            "message": f"Processing RiPP pathway with input: {validated_input}",
-            "input_data": validated_input.dict(),
-        }
-    )
-    return await process_with_error_handling(
-        RiPPPathway(validated_input.dict()).process
-    )
-
-
-@app.get("/api/alola/terpene/")
-@limiter.limit("1/second")
-async def alola_terpene(request: Request, antismash_input: str):
-    try:
-        input_data = json.loads(antismash_input)
-        validated_input = TerpenePathwayInput(**input_data)
-    except json.JSONDecodeError:
-        JSON_DECODE_ERROR_COUNT.inc()  # Increment JSON decoding error counter
-        raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST, detail="Invalid JSON input"
-        )
-    except ValidationError as e:
-        VALIDATION_ERROR_COUNT.inc()  # Increment validation error counter
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail=e.errors())
-
-    logging.debug(
-        {
-            "message": f"Processing Terpene pathway with input: {validated_input}",
-            "input_data": validated_input.dict(),
-        }
-    )
-    return await process_with_error_handling(
-        TerpenePathway(validated_input.dict()).process
-    )
-
-
 # Prometheus Metrics Endpoint
 @app.get("/metrics")
 @limiter.limit("1/second")
 async def metrics(request: Request):
     return Response(generate_latest(), media_type="text/plain")
+
+
+@app.get("/api/alola/nrps_pks/")
+@app.get("/api/alola/nrps_pks")
+@limiter.limit("3/second")
+async def alola_nrps_pks(request: Request, antismash_input: str):
+    return await process_pathway(
+        request, antismash_input, NRPSPKSPathwayInput, NRPSPKSPathway
+    )
+
+
+@app.get("/api/alola/ripp/")
+@app.get("/api/alola/ripp")
+@limiter.limit("3/second")
+async def alola_ripp(request: Request, antismash_input: str):
+    return await process_pathway(
+        request, antismash_input, RiPPPathwayInput, RiPPPathway
+    )
+
+
+@app.get("/api/alola/terpene/")
+@app.get("/api/alola/terpene")
+@limiter.limit("3/second")
+async def alola_terpene(request: Request, antismash_input: str):
+    return await process_pathway(
+        request, antismash_input, TerpenePathwayInput, TerpenePathway
+    )
