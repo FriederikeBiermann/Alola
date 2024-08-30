@@ -1,5 +1,6 @@
 import json
 import logging
+import asyncio
 from typing import Any, Dict, List, Optional
 
 from pikachu.chem.structure import Structure
@@ -171,7 +172,7 @@ class RiPPPathway(BasePathway):
         )
         logging.info("RiPPPathway initialized and cluster built.")
 
-    def process(self) -> Dict[str, Any]:
+    async def process(self) -> Dict[str, Any]:
         """Processes the RiPP pathway and generates the necessary outputs.
 
         Returns:
@@ -214,18 +215,21 @@ class RiPPPathway(BasePathway):
             for index, aa in enumerate(self.antismash_input["rippPrecursor"])
         ]
 
-        return {
-            "svg": cleaved_ripp_svg,
-            "smiles": self.smiles,
-            "mass": self.mass,
-            "pathway_svg": self.pathway_svg,
-            "atomsForCyclisation": str(self.atoms_for_cyclisation),
-            "tailoringSites": self.tailoring_sites,
-            "rawPeptideChain": peptide_svg,
-            "cyclisedStructure": cyclised_product_svg,
-            "aminoAcidsForCleavage": amino_acids_for_cleavage,
-            "structureForTailoring": svg_structure_for_tailoring,
-        }
+        return await asyncio.sleep(
+            0,
+            {
+                "svg": cleaved_ripp_svg,
+                "smiles": self.smiles,
+                "mass": self.mass,
+                "pathway_svg": self.pathway_svg,
+                "atomsForCyclisation": str(self.atoms_for_cyclisation),
+                "tailoringSites": self.tailoring_sites,
+                "rawPeptideChain": peptide_svg,
+                "cyclisedStructure": cyclised_product_svg,
+                "aminoAcidsForCleavage": amino_acids_for_cleavage,
+                "structureForTailoring": svg_structure_for_tailoring,
+            },
+        )
 
 
 class NRPSPKSPathway(BasePathway):
@@ -272,7 +276,7 @@ class NRPSPKSPathway(BasePathway):
             ]
         return ClusterRepresentation(formatted_modules, self.tailoring_reactions)
 
-    def process(self) -> Dict[str, Any]:
+    async def process(self) -> Dict[str, Any]:
         """Processes the NRPS/PKS pathway and generates the necessary outputs.
 
         Returns:
@@ -285,7 +289,7 @@ class NRPSPKSPathway(BasePathway):
         self.final_product = self._perform_cyclization()
         self._draw_pathway_mass_smiles_tailoring_sites()
         self._prepare_svgs()
-        return self._prepare_response()
+        return await asyncio.sleep(0, self._prepare_response())
 
     def _perform_cyclization(self) -> Structure:
         """Performs cyclization if specified.
@@ -454,7 +458,7 @@ class TerpenePathway(BasePathway):
             self.tailoring_reactions,
         )
 
-    def process(self) -> Dict[str, Any]:
+    async def process(self) -> Dict[str, Any]:
         """Processes the Terpene pathway and generates the necessary outputs.
 
         Returns:
@@ -508,14 +512,17 @@ class TerpenePathway(BasePathway):
             svg_tailoring,
         )
 
-        return {
-            "svg": svg_final_product,
-            "smiles": self.smiles,
-            "mass": self.mass,
-            "pathway_svg": self.pathway_svg,
-            "atomsForCyclisation": self.atoms_for_cyclisation,
-            "tailoringSites": str(self.tailoring_sites),
-            "precursor": precursor_svg,
-            "cyclizedStructure": cyclised_product_svg,
-            "structureForTailoring": svg_tailoring,
-        }
+        return await asyncio.sleep(
+            0,
+            {
+                "svg": svg_final_product,
+                "smiles": self.smiles,
+                "mass": self.mass,
+                "pathway_svg": self.pathway_svg,
+                "atomsForCyclisation": self.atoms_for_cyclisation,
+                "tailoringSites": str(self.tailoring_sites),
+                "precursor": precursor_svg,
+                "cyclizedStructure": cyclised_product_svg,
+                "structureForTailoring": svg_tailoring,
+            },
+        )

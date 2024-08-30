@@ -7,6 +7,28 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware import Middleware
+from starlette.status import (
+    HTTP_200_OK,
+    HTTP_400_BAD_REQUEST,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
+from pydantic import BaseModel, Field
+from typing import List, Optional
+
+
+class AntismashInput(BaseModel):
+    rippPrecursor: str
+    cyclization: Optional[List[str]] = Field(default_factory=list)
+    tailoring: Optional[List[List[str]]] = Field(default_factory=list)
+    rippPrecursorName: str
+    rippFullPrecursor: str
+
+
+class NRPSPKSInput(BaseModel):
+    clusterRepresentation: List[List]
+    tailoring: Optional[List[List[str]]] = Field(default_factory=list)
+    cyclization: Optional[str] = None
+
 
 # Adding the path to the cluster_processing module in the docker container
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -35,7 +57,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     exc_type = type(exc).__name__
     logging.error(f"Unhandled {exc_type} occurred: {exc}\nTraceback:\n{tb}")
     return JSONResponse(
-        status_code=500,
+        status_code=HTTP_500_INTERNAL_SERVER_ERROR,
         content={"Error": "An unexpected error occurred. Please try again later."},
     )
 
@@ -43,13 +65,15 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Error handling function
 async def process_with_error_handling(func, *args, **kwargs):
     try:
-        return await func(*args, **kwargs)
+        return JSONResponse(
+            content=await func(*args, **kwargs), status_code=HTTP_200_OK
+        )
     except AssertionError as ae:
         logging.error(
             f"AssertionError occurred: {ae}\nTraceback:\n{traceback.format_exc()}"
         )
         return JSONResponse(
-            status_code=400,
+            status_code=HTTP_400_BAD_REQUEST,
             content={
                 "Error": "The Cluster is not biosynthetically correct, try undoing and incoperating other tailoring reactions."
             },
@@ -59,7 +83,7 @@ async def process_with_error_handling(func, *args, **kwargs):
             f"Unhandled exception occurred: {e}\nTraceback:\n{traceback.format_exc()}"
         )
         return JSONResponse(
-            status_code=500,
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
             content={
                 "Error": "The Cluster is not biosynthetically correct, try undoing and incoperating other tailoring reactions."
             },
