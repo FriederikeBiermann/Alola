@@ -37,6 +37,10 @@ textarea {
   color: black;
   text-decoration-color: white;
 }
+#save_enzymatic_pathway_svg {
+  color: black;
+  text-decoration-color: white;
+}
 
 #save_svg {
   color: black;
@@ -179,6 +183,38 @@ label {
   padding: 0.1vh 0.1vh;
   text-decoration: none;
   font-size: 0.7vw;
+}
+.redoUndo_button {
+  position: relative;
+  float: left;
+  margin: 0.2vh;
+  color: #2B2B2B;
+  text-align: center;
+  padding: 0.1vh 0.1vh;
+  text-decoration: none;
+  font-size: 0.7vw;
+
+}
+.redoUndo_button:hover:not(.disabled) {
+  background-color: #E11839; /* Hover color for enabled state */
+  color: black;
+}
+
+.redoUndo_button.disabled {
+  background-color: white; /* No background color change for disabled state */
+  color: #2B2B2B; /* Keep the text color same as the default */
+  cursor: not-allowed; /* Change cursor to indicate the button is not clickable */
+}
+
+.molecular_mass {
+  position: relative;
+  text-decoration: none;
+  font-size: 0.8vw;
+}
+
+.molecular_mass .mass_value {
+  font-size: 0.8vw; 
+  font-weight: normal; 
 }
 
 .regionButton {
@@ -430,7 +466,6 @@ input:checked+.slider:before {
 .dropdown {
   position: relative;
   display: inline-block;
-
 }
 
 /* Dropdown Content (Hidden by Default) */
@@ -438,11 +473,15 @@ input:checked+.slider:before {
   opacity: 0.9;
   display: none;
   position: absolute;
-  background-color: white;
+  background-color: rgb(188, 185, 185);
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
   min-width: 3.75vw;
   margin-top: -0.5vw;
+  max-height: 200px; /* Feste Höhe */
+  overflow-y: auto; /* Vertikale Scrollbar hinzufügen, wenn der Inhalt zu groß ist */
+  scrollbar-width: auto; /* Scrollbar-Breite: auto, thin, oder none */
+  scrollbar-color: red #f1f1f1;
 }
 
 svg text {
@@ -459,6 +498,7 @@ svg text {
   width: 100%;
   text-transform: capitalize;
   text-align: start;
+  
 }
 
 .dropdown-content button:active {
@@ -484,8 +524,8 @@ svg text {
 .dropbtn-tailoring {
   position: relative;
   background-color: transparent;
-  font-size: 1.6vh;
-  text-transform: capitalize;
+  font-size: 1.4vh;
+  text-transform: none;
   border: none;
 }
 
@@ -519,8 +559,13 @@ svg text {
   background-color: white;
   box-shadow: 0px 0.8vh 1.6vh 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
-  min-width: 170*0.025vw;
+  min-width: 5vw;
+  max-width: 10vw;
   margin-top: -2vh;
+  max-height: 200px; /* Feste Höhe */
+  overflow-y: auto; /* Vertikale Scrollbar hinzufügen, wenn der Inhalt zu groß ist */
+  scrollbar-width: auto; /* Scrollbar-Breite: auto, thin, oder none */
+  scrollbar-color: red #f1f1f1;
 }
 
 
@@ -536,7 +581,6 @@ svg text {
   text-decoration: none;
   display: block;
   width: 100%;
-  text-transform: capitalize;
   text-align: start;
 }
 
@@ -600,7 +644,9 @@ svg text {
   padding: 0.2vh;
   background-color: #fff;
   color: black;
-  font-size: 1.6vh;;
+  font-size: 1.6vh;
+  max-height: 250px; /* Feste Höhe */
+
 }
 
 .formContainer .btn {

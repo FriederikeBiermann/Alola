@@ -357,7 +357,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                 domainIndex + ",\x22" +
                                                 short_option +
                                                 "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                                                option +
+                                                option.replaceAll("_", " ") +
                                                 "</button>";
                                             //format default option differently
 
@@ -599,7 +599,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
             for (let reactionOptionIndex = 0; reactionOptionIndex <
                 reaction_options.length; reactionOptionIndex++) {
                 let reactionOption = reaction_options[reactionOptionIndex].toString();
-                let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption + "</button>";
+                let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption.replaceAll("_", " ") + "</button>";
                 innerDropdownContent.innerHTML += reactionOptionContent
             }
             for (let reactionOptionIndex = 0; reactionOptionIndex <
@@ -637,46 +637,20 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                     for (let atomOptionIndex = 0; atomOptionIndex <
                         atomOptions.length; atomOptionIndex++) {
                         let atomOption = atomOptions[atomOptionIndex]
-                        innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption.toString().replaceAll(" ", "")
+                        if (atomOption.includes(",")) {
+                            let atomOptionParts = atomOption.split(",");
+                            let atomOption1 = atomOptionParts[0].replaceAll(" ", "");
+                            let atomOption2 = atomOptionParts[1].replaceAll(" ", "");
+                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
+                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption1 + "\x22);hover_in_atom(\x22" + atomOption2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption1 + "\x22);hover_out_atom(\x22" + atomOption2 + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
+
+                        }
+                        else{
+                        innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
                             + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
-                        
+                        }
                     }
                 }
-
-                // "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionTailoring(geneMatrix," +
-                // geneIndex + ",\x22" +
-                // short_option +
-                // "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                // option +
-                // "</button>";
-                //format default option differently
-                // if (  geneMatrix[geneIndex].options[
-                //         optionIndex] ==
-                //       geneMatrix[geneIndex].default_option
-                // ) {
-                //     optionContent =
-                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                //         geneIndex +
-                //         ",\x22" +
-                //           short_option+
-                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
-                //           option +
-                //         "</button>";
-                // }
-                // //format active option differently
-
-                // if (  toString(geneMatrix[geneIndex].selected_option).includes(short_option)
-                // ) {
-                //     optionContent =
-                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:#E11839; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                //         geneIndex +
-                //         ",\x22" +
-                //           short_option+
-                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
-                //           option +
-                //         "</button>";
-                // }
-
 
             }
 

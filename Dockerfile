@@ -4,15 +4,21 @@ COPY ./src/package.json ./src/package-lock.json ./
 RUN npm install
 COPY ./src/index.html ./public/
 COPY ./src/index.css ./public/
+COPY ./src/Alola_Manual_new.html ./public/
+COPY ./src/*.png ./public/
+COPY ./src/*.jpg ./public/
+COPY ./src/*.svg ./public/
 COPY ./src/*.js ./public/
 COPY ./src/ ./src
 RUN npm run build && npm install -g npm@8 npx@latest
 FROM python:3.9
 WORKDIR /code
 COPY ./RAIChU /code/RAIChU
+COPY ./pikachu /code/Pikachu
 
 # Install the package using pip
 RUN pip install /code/RAIChU
+RUN pip install /code/Pikachu
 COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 COPY ./Backend /code/app
