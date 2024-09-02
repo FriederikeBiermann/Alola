@@ -90,7 +90,7 @@ app = FastAPI()
 # Add the CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "localhost:3000"],
+    allow_origins=["https://alola.bioinformatics.nl", "https://www.alola.bioinformatics.nl"], # for server version
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
