@@ -208,7 +208,7 @@ label {
 
 #mass_and_formula_container {
   display: flex;            /* Align elements horizontally */
-  gap: 100px;                /* Space between Mass and Sum Formula */
+  gap: 80px;                /* Space between Mass and Sum Formula */
   align-items: center;      /* Vertically center items if needed */
   margin-bottom: 10px;      /* Optional space below this section */
 }
