@@ -1535,6 +1535,7 @@ async function fetchFromRaichu(details_data, regionName, geneMatrix, cluster_typ
             drawing.style["max-width"] = "100%"
             drawing.style["max-height"] = "100%"
             molecularMass(raichu_output.mass)
+            sumFormula(raichu_output.sum_formula)
 
             smiles_container.addEventListener("click", (event) => { navigator.clipboard.writeText(raichu_output.smiles)})}
     else{
@@ -1993,8 +1994,10 @@ function molecularMass(mass) {
     let reoundedmass = mass.toFixed(4);
     document.getElementById("molecular_mass_value").innerHTML = `${reoundedmass} Da`;
 }
-
-      
+function sumFormula(sum_formula) {
+    document.getElementById("Sum_Formula_value").innerHTML = sum_formula;
+}
+     
 
 function openNRPSForm() {
     document.getElementById("popupFormNRPS").style.display = "block";

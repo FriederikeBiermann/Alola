@@ -206,6 +206,12 @@ label {
   cursor: not-allowed; /* Change cursor to indicate the button is not clickable */
 }
 
+#mass_and_formula_container {
+  display: flex;            /* Align elements horizontally */
+  gap: 100px;                /* Space between Mass and Sum Formula */
+  align-items: center;      /* Vertically center items if needed */
+  margin-bottom: 10px;      /* Optional space below this section */
+}
 .molecular_mass {
   position: relative;
   text-decoration: none;
