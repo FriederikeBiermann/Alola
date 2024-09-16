@@ -65,7 +65,7 @@ class BasePathway:
         self.svg_structure_for_tailoring: Optional[str] = None
         self.svg_final: Optional[str] = None
         self.mass: Optional[float] = None
-        self.sum_formula = Optional[str] = None
+        self.sum_formula: Optional[str] = None
         self.pathway_svg: Optional[str] = None
         self.smiles: Optional[str] = None
         self.tailoring_sites: Optional[List[str]] = None
