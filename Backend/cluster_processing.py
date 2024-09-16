@@ -65,6 +65,7 @@ class BasePathway:
         self.svg_structure_for_tailoring: Optional[str] = None
         self.svg_final: Optional[str] = None
         self.mass: Optional[float] = None
+        self.sum_formula = Optional[str] = None
         self.pathway_svg: Optional[str] = None
         self.smiles: Optional[str] = None
         self.tailoring_sites: Optional[List[str]] = None
@@ -87,6 +88,9 @@ class BasePathway:
 
         self.mass = self.final_product.get_mass()
         logging.debug(f"Computed mass: {self.mass}")
+
+        self.sum_formula = self.final_product.get_sum_formula() 
+        logging.debug(f"Computed sum_formula: {self.sum_formula}")
 
         reactions = []
 
@@ -216,6 +220,7 @@ class RiPPPathway(BasePathway):
                 "svg": cleaved_ripp_svg,
                 "smiles": self.smiles,
                 "mass": self.mass,
+                "sum_formula": self.sum_formula,
                 "pathway_svg": self.pathway_svg,
                 "atomsForCyclisation": str(self.atoms_for_cyclisation),
                 "tailoringSites": self.tailoring_sites,
@@ -346,6 +351,7 @@ class NRPSPKSPathway(BasePathway):
             "hangingSvg": self._get_drawings(self.cluster),
             "smiles": self.smiles,
             "mass": self.mass,
+            "sum_formula": self.sum_formula,
             "pathway_svg": self.pathway_svg,
             "atomsForCyclisation": str(self.atoms_for_cyclisation),
             "tailoringSites": str(
@@ -493,12 +499,13 @@ class TerpenePathway(BasePathway):
             ]
         )
         logging.debug(
-            "Returning the following data: SVG Final Product: %s, SMILES: %s, Mass: %s, Pathway SVG: %s, "
+            "Returning the following data: SVG Final Product: %s, SMILES: %s, Mass: %s, Sum Formula: %s, Pathway SVG: %s, "
             "Atoms for Cyclisation: %s, Tailoring Sites: %s, Precursor SVG: %s, Cyclized Structure SVG: %s, "
             "Structure for Tailoring SVG: %s",
             svg_final_product,
             self.smiles,
             self.mass,
+            self.sum_formula,
             self.pathway_svg,
             self.atoms_for_cyclisation,
             str(self.tailoring_sites),
@@ -513,6 +520,7 @@ class TerpenePathway(BasePathway):
                 "svg": svg_final_product,
                 "smiles": self.smiles,
                 "mass": self.mass,
+                "sum_formula": self.sum_formula,
                 "pathway_svg": self.pathway_svg,
                 "atomsForCyclisation": self.atoms_for_cyclisation,
                 "tailoringSites": str(self.tailoring_sites),
