@@ -8,7 +8,7 @@ var RiPPer = {
     tooltip_id_domain: "RiPPer-tooltip-123"
 };
 
-RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600, proteaseOptions = null){
+RiPPer.drawCluster = (function (cluster, geneMatrix, proteaseOptions = null, height = 90 , space = 600){
     var container = document.getElementById('domain_container')
     var scale = (function (val) {
         return parseInt(val / (1000 / height));
@@ -22,7 +22,7 @@ RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600, 
     if (document.getElementById("wildcardProtease")
         .checked || proteaseOptions) {
         RiPPer.drawProtease(height, scale, proteaseOptions);
-        RiPPer.leaveSpace(space, "cleavedProduct", scale);
+        RiPPer.leaveSpace(space, "cleavedProduct_space", scale);
     }
 
     return $(container)
@@ -325,9 +325,17 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
                                 + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption_1 + "\x22);hover_in_atom(\x22" + atomOption_2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption_1 + "\x22);hover_out_atom(\x22" + atomOption_2 + "\x22);'>" + atomOption + "</button>";
 
                         }
+                        else if (atomOption.includes(",")) {
+                            let atomOptionParts = atomOption.split(",");
+                            let atomOption1 = atomOptionParts[0].replaceAll(" ", "");
+                            let atomOption2 = atomOptionParts[1].replaceAll(" ", "");
+                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
+                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption1 + "\x22);hover_in_atom(\x22" + atomOption2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption1 + "\x22);hover_out_atom(\x22" + atomOption2 + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
+
+                        }
                         else {
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
+                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
+                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
                         }
                     }
                 }

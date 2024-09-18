@@ -1,8 +1,10 @@
 /* Copyright 2017 Satria A. Kautsar*/
-var type_colors={
-  "biosynthetic-additional":"grey",
-  "biosynthetic":"white",
-  "other":"#2B2B2B"
+var type_colors = {
+  "biosynthetic-additional": "grey",
+  "biosynthetic": "white",
+  "other": "#2B2B2B",
+  "regulatory": "#025699",
+  "transport": "#025699",
 }
 var Arrower = {
     version: "1.0.0",
@@ -31,7 +33,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
         orf_color = orf.color;
       }
       if (orf.hasOwnProperty("type")) {
-        orf_color = type_colors[orf.type]
+        orf_color = type_colors[orf.type];
       }
       var pol = draw.polygon(Arrower.toPointString(Arrower.getArrowPoints(orf, cluster, height, scale)))
 
