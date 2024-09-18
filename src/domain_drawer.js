@@ -356,7 +356,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                 geneIndex + ',' + moduleIndex + "," +
                                                 domainIndex + ",\x22" +
                                                 short_option +
-                                                "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                                                "\x22," + optionIndex + ");'  onmouseenter='svgHandler.hoverInAtom(\x22" + short_option + "\x22);' onmouseout='svgHandler.hoverOutAtom(\x22" + short_option + "\x22);'>" +
                                                 option.replaceAll("_", " ") +
                                                 "</button>";
                                             //format default option differently
@@ -372,7 +372,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                     domainIndex +
                                                     ",\x22" +
                                                     short_option +
-                                                    "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                                                "\x22," + optionIndex + ");'   onmouseenter='svgHandler.hoverInAtom(\x22" + short_option + "\x22);' onmouseout='svgHandler.hoverOutAtom(\x22" + short_option + "\x22);'>" +
                                                     option +
                                                     "</button>";
                                             }
@@ -387,7 +387,7 @@ Domainer.drawClusterSVG = (function (cluster, height = 90) {
                                                     domainIndex +
                                                     ",\x22," +
                                                     short_option +
-                                                    "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
+                                                "\x22," + optionIndex + ");'   onmouseenter='svgHandler.hoverInAtom(\x22" + short_option + "\x22);' onmouseout='svgHandler.hoverOutAtom(\x22" + short_option + "\x22);'>" +
                                                     option +
                                                     "</button>";
                                             }
@@ -642,12 +642,12 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                             let atomOption1 = atomOptionParts[0].replaceAll(" ", "");
                             let atomOption2 = atomOptionParts[1].replaceAll(" ", "");
                             innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption1 + "\x22);hover_in_atom(\x22" + atomOption2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption1 + "\x22);hover_out_atom(\x22" + atomOption2 + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
+                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='svgHandler.hoverInAtom(\x22" + atomOption1 + "\x22);svgHandler.hoverInAtom(\x22" + atomOption2 + "\x22);' onmouseout='svgHandler.hoverOutAtom(\x22" + atomOption1 + "\x22);svgHandler.hoverOutAtom(\x22" + atomOption2 + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
 
                         }
                         else{
                         innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
-                            + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
+                            + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='svgHandler.hoverInAtom(\x22" + atomOption.replaceAll(" ", "") + "\x22);' onmouseout='svgHandler.hoverOutAtom(\x22" + atomOption.replaceAll(" ", "") + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
                         }
                     }
                 }

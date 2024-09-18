@@ -1,0 +1,262 @@
+class SVGHandler {
+    constructor() {
+        this.clusterType = '';
+    }
+
+    setClusterType(type) {
+        this.clusterType = type;
+    }
+
+    addDropShadowFilterToSVG(svgElement) {
+        let defs = svgElement.querySelector('defs') || this.createDefs(svgElement);
+        this.createFilter(defs, 'dropShadow', 'red', 3, 5, 5);
+        this.createFilter(defs, 'intenseGlowShadow', '#E11839', 5, 0, 0);
+    }
+
+    createDefs(svgElement) {
+        let defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        svgElement.insertBefore(defs, svgElement.firstChild);
+        return defs;
+    }
+
+    createFilter(defs, id, color, blurStdDeviation, dx, dy) {
+        let filter = document.createElementNS("http://www.w3.org/2000/svg", "filter");
+        filter.setAttribute("id", id);
+        filter.setAttribute("x", "-50%");
+        filter.setAttribute("y", "-50%");
+        filter.setAttribute("width", "200%");
+        filter.setAttribute("height", "200%");
+
+        let feGaussianBlur = document.createElementNS("http://www.w3.org/2000/svg", "feGaussianBlur");
+        feGaussianBlur.setAttribute("in", "SourceAlpha");
+        feGaussianBlur.setAttribute("stdDeviation", blurStdDeviation);
+
+        let feOffset = document.createElementNS("http://www.w3.org/2000/svg", "feOffset");
+        feOffset.setAttribute("dx", dx);
+        feOffset.setAttribute("dy", dy);
+        feOffset.setAttribute("result", "offsetblur");
+
+        let feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood");
+        feFlood.setAttribute("flood-color", color);
+
+        let feComposite = document.createElementNS("http://www.w3.org/2000/svg", "feComposite");
+        feComposite.setAttribute("in2", "offsetblur");
+        feComposite.setAttribute("operator", "in");
+
+        let feMerge = document.createElementNS("http://www.w3.org/2000/svg", "feMerge");
+        let feMergeNode1 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+        let feMergeNode2 = document.createElementNS("http://www.w3.org/2000/svg", "feMergeNode");
+        feMergeNode2.setAttribute("in", "SourceGraphic");
+
+        feMerge.appendChild(feMergeNode1);
+        feMerge.appendChild(feMergeNode2);
+        filter.appendChild(feGaussianBlur);
+        filter.appendChild(feOffset);
+        filter.appendChild(feFlood);
+        filter.appendChild(feComposite);
+        filter.appendChild(feMerge);
+
+        defs.appendChild(filter);
+    }
+
+    highlightAtomInSVG(atom, color, width, shadowId = "dropShadow") {
+        if (this.clusterType === "ripp") {
+            this.highlightRippAtom(atom, color, width, shadowId);
+        } else {
+            this.highlightOtherAtom(atom, color, width, shadowId);
+        }
+    }
+
+    highlightRippAtom(atom, color, width, shadowId) {
+        const groupId = "atom_" + atom;
+        const group = document.getElementById(groupId);
+        if (group) {
+            Array.from(group.children).forEach(child => {
+                if (['line', 'path', 'circle'].includes(child.nodeName.toLowerCase())) {
+                    child.style.stroke = color;
+                    child.style.strokeWidth = width;
+                    child.style.filter = `url(#${shadowId})`;
+                    if (color !== "none") {
+                        child.style.fill = color;
+                    }
+                }
+            });
+        }
+    }
+
+    highlightOtherAtom(atom, color, width, shadowId) {
+        if (atom.toString().includes("_")) {
+            let links = document.querySelectorAll(`a[*|href="${atom}"]`);
+            links.forEach(link => {
+                if (this.isValidParent(link.parentElement.parentElement.parentElement.parentElement)) {
+                    let path = link.childNodes[3];
+                    path.setAttribute('style', `fill:${color}; stroke:${color}; stroke-width:${width}; filter:url(#${shadowId});`);
+                    this.addHoverEvents(path, atom);
+                }
+            });
+        }
+    }
+
+    isValidParent(parent) {
+        const validIds = [
+            "intermediate_drawing_tailoring",
+            "intermediate_drawing_cyclisation_terpene",
+            "intermediate_drawing_cyclisation",
+            "intermediate_drawing_precursor",
+            "intermediate_drawing_tailored"
+        ];
+        return validIds.includes(parent.id);
+    }
+
+    addHoverEvents(element, atom) {
+        element.addEventListener('mouseenter', () => {
+            document.dispatchEvent(new CustomEvent('hoverin_atom', { detail: atom }));
+        });
+        element.addEventListener('mouseleave', () => {
+            document.dispatchEvent(new CustomEvent('hoverout_atom', { detail: atom }));
+        });
+    }
+
+    hoverInAtom(atom) {
+        const color = "#E11839";
+        const width = this.clusterType === "ripp" ? "5" : "50";
+        const shadowId = this.clusterType === "ripp" ? "intenseGlowShadow" : "dropShadow";
+        this.highlightAtomInSVG(atom, color, width, shadowId);
+    }
+
+    hoverOutAtom(atom) {
+        if (this.clusterType === "ripp") {
+            this.highlightAtomInSVG(atom, "black", "1", "none");
+        } else {
+            const color = atom.indexOf("C") >= 0 ? "none" : "black";
+            this.highlightAtomInSVG(atom, color, "1", "none");
+        }
+    }
+
+    zoomIn() {
+        this.zoom(30);
+    }
+
+    zoomOut() {
+        this.zoom(-30);
+    }
+
+    zoom(delta) {
+        let drawing = document.getElementById("final_drawing");
+        let styles = window.getComputedStyle(drawing);
+        let width = parseInt(styles.width) + delta;
+        let height = parseInt(styles.height) + delta;
+
+        drawing.style.maxWidth = "";
+        drawing.style.maxHeight = "";
+        drawing.style.width = `${width}px`;
+        drawing.style.height = `${height}px`;
+    }
+
+    formatSVGIntermediates(svg) {
+        return svg.toString()
+            .replaceAll("#ffffff", "none")
+            .replaceAll("#ff00ff", "none")
+            .replaceAll("#ff0000", "#000000")
+            .replaceAll("#00ff00", "#000000")
+            .replaceAll("<g transform='translate", "<g style='fill: black' transform='translate")
+            .replaceAll("<!-- PCP -->    <g style='fill: black'", "<!-- PCP -->    <g style='fill: transparent'")
+            .replaceAll("<!-- ACP -->    <g style='fill: black'", "<!-- ACP -->    <g style='fill: transparent'");
+    }
+
+    formatSVG(svg) {
+        return svg.toString()
+            .replaceAll("#ff00ff", "none")
+            .replaceAll("#ffffff", "none")
+            .replaceAll("#000000", "#ffffff")
+            .replaceAll("stroke: #ffffff", "stroke: #ffffff; fill: #ffffff")
+            .replaceAll("<g transform='translate", "<g style='fill: #ffffff' transform='translate")
+            .replaceAll("<!-- PCP -->    <g style='fill: #ffffff'", "<!-- PCP -->    <g style='fill: transparent'")
+            .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'", "<!-- ACP -->    <g style='fill: transparent'");
+    }
+
+    updateStructure(raichu_output) {
+        let container = document.getElementById("structure_container");
+        container.innerHTML = this.formatSVG(raichu_output.svg);
+        let drawing = document.getElementById("final_drawing");
+        drawing.style["max-width"] = "100%";
+        drawing.style["max-height"] = "100%";
+    }
+
+    updateDownloadLinks(raichu_output) {
+        this.setDownloadLink("save_complete_cluster_svg", raichu_output.completeClusterSvg, raichu_output.smiles + "_cluster.svg");
+        this.setDownloadLink("save_enzymatic_pathway_svg", raichu_output.pathway_svg, raichu_output.smiles + "_pathway.svg");
+        this.setDownloadLink("save_svg", raichu_output.svg, raichu_output.smiles + ".svg");
+    }
+
+    setDownloadLink(elementId, svgContent, filename) {
+        let element = document.getElementById(elementId);
+        let url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgContent);
+        element.href = url;
+        element.setAttribute("download", filename);
+    }
+
+    updateIntermediateContainer(containerId, svgContent, svgId, replacementId = null) {
+        let container = document.getElementById(containerId);
+        container.setAttribute("style", "width:25vw");
+        container.innerHTML = this.formatSVGIntermediates(svgContent).replaceAll("final_drawing", replacementId || "intermediate_drawing");
+        let svg = document.getElementById(replacementId || "intermediate_drawing");
+        this.reformatSVG(svg);
+        svg.setAttribute('id', svgId);
+        svg.setAttribute('class', svgId);
+        if (svgId === "intermediate_drawing_tailored") {
+            this.addDropShadowFilterToSVG(svg);
+        }
+    }
+
+    reformatSVG(svg, id = null, className = null) {
+        let bbox = svg.getBBox();
+        let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
+        svg.setAttribute("viewBox", viewBox);
+        if (id) svg.setAttribute('id', id);
+        if (className) svg.setAttribute('class', className);
+    }
+
+    updateNRPSPKSIntermediateContainer(acp, intermediate, index, carrier_x, max_width, height) {
+        let container = document.getElementById(`innerIntermediateContainer${acp.replace(".", "_")}`);
+        container.setAttribute("style", "width:5vw;");
+        container.innerHTML = this.formatSVGIntermediates(intermediate);
+        let svg = document.getElementById("intermediate_drawing");
+        let bbox = svg.getBBox();
+        let viewBox = [bbox.x, bbox.y, max_width, height].join(" ");
+        svg.setAttribute("viewBox", viewBox);
+        svg.setAttribute("width", max_width);
+        svg.setAttribute('id', `intermediate_drawing${index}`);
+        svg.setAttribute('class', "intermediate_drawing");
+
+        let rightPosition = 0.05 * viewPortWidth <= max_width
+            ? (((carrier_x - bbox.x) / max_width) * 5 - 700 / viewPortHeight)
+            : (carrier_x - bbox.x - 13000 / viewPortHeight);
+        svg.setAttribute('style', `right: ${rightPosition}${0.05 * viewPortWidth <= max_width ? 'vw' : 'px'};`);
+    }
+
+    updateTailoringStructure(structureForTailoring) {
+        let container = document.getElementById("innerIntermediateContainer_tailoring_enzymes");
+        container.setAttribute("style", "width:150px");
+        container.innerHTML = this.formatSVGIntermediates(structureForTailoring);
+        let svg = document.getElementById("tailoring_drawing");
+        this.reformatSVG(svg, "intermediate_drawing_tailoring", "intermediate_drawing_tailoring");
+        this.addDropShadowFilterToSVG(svg);
+    }
+
+    reformatSVGToBoundary(svg) {
+    // Get the bounding box of the SVG
+    const bbox = svg.getBBox();
+    // Get the width and height of the bounding box
+    const width = bbox.width;
+    const height = bbox.height;
+    // Get the x and y coordinates of the top-left corner of the bounding box
+    const bboxX = bbox.x;
+    const bboxY = bbox.y;
+    // Set the new viewBox attribute to fit the bounding box exactly
+    svg.setAttribute("viewBox", `${bboxX} ${bboxY} ${width} ${height}`);
+    // Set the width and height attributes to match the bounding box
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+}
+} 

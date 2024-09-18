@@ -20,10 +20,6 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.7.1/svg.min.js"></script>
   <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.js"></script>
-  <script type="text/javascript" src="./arrower.js"></script>
-  <script type="text/javascript" src="./protein_drawer.js"></script>
-
-
   <!-- <script type="text/javascript" src="./regions-test.js"></script> -->
 
   <!-- Main content of the page -->
@@ -65,7 +61,7 @@
 
 <button type="button" class="start_button tooltip"
   data-tooltip="Fetch updated data and refresh the displayed structures and spaghetti diagram."
-  onclick="fetchFromRaichu(details_data, regionName,geneMatrix, cluster_type, BGC)">
+  onclick="apiService.fetchFromRaichu(details_data, regionName,geneMatrix, cluster_type, BGC)">
   <strong>Refresh structures</strong>
 </button>
 
@@ -166,8 +162,8 @@
       <button type="button" class="start_button tooltip-above" id="save_button" data-tooltip="Download the visualized structure as SVG."> <a id="save_svg"><strong> Download SVG</strong></a></button>
 
       <!-- ... Other buttons ... -->
-      <button type="button" class="start_button tooltip-above" id="Zoom_out_button" onclick="zoom_in()" data-tooltip="Zoom into the structure."><a><strong>Zoom in</strong></a></button>
-      <button type="button" class="start_button tooltip-above" id="Zoom_in_button" onclick="zoom_out()" data-tooltip="Zoom out of the structure."><a><strong>Zoom out</strong></a></button>
+      <button type="button" class="start_button tooltip-above" id="Zoom_out_button" onclick="svgHandler.zoom_in()" data-tooltip="Zoom into the structure."><a><strong>Zoom in</strong></a></button>
+      <button type="button" class="start_button tooltip-above" id="Zoom_in_button" onclick="svgHandler.zoom_out()" data-tooltip="Zoom out of the structure."><a><strong>Zoom out</strong></a></button>
       <button type='button' class='start_button tooltip-above' id = "smiles_button" data-tooltip="Copy the structure's SMILES (Simplified Molecular Input Line Entry System) notation to the clipboard. SMILES is a standard way to represent a chemical structure using a text string. You can for instance directly copy the SMILES into ChemDraw or MarvinSketch to modify the structure."><a><strong> Copy SMILES to clipboard </strong></a></button>
   </div>
   </div>
@@ -206,7 +202,7 @@
             <div class="dropdown-content" id = dropdownContentTerpene>
             </div>
           </div>
-        <button type="button" class="btn" onclick="fetchFromRaichu();closeFormTerpene()">Submit</button>
+        <button type="button" class="btn" onclick="apiService.fetchFromRaichu();closeFormTerpene()">Submit</button>
         <button type="button" class="btn cancel" onclick="closeFormTerpene()">Close</button>
       </form>
     </div>
@@ -350,9 +346,11 @@
   <script type="text/javascript" src="./ripp_drawer.js"></script>
   <script type="text/javascript" src="./terpene_drawer.js"></script>
   <script type="text/javascript" src="./option_creator.js"></script>
+    <script type="text/javascript" src="./arrower.js"></script>
+    <script type="text/javascript" src="./svg_handler.js"></script>
+    <script type="text/javascript" src="./api_handler.js"></script>
   <script type="text/javascript" src="./index.js"></script>
-  <script type="text/javascript" src="./arrower.js"></script>
-  <script type="text/javascript" src="./api_handler.js"></script>
+
   <!-- <script type="text/html" src="./Alola_Manual_new.html"></script> -->
 </body>
 </html>
