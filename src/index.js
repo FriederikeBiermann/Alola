@@ -20,16 +20,17 @@ let tailoringEnzymesWithSubstrate = ["HALOGENASE", "PRENYLTRANSFERASE", "ACYLTRA
 let terpeneSubstrates = ["DIMETHYLALLYL_PYROPHOSPHATE", "GERANYL_PYROPHOSPHATE", "FARNESYL_PYROPHOSPHATE", "GERANYLGERANYL_PYROPHOSPHATE", "SQUALENE", "PHYTOENE"]
 let pksStarterSubstrates = ["propionyl_coa","acetyl_coa","benzoyl_coa","methyl_butyryl_coa_3","methyl_butyryl_coa_2","trans_cyclopentane_dicarboxyl_coa","cyclohexane_carboxyl_coa","hydroxy_malonyl_coa_2", "hydroxy_malonyl_coa_2r", "hydroxy_malonyl_coa_2s","chloroethyl_malonyl_coa", "isobutyryl_coa","glycine","hydroxy_propenoyl_coa_3_23e","hydroxy_buteno yl_coa_3_23e","dihydroxy_butanolyl_coa_2r3","trihydroxy_propanolyl_coa_233","o_methylacetyl_coa","hydroxy_propenoyl_coa_3_23z","oxomalonyl_coa_2","methyl_hydroxy_propenoyl_coa_2_3_23z","dihydroxy_butanolyl_coa_23","dihydroxy_butanolyl_coa_2s3s","heptatrienoyl_coa","hydroxypropionyl_coa_2r","dihydroxy_propanolyl_coa_33","lactyl_coa","phenylacetyl_coa","methoxyformyl_coa"];
 let cluster_type = "nrpspks";
-let terpeneStatus = 0;
 let terpeneSubstrate = "";
-let RiPPStatus = 0;
 let rippPrecursor = "";
 let rippFullPrecursor = "";
 let rippPrecursorGene = 0;
+let cleavageSites = [];
 let proteaseOptions = null;
 let cyclization = [];
 window.rippSelection = "";
 let  terpeneCyclaseOptions = [];
+let historyStack = [];
+
 
 // Mapping of chemical compound names to their corresponding structures
 
@@ -124,9 +125,17 @@ let nameWildcardModule = "Custom_gene_";
 let nameWildcardEnzyme = "Custom_tailoring_gene_";
 let wildcardEnzyme = "";
 let biosyntheticCoreEnzymes = ["alpha/beta fold hydrolase","acyl carrier protein","phosphopantetheine-binding protein","sdr family oxidoreductase", "type i polyketide synthase", "type ii polyketide synthase", "type iii polyketide synthase", "polyketide synthase", "thioesterase domain-containing protein", "non-ribosomal peptide synthetase", "non-ribosomal peptide synthetase"]
-
+var type_colors = {
+    "biosynthetic-additional": "grey",
+    "biosynthetic": "white",
+    "other": "#2B2B2B",
+    "regulatory":"#025699",
+    "transport":"#025699",
+}
 const uploadButton = document.getElementById('uploadButton');
 const fileInput = document.getElementById('fileInput');
+
+
 
 // allowing users to select a file for upload by setting up a click event listener on the 'uploadButton' element.
 uploadButton.addEventListener('click', (event) => {
@@ -459,7 +468,7 @@ function handleDrop(e) {
 
         // Update visualizations
         updateProteins(geneMatrix, BGC);
-        if (RiPPStatus == 0) {
+        if (cluster_type !== "ripp") {
             updateDomains(geneMatrix, BGC);
         } else {
             updateRiPPs(geneMatrix, BGC);
@@ -470,7 +479,7 @@ function handleDrop(e) {
         // Fetch data from Raichu if "Real time calculation" button is checked
         removeTailoringEnzymes(geneMatrix);
         if (document.getElementById("real-time-button").checked) {
-            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+            apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
         }
     }
 
@@ -614,11 +623,25 @@ function addDropShadowFilterToSVG(svgElement) {
  * @fires hoverout_atom - Fires when the mouse leaves the highlighted atom.
  */
 function highlight_atom_in_SVG(atom, color, width, shadowId = "dropShadow") {
-    if (RiPPStatus) {
+    if (cluster_type == "ripp") {
         // Highlight atom in SVG for RiPPs
-        let nameAtom = "atom_" + atom;
-        let path = document.getElementById(nameAtom);
-        path.setAttribute('style', `fill:${color}; stroke:${color}; stroke-width:${width}; filter:url(#${shadowId});`);
+        const groupId = "atom_" + atom;
+        const group = document.getElementById(groupId);
+
+        if (group) {
+            // Iterate through all child elements of the group and apply the styles
+            const children = group.children;
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i];
+                if (child.nodeName === 'line' || child.nodeName === 'path' || child.nodeName === 'circle') {
+                    child.style.stroke = color;
+                    child.style.strokeWidth = width;
+                    child.style.filter = `url(#${shadowId})`;
+                    if (color !== "none") {
+                        child.style.fill = color; // Apply fill if needed
+                    }
+                }
+            }}
 
     } else if (atom.toString().includes("_")) {
         // Highlight atom in SVG for other cases
@@ -627,9 +650,11 @@ function highlight_atom_in_SVG(atom, color, width, shadowId = "dropShadow") {
             let link = links[linkIndex];
             if (
                 link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailoring") ||
+                link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_cyclisation_terpene") ||
                 link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_cyclisation") ||
                 link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_precursor") ||
                 link.parentElement.parentElement.parentElement.parentElement == document.getElementById("intermediate_drawing_tailored")
+                
             ) {
                 let path = link.childNodes[3];
                 path.setAttribute('style', `fill:${color}; stroke:${color}; stroke-width:${width}; filter:url(#${shadowId});`);
@@ -652,7 +677,9 @@ function highlight_atom_in_SVG(atom, color, width, shadowId = "dropShadow") {
  * @param {string} atom - The atom selector.
  */
 function hover_in_atom(atom) {
-    highlight_atom_in_SVG(atom, "#E11839", "50", "intenseGlowShadow");
+    if (cluster_type == "ripp") { highlight_atom_in_SVG(atom, "#E11839", "5", "intenseGlowShadow"); }
+    else { highlight_atom_in_SVG(atom, "#E11839", "50", "dropShadow"); }
+   
 }
 
 /**
@@ -661,15 +688,84 @@ function hover_in_atom(atom) {
  * @param {string} atom - The atom selector.
  */
 function hover_out_atom(atom) {
-    if (atom.indexOf("C") >= 0) {
+    if (cluster_type == "ripp"){
+        // Make other atoms black
+        highlight_atom_in_SVG(atom, "black", "1", "none");
+
+    }
+    else if (atom.indexOf("C") >= 0) {
         // Make carbon atoms transparent
-        highlight_atom_in_SVG(atom, "none", "0", "none");
+        highlight_atom_in_SVG(atom, "none", "1", "none");
     } else {
         // Make other atoms black
-        highlight_atom_in_SVG(atom, "black", "0", "none");
+        highlight_atom_in_SVG(atom, "black", "1", "none");
     }
 }
 
+
+//functions for zooming
+function zoom_in() {
+    /**
+   * Zooms into the structure in the structure explorer.
+   * Gets actual dimensions, removes automatic sizing, and then resizes the SVG.
+   * @fires   onclick-> zoom button
+   */
+    // Get the SVG element for the structure
+    let drawing = document.getElementById("final_drawing");
+
+    // Get the computed styles for the SVG element
+    let drawingStyles = window.getComputedStyle(drawing);
+
+    // Get the height and width of the SVG
+    let height = drawingStyles.height;
+    let width = drawingStyles.width;
+
+    // Calculate new dimensions with a slight increase
+    let stringWidth = (parseInt(width) + 30).toString() + "px";
+    let stringHeight = (parseInt(height) + 30).toString() + "px";
+
+    // Remove automatic sizing constraints    
+    drawing.style["max-width"] = "";
+    drawing.style["max-height"] = "";
+
+    // Resize the SVG with the new dimensions
+    drawing.style["width"] = stringWidth;
+    drawing.style["height"] = stringHeight;
+}
+
+function zoom_out() {
+    /**
+     * Zooms out of structure in structure explorer.
+     *
+     * - Gets the actual dimensions of the drawing.
+     * - Removes the automatic sizing.
+     * - Resizes the SVG by reducing its dimensions.
+     * 
+     * @fires   onclick-> zoom button
+     */
+
+    // Get the reference to the drawing element with the ID "final_drawing"
+    let drawing = document.getElementById("final_drawing");
+
+    // Get the computed styles of the drawing element
+    let drawingStyles = window.getComputedStyle(drawing);
+
+    // Retrieve the current height and width of the drawing
+    let height = drawingStyles.height;
+    let width = drawingStyles.width;
+
+    // Calculate the new dimensions for zooming out (subtracting 30 pixels)
+    let stringWidth = (parseInt(width) - 30).toString() + "px";
+    let stringHeight = (parseInt(height) - 30).toString() + "px";
+
+    // Remove the maximum width and height constraints
+    drawing.style["max-width"] = "";
+    drawing.style["max-height"] = "";
+
+    // Apply the new dimensions to the drawing, effectively zooming out
+    drawing.style["width"] = stringWidth;
+    drawing.style["height"] = stringHeight;
+}
 
 /**
  * Formats the SVGs of the spaghetti diagram to look nice and removes the ACP.
@@ -710,6 +806,8 @@ function formatSVG_intermediates(svg) {
 function formatSVG(svg) {
     // Convert the SVG to a string and perform replacements, then store the result in the 'svg' variable.
     svg = svg.toString()
+        // Replace pink c's with 'none'.
+        .replaceAll("#ff00ff", "none")
         // Replace white fills with 'none'.
         .replaceAll("#ffffff", "none")
         // Replace black fills with white.
@@ -783,69 +881,6 @@ function downloadURI(uri, name) {
     clearDynamicLink(link);
 }
 
-//functions for zooming
-function zoom_in() {
-    /**
-   * Zooms into the structure in the structure explorer.
-   * Gets actual dimensions, removes automatic sizing, and then resizes the SVG.
-   * @fires   onclick-> zoom button
-   */
-    // Get the SVG element for the structure
-    let drawing = document.getElementById("final_drawing");
-
-    // Get the computed styles for the SVG element
-    let drawingStyles = window.getComputedStyle(drawing);
-
-    // Get the height and width of the SVG
-    let height = drawingStyles.height;
-    let width = drawingStyles.width;
-
-    // Calculate new dimensions with a slight increase
-    let stringWidth = (parseInt(width) + 30).toString() + "px";
-    let stringHeight = (parseInt(height) + 30).toString() + "px";
-
-    // Remove automatic sizing constraints    
-    drawing.style["max-width"] = "";
-    drawing.style["max-height"] = "";
-
-    // Resize the SVG with the new dimensions
-    drawing.style["width"] = stringWidth;
-    drawing.style["height"] = stringHeight;
-}
-
-function zoom_out() {
-    /**
-     * Zooms out of structure in structure explorer.
-     *
-     * - Gets the actual dimensions of the drawing.
-     * - Removes the automatic sizing.
-     * - Resizes the SVG by reducing its dimensions.
-     * 
-     * @fires   onclick-> zoom button
-     */
-
-    // Get the reference to the drawing element with the ID "final_drawing"
-    let drawing = document.getElementById("final_drawing");
-
-    // Get the computed styles of the drawing element
-    let drawingStyles = window.getComputedStyle(drawing);
-
-    // Retrieve the current height and width of the drawing
-    let height = drawingStyles.height;
-    let width = drawingStyles.width;
-
-    // Calculate the new dimensions for zooming out (subtracting 30 pixels)
-    let stringWidth = (parseInt(width) - 30).toString() + "px";
-    let stringHeight = (parseInt(height) - 30).toString() + "px";
-
-    // Remove the maximum width and height constraints
-    drawing.style["max-width"] = "";
-    drawing.style["max-height"] = "";
-
-    // Apply the new dimensions to the drawing, effectively zooming out
-    drawing.style["width"] = stringWidth;
-    drawing.style["height"] = stringHeight;
-}
 
 /**
  * Adds click events to every gene arrow.
@@ -873,22 +908,14 @@ function addArrowClick(geneMatrix) {
         let protein = document.querySelector(protein_id);
 
         // Get the original color of the arrow
-        const originalColorArrow = getComputedStyle(arrow).fill;
+        const originalColorArrow = type_colors[geneMatrix[geneIndex].type]
 
         // Add click event to the arrow
         arrow.addEventListener(
             'click',
             function () { // anonyme Funktion (Handle arrow click event)
                 setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
-                updateProteins(geneMatrix, BGC);
-                addArrowClick(geneMatrix);
                 removeTailoringEnzymes(geneMatrix);
-                if (RiPPStatus == 0){ 
-                    updateDomains(geneMatrix, BGC);
-                }  else{ 
-                    updateRiPPs(geneMatrix, BGC)
-                }
-                
                 // Change color on click based on gene properties
                 const currentColor = getComputedStyle(arrow).fill;
                 if (geneMatrix[geneIndex].ko == true) {
@@ -896,10 +923,9 @@ function addArrowClick(geneMatrix) {
                 } else {
                     arrow.style.fill = originalColorArrow;
                 }
-                // Perform additional actions based on conditions
-                if (document.getElementById("real-time-button").checked) {
-                    fetchFromRaichu(details_data, regionName, geneMatrix,cluster_type, BGC);
-                }
+
+                apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+
             },
             false
         );
@@ -959,12 +985,7 @@ function addArrowClick(geneMatrix) {
                 'click',
                 function () { // anonyme Funktion (Handle protein click event)
                     setDisplayedStatus(geneMatrix[geneIndex].id, geneMatrix);
-                    updateProteins(geneMatrix, BGC);
-                    if (RiPPStatus == 0){ 
-                        updateDomains(geneMatrix, BGC)
-                    }  else{ 
-                        updateRiPPs(geneMatrix, BGC);
-                    }
+                    removeTailoringEnzymes(geneMatrix);
                     // Change color on click based on gene properties
                     const currentColor = getComputedStyle(arrow).fill;
                     if (geneMatrix[geneIndex].ko == true) {
@@ -972,14 +993,7 @@ function addArrowClick(geneMatrix) {
                     } else {
                         arrow.style.fill = originalColorArrow;
                     }
-
-                    // Perform additional actions based on conditions
-                    addArrowClick(geneMatrix);
-                    if (document.getElementById("real-time-button")
-                        .checked) {
-                        fetchFromRaichu(details_data, regionName,
-                            geneMatrix, cluster_type, BGC);
-                    }
+                    apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
                 },
                 false
             );
@@ -1053,7 +1067,7 @@ function addArrowClick(geneMatrix) {
                     false
                 );
             }
-            if (RiPPStatus == 0 && (geneMatrix[geneIndex].hasOwnProperty(
+            if (cluster_type !== "ripp" && (geneMatrix[geneIndex].hasOwnProperty(
                 "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))){ // there are no typical domains in ripp clusters
             for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains
                 .length; domainIndex++) {
@@ -1852,7 +1866,7 @@ function setKoStatus(geneIndex, domainIndex, geneMatrix) {
     removeTailoringEnzymes(geneMatrix);
     if (document.querySelector('input[type=checkbox]')
         .checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+        apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
     }
 }
 function setDisplayedStatus(id, geneMatrix) {
@@ -1865,7 +1879,7 @@ function setDisplayedStatus(id, geneMatrix) {
     id.slice(-11, -1);
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         if (geneMatrix[geneIndex].id === id) {
-            if (geneMatrix[geneIndex].displayed === false) {
+            if (geneMatrix[geneIndex].displayed === false || geneMatrix[geneIndex].ko == true) {
                 geneMatrix[geneIndex].displayed = true;
                 geneMatrix[geneIndex].ko = false;
             }
@@ -1911,7 +1925,7 @@ let type = recordData[recordIndex].regions[regionIndex].type;
     if (type.includes("peptide")) {
         return "peptide"
     }
-    if (RiPPStatus == 1){
+    if (cluster_type == "ripp"){
         return "ripp"
     }
     return "misc"
@@ -2029,8 +2043,7 @@ function addRiPPPrecursorOptions(geneMatrix){
     document.getElementById("ripp_precursor_selection").innerHTML=innerHTML
 }
 function addRiPP(geneMatrix,rippSelection){
-    RiPPStatus = 1;
-    terpeneStatus = 0;
+    cluster_type = "ripp"
     terpeneCyclaseOptions = [];
     cyclization = [];
     geneIndex = rippPrecursorGene
@@ -2059,13 +2072,13 @@ function addRiPP(geneMatrix,rippSelection){
     else{
         rippPrecursor = translation.slice(-5)// default only last 5 amino acids
     }
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+    apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
     window.rippSelection = ""
     let textarea = document.querySelector('textarea');
     textarea.value = "";
 }
 function addTerpene(substrate){
-    terpeneStatus = 1;
+    cluster_type = "terpene"
     terpeneSubstrate = substrate;
     cyclization = []
 }
@@ -2183,13 +2196,13 @@ function addWildcardTailoring(geneMatrix) {
     // Update the UI and related components
     displayGenes(BGC);
     updateProteins(geneMatrix, BGC);
-    if (RiPPStatus == 0) { 
+    if (cluster_type !== "ripp") { 
         updateDomains(geneMatrix, BGC); 
     } else { 
         updateRiPPs(geneMatrix, BGC);
     }
     addArrowClick(geneMatrix);
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+    apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 }
 
 function addWildcard(geneMatrix) {
@@ -2630,16 +2643,16 @@ function addWildcard(geneMatrix) {
     }
     displayGenes(BGC)
     updateProteins(geneMatrix, BGC)
-    if (RiPPStatus == 0){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)}
+    if (cluster_type !== "ripp"){ updateDomains(geneMatrix, BGC)}  else{ updateRiPPs(geneMatrix, BGC)}
     addArrowClick(geneMatrix)
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 
 }
 function changeCyclization(atom){
     cyclization.push(atom)
     removeTailoringEnzymes(geneMatrix);
     if (document.querySelector('input[type=checkbox]').checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+        apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
     }
 }
 function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, option, optionIndex) {
@@ -2667,7 +2680,7 @@ function changeSelectedOption(geneMatrix, geneIndex, moduleIndex, domainIndex, o
     removeTailoringEnzymes(geneMatrix);
     if (document.querySelector('input[type=checkbox]')
         .checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+        apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
     }
     /// todo: set all tailoring options + cyclization option to empty + cleavage options -> to default
 }
@@ -2696,7 +2709,7 @@ function changeSelectedOptionTailoring(geneMatrix, geneIndex, reactionOption, at
     }
     if (document.querySelector('input[type=checkbox]')
         .checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+        apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
     }
 
 }
@@ -2718,7 +2731,7 @@ function changeSelectedOptionCleavageSites(option){
     removeTailoringEnzymes(geneMatrix);
      if (document.querySelector('input[type=checkbox]')
         .checked) {
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+         apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
     }
 }
 function displayTextInGeneExplorer(geneId) {
@@ -2858,8 +2871,6 @@ function findTailoringEnzymeStatus(orfFunction) {
 function runAlola(regionIndex, recordIndex, details_data, recordData){
     BGC = {};
  reversed = false;
-  RiPPStatus = 0;
-    terpeneStatus = 0;
   rippPrecursor = "";
     document.getElementById("add_module_button").style.display = "none";
   cyclization = "None";
@@ -2911,7 +2922,7 @@ function runAlola(regionIndex, recordIndex, details_data, recordData){
     if (recordData[recordIndex].regions[regionIndex].type.includes("terpene")){
         openFormTerpene()
     }
-    fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+    apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 
 }
 
@@ -2922,8 +2933,6 @@ function reverseBGC(regionIndex, recordIndex, details_data, recordData){
     else{
     reversed = true;
     BGC = {};
-    RiPPStatus = 0;
-    terpeneStatus = 0;
   rippPrecursor = "";
     document.getElementById("add_module_button").style.display = "none";
   cyclization = "None";
@@ -2996,7 +3005,7 @@ addArrowClick(geneMatrix)
 if (recordData[recordIndex].regions[regionIndex].type.includes("terpene")){
     openFormTerpene()
 }
-fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+        apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 
 }}
 
@@ -3015,7 +3024,7 @@ function unDoButton() {
         
         // Re-run fetchFromRaichu with the second to last state to update the UI
         if (document.getElementById("real-time-button").checked) {
-            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+            apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
             historyStack.pop();
         }
         // Update button states
@@ -3035,7 +3044,7 @@ function reDoButton() {
         ({ geneMatrix, BGC } = redoState);
 
         // Re-run fetchFromRaichu with the redo state to update the UI
-        fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
+        apiService.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC);
 
         // Update button states
         updateButtonStates();
