@@ -38,8 +38,9 @@ OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation 
 //add substrate specifities for NRPS
 if (domain.abbreviation=="A" || domain.abbreviation == "CAL") {
   domain.domainOptions = [...new Set(Object.values(aminoacids))];
-  domain.default_option=aminoacids[domain.predictions[0][1].replace(
+  domain.default_option = aminoacids[domain.predictions[0][1].replace(
   "-", '').toLowerCase()];
+AT_index += 1;
 }
 //add substrate specifities for PKS
 if (domain.abbreviation=="AT") {
