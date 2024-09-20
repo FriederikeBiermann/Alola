@@ -1,11 +1,12 @@
 
 class APIService {
-    constructor(port) {
+    constructor(port, svgHandler) {
         this.port = port;
+        this.svgHandler = svgHandler;
+
     }
 
     async fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC) {
-        historyStack.push(JSON.parse(JSON.stringify({ geneMatrix, BGC })));
 
         let bgcHandler = this.getBGCHandler(cluster_type);
         if (bgcHandler) {
@@ -20,11 +21,11 @@ class APIService {
     getBGCHandler(cluster_type) {
         switch (cluster_type) {
             case 'ripp':
-                return new RiPPHandler(this.port);
+                return new RiPPHandler(this.port, this.svgHandler);
             case 'terpene':
-                return new TerpeneHandler(this.port);
+                return new TerpeneHandler(this.port, this.svgHandler);
             case 'nrpspks':
-                return new NRPSPKSHandler(this.port);
+                return new NRPSPKSHandler(this.port), this.svgHandler;
             default:
                 return null;
         }
@@ -41,8 +42,10 @@ class APIService {
 }
 
 class BGCHandler {
-    constructor(port) {
+    constructor(port, svgHandler) {
         this.port = port;
+        this.svgHandler = svgHandler;
+        
     }
 
     async fetch(details_data, regionName, geneMatrix, BGC) {
@@ -55,8 +58,8 @@ class BGCHandler {
             return;
         }
 
-        svgHandler.updateStructure(raichu_output);
-        svgHandler.updateDownloadLinks(raichu_output);
+        this.svgHandler.updateStructure(raichu_output);
+        this.svgHandler.updateDownloadLinks(raichu_output);
         this.setupSmilesButton(raichu_output.smiles);
         this.updateMolecularMass(raichu_output.mass);
 
@@ -82,7 +85,7 @@ class BGCHandler {
 
 class RiPPHandler extends BGCHandler {
     async fetch(details_data, regionName, geneMatrix, BGC) {
-        svgHandler.setClusterType('ripp');
+        this.svgHandler.setClusterType('ripp');
         updateRiPPs(geneMatrix, BGC);
 
         let data_string = JSON.stringify({
@@ -112,10 +115,10 @@ class RiPPHandler extends BGCHandler {
 
     updateIntermediates(raichu_output) {
         if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor");
+            this.svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+            this.svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor");
             if (document.getElementById("wildcardProtease").checked || proteaseOptions) {
-                svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
+                this.svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
             }
         }
     }
@@ -123,7 +126,7 @@ class RiPPHandler extends BGCHandler {
 
 class TerpeneHandler extends BGCHandler {
     async fetch(details_data, regionName, geneMatrix, BGC) {
-        svgHandler.setClusterType('terpene');
+        this.svgHandler.setClusterType('terpene');
         updateTerpenes(geneMatrix, BGC);
 
         let data_string = JSON.stringify({
@@ -156,16 +159,16 @@ class TerpeneHandler extends BGCHandler {
 
     updateIntermediates(raichu_output) {
         if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene");
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor");
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+            this.svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene");
+            this.svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor");
+            this.svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
         }
     }
 }
 
 class NRPSPKSHandler extends BGCHandler {
     async fetch(details_data, regionName, geneMatrix, BGC) {
-        svgHandler.setClusterType('nrpspks');
+        this.svgHandler.setClusterType('nrpspks');
         let extracted_results = extractAntismashPredictionsFromRegion(details_data, regionName, geneMatrix);
         let data = extracted_results[0];
         let starterACP = extracted_results[1];
@@ -203,11 +206,11 @@ class NRPSPKSHandler extends BGCHandler {
         for (let intermediateIndex = 0; intermediateIndex < intermediates.length; intermediateIndex++) {
             let [intermediate, carrier_x, , , height] = intermediates[intermediateIndex];
             let acp = acpList[intermediateIndex + Math.max(starterACP, 1) - 1];
-            svgHandler.updateNRPSPKSIntermediateContainer(acp, intermediate, intermediateIndex, carrier_x, max_width, height);
+            this.svgHandler.updateNRPSPKSIntermediateContainer(acp, intermediate, intermediateIndex, carrier_x, max_width, height);
         }
 
         if (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) {
-            svgHandler.updateTailoringStructure(raichu_output.structureForTailoring);
+            this.svgHandler.updateTailoringStructure(raichu_output.structureForTailoring);
         }
     }
 }

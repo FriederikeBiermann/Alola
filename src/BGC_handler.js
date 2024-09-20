@@ -1,0 +1,706 @@
+class GeneMatrixHandler {
+    constructor(BGC, details_data, regionName, cluster_type) {
+        this.BGC = BGC;
+        this.details_data = details_data;
+        this.regionName = regionName;
+        this.cluster_type = cluster_type;
+        this.geneMatrix = this.createGeneMatrix();
+        this.moduleMatrix = [];
+    }
+
+    createGeneMatrix() {
+        let geneMatrix = [];
+        for (let geneIndex = 0; geneIndex < this.BGC.orfs.length; geneIndex++) {
+            let domains = this.processDomains(this.BGC.orfs[geneIndex]);
+            let orfFunction = this.findFunctionOrf(this.BGC.orfs[geneIndex].description);
+            let tailoringEnzymeStatus = this.findTailoringEnzymeStatus(orfFunction);
+
+            geneMatrix.push(this.createGeneObject(this.BGC.orfs[geneIndex], domains, orfFunction, tailoringEnzymeStatus, geneIndex));
+        }
+        return this.addModulesGeneMatrix(geneMatrix);
+    }
+
+    processDomains(orf) {
+        if (!orf.hasOwnProperty("domains")) return [];
+        return JSON.parse(JSON.stringify(orf.domains)).map((domain, index) => ({
+            ...domain,
+            identifier: `${orf.locus_tag}_${index + 1}`,
+            domainOptions: [],
+            default_option: [],
+            selected_option: [],
+            ko: "None"
+        }));
+    }
+
+    findFunctionOrf(orfDescription) {
+        let positionBegin = orfDescription.search("\n \n") + 5;
+        let positionEnd = orfDescription.search("Locus tag") - 14;
+        return orfDescription.slice(positionBegin, positionEnd).toLowerCase();
+    }
+
+    findTailoringEnzymeStatus(orfFunction) {
+        for (const [enzymeName, abbreviation] of Object.entries(TAILORING_ENZYMES)) {
+            if (orfFunction.toUpperCase().replaceAll("-", "_").includes(enzymeName)) {
+                return [true, enzymeName.trim(), abbreviation];
+            }
+        }
+        for (const [mainEnzymeName, synonyms] of Object.entries(TAILORING_ENZYMES_SYNONYMS)) {
+            if (synonyms.some(synonym => orfFunction.toUpperCase().replaceAll("-", "_").includes(synonym.toUpperCase()))) {
+                return [true, mainEnzymeName.trim(), tailoringEnzymes[mainEnzymeName]];
+            }
+        }
+        return [false, "", ""];
+    }
+
+    createGeneObject(orf, domains, orfFunction, tailoringEnzymeStatus, geneIndex) {
+        return {
+            id: orf.locus_tag,
+            orffunction: orfFunction,
+            tailoringEnzymeStatus: tailoringEnzymeStatus[0],
+            tailoringEnzymeType: tailoringEnzymeStatus[1],
+            tailoringEnzymeAbbreviation: tailoringEnzymeStatus[2],
+            position_in_BGC: geneIndex + 1,
+            position: geneIndex + 1,
+            ko: false,
+            displayed: true,
+            default_option: [],
+            selected_option: [],
+            options: [],
+            ripp_status: false,
+            domains: domains,
+            type: orf.type
+        };
+    }
+
+    addModulesGeneMatrix(geneMatrix) {
+        let region = this.details_data.hasOwnProperty("nrpspks") ? this.details_data.nrpspks[this.regionName] : this.details_data[this.regionName];
+
+        if (region) {
+            geneMatrix.forEach((gene, geneIndex) => {
+                let orf = region.orfs.find(orf => orf.id === gene.id);
+                if (orf && orf.hasOwnProperty("modules")) {
+                    gene.modules = JSON.parse(JSON.stringify(orf.modules)).map((module, moduleIndex) => {
+                        let nameModule = `${gene.id}_${moduleIndex}`;
+                        module.moduleIdentifier = nameModule;
+
+                        if (gene.hasOwnProperty("domains")) {
+                            let domainArray = gene.domains.filter(domain =>
+                                (module.end >= domain.start && domain.start >= module.start) ||
+                                (module.start >= domain.start && domain.start >= module.end) ||
+                                (moduleIndex === orf.modules.length - 1 && !domain.hasOwnProperty("module"))
+                            );
+
+                            domainArray.forEach(domain => domain.module = nameModule);
+
+                            module.domains = domainArray;
+                            module.numberOfDomains = domainArray.length;
+                            module.lengthVisualisation = 0;
+                        }
+
+                        return module;
+                    });
+                }
+            });
+        }
+
+        return geneMatrix;
+    }
+
+    createWildcardGene(wildcardModule, wildcardSubstrate) {
+        let endLastGene = this.BGC.orfs.length > 0 ? this.BGC.orfs[this.BGC.orfs.length - 1].end : 0;
+        let nameWildcardModule = `Custom_gene_${this.BGC.orfs.length + 1}`;
+
+        let domains = this.createWildcardDomains(wildcardModule, wildcardSubstrate, nameWildcardModule);
+
+        let newGene = {
+            antismashArray: domains.map(domain => [domain.abbreviation]),
+            default_option: [],
+            start: endLastGene,
+            end: endLastGene + 7254,
+            locus_tag: nameWildcardModule,
+            displayed: true,
+            type: "biosynthetic",
+            domains: domains,
+            strand: 1,
+            description: "Custom Gene",
+            id: nameWildcardModule,
+            ko: false,
+            options: [],
+            position: this.BGC.orfs.length + 1,
+            position_in_BGC: this.BGC.orfs.length + 1,
+            selected_option: [],
+            modules: [{
+                start: 1,
+                end: 4000,
+                complete: true,
+                iterative: false,
+                monomer: wildcardSubstrate,
+                moduleIdentifier: `${nameWildcardModule}_0`,
+                domains: domains,
+                numberOfDomains: domains.length,
+                lengthVisualisation: 0
+            }]
+        };
+
+        this.BGC.orfs.push(newGene);
+        this.geneMatrix.push(this.createGeneObject(newGene, domains, "Custom Gene", [false, "", ""], this.BGC.orfs.length - 1));
+        this.updateDetailsData(newGene);
+
+        return newGene;
+    }
+
+    createWildcardTailoringGene(wildcardEnzyme) {
+        let endLastGene = this.BGC.orfs.length > 0 ? this.BGC.orfs[this.BGC.orfs.length - 1].end : 0;
+        let nameWildcardEnzyme = `Custom_tailoring_gene_${this.BGC.orfs.length + 1}`;
+
+        let newGene = {
+            antismashArray: [],
+            default_option: [],
+            start: endLastGene,
+            end: endLastGene + 900,
+            locus_tag: nameWildcardEnzyme,
+            displayed: true,
+            tailoringEnzymeStatus: true,
+            tailoringEnzymeType: wildcardEnzyme,
+            tailoringEnzymeAbbreviation: tailoringEnzymes[wildcardEnzyme],
+            orffunction: wildcardEnzyme,
+            type: "",
+            domains: [],
+            strand: 1,
+            description: "Custom Gene",
+            id: nameWildcardEnzyme,
+            ko: false,
+            options: [],
+            position: this.BGC.orfs.length + 1,
+            position_in_BGC: this.BGC.orfs.length + 1,
+            selected_option: [],
+            modules: []
+        };
+
+        this.BGC.orfs.push(newGene);
+        this.geneMatrix.push(this.createGeneObject(newGene, [], wildcardEnzyme, [true, wildcardEnzyme, tailoringEnzymes[wildcardEnzyme]], this.BGC.orfs.length - 1));
+        this.updateDetailsData(newGene);
+
+        return newGene;
+    }
+
+    createWildcardDomains(wildcardModule, wildcardSubstrate, nameWildcardModule) {
+        let domainArray = [];
+        let longDomainArray = [];
+
+        const defaultDomains = {
+            C: this.createDefaultDomain("Condensation", "C", nameWildcardModule),
+            A: this.createDefaultADomain(wildcardSubstrate, nameWildcardModule),
+            PCP: this.createDefaultDomain("PCP", "PCP", nameWildcardModule),
+            ACP: this.createDefaultDomain("ACP", "ACP", nameWildcardModule),
+            TE: this.createDefaultTEDomain(nameWildcardModule),
+            E: this.createDefaultDomain("Epimerization", "E", nameWildcardModule),
+            ER: this.createDefaultDomain("PKS_ER", "ER", nameWildcardModule),
+            KR: this.createDefaultKRDomain(nameWildcardModule),
+            AT: this.createDefaultATDomain(wildcardSubstrate, nameWildcardModule),
+            KS: this.createDefaultKSDomain(nameWildcardModule),
+            DH: this.createDefaultDHDomain(nameWildcardModule)
+        };
+
+        switch (wildcardModule) {
+            case "starter_module_nrps":
+                longDomainArray.push(defaultDomains.A, defaultDomains.PCP);
+                break;
+            case "elongation_module_nrps":
+                if (document.getElementById("wildcardE").checked) {
+                    domainArray.push(["E"]);
+                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.E, defaultDomains.PCP);
+                } else {
+                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.PCP);
+                }
+                break;
+            case "terminator_module_nrps":
+                if (document.getElementById("wildcardE").checked) {
+                    domainArray.push(["E"]);
+                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.E, defaultDomains.PCP, defaultDomains.TE);
+                } else {
+                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.PCP, defaultDomains.TE);
+                }
+                break;
+            case "starter_module_pks":
+            case "elongation_module_pks":
+            case "terminator_module_pks":
+                longDomainArray.push(defaultDomains.AT);
+                if (wildcardModule !== "starter_module_pks") {
+                    longDomainArray.push(defaultDomains.KS);
+                }
+                if (document.getElementById("wildcardKR").checked) {
+                    domainArray.push(["KR"]);
+                    longDomainArray.push(defaultDomains.KR);
+                    if (document.getElementById("wildcardDH").checked) {
+                        domainArray.push(["DH"]);
+                        longDomainArray.push(defaultDomains.DH);
+                        if (document.getElementById("wildcardER").checked) {
+                            domainArray.push(["ER"]);
+                            longDomainArray.push(defaultDomains.ER);
+                        }
+                    }
+                }
+                longDomainArray.push(defaultDomains.ACP);
+                if (wildcardModule === "terminator_module_pks") {
+                    longDomainArray.push(defaultDomains.TE);
+                }
+                break;
+        }
+
+        return { domainArray, longDomainArray };
+    }
+
+    createDefaultDomain(type, abbreviation, nameWildcardModule) {
+        return {
+            type: type,
+            start: 1,
+            end: 300,
+            predictions: [],
+            napdoslink: "",
+            blastlink: "",
+            sequence: "",
+            dna_sequence: "",
+            abbreviation: abbreviation,
+            html_class: `jsdomain-${abbreviation.toLowerCase()}`,
+            identifier: `${nameWildcardModule}_${abbreviation}`,
+            domainOptions: [],
+            default_option: [],
+            selected_option: [],
+            ko: false,
+            module: nameWildcardModule,
+            function: abbreviation
+        };
+    }
+
+    createDefaultADomain(wildcardSubstrate, nameWildcardModule) {
+        let domain = this.createDefaultDomain("AMP-binding", "A", nameWildcardModule);
+        domain.predictions = [["consensus", Object.keys(aminoacids).find(key => aminoacids[key] === wildcardSubstrate)]];
+        domain.domainOptions = ["arginine", "histidine", "lysine", "aspartic acid", "glutamic acid", "serine", "threonine", "asparagine", "glutamine", "cysteine", "selenocysteine", "glycine", "proline", "alanine", "valine", "isoleucine", "leucine", "methionine", "phenylalanine", "tyrosine", "tryptophan"];
+        domain.default_option = wildcardSubstrate;
+        domain.substrate = wildcardSubstrate;
+        return domain;
+    }
+
+    createDefaultTEDomain(nameWildcardModule) {
+        let domain = this.createDefaultDomain("Thioesterase", "TE", nameWildcardModule);
+        domain.domainOptions = ["O_131", "O_4", "O_61", "N_125", "Linear product"];
+        domain.default_option = ["Linear product"];
+        return domain;
+    }
+
+    createDefaultKRDomain(nameWildcardModule) {
+        let domain = this.createDefaultDomain("PKS_KR", "KR", nameWildcardModule);
+        domain.predictions = [["KR activity", "active"], ["KR stereochemistry", "B2"]];
+        domain.domainOptions = ["A1", "A2", "B1", "B2", "C1", "C2"];
+        domain.default_option = "A1";
+        return domain;
+    }
+
+    createDefaultATDomain(wildcardSubstrate, nameWildcardModule) {
+        let domain = this.createDefaultDomain("PKS_AT", "AT", nameWildcardModule);
+        domain.predictions = [["consensus", "pk"], ["PKS signature", "Malonyl-CoA"], ["Minowa", "prop"]];
+        domain.domainOptions = ["methylmalonylcoa", "propionylcoa", "malonylcoa"];
+        domain.default_option = "malonylcoa";
+        domain.substrate = wildcardSubstrate;
+        return domain;
+    }
+
+    createDefaultKSDomain(nameWildcardModule) {
+        return this.createDefaultDomain("PKS_KS(Modular-KS)", "KS", nameWildcardModule);
+    }
+
+    createDefaultDHDomain(nameWildcardModule) {
+        return this.createDefaultDomain("PKS_DH", "DH", nameWildcardModule);
+    }
+
+    updateDetailsData(wildcard_gene) {
+        if (this.details_data.hasOwnProperty(this.cluster_type)) {
+            this.details_data[this.cluster_type][this.regionName].orfs.push(wildcard_gene);
+        } else {
+            this.details_data[this.regionName].orfs.push(wildcard_gene);
+        }
+    }
+
+    getTranslation(geneIndex) {
+        if (this.BGC.orfs[geneIndex].hasOwnProperty("translation")) {
+            return this.BGC.orfs[geneIndex].translation;
+        } else {
+            let regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig");
+            let translationSearch = regExString.exec(this.BGC.orfs[geneIndex].description);
+            return translationSearch[1];
+        }
+    }
+
+    generateRiPPOptions(translation) {
+        let aminoacidsWithNumber = translation.split('').map((aa, index) => aa + (index + 1));
+        return aminoacidsWithNumber.map(aa => "Proteolytic cleavage at " + aa);
+    }
+
+    getGeneMatrix() {
+        return this.geneMatrix;
+    }
+
+    getBGC() {
+        return this.BGC;
+    }
+
+    getDetailsData() {
+        return this.details_data;
+    }
+
+    getRegionName() {
+        return this.regionName;
+    }
+
+    getClusterType() {
+        return this.cluster_type;
+    }
+
+    getACPList() {
+        let acpList = [];
+        for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
+            if (this.geneMatrix[geneIndex].ko == false && this.geneMatrix[geneIndex].domains.length != 0 &&
+                (this.geneMatrix[geneIndex].hasOwnProperty("modules") ||
+                BIOSYNTHETIC_CORE_ENZYMES.includes(this.geneMatrix[geneIndex].orffunction) ||
+                this.geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+                for (let domainIndex = 0; domainIndex < this.geneMatrix[geneIndex].domains.length; domainIndex++) {
+                    if (this.geneMatrix[geneIndex].domains[domainIndex].ko == false || this.geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
+                        if ((this.geneMatrix[geneIndex].domains[domainIndex].type.includes("ACP") ||
+                            this.geneMatrix[geneIndex].domains[domainIndex].type.includes("PP") ||
+                            this.geneMatrix[geneIndex].domains[domainIndex].type.includes("PCP")) &&
+                            !(this.geneMatrix[geneIndex].domains[domainIndex].type.includes("ACPS"))) {
+                            acpList.push(this.geneMatrix[geneIndex].domains[domainIndex].identifier);
+                        }
+                    }
+                }
+            }
+        }
+        return acpList;
+    }
+
+    extractAntismashPredictionsFromRegion() {
+        let outputForRaichu = [];
+        let region = this.details_data.hasOwnProperty("nrpspks") ? this.details_data.nrpspks[this.regionName] : this.details_data[this.regionName];
+
+        this.geneMatrix.sort((a, b) => a.position - b.position);
+
+        let acpCounter = 0;
+        let starterACP = 1;
+        let substrate = "";
+        let domainArray = [];
+        let typesInModule = [];
+        let domains = [];
+        let moduleType = "PKS";
+        let moduleSubtype = "PKS_TRANS";
+        let moduleIndex = 0;
+
+        for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
+            let gene = this.geneMatrix[geneIndex];
+            if (gene.ko == false && (gene.hasOwnProperty("modules") || BIOSYNTHETIC_CORE_ENZYMES.includes(gene.orffunction) || gene.type.includes("biosynthetic"))) {
+                let orf = region.orfs.find(o => o.id === gene.id);
+                if (orf) {
+                    for (let domainIndex = 0; domainIndex < orf.domains.length; domainIndex++) {
+                        let domain = orf.domains[domainIndex];
+                        let geneDomain = gene.domains[domainIndex];
+
+                        if (geneDomain.ko === false || geneDomain.ko === "None") {
+                            let [type, subtype, active, used] = this.processDomain(domain, geneDomain, typesInModule, moduleIndex, substrate);
+
+                            if (type === "ACP" || type === "PCP") {
+                                [outputForRaichu, moduleIndex, domainArray, domains, typesInModule, moduleType, moduleSubtype] =
+                                    this.handleACPPCP(type, domainArray, moduleType, moduleSubtype, substrate, outputForRaichu, moduleIndex, domains);
+                            } else {
+                                domainArray.push([gene.id, type, subtype, "None", active, used]);
+                                typesInModule.push(type);
+                            }
+
+                            [moduleType, moduleSubtype, substrate] = this.updateModuleInfo(type, moduleType, moduleSubtype, substrate, domain, geneDomain);
+                        } else {
+                            domains.push(domain.type);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Handle any remaining domains
+        if (domainArray.length > 0) {
+            outputForRaichu = this.finalizeModule(outputForRaichu, domainArray, moduleType, moduleSubtype, domains);
+        }
+
+        return [outputForRaichu, starterACP, this.geneMatrix];
+    }
+
+    processDomain(domain, geneDomain, typesInModule, moduleIndex, substrate) {
+        let type = domain.abbreviation || domain.type;
+        let subtype = "None";
+        let active = "True";
+        let used = "True";
+
+        if (domain.type === "Heterocyclization") type = "CYC";
+        if (domain.abbreviation === "DH" || domain.abbreviation === "DHt") type = "DH";
+
+        if (type === "KR" || type === "KS" || type === "AT" || type === "A" || type === "CAL") {
+            [subtype, active, substrate] = this.handleSpecialDomains(type, domain, geneDomain, moduleIndex, substrate);
+        }
+
+        geneDomain.function = type;
+
+        if (this.isDuplicateDomain(type, typesInModule)) {
+            active = "False";
+            geneDomain.ko = true;
+        }
+
+        return [type, subtype, active, used];
+    }
+
+    handleSpecialDomains(type, domain, geneDomain, moduleIndex, substrate) {
+        let subtype = "None";
+        let active = "True";
+
+        switch (type) {
+            case "KR":
+                [subtype, active] = this.handleKRDomain(domain, geneDomain);
+                break;
+            case "KS":
+                subtype = this.handleKSDomain(domain, geneDomain);
+                break;
+            case "AT":
+                [substrate, subtype] = this.handleATDomain(domain, geneDomain, moduleIndex);
+                break;
+            case "A":
+            case "CAL":
+                substrate = this.handleADomain(domain, geneDomain);
+                break;
+        }
+
+        return [subtype, active, substrate];
+    }
+
+    handleKRDomain(domain, geneDomain) {
+        let subtype = "None";
+        let active = "True";
+
+        if (geneDomain.selected_option.length === 0 && domain.predictions.length > 0) {
+            let domainActivity = domain.predictions[0][1];
+            if (domainActivity === "inactive") {
+                geneDomain.ko = true;
+                active = "False";
+            }
+            subtype = domain.predictions[1][1] !== "(unknown)" ? domain.predictions[1][1] : "None";
+        } else {
+            subtype = geneDomain.selected_option;
+        }
+
+        return [subtype, active];
+    }
+
+    handleKSDomain(domain, geneDomain) {
+        if (geneDomain.selected_option.length === 0) {
+            return domain.predictions.length > 0 && domain.predictions[0][1] !== "(unknown)"
+                ? domain.predictions[0][1].toUpperCase().replaceAll("-", "_").replaceAll("/", "_")
+                : "MISCELLANEOUS";
+        } else {
+            return TRANS_AT_KS_SUBTYPES[geneDomain.selected_option];
+        }
+    }
+
+    handleATDomain(domain, geneDomain, moduleIndex) {
+        let substrate = "";
+        let subtype = "PKS_CIS";
+
+        if (moduleIndex === 0) {
+            substrate = this.getATSubstrate(domain, "acetyl_coa", PKS_STARTER_SUBSTRATES);
+        } else {
+            substrate = this.getATSubstrate(domain, "malonyl_coa");
+        }
+
+        if (geneDomain.selected_option.length > 0) {
+            substrate = geneDomain.selected_option.toUpperCase();
+        }
+
+        return [substrate, subtype];
+    }
+
+    getATSubstrate(domain, defaultSubstrate, validSubstrates = null) {
+        if (domain.hasOwnProperty("predictions") && domain.predictions.length > 0) {
+            let prediction = domain.predictions[1][1];
+            if (prediction !== "(unknown)" && (!validSubstrates || validSubstrates.includes(prediction))) {
+                return prediction.replace("-", '_').toUpperCase();
+            }
+        }
+        return defaultSubstrate.toUpperCase();
+    }
+
+    handleADomain(domain, geneDomain) {
+        let substrate = "**Unknown**";
+
+        if (domain.hasOwnProperty("predictions") && domain.predictions.length > 0) {
+            let prediction = domain.predictions[0][1];
+            if (prediction !== "unknown" && prediction !== "X") {
+                substrate = aminoacids[prediction.toLowerCase()] || "**Unknown**";
+            }
+        }
+
+        geneDomain.substrate = substrate;
+
+        if (geneDomain.selected_option.length > 0) {
+            substrate = geneDomain.selected_option;
+        }
+
+        return substrate;
+    }
+
+    isDuplicateDomain(type, typesInModule) {
+        return typesInModule.includes(type) ||
+            (type === "TD" && typesInModule.includes("TE")) ||
+            (type === "TE" && typesInModule.includes("TD"));
+    }
+
+    handleACPPCP(type, domainArray, moduleType, moduleSubtype, substrate, outputForRaichu, moduleIndex, domains) {
+        if (domainArray.length > 1) {
+            substrate = substrate || (moduleType === "PKS" ? "MALONYL_COA" : "**Unknown**");
+
+            let domainArrayFiltered = this.filterDomainArray(domainArray, moduleType);
+            let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered];
+
+            if (moduleArray.length !== 0) {
+                outputForRaichu.push(moduleArray);
+                domains = domains.concat(domainArray.map(x => x[1]));
+                this.moduleMatrix.push({
+                    "id": moduleIndex,
+                    "domains": domains,
+                    "numberOfDomains": domains.length,
+                    "moduleType": moduleType
+                });
+                moduleIndex++;
+            }
+
+            domainArray = [];
+            domains = [];
+            moduleType = "PKS";
+            moduleSubtype = "PKS_TRANS";
+        }
+
+        return [outputForRaichu, moduleIndex, domainArray, domains, [], moduleType, moduleSubtype];
+    }
+
+    filterDomainArray(domainArray, moduleType) {
+        if (moduleType === "NRPS") {
+            return domainArray.filter(domain => !["AT", "KS", "KR", "ER", "DH", "ACP"].includes(domain[1]));
+        } else if (moduleType === "PKS") {
+            return domainArray.filter(domain => !["A", "C", "E", "PCP"].includes(domain[1]));
+        }
+        return domainArray;
+    }
+
+    updateModuleInfo(type, moduleType, moduleSubtype, substrate, domain, geneDomain) {
+        if (["A", "C", "PCP", "E", "CAL"].includes(type)) {
+            moduleType = "NRPS";
+            moduleSubtype = "None";
+        } else if (["AT", "KS", "ACP", "KR"].includes(type)) {
+            moduleType = "PKS";
+            if (moduleSubtype === "None") {
+                moduleSubtype = "PKS_TRANS";
+            }
+        }
+
+        return [moduleType, moduleSubtype, substrate];
+    }
+
+    finalizeModule(outputForRaichu, domainArray, moduleType, moduleSubtype, domains) {
+        if (outputForRaichu.length > 0) {
+            let lastModule = outputForRaichu[outputForRaichu.length - 1];
+            let typesInModule = lastModule[3].map(x => x[1]);
+            let newDomainArray = domainArray.map(domain => {
+                if (this.isDuplicateDomain(domain[1], typesInModule)) {
+                    return [...domain.slice(0, 4), "False", domain[5]];
+                }
+                return domain;
+            });
+
+            let domainArrayFiltered = this.filterDomainArray(newDomainArray, moduleType);
+            lastModule[3] = lastModule[3].concat(domainArrayFiltered);
+
+            domains = domains.concat(domainArray.map(x => x[1]));
+            if (this.moduleMatrix.length > 0) {
+                let lastModuleMatrix = this.moduleMatrix[this.moduleMatrix.length - 1];
+                lastModuleMatrix.domains = lastModuleMatrix.domains.concat(domains);
+                lastModuleMatrix.numberOfDomains += domains.length;
+            }
+        }
+
+        return outputForRaichu;
+    }
+}
+
+class ClusterTypeHandler {
+    getClusterType(regionIndex, recordData) {
+        let type = recordData[0].regions[regionIndex].type;
+        if (type.includes("PKS") || type.includes("NRPS") || type.includes("Fatty_acid")) {
+            return "nrpspks";
+        }
+        if (type.includes("Terpene")) {
+            return "terpene";
+        }
+        if (type.includes("peptide")) {
+            return "peptide";
+        }
+        if (type === "ripp") {
+            return "ripp";
+        }
+        return "misc";
+    }
+}
+
+class RegionHandler {
+    getFirstRegion(recordData) {
+        for (let recordIndex = 0; recordIndex < recordData.length; recordIndex++) {
+            if (recordData[recordIndex].regions.length > 0) {
+                return [0, recordIndex];
+            }
+        }
+        return [0, 0];
+    }
+
+    getRegionName(regionIndex, recordIndex, recordData) {
+        return recordData[recordIndex].regions[regionIndex].anchor;
+    }
+
+    getBGC(recordIndex, regionIndex, recordData, details_data) {
+        let BGC = {
+            start: recordData[recordIndex].regions[regionIndex].start,
+            end: recordData[recordIndex].regions[regionIndex].end,
+            orfs: JSON.parse(JSON.stringify(recordData[recordIndex].regions[regionIndex].orfs))
+        };
+
+        let regionName = this.getRegionName(regionIndex, recordIndex, recordData);
+        let regionData = details_data.hasOwnProperty("nrpspks") ? details_data.nrpspks[regionName] : details_data[regionName];
+
+        if (regionData) {
+            BGC.orfs.forEach(orf => {
+                let detailedOrf = regionData.orfs.find(o => o.id === orf.locus_tag);
+                if (detailedOrf) {
+                    orf.domains = detailedOrf.domains;
+                }
+            });
+        }
+
+        return BGC;
+    }
+
+    getReversedBGC(regionIndex, recordIndex, details_data, recordData) {
+        let BGC = this.getBGC(regionIndex, recordIndex, recordData, details_data);
+
+        BGC.orfs = BGC.orfs.map(orf => {
+            let newStart = BGC.end - orf.end + BGC.start;
+            let newEnd = BGC.end - orf.start + BGC.start;
+            let newStrand = -orf.strand;
+
+            return { ...orf, start: newStart, end: newEnd, strand: newStrand };
+        }).reverse();
+
+        return BGC;
+    }
+}

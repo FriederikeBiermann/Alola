@@ -64,7 +64,9 @@ var Proteiner = {
     tooltip_id: "Proteiner-tooltip-1234567890",
     tooltip_id_protein: "Proteiner-tooltip-123"
 };
-Proteiner.drawClusterSVG = (function(cluster, height = 90) {
+Proteiner.drawClusterSVG = (function(cluster, height = 90, geneMatrix, recordData) {
+    console.log("Drawing cluster");
+    console.log(geneMatrix);
     var container = document.createElement("div");
     document.getElementById('protein_container')
         .innerHTML = "";
