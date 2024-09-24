@@ -70,7 +70,10 @@ var Domainer = {
     tooltip_id: "Domainer-tooltip-1234567890",
     tooltip_id_domain: "Domainer-tooltip-123"
 };
-Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData, moduleMatrix) {
+Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler) {
+    let moduleMatrix = geneMatrixHandler.moduleMatrix;
+    let geneMatrix = geneMatrixHandler.geneMatrix;
+    let recordData = geneMatrixHandler.recordData;
     const container = document.getElementById('domain_container');
     container.innerHTML = "";
 
@@ -121,8 +124,9 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
 
         for (let moduleIndex = 0; moduleIndex < gene.modules.length; moduleIndex++) {
             const domainIndex = gene.modules[moduleIndex].domains.findIndex(d => d.start === domain.start);
+            let domain_with_options = gene.domains.find(d => d.start === domain.start);
             if (domainIndex !== -1) {
-                return { gene, moduleIndex, domainIndex, domain };
+                return { gene, moduleIndex, domainIndex, domain_with_options};
             }
         }
 
@@ -138,16 +142,15 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
     }
 
     function createDomainElements(domainData, height, scale, indentSteps) {
-        const { gene, moduleIndex, domainIndex, domain } = domainData;
-        const domainModule = gene.modules[moduleIndex];
-        const domainInfo = domainModule.domains[domainIndex];
+        const { gene, moduleIndex, domainIndex, domain_with_options } = domainData;
+        const domainInfo = domain_with_options;
 
         const domainIdentifier = domainInfo.identifier.replace(".", "_");
         const containerElements = createContainerElements(domainIdentifier);
         const size = getDomainSize(domainInfo, height);
-        const color = getDomainColor(domain);
+        const color = getDomainColor(domain_with_options);
         const opacity = domainInfo.ko ? "0.5" : "1";
-        const points = Domainer.getDomainPoints(domain, gene, cluster, height, scale);
+        const points = Domainer.getDomainPoints(domain_with_options, gene, cluster, height, scale);
         const indent = shouldIndentDomain(domainInfo.
             abbreviation) ? indentSteps : 0;
 
@@ -247,7 +250,6 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
 
     function populateDropdownContent(contentElement, gene, moduleIndex, domainIndex, domainInfo) {
         const options = domainInfo.domainOptions.sort((a, b) => a.localeCompare(b)).sort((a, b) => a.length - b.length);
-
         options.forEach((option, optionIndex) => {
             const shortOption = hasNumbers(option) ? option.split(" ").pop() : option;
             const button = createOptionButton(gene, moduleIndex, domainIndex, optionIndex, shortOption, option);
@@ -258,7 +260,7 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrix, recordData
     function createOptionButton(gene, moduleIndex, domainIndex, optionIndex, shortOption, fullOption) {
         const button = document.createElement('button');
         button.id = `${gene.index}_${moduleIndex}_${domainIndex}_${optionIndex}`;
-        button.onclick = () => changeSelectedOption(geneMatrix, gene.index, moduleIndex, domainIndex, shortOption, optionIndex);
+        button.onclick = () => geneMatrixHandler.changeSelectedOption(gene.index, moduleIndex, domainIndex, shortOption, optionIndex);
         button.onmouseenter = () => svgHandler.hoverInAtom(shortOption);
         button.onmouseout = () => svgHandler.hoverOutAtom(shortOption);
         button.textContent = fullOption.replaceAll("_", " ");
@@ -595,7 +597,6 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
                 bubble_size = height/2;
             }
             lengthVisualisation += bubble_size;
-            console.log(bubble_size, domain, domains)
         };
         size = lengthVisualisation - 3;
         if (size > 0) {

@@ -1,6 +1,40 @@
 class SVGHandler {
     constructor() {
         this.clusterType = '';
+        this.addZoomButtonListeners();
+    }
+
+    updateIntermediates(raichu_output, geneMatrixHandler, starterACP) {
+        let acpList = geneMatrixHandler.getACPList();
+        let intermediates = raichu_output.hangingSvg;
+        let max_width = Math.max(...intermediates.map(element => element[3]));
+
+        for (let intermediateIndex = 0; intermediateIndex < intermediates.length; intermediateIndex++) {
+            let [intermediate, carrier_x, , , height] = intermediates[intermediateIndex];
+            let acp = acpList[intermediateIndex + Math.max(starterACP, 1) - 1];
+            svgHandler.updateNRPSPKSIntermediateContainer(acp, intermediate, intermediateIndex, carrier_x, max_width, height);
+        }
+
+        if (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) {
+            svgHandler.updateTailoringStructure(raichu_output.structureForTailoring);
+        }
+    }
+
+    addZoomButtonListeners() {
+        const zoomInButton = document.getElementById('Zoom_in_button');
+        const zoomOutButton = document.getElementById('Zoom_out_button');
+
+        if (zoomInButton) {
+            zoomInButton.addEventListener('click', () => this.zoom_in());
+        } else {
+            console.warn('Zoom in button not found');
+        }
+
+        if (zoomOutButton) {
+            zoomOutButton.addEventListener('click', () => this.zoom_out());
+        } else {
+            console.warn('Zoom out button not found');
+        }
     }
 
     setClusterType(type) {
@@ -218,6 +252,12 @@ class SVGHandler {
     }
 
     updateNRPSPKSIntermediateContainer(acp, intermediate, index, carrier_x, max_width, height) {
+        let viewPortHeight = window.innerHeight;
+        let viewPortWidth = window.innerWidth;
+        if (window.matchMedia("(orientation: portrait)").matches) {
+            viewPortHeight = window.innerWidth;
+            viewPortWidth = window.innerHeight;
+        }
         let container = document.getElementById(`innerIntermediateContainer${acp.replace(".", "_")}`);
         container.setAttribute("style", "width:5vw;");
         container.innerHTML = this.formatSVGIntermediates(intermediate);

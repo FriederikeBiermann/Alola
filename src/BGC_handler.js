@@ -1,5 +1,5 @@
 class GeneMatrixHandler {
-    constructor(BGC, details_data, regionName, cluster_type, regionIndex) {
+    constructor(BGC, details_data, regionName, cluster_type, regionIndex, recordData) {
         this.BGC = BGC;
         this.details_data = details_data;
         this.regionName = regionName;
@@ -12,6 +12,8 @@ class GeneMatrixHandler {
         this.rippPrecursorGene = 0;
         this.moduleMatrix = [];
         this.regionIndex = regionIndex;
+        this.recordData = recordData;
+        this.starterACP = "";
     }
 
     createGeneMatrix() {
@@ -507,6 +509,7 @@ class GeneMatrixHandler {
         const [outputForRaichu, starterACP, updatedGeneMatrix] = antismashExtractor.extractAntismashPredictions();
         this.moduleMatrix = antismashExtractor.moduleMatrix;
         this.geneMatrix = updatedGeneMatrix;
+        this.starterACP = starterACP;
         return [outputForRaichu, starterACP]
     }
 
@@ -520,11 +523,49 @@ class GeneMatrixHandler {
         if (this.geneMatrix[geneIndex].tailoringEnzymeStatus === true) {
             this.geneMatrix[geneIndex].selected_option = [];
         }
-    }
-}
+    }}
+
+    changeSelectedOption(geneIndex, moduleIndex, domainIndex, option, optionIndex) {
+            /**
+            * Change the option in geneMatrix.
+           * @fires clickondomaindropdown
+           *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
+           *@yield Selected option correct+ cyclization option correct.
+           */
+            geneMatrix[geneIndex].modules[
+                moduleIndex].domains[
+                domainIndex].selected_option = option
+            $('[id^=\x22' + geneIndex + '_' + moduleIndex + '_' + domainIndex + '\x22]').removeAttr('style');
+            let button = document.getElementById(geneIndex + '_' + moduleIndex + '_' + domainIndex + "_" + optionIndex)
+            button.setAttribute("style", "background-color: #E11839")
+            if (geneMatrix[geneIndex].modules[
+                moduleIndex].domains[
+                domainIndex].abbreviation.includes("TE")) {
+                if (option == "Linear product") {
+                    cyclization = "None"
+                }
+                else { cyclization = option }
+
+            }
+            this.removeTailoringEnzymes(geneMatrix);
+            /// todo: set all tailoring options + cyclization option to empty + cleavage options -> to default
+        }
+
+    async reloadGeneCluster() {
+        if (document.querySelector('input[type=checkbox]')
+            .checked) {
+            uiHandler.updateUI(this.geneMatrix, this.cluster_type, this.BGC, this.recordData, this.moduleMatrix, this.regionName);
+            session.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+            let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            if (this.geneMatrixHandler.cluster_type === "nrpspks") {
+                svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
+            }
+        }
+}}
 
 
-}
+
 
 class ClusterTypeHandler {
     getClusterType(regionIndex, recordData) {
@@ -758,7 +799,7 @@ class AntismashExtractor {
                                     if (domain.hasOwnProperty("predictions")) {
                                         if (domain.predictions.length != 0) {
                                             if (domain.predictions[1][1] !=
-                                                "(unknown)" && pksStarterSubstrates.includes(domain.predictions[1][1])) {
+                                                "(unknown)" && PKS_STARTER_SUBSTRATES.includes(domain.predictions[1][1])) {
                                                 substrate = domain.predictions[1][1].replace("-", '_').toUpperCase()
                                             }
                                             else {

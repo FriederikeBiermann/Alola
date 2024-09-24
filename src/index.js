@@ -131,11 +131,11 @@ const AMINO_ACIDS = {
     "trp": "tryptophan",
     "tyr": "tyrosine",
     "val": "valine",
-    "3-me-glu": "4-methylglutamicacid",
+    "3-me-glu": "4-methylglutamic acid",
     "4ppro": "**Unknown**",
     "aad": "2-aminoadipicacid",
     'abu': "2-aminobutyricacid",
-    'aeo': "2-amino-9,10-epoxy-8-oxodecanoidacid",
+    'aeo': "2-amino-9,10-epoxy-8-oxodecanoid acid",
     'ala-b': "beta-alanine",
     'ala-d': "d-alanine",
     'allo-thr': "allo-threonine",
@@ -144,8 +144,8 @@ const AMINO_ACIDS = {
     'bmt': "4-butenyl-4-methylthreonine",
     'cap': "capreomycidine",
     'bht': "**Unknown**",
-    'dab': "2,4-diaminobutyricacid",
-    'dhb': "2,3-dihydroxybenzoicacid",
+    'dab': "2,4-diaminobutyric acid",
+    'dhb': "2,3-dihydroxybenzoic acid",
     'dhpg': "3,5-dihydroxyphenylglycine",
     'dht': "dehydrobutyrine",
     'dpg': "3,5-dihydroxyphenylglycine",
@@ -192,6 +192,8 @@ const NAME_TO_STRUCTURE = {
     'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
 }; 
 
+const TRANS_AT_KS_SUBTYPES = { ' Beta Keto groups.': 'BETA_OH_KETO', 'Acetyl groups as the starting building block of the polyketide.': 'ACST', 'Alpha hydroxy groups, beta keto group': 'ALPHA_OH', 'Alpha-L-groups in conjunction with beta-D-hydroxyl groups.': 'ALPHAME_BETA_D_OH', 'Alpha-hydroxyl groups in conjunction with beta-hydroxyl groups.': 'ALPHABETA_OH', 'Alpha-methyl groups in conjunction with beta-L-hydroxyl groups.': 'ALPHAME_BETA_L_OH', 'Alpha-methyl groups in conjunction with beta-hydroxyl groups.': 'ALPHAME_BETAOH', 'Alpha-methyl groups with E-configured double bonds.': 'ALPHAME_EDB', 'Alpha-methyl groups with Z-configured double bonds.': 'ALPHAME_ZDB', 'Alpha-methyl groups with beta-gamma-double bonds.': 'ALPHA_D_ME_SHDB', 'Alpha-methyl groups with double bonds.': 'ALPHAME_DB', 'Alpha-methyl groups with either a reduced bond or a beta-gamma-double bond.': 'ALPHAME', 'Amidated amino acid starters. Amide groups are introduced by a dedicated aminotransferase.': 'ST', 'Amino acids containing oxazole or thiazole rings introduced by the NRPS module upstream.': 'OXA', 'Aromatic rings as the starting building block of the polyketide.': 'ARST', 'Beta-D-hydroxyl groups.': 'BETA_D_OH', 'Beta-L-hydroxyl groups.': 'BETA_L_OH', 'Beta-gamma-double bonds.': 'SHDB', 'Beta-hydroxy E-double bond': 'BETA_OH_EDB', 'Beta-hydroxyl groups.': 'BETA_OH', 'Beta-keto groups.': 'KETO', 'Beta-methoxy groups.': 'BETA_D_OME', 'Beta-methyl groups with double bonds.': 'BETA_MEDB', 'Double bonds of various configurations.': 'DB', 'E-configured double bonds.': 'EDB', 'Either beta-exomethylene groups or reduced beta-methyl groups, depending on the module composition upstream.': 'BETA_ME', 'Exomethylene groups.': 'EXOMETHYLENE', 'Glycine introduced by the NRPS module upstream.': 'AA', 'Lactate as the starting building block of the polyketide.': 'LACST', 'Methoxycarbonyl units as the starting building block of the polyketide.': 'MEOST', 'Non-elongating KS with keto groups': 'NON_ELONGATING_OXA', 'Non-elongating KS with specifity for pyran or furan rings.': 'NON_ELONGATING_PYR', 'Non-elongating with alpha-methyl groups and E-double bonds.': 'NON_ELONGATING_ALPHAME_EDB', 'Non-elongating with beta-L-hydroxy groups.': 'NON_ELONGATING_BETA_L_OH', 'Non-elongating with beta-hydroxy groups.': 'NON_ELONGATING_BETA_OH', 'Non-elongating with double bonds.': 'NON_ELONGATING_DB', 'Phosphoglycerate-derived molecules as the starting building block of the polyketide.': 'UNST', 'Pyran or furan rings, depending on the presence of an in-trans-acting hydroxylases two modules upstream.': 'PYR', 'Reduced bonds.': 'RED', 'Shifted double bond.': 'RED_SHDB', 'Substrates with inserted oxygen, oftentimes resulting in oxidative cleaving.': 'OXI', 'This type is elongating, but the substrate specificity cannot be predicted.': 'MISCELLANEOUS', 'This type is in an out group.': 'OUT', 'This type is specific for vinylogous chain branching.': 'BR', 'When without a suffix, this type is non-elongating, but the substrate specificity cannot be predicted.': 'NON_ELONGATING', 'Z-Double bonds': 'ZDB' }
+
 class Record {
     constructor() {
         this.geneMatrixHandler = null;
@@ -204,7 +206,7 @@ class Record {
         this.reversed = false;
         this.regionName = "";
         this.BGC = {};
-        
+        this.cluster_type = "";
 
         this.historyStack = [];
         this.wildcardModule = "";
@@ -212,29 +214,66 @@ class Record {
         this.wildcardEnzyme = "";
         this.recordData = null;
         this.details_data = null;
-        
     }
 
     init(recordData, details_data) {
         this.recordData = recordData;
         this.details_data = details_data;
+        this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData)
         this.reload_site_with_genecluster();
     }
 
-    init_from_state(recordData, details_data, geneMatrix, BGC, regionIndex) {
+    async init_from_state(recordData, details_data, geneMatrix, BGC, regionIndex) {
         this.recordData = recordData;
         this.details_data = details_data;
+        this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData)
         this.regionIndex = regionIndex;
         this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
-        this.geneMatrixHandler = new GeneMatrixHandler(BGC, this.details_data, this.regionName, this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData), this.regionIndex);
+        this.geneMatrixHandler = new GeneMatrixHandler(BGC, this.details_data, this.regionName, this.cluster_type, this.regionIndex, this.recordData);
         this.geneMatrixHandler.geneMatrix = geneMatrix;
-        uiHandler.createButtonsForEachRegion(this.recordData);
+        this.createButtonsForEachRegion();
+        //this.addButtonListeners()
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        if (this.geneMatrixHandler.cluster_type === "nrpspks") {
+            svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
+        }
 
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
-        apiService.fetchFromRaichu(this.geneMatrixHandler);
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
         this.updateHistory();
 
+    }
+
+    addButtonListeners() {
+        const buttonConfigs = [
+            { id: 'impressum-button', action: () => uiHandler.showImpressum() },
+            { id: 'add_module_button', action: () => uiHandler.openForm() },
+            { id: 'add_tailoring_enzyme_button', action: () => uiHandler.openTailoringForm() },
+            { id: 'ripp_button', action: () => uiHandler.openRiPPForm() },
+            { id: 'save_biosynthetic_model_button', action: () => uiHandler.PrintDiv() },
+            { selector: '.formContainer .btn:nth-child(1)', action: () => { uiHandler.openNRPSForm(); uiHandler.closeForm(); } },
+            { selector: '.formContainer .btn:nth-child(2)', action: () => { uiHandler.openPKSForm(); uiHandler.closeForm(); } },
+            { selector: '.formContainer .btn.cancel', action: () => uiHandler.closeForm() },
+            { selector: '#popupFormTailoring .btn:nth-child(1)', action: () => { this.addWildcardTailoring(this.geneMatrixHandler.geneMatrix); uiHandler.closeTailoringForm(); } },
+            { selector: '#popupFormTailoring .btn.cancel', action: () => uiHandler.closeTailoringForm() },
+            { selector: '#popupFormTerpene .btn:nth-child(2)', action: () => { this.apiService.fetchFromRaichu(); uiHandler.closeFormTerpene(); } },
+            { selector: '#popupFormTerpene .btn.cancel', action: () => uiHandler.closeFormTerpene() },
+            { selector: '#popupFormPKS .btn:nth-child(1)', action: () => { this.addWildcard(this.geneMatrixHandler.geneMatrix); uiHandler.closePKSForm(); } },
+            { selector: '#popupFormPKS .btn.cancel', action: () => uiHandler.closePKSForm() },
+            { selector: '#popupFormNRPS .btn:nth-child(1)', action: () => { this.addWildcard(this.geneMatrixHandler.geneMatrix); uiHandler.closeNRPSForm(); } },
+            { selector: '#popupFormNRPS .btn.cancel', action: () => uiHandler.closeNRPSForm() },
+            { selector: '#popupFormRiPP .btn:nth-child(1)', action: () => { this.addRiPP(this.geneMatrixHandler.geneMatrix, this.rippSelection); uiHandler.closeRiPPForm(); } },
+            { selector: '#popupFormRiPP .btn.cancel', action: () => uiHandler.closeRiPPForm() },
+        ];
+
+        buttonConfigs.forEach(config => {
+            const element = config.id ? document.getElementById(config.id) : document.querySelector(config.selector);
+            if (element) {
+                element.addEventListener('click', config.action);
+            } else {
+                console.warn(`Button ${config.id || config.selector} not found`);
+            }
+        });
     }
 
     updateHistory() {
@@ -245,37 +284,82 @@ class Record {
         this.historyStack.updateButtonStates();
     }
 
-    undo() {
+    async undo() {
         const previousState = this.historyStack.undo();
         if (previousState) {
             this.geneMatrixHandler.geneMatrix = previousState.geneMatrix;
             this.BGC = previousState.BGC;
             uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
-            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            await apiService.fetchFromRaichu(this.geneMatrixHandler);
             uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
         }
         this.historyStack.updateButtonStates();
     }
 
-    redo() {
+    async redo() {
         const nextState = this.historyStack.redo();
         if (nextState) {
             this.geneMatrixHandler.geneMatrix = nextState.geneMatrix;
             this.BGC = nextState.BGC;
             uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
-            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            await apiService.fetchFromRaichu(this.geneMatrixHandler);
             uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
         }
         this.historyStack.updateButtonStates();
     }
 
     reload_site_with_genecluster() {
-        uiHandler.createButtonsForEachRegion(this.recordData);
+        this.createButtonsForEachRegion();
         [this.regionIndex, this.recordIndex] = regionHandler.getFirstRegion(this.recordData);
         this.runAlola();
     }
 
-    runAlola() {
+
+    createButtonsForEachRegion() {
+        console.log('Creating buttons for record data:', this.recordData);
+
+        const regionData = this.extractRegionData();
+        const buttonElements = this.createButtonElements(regionData);
+
+        this.renderButtons(buttonElements);
+    }
+
+    extractRegionData() {
+        return this.recordData.flatMap(record =>
+            record.regions.map(region => ({
+                anchor: region.anchor,
+                type: region.type
+            }))
+        );
+    }
+
+    createButtonElements(regionData) {
+        return regionData.map(({ anchor, type }) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.id = `buttonRegion_${anchor}`;
+            button.className = 'regionButton';
+            button.innerHTML = `<strong>${anchor.toUpperCase()}<br>${type}</strong>`;
+
+            button.addEventListener('click', () => this.changeRegionTo(anchor));
+
+            return button;
+        });
+    }
+
+    renderButtons(buttonElements) {
+        // Clear existing content
+        regionsBar = document.getElementById("regionsBar");
+        regionsBar.innerHTML = '';
+
+        // Use DocumentFragment for better performance
+        const fragment = document.createDocumentFragment();
+        buttonElements.forEach(button => fragment.appendChild(button));
+
+        regionsBar.appendChild(fragment);
+    }
+
+    async runAlola() {
         this.BGC = {};
         this.reversed = false;
         this.rippPrecursor = "";
@@ -288,7 +372,7 @@ class Record {
         this.BGC = regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
         this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex);
         this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
-        console.log(this.geneMatrixHandler.moduleMatrix)
+        //this.addButtonListeners()
 
         uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName, this.regionName);
         uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
@@ -297,8 +381,12 @@ class Record {
             uiHandler.openFormTerpene();
         }
 
-        apiService.fetchFromRaichu(this.geneMatrixHandler);
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName, this.regionName);
+        let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        if (this.geneMatrixHandler.cluster_type === "nrpspks") {
+            svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
+        }
+        //uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName, this.regionName);
         this.updateHistory()
 
     }
@@ -352,8 +440,8 @@ class Record {
         this.runAlola();
     }
 
-    changeRegionTo(regionName, recordData) {
-        [this.regionIndex, this.recordIndex] = regionHandler.selectRegion(recordData, regionName);
+    changeRegionTo(regionName) {
+        [this.regionIndex, this.recordIndex] = regionHandler.selectRegion(this.recordData, regionName);
         this.runAlola();
     }
 
@@ -438,6 +526,7 @@ class ApplicationManager {
         document.getElementById('uploadButton').addEventListener('click', () => this.fileHandler.triggerFileInput());
         document.getElementById('fileInput').addEventListener('change', (event) => this.handleFileSelection(event));
         document.getElementById('load_example_button').addEventListener('click', () => this.fileHandler.loadExampleFile());
+        document.getElementById('shareButton').addEventListener('click', () => this.shareData());
         this.fileHandler.setupDropArea();
     }
 
@@ -502,39 +591,20 @@ class UIHandler {
         }
         this.addArrowClick(geneMatrix, cluster_type);
     }
+
     displayGenes(BGC, recordData, regionName) {
         this.viewPortHeight = window.innerHeight;
         this.viewPortWidth = window.innerWidth;
+        if (window.matchMedia("(orientation: portrait)").matches) {
+            this.viewPortHeight = window.innerWidth;
+            this.viewPortWidth = window.innerHeight;
+        }
         let BGCForDisplay = JSON.parse(JSON.stringify(BGC));
         for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
             delete BGCForDisplay["orfs"][geneIndex]["domains"];
         }
         $("#arrow_container").html(Arrower.drawClusterSVG(this.removePaddingBGC(BGCForDisplay), this.viewPortHeight * 0.05, recordData, regionName));
         return BGCForDisplay;}
-
-    createButtonsForEachRegion(recordData) {
-        let listRegions = [];
-        let listTypes = [];
-        console.log(this.recordData)
-
-        for (const record of recordData) {
-            for (let index = 0; index < record.regions.length; index++) {
-                listRegions.push(record.regions[index].anchor);
-                listTypes.push(record.regions[index].type);
-            }
-        }
-
-        let regionsBar = document.getElementById("regionsBar");
-        let innerHTML = "";
-
-        for (let index = 0; index < listRegions.length; index++) {
-            let region = listRegions[index];
-            let type = listTypes[index];
-            innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=session.record.changeRegionTo("${region}", recordData)><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`;
-        }
-
-        regionsBar.innerHTML = innerHTML;
-    }
 
     addRiPPPrecursorOptions(geneMatrix) {
         let innerHTML = "";

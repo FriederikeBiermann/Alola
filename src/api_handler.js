@@ -5,11 +5,14 @@ class APIService {
 
     async fetchFromRaichu(geneMatrixHandler) {
         let bgcHandler = this.getBGCHandler(geneMatrixHandler.cluster_type);
+        let raichu_output;
         if (bgcHandler) {
-            await bgcHandler.fetch(geneMatrixHandler);
+            raichu_output = await bgcHandler.fetch(geneMatrixHandler);
         } else {
             this.showError("This type of BGC is not implemented yet.");
+            raichu_output = { "Error": "This type of BGC is not implemented yet." };
         }
+        return raichu_output;
     }
 
     getBGCHandler(cluster_type) {
@@ -50,6 +53,7 @@ class BGCFetcher {
         svgHandler.updateDownloadLinks(raichu_output);
         this.setupSmilesButton(raichu_output.smiles);
         this.updateMolecularMass(raichu_output.mass);
+        this.updateSumFormula(raichu_output.sum_formula);
     }
 
     showError(message) {
@@ -65,6 +69,10 @@ class BGCFetcher {
     updateMolecularMass(mass) {
         let roundedMass = mass.toFixed(4);
         document.getElementById("molecular_mass_value").innerHTML = `${roundedMass} Da`;
+    }
+    
+    updateSumFormula(sum_formula) {
+        document.getElementById("sum_formula_value").innerHTML = `${sum_formula}`;
     }
 }
 
@@ -92,8 +100,8 @@ class RiPPHandler extends BGCFetcher {
     }
 
     processRaichuOutput(raichu_output, geneMatrixHandler) {
-        OptionCreator.createOptionsDomains(geneMatrixHandler.geneMatrix, JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')));
-        OptionCreator.createOptionsTailoringEnzymes(geneMatrixHandler.geneMatrix, raichu_output.tailoringSites);
+        geneMatrixHandler.geneMatrix = OptionCreator.createOptionsDomains(geneMatrixHandler.geneMatrix, JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')));
+        geneMatrixHandler.geneMatrix = OptionCreator.createOptionsTailoringEnzymes(geneMatrixHandler.geneMatrix, raichu_output.tailoringSites);
         this.updateIntermediates(raichu_output);
     }
 
@@ -142,7 +150,7 @@ class TerpeneHandler extends BGCFetcher {
         let atomsForCyclisation = JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"'));
         let tailoringSites = JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"'));
         geneMatrixHandler.terpeneCyclaseOptions = OptionCreator.createOptionsTerpeneCyclase(atomsForCyclisation, tailoringSites);
-        OptionCreator.createOptionsTailoringEnzymes(geneMatrixHandler.geneMatrix, tailoringSites);
+        geneMatrixHandler.geneMatrix = OptionCreator.createOptionsTailoringEnzymes(geneMatrixHandler.geneMatrix, tailoringSites);
         this.updateIntermediates(raichu_output);
     }
 
@@ -168,34 +176,18 @@ class NRPSPKSHandler extends BGCFetcher {
         let url = `${this.port}api/alola/nrps_pks?antismash_input=${encodeURIComponent(data_string)}`;
         const response = await fetch(url);
         const raichu_output = await response.json();
-        console.log(raichu_output)
-
         this.updateUI(raichu_output, geneMatrixHandler.geneMatrix, geneMatrixHandler.BGC);
 
         if (!raichu_output.hasOwnProperty("Error")) {
             this.processRaichuOutput(raichu_output, geneMatrixHandler, starterACP);
         }
+        return raichu_output;
     }
 
     processRaichuOutput(raichu_output, geneMatrixHandler, starterACP) {
-        OptionCreator.createOptionsDomains(geneMatrixHandler.geneMatrix, JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')));
-        OptionCreator.createOptionsTailoringEnzymes(geneMatrixHandler.geneMatrix, JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')));
-        this.updateIntermediates(raichu_output, geneMatrixHandler, starterACP);
+        geneMatrixHandler.geneMatrix = OptionCreator.createOptionsDomains(geneMatrixHandler.geneMatrix, JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')));
+        geneMatrixHandler.geneMatrix = OptionCreator.createOptionsTailoringEnzymes(geneMatrixHandler.geneMatrix, JSON.parse(raichu_output.tailoringSites.replaceAll("'", '"')));
     }
 
-    updateIntermediates(raichu_output, geneMatrixHandler, starterACP) {
-        let acpList = geneMatrixHandler.getACPList();
-        let intermediates = raichu_output.hangingSvg;
-        let max_width = Math.max(...intermediates.map(element => element[3]));
 
-        for (let intermediateIndex = 0; intermediateIndex < intermediates.length; intermediateIndex++) {
-            let [intermediate, carrier_x, , , height] = intermediates[intermediateIndex];
-            let acp = acpList[intermediateIndex + Math.max(starterACP, 1) - 1];
-            svgHandler.updateNRPSPKSIntermediateContainer(acp, intermediate, intermediateIndex, carrier_x, max_width, height);
-        }
-
-        if (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) {
-            svgHandler.updateTailoringStructure(raichu_output.structureForTailoring);
-        }
-    }
 }
