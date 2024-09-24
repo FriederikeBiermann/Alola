@@ -221,6 +221,22 @@ class Record {
         this.reload_site_with_genecluster();
     }
 
+    init_from_state(recordData, details_data, geneMatrix, BGC, regionIndex) {
+        this.recordData = recordData;
+        this.details_data = details_data;
+        this.regionIndex = regionIndex;
+        this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
+        this.geneMatrixHandler = new GeneMatrixHandler(BGC, this.details_data, this.regionName, this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData), this.regionIndex);
+        this.geneMatrixHandler.geneMatrix = geneMatrix;
+        uiHandler.createButtonsForEachRegion(this.recordData);
+
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        apiService.fetchFromRaichu(this.geneMatrixHandler);
+        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        this.updateHistory();
+
+    }
+
     updateHistory() {
         this.historyStack.push({
             geneMatrix: this.geneMatrixHandler.geneMatrix,
@@ -336,9 +352,8 @@ class Record {
         this.runAlola();
     }
 
-    changeRegionTo(regionName) {
-        console.log(this.recordData)
-        [this.regionIndex, this.recordIndex] = regionHandler.selectRegion(this.recordData, regionName);
+    changeRegionTo(regionName, recordData) {
+        [this.regionIndex, this.recordIndex] = regionHandler.selectRegion(recordData, regionName);
         this.runAlola();
     }
 
@@ -419,14 +434,48 @@ class ApplicationManager {
     }
 
     setupEventListeners() {
+        this.loadDataFromURL();
         document.getElementById('uploadButton').addEventListener('click', () => this.fileHandler.triggerFileInput());
         document.getElementById('fileInput').addEventListener('change', (event) => this.handleFileSelection(event));
         document.getElementById('load_example_button').addEventListener('click', () => this.fileHandler.loadExampleFile());
         this.fileHandler.setupDropArea();
-        
-        // Add more event listeners as needed
     }
 
+    loadDataFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
+        if (encodedData) {
+            try {
+                const decodedData = JSON.parse(atob(encodedData));
+                if (decodedData.currentBGC && decodedData.currentGeneMatrix && decodedData.regionIndex !== undefined) {
+                    this.record.init_from_state(decodedData.recordData, decodedData.detailsData, decodedData.currentGeneMatrix, decodedData.currentBGC, decodedData.regionIndex);
+                }
+                else {
+                this.record.init(decodedData.recordData, decodedData.detailsData);
+                }
+            } catch (error) {
+                console.error('Failed to load data from URL:', error);
+            }
+        }
+    }
+
+    shareData() {
+        const data = {
+            recordData: this.record.recordData,
+            detailsData: this.record.detailsData
+        };
+        const encodedData = btoa(JSON.stringify(data));
+        const url = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+
+        // You can either copy to clipboard or open in a new tab
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Share URL copied to clipboard!');
+        }).catch(err => {
+            console.error('Failed to copy URL: ', err);
+            // Fallback: open in new tab
+            window.open(url, '_blank');
+        });
+    }
 
     handleFileSelection(event) {
         const file = event.target.files[0];
@@ -481,7 +530,7 @@ class UIHandler {
         for (let index = 0; index < listRegions.length; index++) {
             let region = listRegions[index];
             let type = listTypes[index];
-            innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=session.record.changeRegionTo("${region}")><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`;
+            innerHTML += `<button type='button' id ='buttonRegion_${region}' class= 'regionButton' onclick=session.record.changeRegionTo("${region}", recordData)><strong>${region.toUpperCase()} <br /> ${type}</strong></button>`;
         }
 
         regionsBar.innerHTML = innerHTML;
