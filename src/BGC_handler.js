@@ -180,6 +180,7 @@ class GeneMatrixHandler {
     createGeneObject(orf, domains, orfFunction, tailoringEnzymeStatus, geneIndex) {
         return {
             id: orf.locus_tag,
+            index: geneIndex,
             orffunction: orfFunction,
             tailoringEnzymeStatus: tailoringEnzymeStatus[0],
             tailoringEnzymeType: tailoringEnzymeStatus[1],
@@ -519,7 +520,7 @@ class GeneMatrixHandler {
      * only if the tailoringEnzymeStatus is true.
      * @input geneMatrix
      */
-    for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
+    for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
         if (this.geneMatrix[geneIndex].tailoringEnzymeStatus === true) {
             this.geneMatrix[geneIndex].selected_option = [];
         }
@@ -532,34 +533,34 @@ class GeneMatrixHandler {
            *@input geneMatrix, geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
            *@yield Selected option correct+ cyclization option correct.
            */
-            geneMatrix[geneIndex].modules[
+            this.geneMatrix[geneIndex].modules[
                 moduleIndex].domains[
                 domainIndex].selected_option = option
             $('[id^=\x22' + geneIndex + '_' + moduleIndex + '_' + domainIndex + '\x22]').removeAttr('style');
             let button = document.getElementById(geneIndex + '_' + moduleIndex + '_' + domainIndex + "_" + optionIndex)
             button.setAttribute("style", "background-color: #E11839")
-            if (geneMatrix[geneIndex].modules[
+        if (this.geneMatrix[geneIndex].modules[
                 moduleIndex].domains[
                 domainIndex].abbreviation.includes("TE")) {
                 if (option == "Linear product") {
-                    cyclization = "None"
+                    this.cyclization = "None"
                 }
-                else { cyclization = option }
+                else { this.cyclization = option }
 
             }
-            this.removeTailoringEnzymes(geneMatrix);
+            this.removeTailoringEnzymes();
+            this.reloadGeneCluster();
             /// todo: set all tailoring options + cyclization option to empty + cleavage options -> to default
         }
 
     async reloadGeneCluster() {
         if (document.querySelector('input[type=checkbox]')
             .checked) {
-            uiHandler.updateUI(this.geneMatrix, this.cluster_type, this.BGC, this.recordData, this.moduleMatrix, this.regionName);
-            session.fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
-            let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
-            if (this.geneMatrixHandler.cluster_type === "nrpspks") {
-                svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
+            uiHandler.updateUI(this);
+            let raichu_output = await apiService.fetchFromRaichu(this);
+            uiHandler.updateUI(this);
+            if (this.cluster_type === "nrpspks") {
+                svgHandler.updateIntermediates(raichu_output, this, this.starterACP);
             }
         }
 }}

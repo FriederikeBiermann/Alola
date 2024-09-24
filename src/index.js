@@ -233,9 +233,9 @@ class Record {
         this.geneMatrixHandler.geneMatrix = geneMatrix;
         this.createButtonsForEachRegion();
         //this.addButtonListeners()
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        uiHandler.updateUI(this.geneMatrixHandler);
         let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        uiHandler.updateUI(this.geneMatrixHandler);
         if (this.geneMatrixHandler.cluster_type === "nrpspks") {
             svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
         }
@@ -289,9 +289,9 @@ class Record {
         if (previousState) {
             this.geneMatrixHandler.geneMatrix = previousState.geneMatrix;
             this.BGC = previousState.BGC;
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
             await apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
         }
         this.historyStack.updateButtonStates();
     }
@@ -301,9 +301,9 @@ class Record {
         if (nextState) {
             this.geneMatrixHandler.geneMatrix = nextState.geneMatrix;
             this.BGC = nextState.BGC;
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
             await apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
         }
         this.historyStack.updateButtonStates();
     }
@@ -374,7 +374,7 @@ class Record {
         this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
         //this.addButtonListeners()
 
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName, this.regionName);
+        uiHandler.updateUI(this.geneMatrixHandler);
         uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
 
         if (this.geneMatrixHandler.cluster_type === "terpene") {
@@ -382,11 +382,11 @@ class Record {
         }
 
         let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        uiHandler.updateUI(this.geneMatrixHandler);
         if (this.geneMatrixHandler.cluster_type === "nrpspks") {
             svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
         }
-        //uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName, this.regionName);
+        //uiHandler.updateUI(this.geneMatrixHandler);
         this.updateHistory()
 
     }
@@ -398,9 +398,9 @@ class Record {
             this.reversed = true;
             this.BGC = regionHandler.getReversedBGC(this.regionIndex, this.recordIndex, this.details_data, this.recordData);
             this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
             apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
 
         }
     }
@@ -419,7 +419,7 @@ class Record {
         this.rippPrecursor = rippSelection.length > 0 ? rippSelection : translation.slice(-5);
 
         apiService.fetchFromRaichu(this.geneMatrixHandler);
-        uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+        uiHandler.updateUI(this.geneMatrixHandler);
 
     }
 
@@ -464,7 +464,7 @@ class Record {
         this.geneMatrixHandler.removeTailoringEnzymes();
         if (uiHandler.isRealTimeCalculationEnabled()) {
             apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
         }
     }
 
@@ -486,7 +486,7 @@ class Record {
             this.geneMatrixHandler.geneMatrix = previousState.geneMatrix;
             this.BGC = previousState.BGC;
             apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler.geneMatrix, this.geneMatrixHandler.cluster_type, this.BGC, this.recordData, this.geneMatrixHandler.moduleMatrix, this.regionName);
+            uiHandler.updateUI(this.geneMatrixHandler);
             
         }
     }
@@ -579,7 +579,12 @@ class UIHandler {
 
     }
 
-    updateUI(geneMatrix, cluster_type, BGC, recordData, moduleMatrix, regionName) {
+    updateUI(geneMatrixHandler) {
+        let geneMatrix = geneMatrixHandler.geneMatrix;
+        let BGC = geneMatrixHandler.BGC;
+        let recordData = geneMatrixHandler.recordData;
+        let regionName = geneMatrixHandler.regionName;
+        let cluster_type = geneMatrixHandler.cluster_type;
         this.displayGenes(BGC, recordData, regionName);
         this.updateProteins(geneMatrix, BGC, recordData);
         
@@ -587,7 +592,7 @@ class UIHandler {
             this.updateRiPPs(geneMatrix, BGC);
         }
         else{
-            this.updateDomains(geneMatrix, BGC, recordData, moduleMatrix);
+            this.updateDomains(geneMatrixHandler);
         }
         this.addArrowClick(geneMatrix, cluster_type);
     }
@@ -629,17 +634,21 @@ class UIHandler {
         this.addDragDrop();
     }
 
-    updateDomains(geneMatrix, BGC, recordData, moduleMatrix) {
-        let domainsForDisplay = JSON.parse(JSON.stringify(BGC));
+    updateDomains(geneMatrixHandler) {
+        let domainsForDisplay = JSON.parse(JSON.stringify(geneMatrixHandler.BGC));
+        let geneMatrix = geneMatrixHandler.geneMatrix;
+        let BGC = geneMatrixHandler.BGC;
         delete domainsForDisplay.orfs;
+        
         domainsForDisplay.orfs = [];
+        
         geneMatrix.sort((a, b) => a.position - b.position);
         for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
             if (geneMatrix[geneIndex].displayed == true && geneMatrix[geneIndex].domains.length != 0) {
                 domainsForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC - 1]);
             }
         }
-        $("#Domain_container").html(Domainer.drawClusterSVG(this.removePaddingBGC(this.removeSpaceBetweenProteins(domainsForDisplay)), this.viewPortHeight * 0.09, geneMatrix, recordData, moduleMatrix));
+        $("#Domain_container").html(Domainer.drawClusterSVG(this.removePaddingBGC(this.removeSpaceBetweenProteins(domainsForDisplay)), this.viewPortHeight * 0.09, geneMatrixHandler));
         this.addDragDrop();
     }
 
