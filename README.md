@@ -3,11 +3,17 @@
 **ALOLA** is designed to visualize and customize biosynthetic gene clusters (BGCs) from antiSMASH results. It offers real-time interactivity, support for various BGC types, integration of tailoring enzymes, and a user-friendly interface for modifying pathways. The tool bridges genomic data and chemical structures, providing researchers with the ability to explore, design, and modify biosynthetic pathways.
 
 ## Features:
+
 **User-Friendly Interface:** Perform complex operations with just a few clicks.
+
 **Real-time Interactivity:** Modify BGCs and visualize changes in real-time.
+
 **Support for Various BGC Types:** Works with NRPS, PKS systems, RiPPs, Terpenes, and more.
+
 **Tailoring Enzyme Integration:** Easily add and customize tailoring enzymes.
+
 **Flexible Starting Points:** Import antiSMASH results, use pre-loaded examples, or design BGCs from scratch.
+
 **Exportable Results:** Export pathways and predicted structures in multiple formats.
 
 ## Packages:
