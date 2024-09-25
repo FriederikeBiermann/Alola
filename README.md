@@ -1,17 +1,21 @@
-# ALOLA: A Web-Based Tool for Visualization and Customization of Biosynthetic Gene Clusters
-ALOLA is designed to visualize and customize biosynthetic gene clusters (BGCs) from antiSMASH results. It offers real-time interactivity, support for various BGC types, integration of tailoring enzymes, and a user-friendly interface for modifying pathways. The tool bridges genomic data and chemical structures, providing researchers with the ability to explore, design, and modify biosynthetic pathways.
+# ALOLA: An interactive web-based natural product biosynthetic model builder
+##  An online tool for visualization and customization of biosynthetic gene clusters
+**ALOLA** is designed to visualize and customize biosynthetic gene clusters (BGCs) from antiSMASH results. It offers real-time interactivity, support for various BGC types, integration of tailoring enzymes, and a user-friendly interface for modifying pathways. The tool bridges genomic data and chemical structures, providing researchers with the ability to explore, design, and modify biosynthetic pathways.
 
 ## Features:
-User-Friendly Interface: Perform complex operations with just a few clicks.
-Real-time Interactivity: Modify BGCs and visualize changes in real-time.
-Support for Various BGC Types: Works with NRPS, PKS systems, RiPPs, Terpenes, and more.
-Tailoring Enzyme Integration: Easily add and customize tailoring enzymes.
-Flexible Starting Points: Import antiSMASH results, use pre-loaded examples, or design BGCs from scratch.
-Exportable Results: Export pathways and predicted structures in multiple formats.
+**User-Friendly Interface:** Perform complex operations with just a few clicks.
+**Real-time Interactivity:** Modify BGCs and visualize changes in real-time.
+**Support for Various BGC Types:** Works with NRPS, PKS systems, RiPPs, Terpenes, and more.
+**Tailoring Enzyme Integration:** Easily add and customize tailoring enzymes.
+**Flexible Starting Points:** Import antiSMASH results, use pre-loaded examples, or design BGCs from scratch.
+**Exportable Results:** Export pathways and predicted structures in multiple formats.
+
+## Packages:
+One of the key components of ALOLA is **RAIChU**, or Reaction Analysis through Imaging of Chemical Units. This Python-based tool, developed specifically for visualizing natural product chemistry, handles all the structure computation and visualization tasks. RAIChU itself is built upon **PIkachu**, a Python-based Informatics Kit for the Analysis of Chemical Units, which provides the core functionalities for chemical informatics and structural analysis. 
 
 ## Installation and Running ALOLA Locally
 
-Follow these steps to set up and run ALOLA on your local computer:
+Follow these steps to set up and run ALOLA on your local computer to make your own local server:
 
 **1. Create a New Directory**
 
