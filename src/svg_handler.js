@@ -25,13 +25,13 @@ class SVGHandler {
         const zoomOutButton = document.getElementById('Zoom_out_button');
 
         if (zoomInButton) {
-            zoomInButton.addEventListener('click', () => this.zoom_in());
+            zoomInButton.addEventListener('click', () => this.zoomIn());
         } else {
             console.warn('Zoom in button not found');
         }
 
         if (zoomOutButton) {
-            zoomOutButton.addEventListener('click', () => this.zoom_out());
+            zoomOutButton.addEventListener('click', () => this.zoomOut());
         } else {
             console.warn('Zoom out button not found');
         }
@@ -168,11 +168,11 @@ class SVGHandler {
     }
 
     zoomIn() {
-        this.zoom(30);
+        this.zoom(-30);
     }
 
     zoomOut() {
-        this.zoom(-30);
+        this.zoom(30);
     }
 
     zoom(delta) {

@@ -198,7 +198,7 @@ class Record {
     constructor() {
         this.geneMatrixHandler = null;
         this.clusterTypeHandler = new ClusterTypeHandler();
-        this.historyStack = new HistoryStack();
+        
 
 
         this.regionIndex = 0;
@@ -207,8 +207,6 @@ class Record {
         this.regionName = "";
         this.BGC = {};
         this.cluster_type = "";
-
-        this.historyStack = [];
         this.wildcardModule = "";
         this.wildcardSubstrate = "";
         this.wildcardEnzyme = "";
@@ -220,6 +218,7 @@ class Record {
         this.recordData = recordData;
         this.details_data = details_data;
         this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData)
+        
         this.reload_site_with_genecluster();
     }
 
@@ -230,82 +229,20 @@ class Record {
         this.regionIndex = regionIndex;
         this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
         this.geneMatrixHandler = new GeneMatrixHandler(BGC, this.details_data, this.regionName, this.cluster_type, this.regionIndex, this.recordData);
+        this.addButtonListeners()
         this.geneMatrixHandler.geneMatrix = geneMatrix;
+        uiHandler.setGeneMatrixHandler(this.geneMatrixHandler);
         this.createButtonsForEachRegion();
         //this.addButtonListeners()
         uiHandler.updateUI(this.geneMatrixHandler);
         let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
         uiHandler.updateUI(this.geneMatrixHandler);
+        uiHandler.addDragDrop();
         if (this.geneMatrixHandler.cluster_type === "nrpspks") {
             svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
         }
 
-        this.updateHistory();
 
-    }
-
-    addButtonListeners() {
-        const buttonConfigs = [
-            { id: 'impressum-button', action: () => uiHandler.showImpressum() },
-            { id: 'add_module_button', action: () => uiHandler.openForm() },
-            { id: 'add_tailoring_enzyme_button', action: () => uiHandler.openTailoringForm() },
-            { id: 'ripp_button', action: () => uiHandler.openRiPPForm() },
-            { id: 'save_biosynthetic_model_button', action: () => uiHandler.PrintDiv() },
-            { selector: '.formContainer .btn:nth-child(1)', action: () => { uiHandler.openNRPSForm(); uiHandler.closeForm(); } },
-            { selector: '.formContainer .btn:nth-child(2)', action: () => { uiHandler.openPKSForm(); uiHandler.closeForm(); } },
-            { selector: '.formContainer .btn.cancel', action: () => uiHandler.closeForm() },
-            { selector: '#popupFormTailoring .btn:nth-child(1)', action: () => { this.addWildcardTailoring(this.geneMatrixHandler.geneMatrix); uiHandler.closeTailoringForm(); } },
-            { selector: '#popupFormTailoring .btn.cancel', action: () => uiHandler.closeTailoringForm() },
-            { selector: '#popupFormTerpene .btn:nth-child(2)', action: () => { this.apiService.fetchFromRaichu(); uiHandler.closeFormTerpene(); } },
-            { selector: '#popupFormTerpene .btn.cancel', action: () => uiHandler.closeFormTerpene() },
-            { selector: '#popupFormPKS .btn:nth-child(1)', action: () => { this.addWildcard(this.geneMatrixHandler.geneMatrix); uiHandler.closePKSForm(); } },
-            { selector: '#popupFormPKS .btn.cancel', action: () => uiHandler.closePKSForm() },
-            { selector: '#popupFormNRPS .btn:nth-child(1)', action: () => { this.addWildcard(this.geneMatrixHandler.geneMatrix); uiHandler.closeNRPSForm(); } },
-            { selector: '#popupFormNRPS .btn.cancel', action: () => uiHandler.closeNRPSForm() },
-            { selector: '#popupFormRiPP .btn:nth-child(1)', action: () => { this.addRiPP(this.geneMatrixHandler.geneMatrix, this.rippSelection); uiHandler.closeRiPPForm(); } },
-            { selector: '#popupFormRiPP .btn.cancel', action: () => uiHandler.closeRiPPForm() },
-        ];
-
-        buttonConfigs.forEach(config => {
-            const element = config.id ? document.getElementById(config.id) : document.querySelector(config.selector);
-            if (element) {
-                element.addEventListener('click', config.action);
-            } else {
-                console.warn(`Button ${config.id || config.selector} not found`);
-            }
-        });
-    }
-
-    updateHistory() {
-        this.historyStack.push({
-            geneMatrix: this.geneMatrixHandler.geneMatrix,
-            BGC: this.geneMatrixHandler.BGC
-        });
-        this.historyStack.updateButtonStates();
-    }
-
-    async undo() {
-        const previousState = this.historyStack.undo();
-        if (previousState) {
-            this.geneMatrixHandler.geneMatrix = previousState.geneMatrix;
-            this.BGC = previousState.BGC;
-            uiHandler.updateUI(this.geneMatrixHandler);
-            await apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler);
-        }
-        this.historyStack.updateButtonStates();
-    }
-
-    async redo() {
-        const nextState = this.historyStack.redo();
-        if (nextState) {
-            this.geneMatrixHandler.geneMatrix = nextState.geneMatrix;
-            this.BGC = nextState.BGC;
-            uiHandler.updateUI(this.geneMatrixHandler);
-            await apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler);
-        }
-        this.historyStack.updateButtonStates();
     }
 
     reload_site_with_genecluster() {
@@ -314,6 +251,26 @@ class Record {
         this.runAlola();
     }
 
+    addButtonListeners() {
+        const resetButton = document.getElementById("reset_button");
+        const reverseButton = document.getElementById("reverse_button");
+        const refreshButton = document.getElementById("refresh_button");
+
+        // Remove all existing listeners
+        resetButton.replaceWith(resetButton.cloneNode(true));
+        reverseButton.replaceWith(reverseButton.cloneNode(true));
+        refreshButton.replaceWith(refreshButton.cloneNode(true));
+
+        // Re-select the buttons after replacing them
+        const newResetButton = document.getElementById("reset_button");
+        const newReverseButton = document.getElementById("reverse_button");
+        const newRefreshButton = document.getElementById("refresh_button");
+
+        // Add new listeners
+        newResetButton.addEventListener('click', () => this.runAlola());
+        newReverseButton.addEventListener('click', () => this.reverseBGC());
+        newRefreshButton.addEventListener('click', () => this.geneMatrixHandler.reloadGeneCluster());
+    }
 
     createButtonsForEachRegion() {
         console.log('Creating buttons for record data:', this.recordData);
@@ -370,7 +327,9 @@ class Record {
         
 
         this.BGC = regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
-        this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex);
+        this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
+        this.addButtonListeners()
+        uiHandler.setGeneMatrixHandler(this.geneMatrixHandler);
         this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
         //this.addButtonListeners()
 
@@ -383,15 +342,14 @@ class Record {
 
         let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
         uiHandler.updateUI(this.geneMatrixHandler);
+        uiHandler.addDragDrop();
         if (this.geneMatrixHandler.cluster_type === "nrpspks") {
             svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
         }
-        //uiHandler.updateUI(this.geneMatrixHandler);
-        this.updateHistory()
 
     }
 
-    reverseBGC() {
+    async reverseBGC() {
         if (this.reversed) {
             this.runAlola();
         } else {
@@ -399,8 +357,19 @@ class Record {
             this.BGC = regionHandler.getReversedBGC(this.regionIndex, this.recordIndex, this.details_data, this.recordData);
             this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
             uiHandler.updateUI(this.geneMatrixHandler);
-            apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
+
+            if (this.geneMatrixHandler.cluster_type === "terpene") {
+                uiHandler.openFormTerpene();
+            }
+
+            let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
             uiHandler.updateUI(this.geneMatrixHandler);
+            uiHandler.addDragDrop();
+            if (this.geneMatrixHandler.cluster_type === "nrpspks") {
+                svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
+            }
+
 
         }
     }
@@ -459,37 +428,6 @@ class Record {
         this.wildcardModule = moduleType;
     }
 
-    setKoStatus(geneIndex, domainIndex) {
-        this.geneMatrixHandler.toggleKoStatus(geneIndex, domainIndex);
-        this.geneMatrixHandler.removeTailoringEnzymes();
-        if (uiHandler.isRealTimeCalculationEnabled()) {
-            apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler);
-        }
-    }
-
-    setDisplayedStatus(id) {
-        this.geneMatrixHandler.toggleDisplayedStatus(id);
-    }
-
-    updateHistory() {
-        this.historyStack.push({
-            geneMatrix: JSON.parse(JSON.stringify(this.geneMatrixHandler.geneMatrix)),
-            BGC: JSON.parse(JSON.stringify(this.BGC))
-        });
-    }
-
-    undo() {
-        if (this.historyStack.length > 1) {
-            this.historyStack.pop(); // Remove current state
-            const previousState = this.historyStack[this.historyStack.length - 1];
-            this.geneMatrixHandler.geneMatrix = previousState.geneMatrix;
-            this.BGC = previousState.BGC;
-            apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler);
-            
-        }
-    }
 
     create_empty_BGC() {
         this.regionIndex = 0
@@ -576,6 +514,7 @@ class ApplicationManager {
 
 class UIHandler {
     constructor() {
+        this.dragSrcEl = null;
 
     }
 
@@ -594,7 +533,34 @@ class UIHandler {
         else{
             this.updateDomains(geneMatrixHandler);
         }
-        this.addArrowClick(geneMatrix, cluster_type);
+        geneMatrixHandler.addArrowClick();
+    }
+
+    addButtonListeners() {
+        const impressumButton = document.getElementById('impressum-button');
+        const openAlolaManualButton = document.getElementById('openAlolaManual');
+
+        // Remove all existing listeners
+        impressumButton.replaceWith(impressumButton.cloneNode(true));
+        openAlolaManualButton.replaceWith(openAlolaManualButton.cloneNode(true));
+
+        // Re-select the buttons after replacing them
+        const newImpressumButton = document.getElementById('impressum-button');
+        const newOpenAlolaManualButton = document.getElementById('openAlolaManual');
+
+        // Add new listeners
+        newImpressumButton.addEventListener('click', () => this.showImpressum());
+        newOpenAlolaManualButton.addEventListener('click', () => {
+            window.location.href = './Alola_Manual_new.html';
+        });
+    }
+
+    showImpressum() {
+        var popup = document.getElementById("popupImpressum");
+        if (popup.style.display == "block") {
+            popup.style.display = "none";
+        }
+        else { popup.style.display = "block"; }
     }
 
     displayGenes(BGC, recordData, regionName) {
@@ -649,7 +615,7 @@ class UIHandler {
             }
         }
         $("#Domain_container").html(Domainer.drawClusterSVG(this.removePaddingBGC(this.removeSpaceBetweenProteins(domainsForDisplay)), this.viewPortHeight * 0.09, geneMatrixHandler));
-        this.addDragDrop();
+
     }
 
     updateRiPPs(geneMatrix, BGC, proteaseOptions) {
@@ -663,212 +629,9 @@ class UIHandler {
             }
         }
         $("#Domain_container").html(RiPPer.drawCluster(genesForDisplay, geneMatrix, proteaseOptions), this.viewPortHeight * 0.05);
-        this.addDragDrop();
+
     }
-    addArrowClick(geneMatrix, cluster_type) {
-        geneMatrix.forEach((gene, geneIndex) => {
-            const elements = this.getGeneElements(gene);
-            const originalColor = TYPE_COLORS[gene.type];
-
-            this.setupArrowListeners(elements.arrow, gene, geneIndex, originalColor);
-            this.setupProteinListeners(elements.protein, gene, geneIndex, originalColor);
-            this.setupRippButtonListeners(elements.rippButton, gene, geneIndex, elements.arrow, originalColor);
-
-            if (gene.displayed) {
-                this.setupDisplayedGeneElements(gene, geneIndex, elements, originalColor, cluster_type);
-            }
-        });
-    }
-
-    getGeneElements(gene) {
-        const getId = (suffix) => `#${gene.id.replace(".", "_")}${suffix}`;
-        return {
-            arrow: document.querySelector(getId("_gene_arrow")),
-            protein: document.querySelector(getId("_protein")),
-            rippButton: document.querySelector(getId("_ripp_button"))
-        };
-    }
-
-    setupArrowListeners(arrow, gene, geneIndex, originalColor) {
-        if (!arrow) return;
-
-        const newArrow = arrow.cloneNode(true);
-        arrow.parentNode.replaceChild(newArrow, arrow);
-
-        newArrow.addEventListener('click', () => this.handleArrowClick(gene, newArrow, originalColor));
-        newArrow.addEventListener('mouseenter', () => this.handleArrowMouseEnter(gene, newArrow, geneIndex));
-        newArrow.addEventListener('mouseleave', () => this.handleArrowMouseLeave(gene, newArrow, geneIndex, originalColor));
-    }
-
-    setupProteinListeners(protein, gene, geneIndex, originalColor) {
-        if (!protein) return;
-
-        protein.addEventListener('click', () => this.handleProteinClick(gene, geneIndex, originalColor));
-        protein.addEventListener('mouseenter', () => this.handleProteinMouseEnter(gene, geneIndex));
-        protein.addEventListener('mouseleave', () => this.handleProteinMouseLeave(gene, geneIndex));
-    }
-
-    setupRippButtonListeners(rippButton, gene, geneIndex, arrow, originalColor) {
-        if (!rippButton) return;
-
-        rippButton.addEventListener('mouseenter', () => this.handleRippButtonMouseEnter(gene, arrow, geneIndex));
-        rippButton.addEventListener('mouseleave', () => this.handleRippButtonMouseLeave(gene, arrow, geneIndex, originalColor));
-    }
-
-    setupDisplayedGeneElements(gene, geneIndex, elements, originalColor, cluster_type) {
-        if (gene.tailoringEnzymeStatus) {
-            this.setupTailoringEnzymeListeners(gene, geneIndex, elements);
-        }
-
-        if (cluster_type !== "ripp" && this.shouldSetupDomains(gene)) {
-            this.setupDomainListeners(gene, geneIndex);
-        }
-    }
-
-    shouldSetupDomains(gene) {
-        return gene.modules || BIOSYNTHETIC_CORE_ENZYMES.includes(gene.orffunction) || gene.type.includes("biosynthetic");
-    }
-
-    setupTailoringEnzymeListeners(gene, geneIndex, elements) {
-        const tailoringEnzyme = document.querySelector(`#tailoringEnzyme_${gene.id.replace(".", "_")}`);
-        if (!tailoringEnzyme) return;
-
-        const mouseEnterHandler = () => this.handleTailoringEnzymeMouseEnter(gene, geneIndex);
-        const mouseLeaveHandler = () => this.handleTailoringEnzymeMouseLeave(gene, geneIndex);
-
-        elements.arrow.addEventListener('mouseenter', mouseEnterHandler);
-        elements.arrow.addEventListener('mouseleave', mouseLeaveHandler);
-        elements.protein.addEventListener('mouseenter', mouseEnterHandler);
-        elements.protein.addEventListener('mouseleave', mouseLeaveHandler);
-        tailoringEnzyme.addEventListener('mouseenter', mouseEnterHandler);
-        tailoringEnzyme.addEventListener('mouseleave', mouseLeaveHandler);
-    }
-
-    setupDomainListeners(gene, geneIndex) {
-        gene.domains.forEach((domain, domainIndex) => {
-            const domainElements = this.getDomainElements(gene, domain);
-            this.addDomainListeners(domainElements, gene, geneIndex, domainIndex);
-        });
-    }
-
-    getDomainElements(gene, domain) {
-        const getId = (suffix) => `#${gene.id.replace(".", "_")}${suffix}`;
-        return {
-            domain: document.querySelector(`#domain${domain.identifier.replace(".", "_")}`),
-            domain2: document.querySelector(getId(`_domain_${domain.sequence}`))
-        };
-    }
-
-    addDomainListeners(elements, gene, geneIndex, domainIndex) {
-        const { domain, domain2 } = elements;
-        if (!domain || !domain2) return;
-
-        const originalColor = getComputedStyle(domain).fill;
-        const originalColor2 = getComputedStyle(domain2).fill;
-
-        const clickHandler = () => this.handleDomainClick(gene, geneIndex, domainIndex, domain, domain2, originalColor, originalColor2);
-        const mouseEnterHandler = () => this.handleDomainMouseEnter(gene, geneIndex, domain, domain2);
-        const mouseLeaveHandler = () => this.handleDomainMouseLeave(gene, geneIndex, domain, domain2, originalColor, originalColor2);
-
-        domain.addEventListener('click', clickHandler);
-        domain.addEventListener('mouseenter', mouseEnterHandler);
-        domain.addEventListener('mouseleave', mouseLeaveHandler);
-
-        domain2.addEventListener('click', clickHandler);
-        domain2.addEventListener('mouseenter', mouseEnterHandler);
-        domain2.addEventListener('mouseleave', mouseLeaveHandler);
-    }
-
-    // Event handlers
-    handleArrowClick(gene, arrow, originalColor) {
-        session.record.geneMatrixHandler.setDisplayedStatus(gene.id);
-        session.record.geneMatrixHandler.removeTailoringEnzymes();
-        arrow.style.fill = gene.ko ? "#E11839" : originalColor;
-        this.fetchFromRaichu(this.geneMatrixHandler);
-    }
-
-    handleArrowMouseEnter(gene, arrow, geneIndex, geneMatrix) {
-        this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
-        if (!gene.ko) {
-            arrow.style.fill = "#E11839";
-        }
-    }
-
-    handleArrowMouseLeave(gene, arrow, geneIndex, originalColor, geneMatrix) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
-        if (!gene.ko) {
-            arrow.style.fill = originalColor;
-        }
-    }
-
-    handleProteinClick(gene, geneIndex, originalColor) {
-        this.handleArrowClick(gene, document.querySelector(`#${gene.id.replace(".", "_")}_gene_arrow`), originalColor);
-    }
-
-    handleProteinMouseEnter(gene, geneIndex, geneMatrix) {
-        this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
-    }
-
-    handleProteinMouseLeave(gene, geneIndex, geneMatrix) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
-    }
-
-    handleRippButtonMouseEnter(gene, arrow, geneIndex, geneMatrix) {
-        this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
-        if (!gene.ko) {
-            arrow.style.fill = "#E11839";
-        }
-    }
-
-    handleRippButtonMouseLeave(gene, arrow, geneIndex, originalColor, geneMatrix) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
-        if (!gene.ko) {
-            arrow.style.fill = originalColor;
-        }
-    }
-
-    handleTailoringEnzymeMouseEnter(gene, geneIndex) {
-        this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
-    }
-
-    handleTailoringEnzymeMouseLeave(gene, geneIndex, geneMatrix) {
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex, geneMatrix);
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex, geneMatrix);
-    }
-
-    handleDomainClick(gene, geneIndex, domainIndex, domain, domain2, originalColor, originalColor2) {
-        const isKo = gene.domains[domainIndex].ko;
-        const newColor = isKo ? originalColor : "#E11839";
-        domain.style.fill = newColor;
-        domain2.style.fill = newColor;
-        this.setKoStatus(geneIndex, domainIndex);
-        this.addArrowClick(); // Re-initialize to update all elements
-    }
-
-    handleDomainMouseEnter(gene, geneIndex, domain, domain2) {
-        if (!gene.domains[geneIndex].ko) {
-            domain.style.fill = "#E11839";
-            domain2.style.fill = "#E11839";
-        }
-        this.displayTextInGeneExplorer(gene.id);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
-        this.changeProteinColorON(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex);
-    }
-
-    handleDomainMouseLeave(gene, geneIndex, domain, domain2, originalColor, originalColor2) {
-        if (!gene.domains[geneIndex].ko) {
-            domain.style.fill = originalColor;
-            domain2.style.fill = originalColor2;
-        }
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_gene_arrow`, geneIndex);
-        this.changeProteinColorOFF(`#${gene.id.replace(".", "_")}_protein`, geneIndex);
-    }
-
+    
     openFormTerpene() {
         document.getElementById("popupFormTerpene").style.display = "block";
     }
@@ -901,8 +664,78 @@ class UIHandler {
         return BGC_without_space;
     }
 
+    setGeneMatrixHandler(geneMatrixHandler) {
+        this.geneMatrixHandler = geneMatrixHandler;
+    }
+
     addDragDrop() {
-        // Implementation of addDragDrop...
+        const items = document.querySelectorAll('.protein-container .box');
+        items.forEach(item => {
+            item.addEventListener('dragstart', this.handleDragStart.bind(this));
+            item.addEventListener('dragenter', this.handleDragEnter);
+            item.addEventListener('dragover', this.handleDragOver);
+            item.addEventListener('dragleave', this.handleDragLeave);
+            item.addEventListener('drop', this.handleDrop.bind(this));
+            item.addEventListener('dragend', this.handleDragEnd);
+        });
+    }
+
+    handleDragStart(e) {
+        this.dragSrcEl = e.target;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', e.target.outerHTML);
+    }
+
+    handleDragOver(e) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+
+    handleDragEnter(e) {
+        e.target.classList.add('over');
+    }
+
+    handleDragLeave(e) {
+        e.target.classList.remove('over');
+    }
+
+    handleDrop(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (this.dragSrcEl !== e.target) {
+            const locusTagDragged = this.dragSrcEl.id.substring(21);
+            const locusTagTarget = e.target.id.replace('_protein', '').replace('_', '.');
+
+            if (this.geneMatrixHandler) {
+                if (typeof this.geneMatrixHandler.handleGenePositionUpdate === 'function') {
+                    this.geneMatrixHandler.handleGenePositionUpdate(locusTagDragged, locusTagTarget);
+                } else {
+                    console.error('handleGenePositionUpdate is not a function');
+                }
+
+                if (typeof this.geneMatrixHandler.reloadGeneCluster === 'function') {
+                    this.geneMatrixHandler.reloadGeneCluster();
+                } else {
+                    console.error('reloadGeneCluster is not a function');
+                }
+
+            } else {
+                console.error('geneMatrixHandler is not set');
+            }
+        }
+
+        return false;
+    }
+
+    handleDragEnd(e) {
+        e.target.style.opacity = '1';
+        document.querySelectorAll('.protein-container .box').forEach(item => {
+            item.classList.remove('over');
+        });
     }
 
     isRealTimeCalculationEnabled() {
@@ -919,9 +752,40 @@ class UIHandler {
     }
 
     displayTextInGeneExplorer(geneId, BGCForDisplay) {
-        // Implementation of displayTextInGeneExplorer...
-    }
+    /**
+    * Displays the description of the gene in the gene explorer.
+    * @fires hovergene
+    * @input geneID
+    * @yield changes text in gene explorer
+    */
+    for (let geneIndex = 0; geneIndex < BGCForDisplay["orfs"].length; geneIndex++) {
+        if (BGCForDisplay["orfs"][geneIndex].locus_tag === geneId) {
+            let description = BGCForDisplay["orfs"][geneIndex].description;
 
+            // Remove unwanted text sections and their contents
+            const unwantedTextPatterns = [
+                /NCBI BlastP on this gene.*?/gis,
+                /Blast against antiSMASH-database *?/gis,
+                /MiBIG Hits.*?/gis,
+                /TransportDB BLAST on this gene.*?/gis,
+                /AA sequence: *?/gis,
+                /Copy to clipboard *?/gis,
+                /Nucleotide sequence: *?/gis,
+                /Copy to clipboard *?/gis,
+            ];
+
+            unwantedTextPatterns.forEach(pattern => {
+                description = description.replace(pattern, '');
+            });
+
+            // Remove extra whitespace if necessary
+            description = description.trim();
+
+            // Set the cleaned description to the gene container
+            gene_container.innerHTML = description;
+        }
+    }
+    }
     changeProteinColorON(ProteinId, geneIndex, geneMatrix) {
     /**
     * Change color of protein.
@@ -931,7 +795,7 @@ class UIHandler {
    */
         const arrow = document.querySelector(ProteinId.replace(".", "_"));
         arrow.setAttribute('style', "fill: #E11839");
-}
+    }
     changeProteinColorOFF(ProteinId, geneIndex, geneMatrix) {
     /**
     * Change color of protein.
@@ -941,67 +805,13 @@ class UIHandler {
    */
         const arrow = document.querySelector(ProteinId.replace(".", "_"));
         arrow.removeAttribute("style");
+    }
+
+    
+
+
 }
-}
 
-class HistoryStack {
-    constructor() {
-        this.undoStack = [];
-        this.redoStack = [];
-    }
-
-    push(state) {
-        this.undoStack.push(JSON.parse(JSON.stringify(state)));
-        this.redoStack = []; // Clear redo stack when a new action is performed
-    }
-
-    undo() {
-        if (this.undoStack.length > 1) {
-            const currentState = this.undoStack.pop();
-            this.redoStack.push(currentState);
-            return this.undoStack[this.undoStack.length - 1];
-        }
-        return null;
-    }
-
-    redo() {
-        if (this.redoStack.length > 0) {
-            const state = this.redoStack.pop();
-            this.undoStack.push(state);
-            return state;
-        }
-        return null;
-    }
-
-    canUndo() {
-        return this.undoStack.length > 1;
-    }
-
-    canRedo() {
-        return this.redoStack.length > 0;
-    }
-
-    updateButtonStates() {
-        const undoButton = document.querySelector('.redoUndo_button[onclick="session.record.undo()"]');
-        const redoButton = document.querySelector('.redoUndo_button[onclick="session.record.redo()"]');
-
-        if (!this.canUndo()) {
-            undoButton.setAttribute('data-tooltip', 'No job to revert!');
-            undoButton.classList.add('disabled');
-        } else {
-            undoButton.setAttribute('data-tooltip', 'Click to revert your last action.');
-            undoButton.classList.remove('disabled');
-        }
-
-        if (!this.canRedo()) {
-            redoButton.setAttribute('data-tooltip', 'No job to reapply!');
-            redoButton.classList.add('disabled');
-        } else {
-            redoButton.setAttribute('data-tooltip', 'Click to reapply an action you have undone.');
-            redoButton.classList.remove('disabled');
-        }
-    }
-}
 
 class FileHandler {
     constructor(record) {
@@ -1101,6 +911,7 @@ class FileHandler {
 let session = new ApplicationManager();
 let regionHandler = new RegionHandler();
 let uiHandler = new UIHandler();
+uiHandler.addButtonListeners();
 let svgHandler = new SVGHandler();
 let apiService = new APIService(CONFIG.PORT, svgHandler);
 session.init();

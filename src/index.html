@@ -25,12 +25,12 @@
   <div id="menu_bar">
     <!-- Rounded switch -->
     <button type="button" id="undoButton" class="redoUndo_button tooltip"
-      data-tooltip="Click to revert your last action." onclick="session.record.undo()">
+      data-tooltip="Click to revert your last action." >
       <strong>Undo</strong>
     </button>
 
     <button type="button" id="redoButton" class="redoUndo_button tooltip"
-      data-tooltip="Click to reapply an action you have undone." onclick="session.record.redo()">
+      data-tooltip="Click to reapply an action you have undone." >
       <strong>Redo</strong>
     </button>
 
@@ -40,7 +40,7 @@
       <strong>Alola Manual</strong>
     </button>
 
-    <button class="start_button tooltip" data-tooltip="View Impressum" onclick="session.uiHandler.showImpressum()">
+    <button class="start_button tooltip" data-tooltip="View Impressum" id="impressum-button"> 
       <strong>Impressum</strong>
     </button>
 
@@ -68,15 +68,13 @@
       <strong>Load Example</strong>
     </button>
 
-    <button type="button" class="start_button tooltip"
-      data-tooltip="Fetch updated data and refresh the displayed structures and spaghetti diagram."
-      onclick="record.refreshStructures()">
+    <button type="button" class="start_button tooltip" id="refresh_button"
+      data-tooltip="Fetch updated data and refresh the displayed structures and spaghetti diagram.">
       <strong>Refresh structures</strong>
     </button>
 
-    <button type="button" class="start_button tooltip"
-      data-tooltip="Reset the view to the initial state without modifications to the biosynthetic model."
-      onclick="record.reload_site_with_genecluster()">
+    <button type="button" class="start_button tooltip" id="reset_button"
+      data-tooltip="Reset the view to the initial state without modifications to the biosynthetic model.">
       <strong>Reset view</strong>
     </button>
 
@@ -99,8 +97,7 @@
 
   <div id="BGC_explorer">
     <!-- Biosynthetic gene cluster explorer -->
-    <button type="button" class="start_button tooltip" data-tooltip="Click to reverse the BGC arrangement"
-      onclick="record.reverseBGC()">
+    <button type="button" class="start_button tooltip" data-tooltip="Click to reverse the BGC arrangement" id="reverse_button">
       <strong>Reverse BGC</strong>
     </button>
     <div class="heading-container tooltip" id="BGCHeading"

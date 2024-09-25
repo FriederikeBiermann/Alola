@@ -117,8 +117,11 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler) {
         if (geneIndex === -1) return null;
 
         const gene = geneMatrix[geneIndex];
-        if (!gene.modules && !shouldCreateModule(gene)) return null;
-        if (!gene.modules) {
+        if ((!gene.modules || gene.modules.length === 0) && !shouldCreateModule(gene)) {
+            return null;
+        }
+
+        if (!gene.modules || gene.modules.length === 0) {
             gene.modules = [{ domains: gene.domains }];
         }
 
@@ -134,7 +137,7 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler) {
     }
 
     function shouldCreateModule(gene) {
-        return BIOSYNTHETIC_CORE_ENZYMES.includes(gene.orffunction) || gene.type.includes("biosynthetic");
+        return BIOSYNTHETIC_CORE_ENZYMES.includes(gene.orffunction) || gene.type.includes("biosynthetic") || gene.hasOwnProperty("modules");
     }
 
     function shouldIndentDomain(domainType) {
