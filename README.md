@@ -14,8 +14,10 @@ Exportable Results: Export pathways and predicted structures in multiple formats
 Follow these steps to set up and run ALOLA on your local computer:
 
 **1. Create a New Directory**
+
 Open a terminal and create a new directory where you want to set up ALOLA:
 **2. Clone the ALOLA Repository**
+
 Clone the ALOLA repository from GitHub into the newly created directory:
 ```
 git clone git@github.com:FriederikeBiermann/Alola.git
