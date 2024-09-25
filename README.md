@@ -6,19 +6,8 @@
 
 Follow these steps to set up and run ALOLA on your local computer to make your own local server:
 
-**1. Create a New Directory**
 
-- Open a terminal and create a new directory where you want to set up ALOLA:
-```
-mkdir ALOLA_SetUp
-```
-
-- Navigate to the newly created directory:
-```
-cd ALOLA_SetUp
-```
-
-**2. Clone the ALOLA Repository**
+**1. Clone the ALOLA Repository**
 
 - Clone the ALOLA repository from GitHub:
 ```
@@ -30,35 +19,35 @@ git clone git@github.com:FriederikeBiermann/Alola.git
 cd Alola
 ```
 
-**3. Clone the RAIChU Package**
+**2. Clone the RAIChU Package**
 
 Clone the RAIChU package:
 ```
 git clone https://github.com/BTheDragonMaster/RAIChU.git
 ```
 
-**4. Clone the Pikachu Package**
+**3. Clone the Pikachu Package**
 
 Also, clone the Pikachu package into the Alola directory:
 ```
 git clone https://github.com/FriederikeBiermann/pikachu.git
 ```
 
-**5. Build the Docker Image for ALOLA**
+**4. Build the Docker Image for ALOLA**
 
 Once both packages are cloned, create a Docker image for ALOLA by running:
 ```
 sudo docker build -t alola .
 ```
 
-**6. Run ALOLA**
+**5. Run ALOLA**
 
 After building the image, run ALOLA using Docker:
 ```
 sudo docker run -it -p 8000:8000 -p 3000:3000 alola
 ```
 
-**7. Access ALOLA in Your Browser**
+**6. Access ALOLA in Your Browser**
 
 Open your preferred web browser (e.g., Mozilla Firefox) and enter the following URL to access ALOLA:
 ```
