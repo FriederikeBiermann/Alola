@@ -13,35 +13,35 @@ Exportable Results: Export pathways and predicted structures in multiple formats
 
 Follow these steps to set up and run ALOLA on your local computer:
 
-1. Create a New Directory
+**1. Create a New Directory**
 Open a terminal and create a new directory where you want to set up ALOLA:
-2. Clone the ALOLA Repository
+**2. Clone the ALOLA Repository**
 Clone the ALOLA repository from GitHub into the newly created directory:
 ```
 git clone git@github.com:FriederikeBiermann/Alola.git
 ```
 
-3. Clone the RAIChU Package
+**3. Clone the RAIChU Package**
 Inside the cloned Alola directory, clone the RAIChU package:
 ```
 git clone https://github.com/BTheDragonMaster/RAIChU.git
 ```
-4. Clone the Pikachu Package
+**4. Clone the Pikachu Package**
 Also, clone the Pikachu package into the Alola directory:
 ```
 git clone https://github.com/FriederikeBiermann/pikachu.git
 ```
-5. Build the Docker Image for ALOLA
+**5. Build the Docker Image for ALOLA**
 Once both packages are cloned, create a Docker image for ALOLA by running:
 ```
 sudo docker build -t alola .
 ```
-6. Run ALOLA
+**6. Run ALOLA**
 After building the image, run ALOLA using Docker:
 ```
 sudo docker run -it -p 8000:8000 -p 3000:3000 alola
 ```
-7. Access ALOLA in Your Browser
+**7. Access ALOLA in Your Browser**
 Open your preferred web browser (e.g., Mozilla Firefox) and enter the following URL to access ALOLA:
 ```
 http://localhost:3000/
