@@ -1,6 +1,6 @@
 # ALOLA: An interactive web-based natural product biosynthetic model builder
 ##  An online tool for visualization and customization of biosynthetic gene clusters
-**ALOLA** is designed to visualize and customize biosynthetic gene clusters (BGCs) from antiSMASH results. It offers real-time interactivity, support for various BGC types, integration of tailoring enzymes, and a user-friendly interface for modifying pathways. ALOLA uses **RAIChU** (Reaction Analysis through Imaging of Chemical Units), which is built on **Pikachu** (Python-based Informatics Kit for the Analysis of Chemical Units); both packages need to be cloned during the local setup.
+**ALOLA** is designed to visualize and customize biosynthetic gene clusters (BGCs) from antiSMASH results. It offers real-time interactivity, support for various BGC types, integration of tailoring enzymes, and a user-friendly interface for modifying pathways. ALOLA uses **RAIChU** (Reaction Analysis through Imaging of Chemical Units), which is built on **Pikachu** (Python-based Informatics Kit for the Analysis of Chemical Units) as part of its backend; both packages need to be cloned during the local setup.
 
 ## Installation and Running ALOLA Locally
 
