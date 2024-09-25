@@ -14,7 +14,7 @@
 
 **Flexible Starting Points:** Import antiSMASH results, use pre-loaded examples, or design BGCs from scratch.
 
-**Exportable Results:** Export pathways and predicted structures in multiple formats.
+**Exportable Results:** Export pathways and predicted structures in multiple formats (e.g., SVG, PNG, SMILES).
 
 ## Packages:
 One of the key components of ALOLA is **RAIChU**, or Reaction Analysis through Imaging of Chemical Units. This Python-based tool, developed specifically for visualizing natural product chemistry, handles all the structure computation and visualization tasks. RAIChU itself is built upon **PIkachu**, a Python-based Informatics Kit for the Analysis of Chemical Units, which provides the core functionalities for chemical informatics and structural analysis. 
