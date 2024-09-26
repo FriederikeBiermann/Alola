@@ -548,11 +548,15 @@ class UIHandler {
         const openNRPSFormButton = document.getElementById('openNRPSForm');
         const openPKSFormButton = document.getElementById('openPKSForm');
         const closeMainFormButton = document.getElementById('closeMainForm');
+        const addTailoringEnzymeButton = document.getElementById('add_tailoring_enzyme_button');
 
         // Remove all existing listeners
         [impressumButton, openAlolaManualButton, openWildcardModuleButton,
-            openNRPSFormButton, openPKSFormButton, closeMainFormButton].forEach(button => {
-                button.replaceWith(button.cloneNode(true));
+            openNRPSFormButton, openPKSFormButton, closeMainFormButton,
+            addTailoringEnzymeButton].forEach(button => {
+                if (button) {
+                    button.replaceWith(button.cloneNode(true));
+                }
             });
 
         // Re-select the buttons after replacing them
@@ -562,22 +566,38 @@ class UIHandler {
         const newOpenNRPSFormButton = document.getElementById('openNRPSForm');
         const newOpenPKSFormButton = document.getElementById('openPKSForm');
         const newCloseMainFormButton = document.getElementById('closeMainForm');
+        const newAddTailoringEnzymeButton = document.getElementById('add_tailoring_enzyme_button');
 
         // Add new listeners
-        newImpressumButton.addEventListener('click', () => this.showImpressum());
-        newOpenAlolaManualButton.addEventListener('click', () => {
-            window.location.href = './Alola_Manual_new.html';
-        });
-        newOpenWildcardModuleButton.addEventListener('click', () => this.openWildcardModuleForm());
-        newOpenNRPSFormButton.addEventListener('click', () => {
-            this.openNRPSForm();
-            this.closeWildcardModuleForm();
-        });
-        newOpenPKSFormButton.addEventListener('click', () => {
-            this.openPKSForm();
-            this.closeWildcardModuleForm();
-        });
-        newCloseMainFormButton.addEventListener('click', () => this.closeWildcardModuleForm());
+        if (newImpressumButton) {
+            newImpressumButton.addEventListener('click', () => this.showImpressum());
+        }
+        if (newOpenAlolaManualButton) {
+            newOpenAlolaManualButton.addEventListener('click', () => {
+                window.location.href = './Alola_Manual_new.html';
+            });
+        }
+        if (newOpenWildcardModuleButton) {
+            newOpenWildcardModuleButton.addEventListener('click', () => this.openWildcardModuleForm());
+        }
+        if (newOpenNRPSFormButton) {
+            newOpenNRPSFormButton.addEventListener('click', () => {
+                this.openNRPSForm();
+                this.closeWildcardModuleForm();
+            });
+        }
+        if (newOpenPKSFormButton) {
+            newOpenPKSFormButton.addEventListener('click', () => {
+                this.openPKSForm();
+                this.closeWildcardModuleForm();
+            });
+        }
+        if (newCloseMainFormButton) {
+            newCloseMainFormButton.addEventListener('click', () => this.closeWildcardModuleForm());
+        }
+        if (newAddTailoringEnzymeButton) {
+            newAddTailoringEnzymeButton.addEventListener('click', () => this.openTailoringForm());
+        }
     }
 
     openWildcardModuleForm(){
@@ -836,6 +856,7 @@ class UIHandler {
         }
     }
     }
+
     changeProteinColorON(ProteinId, geneIndex, geneMatrix) {
     /**
     * Change color of protein.
@@ -846,6 +867,7 @@ class UIHandler {
         const arrow = document.querySelector(ProteinId.replace(".", "_"));
         arrow.setAttribute('style', "fill: #E11839");
     }
+
     changeProteinColorOFF(ProteinId, geneIndex, geneMatrix) {
     /**
     * Change color of protein.
@@ -857,11 +879,210 @@ class UIHandler {
         arrow.removeAttribute("style");
     }
 
-    
+    createTailoringEnzymeForm(geneMatrixHandler) {
+        const container = document.getElementById('popupFormTailoring');
+        if (!container) {
+            console.error("Container 'popupFormTailoring' not found");
+            return;
+        }
+
+        // Remove all existing children
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+
+        const form = document.createElement('div');
+        form.className = 'formContainer';
+
+        // Create Tailoring Enzyme dropdown
+        const tailoringEnzymes = Object.keys(TAILORING_ENZYMES); // Assuming you have a tailoringEnzymes object
+        const enzymeDropdown = this.createDropdown('Tailoring Enzyme', tailoringEnzymes);
+        form.appendChild(enzymeDropdown);
+
+        // Create Submit button
+        const submitButton = document.createElement('button');
+        submitButton.type = 'button';
+        submitButton.className = 'btn';
+        submitButton.textContent = 'Submit';
+        submitButton.onclick = () => {
+            const selectedEnzyme = enzymeDropdown.querySelector('.dropbtn').textContent;
+            geneMatrixHandler.createWildcardTailoringGene(selectedEnzyme);
+            this.closeTailoringForm();
+        };
+        form.appendChild(submitButton);
+
+        // Create Close button
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn cancel';
+        closeButton.textContent = 'Close';
+        closeButton.onclick = () => this.closeTailoringForm();
+        form.appendChild(closeButton);
+
+        container.appendChild(form);
+    }
+
+    closeTailoringForm() {
+        document.getElementById('popupFormTailoring').style.display = "none";
+    }
+
+    openTailoringForm() {
+        const form = document.getElementById('popupFormTailoring');
+        if (form) {
+            form.style.display = "block";
+        } else {
+            console.error("Tailoring form container not found");
+        }
+    }
+
+    createWildcardButtons(formType, geneMatrixHandler) {
+        const containerId = formType === 'NRPS' ? 'popupFormNRPS' : 'popupFormPKS';
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Container '${containerId}' not found`);
+            return;
+        }
+
+        // Remove all existing children
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+
+        const form = document.createElement('form');
+        form.className = 'formContainer';
+
+        // Create Module Type dropdown
+        const moduleTypes = [
+            `starter_module_${formType.toLowerCase()}`,
+            `elongation_module_${formType.toLowerCase()}`,
+            `terminator_module_${formType.toLowerCase()}`
+        ];
+        const moduleDropdown = this.createDropdown('Module Type', moduleTypes);
+        form.appendChild(moduleDropdown);
+
+        // Create Substrate dropdown (initially with NRPS or PKS substrates)
+        const initialSubstrates = formType === 'NRPS' ? Object.values(AMINO_ACIDS) : PKS_SUBSTRATES;
+        const substrateDropdown = this.createDropdown('Substrate', initialSubstrates);
+        form.appendChild(substrateDropdown);
+
+        form.appendChild(document.createElement('br'));
+
+        // Create checkboxes
+        if (formType === 'NRPS') {
+            this.createCheckbox(form, 'wildcardE', 'Epimerization');
+        } else {
+            this.createCheckbox(form, 'wildcardKR', 'Ketoreductase domain');
+            this.createCheckbox(form, 'wildcardDH', 'Dehydratase domain');
+            this.createCheckbox(form, 'wildcardER', 'Enoylreductase domain');
+        }
+
+        // Update substrate options when module type changes (for PKS only)
+        if (formType === 'PKS') {
+            moduleDropdown.querySelector('.dropbtn').addEventListener('click', () => {
+                setTimeout(() => {
+                    const selectedModule = moduleDropdown.querySelector('.dropbtn').textContent;
+                    const substrates = selectedModule === 'starter_module_pks' ? PKS_STARTER_SUBSTRATES : PKS_SUBSTRATES;
+                    this.updateDropdownOptions(substrateDropdown, substrates);
+                }, 0);
+            });
+        }
+
+        // Create Submit button
+        const submitButton = document.createElement('button');
+        submitButton.type = 'button';
+        submitButton.className = 'btn';
+        submitButton.textContent = 'Submit';
+        submitButton.onclick = () => {
+            const substrate = substrateDropdown.querySelector('.dropbtn').textContent;
+            const moduleType = moduleDropdown.querySelector('.dropbtn').textContent;
+            const checkboxValues = {};
+            form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkboxValues[checkbox.id] = checkbox.checked;
+            });
+            geneMatrixHandler.createWildcardGene(moduleType, substrate);
+            this.closeForm(formType);
+        };
+        form.appendChild(submitButton);
+
+        // Create Close button
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn cancel';
+        closeButton.textContent = 'Close';
+        closeButton.onclick = () => this.closeForm(formType);
+        form.appendChild(closeButton);
+
+        container.appendChild(form);
+    }
+
+    createDropdown(label, options) {
+        console.log(JSON.stringify(options));
+        const dropdown = document.createElement('div');
+        dropdown.className = 'dropdown';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'dropbtn';
+        button.textContent = label;
+
+        const content = document.createElement('div');
+        content.className = 'dropdown-content';
+
+        options.forEach(option => {
+            const optionButton = document.createElement('button');
+            optionButton.type = 'button';
+            optionButton.className = 'wildcardsubstrate';
+            optionButton.textContent = option;
+            optionButton.onclick = (e) => {
+                e.preventDefault();
+                button.textContent = option;
+            };
+            content.appendChild(optionButton);
+        });
+
+        dropdown.appendChild(button);
+        dropdown.appendChild(content);
+        return dropdown;
+    }
+
+    updateDropdownOptions(dropdown, newOptions) {
+        const content = dropdown.querySelector('.dropdown-content');
+        content.innerHTML = '';
+        newOptions.forEach(option => {
+            const optionButton = document.createElement('button');
+            optionButton.type = 'button';
+            optionButton.className = 'wildcardsubstrate';
+            optionButton.textContent = option;
+            optionButton.onclick = (e) => {
+                e.preventDefault();
+                dropdown.querySelector('.dropbtn').textContent = option;
+            };
+            content.appendChild(optionButton);
+        });
+    }
+
+    createCheckbox(form, id, label) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = id;
+        checkbox.name = id;
+        checkbox.value = 'true';
+        const checkboxLabel = document.createElement('label');
+        checkboxLabel.htmlFor = id;
+        checkboxLabel.textContent = ` ${label}`;
+        form.appendChild(checkbox);
+        form.appendChild(checkboxLabel);
+        form.appendChild(document.createElement('br'));
+    }
+
+    closeForm(formType) {
+        const formId = formType === 'NRPS' ? 'popupFormNRPS' : 'popupFormPKS';
+        document.getElementById(formId).style.display = "none";
+    }
+
 
 
 }
-
 
 class FileHandler {
     constructor(record) {

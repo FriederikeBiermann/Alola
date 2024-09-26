@@ -16,8 +16,9 @@ class GeneMatrixHandler {
         this.recordData = recordData;
         this.starterACP = "";
         this.addUndoRedoListeners();
-        this.createWildcardButtons("PKS");
-        this.createWildcardButtons("NRPS");
+        uiHandler.createWildcardButtons("PKS", this);
+        uiHandler.createWildcardButtons("NRPS", this);
+        uiHandler.createTailoringEnzymeForm(this)
     }
     
 
@@ -109,6 +110,55 @@ class GeneMatrixHandler {
         this.cluster_type = "terpene";
         this.terpeneSubstrate = substrate;
         this.cyclization = [];
+    }
+
+    changeSelectedOptionTailoring( geneIndex, reactionOption, atomOption) {
+        /**
+        * Change the option in geneMatrix -> more than one option can be selected
+    * @fires clickondomaindropdown
+    *@input geneIndex,moduleIndex, domainIndex, option -> find the exact thing to change
+    *@yield Selected option correct+ cyclization option correct.
+    */
+        let button = document.getElementById(geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption)
+        if (atomOption.includes(",")) {
+            atomOption = atomOption.split(",")
+        }
+        else {
+            atomOption = [atomOption]
+        }
+
+        if (this.geneMatrix[geneIndex].selected_option[reactionOption].includes(atomOption)) {
+            button.setAttribute("style", "background-color: white")
+            var atomOptions = this.geneMatrix[geneIndex].selected_option[reactionOption].filter((item) => item !== atomOption);
+            this.geneMatrix[geneIndex].selected_option[reactionOption] = atomOptions;
+        }
+        else {
+            this.geneMatrix[geneIndex].selected_option[reactionOption].push(atomOption);
+            button.setAttribute("style", "background-color: #E11839")
+        }
+        this.reloadGeneCluster();
+
+    }
+    changeSelectedOptionCleavageSites(option) {
+        cleavageSites = [option]
+        let translation = ""
+        // for antismash 7.0 files
+        if (BGCForDisplay["orfs"][rippPrecursorGene].hasOwnProperty("translation")) {
+            translation = BGCForDisplay["orfs"][rippPrecursorGene].translation
+        }
+        // for antismash 6.0 files
+        else {
+            var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
+            var translationSearch = regExString.exec(BGCForDisplay["orfs"][rippPrecursorGene].description);
+            translation = translationSearch[1]; //is the matched group if found
+        }
+        let cleavageNumber = parseInt(option.replace(/\D/g, ''));
+        rippPrecursor = translation.slice(-cleavageNumber);//
+        removeTailoringEnzymes(geneMatrix);
+        if (document.querySelector('input[type=checkbox]')
+            .checked) {
+            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
+        }
     }
 
     //TODO: put into uiHandler
@@ -383,7 +433,7 @@ class GeneMatrixHandler {
             let enzymeReactionArray;
             let substrate = "None";
             let enzymeNameReaction;
-            if (tailoringEnzymesWithSubstrate.includes(enzymeType)) {
+            if (TAILORING_ENZYMES_WITH_SUBSTRATE.includes(enzymeType)) {
                 substrate = firstparameter
                 enzymeNameReaction = enzymeType
             }
@@ -391,7 +441,7 @@ class GeneMatrixHandler {
                 enzymeNameReaction = firstparameter
             }
             // put atoms for bond formation in pairs
-            if (tailoringEnzymesWithTwoAtoms.includes(enzymeNameReaction)) {
+            if (TAILORING_ENZYMES_WITH_TWO_ATOMS.includes(enzymeNameReaction)) {
                 atoms = atoms.flat(1)
                 if (atoms.length % 2 == 1) {
                     atoms.pop()
@@ -477,152 +527,6 @@ class GeneMatrixHandler {
         return geneMatrix;
     }
 
-    createWildcardButtons(formType) {
-        const containerId = formType === 'NRPS' ? 'popupFormNRPS' : 'popupFormPKS';
-        const container = document.getElementById(containerId);
-        if (!container) {
-            console.error(`Container '${containerId}' not found`);
-            return;
-        }
-
-        // Remove all existing children
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-
-        const form = document.createElement('form');
-        form.className = 'formContainer';
-
-        // Create Module Type dropdown
-        const moduleTypes = [
-            `starter_module_${formType.toLowerCase()}`,
-            `elongation_module_${formType.toLowerCase()}`,
-            `terminator_module_${formType.toLowerCase()}`
-        ];
-        const moduleDropdown = this.createDropdown('Module Type', moduleTypes);
-        form.appendChild(moduleDropdown);
-
-        // Create Substrate dropdown (initially with NRPS or PKS substrates)
-        const initialSubstrates = formType === 'NRPS' ? Object.values(AMINO_ACIDS) : PKS_SUBSTRATES;
-        const substrateDropdown = this.createDropdown('Substrate', initialSubstrates);
-        form.appendChild(substrateDropdown);
-
-        form.appendChild(document.createElement('br'));
-
-        // Create checkboxes
-        if (formType === 'NRPS') {
-            this.createCheckbox(form, 'wildcardE', 'Epimerization');
-        } else {
-            this.createCheckbox(form, 'wildcardKR', 'Ketoreductase domain');
-            this.createCheckbox(form, 'wildcardDH', 'Dehydratase domain');
-            this.createCheckbox(form, 'wildcardER', 'Enoylreductase domain');
-        }
-
-        // Update substrate options when module type changes (for PKS only)
-        if (formType === 'PKS') {
-            moduleDropdown.querySelector('.dropbtn').addEventListener('click', () => {
-                setTimeout(() => {
-                    const selectedModule = moduleDropdown.querySelector('.dropbtn').textContent;
-                    const substrates = selectedModule === 'starter_module_pks' ? PKS_STARTER_SUBSTRATES : PKS_SUBSTRATES;
-                    this.updateDropdownOptions(substrateDropdown, substrates);
-                }, 0);
-            });
-        }
-
-        // Create Submit button
-        const submitButton = document.createElement('button');
-        submitButton.type = 'button';
-        submitButton.className = 'btn';
-        submitButton.textContent = 'Submit';
-        submitButton.onclick = () => {
-            const substrate = substrateDropdown.querySelector('.dropbtn').textContent;
-            const moduleType = moduleDropdown.querySelector('.dropbtn').textContent;
-            const checkboxValues = {};
-            form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkboxValues[checkbox.id] = checkbox.checked;
-            });
-            this.createWildcardGene(moduleType, substrate);
-            this.closeForm(formType);
-        };
-        form.appendChild(submitButton);
-
-        // Create Close button
-        const closeButton = document.createElement('button');
-        closeButton.type = 'button';
-        closeButton.className = 'btn cancel';
-        closeButton.textContent = 'Close';
-        closeButton.onclick = () => this.closeForm(formType);
-        form.appendChild(closeButton);
-
-        container.appendChild(form);
-    }
-
-    createDropdown(label, options) {
-        console.log(JSON.stringify(options));
-        const dropdown = document.createElement('div');
-        dropdown.className = 'dropdown';
-
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'dropbtn';
-        button.textContent = label;
-
-        const content = document.createElement('div');
-        content.className = 'dropdown-content';
-
-        options.forEach(option => {
-            const optionButton = document.createElement('button');
-            optionButton.type = 'button';
-            optionButton.className = 'wildcardsubstrate';
-            optionButton.textContent = option;
-            optionButton.onclick = (e) => {
-                e.preventDefault();
-                button.textContent = option;
-            };
-            content.appendChild(optionButton);
-        });
-
-        dropdown.appendChild(button);
-        dropdown.appendChild(content);
-        return dropdown;
-    }
-
-    updateDropdownOptions(dropdown, newOptions) {
-        const content = dropdown.querySelector('.dropdown-content');
-        content.innerHTML = '';
-        newOptions.forEach(option => {
-            const optionButton = document.createElement('button');
-            optionButton.type = 'button';
-            optionButton.className = 'wildcardsubstrate';
-            optionButton.textContent = option;
-            optionButton.onclick = (e) => {
-                e.preventDefault();
-                dropdown.querySelector('.dropbtn').textContent = option;
-            };
-            content.appendChild(optionButton);
-        });
-    }
-
-    createCheckbox(form, id, label) {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.id = id;
-        checkbox.name = id;
-        checkbox.value = 'true';
-        const checkboxLabel = document.createElement('label');
-        checkboxLabel.htmlFor = id;
-        checkboxLabel.textContent = ` ${label}`;
-        form.appendChild(checkbox);
-        form.appendChild(checkboxLabel);
-        form.appendChild(document.createElement('br'));
-    }
-
-    closeForm(formType) {
-        const formId = formType === 'NRPS' ? 'popupFormNRPS' : 'popupFormPKS';
-        document.getElementById(formId).style.display = "none";
-    }
-
-
     createWildcardGene(wildcardModule, wildcardSubstrate) {
         let endLastGene = this.BGC.orfs.length > 0 ? this.BGC.orfs[this.BGC.orfs.length - 1].end : 0;
         let nameWildcardModule = `Custom_gene_${this.BGC.orfs.length + 1}`;
@@ -680,7 +584,7 @@ class GeneMatrixHandler {
             displayed: true,
             tailoringEnzymeStatus: true,
             tailoringEnzymeType: wildcardEnzyme,
-            tailoringEnzymeAbbreviation: tailoringEnzymes[wildcardEnzyme],
+            tailoringEnzymeAbbreviation: TAILORING_ENZYMES[wildcardEnzyme],
             orffunction: wildcardEnzyme,
             type: "",
             domains: [],
@@ -696,8 +600,9 @@ class GeneMatrixHandler {
         };
 
         this.BGC.orfs.push(newGene);
-        this.geneMatrix.push(this.createGeneObject(newGene, [], wildcardEnzyme, [true, wildcardEnzyme, tailoringEnzymes[wildcardEnzyme]], this.BGC.orfs.length - 1));
+        this.geneMatrix.push(this.createGeneObject(newGene, [], wildcardEnzyme, [true, wildcardEnzyme, TAILORING_ENZYMES[wildcardEnzyme]], this.BGC.orfs.length - 1));
         this.updateDetailsData(newGene);
+        this.reloadGeneCluster();
 
         return newGene;
     }

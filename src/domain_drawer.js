@@ -70,7 +70,8 @@ var Domainer = {
     tooltip_id: "Domainer-tooltip-1234567890",
     tooltip_id_domain: "Domainer-tooltip-123"
 };
-Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler) {
+Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler) 
+{
     let moduleMatrix = geneMatrixHandler.moduleMatrix;
     let geneMatrix = geneMatrixHandler.geneMatrix;
     let recordData = geneMatrixHandler.recordData;
@@ -90,7 +91,7 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler) {
     Domainer.drawModules(moduleMatrix, height, scale);
     Domainer.drawGenes(geneMatrix, height, scale);
     Domainer.leaveSpaceForTailoring(height * 2, scale);
-    Domainer.drawTailoringEnzymes(cluster, geneMatrix, height, scale);
+    Domainer.drawTailoringEnzymes(cluster, geneMatrix, height, scale, geneMatrixHandler);
 
     return container.querySelector("svg");
 
@@ -307,7 +308,7 @@ Domainer.leaveSpaceForTailoring = (function (width, scale) {
     innerContainer.appendChild(innerIntermediateContainer);
     innerContainer.style.width = String(width) + "px";
 })
-Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, scale) {
+Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, scale, geneMatrixHandler) {
     var container = document.getElementById('domain_container')
     let size = height/2
     let indent = 0
@@ -437,22 +438,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                     ""
                 let atomOptions = options[reactionOption]
                 if (atomOptions) {
-                    for (let atomOptionIndex = 0; atomOptionIndex <
-                        atomOptions.length; atomOptionIndex++) {
-                        let atomOption = atomOptions[atomOptionIndex]
-                        if (atomOption.includes(",")) {
-                            let atomOptionParts = atomOption.split(",");
-                            let atomOption1 = atomOptionParts[0].replaceAll(" ", "");
-                            let atomOption2 = atomOptionParts[1].replaceAll(" ", "");
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='svgHandler.hoverInAtom(\x22" + atomOption1 + "\x22);svgHandler.hoverInAtom(\x22" + atomOption2 + "\x22);' onmouseout='svgHandler.hoverOutAtom(\x22" + atomOption1 + "\x22);svgHandler.hoverOutAtom(\x22" + atomOption2 + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
-
-                        }
-                        else{
-                        innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
-                            + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='svgHandler.hoverInAtom(\x22" + atomOption.replaceAll(" ", "") + "\x22);' onmouseout='svgHandler.hoverOutAtom(\x22" + atomOption.replaceAll(" ", "") + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
-                        }
-                    }
+                    createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler);
                 }
 
             }
@@ -487,9 +473,40 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
 
         }
     }
+    function createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler) {
+        atomOptions.forEach(atomOption => {
+            const button = document.createElement('button');
+            const atomOptionCleaned = atomOption.replaceAll(" ", "");
+            button.id = `${geneIndex}_${reactionOption.replaceAll(" ", "")}${atomOptionCleaned}`;
+            button.textContent = atomOptionCleaned;
 
+            button.addEventListener('click', () => {
+                geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
+            });
+
+            if (atomOption.includes(",")) {
+                const [atomOption1, atomOption2] = atomOption.split(",").map(opt => opt.replaceAll(" ", ""));
+
+                button.addEventListener('mouseenter', () => {
+                    svgHandler.hoverInAtom(atomOption1);
+                    svgHandler.hoverInAtom(atomOption2);
+                });
+
+                button.addEventListener('mouseout', () => {
+                    svgHandler.hoverOutAtom(atomOption1);
+                    svgHandler.hoverOutAtom(atomOption2);
+                });
+            } else {
+                button.addEventListener('mouseenter', () => svgHandler.hoverInAtom(atomOptionCleaned));
+                button.addEventListener('mouseout', () => svgHandler.hoverOutAtom(atomOptionCleaned));
+            }
+
+            innerDropdownContainer_folded_1.appendChild(button);
+        });
+    }
 
 });
+
 Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
     document.getElementById('model_gene_container')
         .innerHTML = ""
