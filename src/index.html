@@ -126,7 +126,7 @@
   <div id="Domain_explorer" class="Domain_explorer">
     <div class="heading-container">
       Biosynthetic model
-      <button type="button" class="start_button tooltip" onclick="uiHandler.openForm()" id="add_module_button"
+      <button type="button" class="start_button tooltip" id="add_module_button"
         data-tooltip="Add a new module to the biosynthetic model."><strong>Add Module</strong></button>
       <button type="button" class="start_button tooltip" onclick="uiHandler.openTailoringForm()"
         id="add_tailoring_enzyme_button"
@@ -190,9 +190,9 @@
     <div class="formPopup" id="popupForm">
       <form class="formContainer">
 
-        <button type="button" class="btn" onclick="uiHandler.openNRPSForm();uiHandler.closeForm()">NRPS</button>
-        <button type="button" class="btn" onclick="uiHandler.openPKSForm();uiHandler.closeForm()">PKS</button>
-        <button type="button" class="btn cancel" onclick="uiHandler.closeForm()">Close</button>
+        <button type="button" class="btn" id="openNRPSForm">NRPS</button>
+        <button type="button" class="btn" id="openPKSForm" >PKS</button>
+        <button type="button" class="btn cancel" id="closeMainForm" >Close</button>
       </form>
     </div>
   </div>
@@ -228,97 +228,10 @@
   </div>
   <div class="loginPopup">
     <div class="formPopup" id="popupFormPKS">
-      <form class="formContainer">
-        <div class="dropdown">
-          <button type="button" class="dropbtn">Substrate</button>
-          <div class="dropdown-content">
-            <button class="wildcardsubstrate" type="button"
-              onclick="setWildcardSubstrate('malonyl_coa')">malonylcoa</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="setWildcardSubstrate('methylmalonyl_coa')">methylmalonylcoa</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="setWildcardSubstrate('ethylmalonyl_coa')">ethylmalonylcoa</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="setWildcardSubstrate('methoxymalonyl_coa')">methoxymalonylacp</button>
-          </div>
-        </div>
-        <div class="dropdown">
-          <button type="button" class="dropbtn">Module Type</button>
-          <div class="dropdown-content">
-            <button type="button" onclick="record.setWildcardModule('starter_module_pks')">Starter Module</button>
-            <button type="button" onclick="record.setWildcardModule('elongation_module_pks')">Elongation
-              Module</button>
-            <button type="button" onclick="record.setWildcardModule('terminator_module_pks')">Terminator
-              Module</button>
-          </div>
-        </div>
-        <br>
-        <input type="checkbox" id="wildcardKR" name="wildcardKR" value="true">
-        <label for="wildcardKR"> Ketoreductase domain</label><br>
-        <input type="checkbox" id="wildcardDH" name="wildcardDH" value="true">
-        <label for="wildcardDH"> Dehydratase domain</label><br>
-        <input type="checkbox" id="wildcardER" name="wildcardER" value="true">
-        <label for="wildcardER"> Enoylreductase domain</label><br>
-        <button type="button" class="btn"
-          onclick="record.addWildcard(record.geneMatrix);uiHandler.closePKSForm()">Submit</button>
-        <button type="button" class="btn cancel" onclick="uiHandler.closePKSForm()">Close</button>
-      </form>
     </div>
   </div>
   <div class="loginPopup">
     <div class="formPopup" id="popupFormNRPS">
-      <form class="formContainer">
-        <div class="dropdown">
-          <button type="button" class="dropbtn">Substrate</button>
-          <div class="dropdown-content">
-            <button class="wildcardsubstrate" type="button" onclick="setWildcardSubstrate('alanine')">alanine</button>
-            <button type="button" onclick="setWildcardSubstrate('cysteine')">cysteine</button>
-            <button class="wildcardsubstrate" type="button" onclick="setWildcardSubstrate('aspartic acid')">aspartic
-              acid</button>
-            <button class="wildcardsubstrate" type="button" onclick="setWildcardSubstrate('glutamic acid')">glutamic
-              acid</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="record.setWildcardSubstrate('phenylalanine')">phenylalanine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('glycine')">glycine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('histidine')">histidine</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="record.setWildcardSubstrate('isoleucine')">isoleucine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('lysine')">lysine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('leucine')">leucine</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="record.setWildcardSubstrate('methionine')">methionine</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="record.setWildcardSubstrate('asparagine')">asparagine</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="record.setWildcardSubstrate('pyrrolysine')">pyrrolysine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('proline')">proline</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('glutamine')">glutamine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('arginine')">arginine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('serine')">serine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('threonine')">threonine</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="record.setWildcardSubstrate('selenocysteine')">selenocysteine</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('valine')">valine</button>
-            <button class="wildcardsubstrate" type="button"
-              onclick="record.setWildcardSubstrate('tryptophan')">tryptophan</button>
-            <button class="wildcardsubstrate" type="button" onclick="record.setWildcardSubstrate('tyrosine')">tyrosine</button>
-            </div>
-            </div>
-            <div class="dropdown">
-              <button type="button" class="dropbtn">Module Type</button>
-              <div class="dropdown-content">
-                <button type="button" onclick="record.setWildcardModule('starter_module_nrps')">Starter Module</button>
-                <button type="button" onclick="record.setWildcardModule('elongation_module_nrps')">Elongation Module</button>
-                <button type="button" onclick="record.setWildcardModule('terminator_module_nrps')">Terminator Module</button>
-              </div>
-            </div>
-            <br>
-            <input type="checkbox" id="wildcardE" name="wildcardE" value="true">
-            <label for="wildcardE"> Epimerization</label><br>
-            <button type="button" class="btn"
-              onclick="record.addWildcard(record.geneMatrix);uiHandler.closeNRPSForm()">Submit</button>
-            <button type="button" class="btn cancel" onclick="uiHandler.closeNRPSForm()">Close</button>
-            </form>
             </div>
             </div>
             <div class="formPopup" id="popupFormRiPP">

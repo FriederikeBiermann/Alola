@@ -15,7 +15,9 @@ class GeneMatrixHandler {
         this.regionIndex = regionIndex;
         this.recordData = recordData;
         this.starterACP = "";
-        this.addUndoRedoListeners()
+        this.addUndoRedoListeners();
+        this.createWildcardButtons("PKS");
+        this.createWildcardButtons("NRPS");
     }
     
 
@@ -475,6 +477,152 @@ class GeneMatrixHandler {
         return geneMatrix;
     }
 
+    createWildcardButtons(formType) {
+        const containerId = formType === 'NRPS' ? 'popupFormNRPS' : 'popupFormPKS';
+        const container = document.getElementById(containerId);
+        if (!container) {
+            console.error(`Container '${containerId}' not found`);
+            return;
+        }
+
+        // Remove all existing children
+        while (container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+
+        const form = document.createElement('form');
+        form.className = 'formContainer';
+
+        // Create Module Type dropdown
+        const moduleTypes = [
+            `starter_module_${formType.toLowerCase()}`,
+            `elongation_module_${formType.toLowerCase()}`,
+            `terminator_module_${formType.toLowerCase()}`
+        ];
+        const moduleDropdown = this.createDropdown('Module Type', moduleTypes);
+        form.appendChild(moduleDropdown);
+
+        // Create Substrate dropdown (initially with NRPS or PKS substrates)
+        const initialSubstrates = formType === 'NRPS' ? Object.values(AMINO_ACIDS) : PKS_SUBSTRATES;
+        const substrateDropdown = this.createDropdown('Substrate', initialSubstrates);
+        form.appendChild(substrateDropdown);
+
+        form.appendChild(document.createElement('br'));
+
+        // Create checkboxes
+        if (formType === 'NRPS') {
+            this.createCheckbox(form, 'wildcardE', 'Epimerization');
+        } else {
+            this.createCheckbox(form, 'wildcardKR', 'Ketoreductase domain');
+            this.createCheckbox(form, 'wildcardDH', 'Dehydratase domain');
+            this.createCheckbox(form, 'wildcardER', 'Enoylreductase domain');
+        }
+
+        // Update substrate options when module type changes (for PKS only)
+        if (formType === 'PKS') {
+            moduleDropdown.querySelector('.dropbtn').addEventListener('click', () => {
+                setTimeout(() => {
+                    const selectedModule = moduleDropdown.querySelector('.dropbtn').textContent;
+                    const substrates = selectedModule === 'starter_module_pks' ? PKS_STARTER_SUBSTRATES : PKS_SUBSTRATES;
+                    this.updateDropdownOptions(substrateDropdown, substrates);
+                }, 0);
+            });
+        }
+
+        // Create Submit button
+        const submitButton = document.createElement('button');
+        submitButton.type = 'button';
+        submitButton.className = 'btn';
+        submitButton.textContent = 'Submit';
+        submitButton.onclick = () => {
+            const substrate = substrateDropdown.querySelector('.dropbtn').textContent;
+            const moduleType = moduleDropdown.querySelector('.dropbtn').textContent;
+            const checkboxValues = {};
+            form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkboxValues[checkbox.id] = checkbox.checked;
+            });
+            this.createWildcardGene(moduleType, substrate);
+            this.closeForm(formType);
+        };
+        form.appendChild(submitButton);
+
+        // Create Close button
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'btn cancel';
+        closeButton.textContent = 'Close';
+        closeButton.onclick = () => this.closeForm(formType);
+        form.appendChild(closeButton);
+
+        container.appendChild(form);
+    }
+
+    createDropdown(label, options) {
+        console.log(JSON.stringify(options));
+        const dropdown = document.createElement('div');
+        dropdown.className = 'dropdown';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'dropbtn';
+        button.textContent = label;
+
+        const content = document.createElement('div');
+        content.className = 'dropdown-content';
+
+        options.forEach(option => {
+            const optionButton = document.createElement('button');
+            optionButton.type = 'button';
+            optionButton.className = 'wildcardsubstrate';
+            optionButton.textContent = option;
+            optionButton.onclick = (e) => {
+                e.preventDefault();
+                button.textContent = option;
+            };
+            content.appendChild(optionButton);
+        });
+
+        dropdown.appendChild(button);
+        dropdown.appendChild(content);
+        return dropdown;
+    }
+
+    updateDropdownOptions(dropdown, newOptions) {
+        const content = dropdown.querySelector('.dropdown-content');
+        content.innerHTML = '';
+        newOptions.forEach(option => {
+            const optionButton = document.createElement('button');
+            optionButton.type = 'button';
+            optionButton.className = 'wildcardsubstrate';
+            optionButton.textContent = option;
+            optionButton.onclick = (e) => {
+                e.preventDefault();
+                dropdown.querySelector('.dropbtn').textContent = option;
+            };
+            content.appendChild(optionButton);
+        });
+    }
+
+    createCheckbox(form, id, label) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = id;
+        checkbox.name = id;
+        checkbox.value = 'true';
+        const checkboxLabel = document.createElement('label');
+        checkboxLabel.htmlFor = id;
+        checkboxLabel.textContent = ` ${label}`;
+        form.appendChild(checkbox);
+        form.appendChild(checkboxLabel);
+        form.appendChild(document.createElement('br'));
+    }
+
+    closeForm(formType) {
+        const formId = formType === 'NRPS' ? 'popupFormNRPS' : 'popupFormPKS';
+        document.getElementById(formId).style.display = "none";
+    }
+
+
     createWildcardGene(wildcardModule, wildcardSubstrate) {
         let endLastGene = this.BGC.orfs.length > 0 ? this.BGC.orfs[this.BGC.orfs.length - 1].end : 0;
         let nameWildcardModule = `Custom_gene_${this.BGC.orfs.length + 1}`;
@@ -482,14 +630,14 @@ class GeneMatrixHandler {
         let domains = this.createWildcardDomains(wildcardModule, wildcardSubstrate, nameWildcardModule);
 
         let newGene = {
-            antismashArray: domains.map(domain => [domain.abbreviation]),
+            antismashArray: domains.domainArray,
             default_option: [],
             start: endLastGene,
             end: endLastGene + 7254,
             locus_tag: nameWildcardModule,
             displayed: true,
             type: "biosynthetic",
-            domains: domains,
+            domains: domains.longDomainArray,
             strand: 1,
             description: "Custom Gene",
             id: nameWildcardModule,
@@ -505,15 +653,16 @@ class GeneMatrixHandler {
                 iterative: false,
                 monomer: wildcardSubstrate,
                 moduleIdentifier: `${nameWildcardModule}_0`,
-                domains: domains,
-                numberOfDomains: domains.length,
+                domains: domains.longDomainArray,
+                numberOfDomains: domains.domainArray.length,
                 lengthVisualisation: 0
             }]
         };
 
         this.BGC.orfs.push(newGene);
-        this.geneMatrix.push(this.createGeneObject(newGene, domains, "Custom Gene", [false, "", ""], this.BGC.orfs.length - 1));
+        this.geneMatrix.push(this.createGeneObject(newGene, domains.longDomainArray, "Custom Gene", [false, "", ""], this.BGC.orfs.length - 1));
         this.updateDetailsData(newGene);
+        this.reloadGeneCluster();
 
         return newGene;
     }
@@ -558,61 +707,66 @@ class GeneMatrixHandler {
         let longDomainArray = [];
 
         const defaultDomains = {
-            C: this.createDefaultDomain("Condensation", "C", nameWildcardModule),
+            C: this.createDefaultCDomain(nameWildcardModule),
             A: this.createDefaultADomain(wildcardSubstrate, nameWildcardModule),
-            PCP: this.createDefaultDomain("PCP", "PCP", nameWildcardModule),
-            ACP: this.createDefaultDomain("ACP", "ACP", nameWildcardModule),
+            PCP: this.createDefaultPCPDomain(nameWildcardModule),
+            ACP: this.createDefaultACPDomain(nameWildcardModule),
             TE: this.createDefaultTEDomain(nameWildcardModule),
-            E: this.createDefaultDomain("Epimerization", "E", nameWildcardModule),
-            ER: this.createDefaultDomain("PKS_ER", "ER", nameWildcardModule),
+            E: this.createDefaultEDomain(nameWildcardModule),
+            ER: this.createDefaultERDomain(nameWildcardModule),
             KR: this.createDefaultKRDomain(nameWildcardModule),
             AT: this.createDefaultATDomain(wildcardSubstrate, nameWildcardModule),
             KS: this.createDefaultKSDomain(nameWildcardModule),
             DH: this.createDefaultDHDomain(nameWildcardModule)
         };
 
+        const pushDomain = (domain) => {
+            domainArray.push(domain);
+            longDomainArray.push(defaultDomains[domain]);
+        };
+
         switch (wildcardModule) {
             case "starter_module_nrps":
-                longDomainArray.push(defaultDomains.A, defaultDomains.PCP);
+                pushDomain('A');
+                pushDomain('PCP');
                 break;
             case "elongation_module_nrps":
+                pushDomain('C');
+                pushDomain('A');
                 if (document.getElementById("wildcardE").checked) {
-                    domainArray.push(["E"]);
-                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.E, defaultDomains.PCP);
-                } else {
-                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.PCP);
+                    pushDomain('E');
                 }
+                pushDomain('PCP');
                 break;
             case "terminator_module_nrps":
+                pushDomain('C');
+                pushDomain('A');
                 if (document.getElementById("wildcardE").checked) {
-                    domainArray.push(["E"]);
-                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.E, defaultDomains.PCP, defaultDomains.TE);
-                } else {
-                    longDomainArray.push(defaultDomains.A, defaultDomains.C, defaultDomains.PCP, defaultDomains.TE);
+                    pushDomain('E');
                 }
+                pushDomain('PCP');
+                pushDomain('TE');
                 break;
             case "starter_module_pks":
+                pushDomain('AT');
+                pushDomain('ACP');
+                break;
             case "elongation_module_pks":
             case "terminator_module_pks":
-                longDomainArray.push(defaultDomains.AT);
-                if (wildcardModule !== "starter_module_pks") {
-                    longDomainArray.push(defaultDomains.KS);
-                }
+                pushDomain('KS');
+                pushDomain('AT');
                 if (document.getElementById("wildcardKR").checked) {
-                    domainArray.push(["KR"]);
-                    longDomainArray.push(defaultDomains.KR);
+                    pushDomain('KR');
                     if (document.getElementById("wildcardDH").checked) {
-                        domainArray.push(["DH"]);
-                        longDomainArray.push(defaultDomains.DH);
+                        pushDomain('DH');
                         if (document.getElementById("wildcardER").checked) {
-                            domainArray.push(["ER"]);
-                            longDomainArray.push(defaultDomains.ER);
+                            pushDomain('ER');
                         }
                     }
                 }
-                longDomainArray.push(defaultDomains.ACP);
+                pushDomain('ACP');
                 if (wildcardModule === "terminator_module_pks") {
-                    longDomainArray.push(defaultDomains.TE);
+                    pushDomain('TE');
                 }
                 break;
         }
@@ -620,11 +774,71 @@ class GeneMatrixHandler {
         return { domainArray, longDomainArray };
     }
 
-    createDefaultDomain(type, abbreviation, nameWildcardModule) {
+
+    createDefaultCDomain(nameWildcardModule) {
+        return this.createDefaultDomain("Condensation", "C", nameWildcardModule, 4, 302);
+    }
+
+    createDefaultADomain(wildcardSubstrate, nameWildcardModule) {
+        let domain = this.createDefaultDomain("AMP-binding", "A", nameWildcardModule, 465, 867);
+        domain.predictions = [["consensus", Object.keys(AMINO_ACIDS).find(key => AMINO_ACIDS[key] === wildcardSubstrate)]];
+        domain.domainOptions = Object.values(AMINO_ACIDS);
+        domain.default_option = wildcardSubstrate;
+        domain.substrate = wildcardSubstrate;
+        return domain;
+    }
+
+    createDefaultPCPDomain(nameWildcardModule) {
+        return this.createDefaultDomain("PCP", "PCP", nameWildcardModule, 976, 1045);
+    }
+
+    createDefaultACPDomain(nameWildcardModule) {
+        return this.createDefaultDomain("ACP", "ACP", nameWildcardModule, 2200, 2300);
+    }
+
+    createDefaultTEDomain(nameWildcardModule) {
+        let domain = this.createDefaultDomain("Thioesterase", "TE", nameWildcardModule, 2350, 2550);
+        return domain;
+    }
+
+    createDefaultEDomain(nameWildcardModule) {
+        return this.createDefaultDomain("Epimerization", "E", nameWildcardModule, 3122, 3421);
+    }
+
+    createDefaultERDomain(nameWildcardModule) {
+        return this.createDefaultDomain("PKS_ER", "ER", nameWildcardModule, 1800, 2100);
+    }
+
+    createDefaultKRDomain(nameWildcardModule) {
+        let domain = this.createDefaultDomain("PKS_KR", "KR", nameWildcardModule, 1000, 1300);
+        domain.predictions = [["KR activity", "active"], ["KR stereochemistry", "B2"]];
+        domain.domainOptions = ["A1", "A2", "B1", "B2", "C1", "C2"];
+        domain.default_option = "A1";
+        return domain;
+    }
+
+    createDefaultATDomain(wildcardSubstrate, nameWildcardModule) {
+        let domain = this.createDefaultDomain("PKS_AT", "AT", nameWildcardModule, 110, 404);
+        domain.predictions = [["consensus", "pk"], ["PKS signature", wildcardSubstrate], ["Minowa", "prop"]];
+        domain.domainOptions = PKS_SUBSTRATES;
+        domain.default_option = wildcardSubstrate;
+        domain.substrate = wildcardSubstrate;
+        return domain;
+    }
+
+    createDefaultKSDomain(nameWildcardModule) {
+        return this.createDefaultDomain("PKS_KS(Modular-KS)", "KS", nameWildcardModule, 559, 983);
+    }
+
+    createDefaultDHDomain(nameWildcardModule) {
+        return this.createDefaultDomain("PKS_DH", "DH", nameWildcardModule, 1400, 1700);
+    }
+
+    createDefaultDomain(type, abbreviation, nameWildcardModule, start, end) {
         return {
             type: type,
-            start: 1,
-            end: 300,
+            start: start,
+            end: end,
             predictions: [],
             napdoslink: "",
             blastlink: "",
@@ -640,47 +854,6 @@ class GeneMatrixHandler {
             module: nameWildcardModule,
             function: abbreviation
         };
-    }
-
-    createDefaultADomain(wildcardSubstrate, nameWildcardModule) {
-        let domain = this.createDefaultDomain("AMP-binding", "A", nameWildcardModule);
-        domain.predictions = [["consensus", Object.keys(AMINO_ACIDS).find(key => AMINO_ACIDS[key] === wildcardSubstrate)]];
-        domain.domainOptions = ["arginine", "histidine", "lysine", "aspartic acid", "glutamic acid", "serine", "threonine", "asparagine", "glutamine", "cysteine", "selenocysteine", "glycine", "proline", "alanine", "valine", "isoleucine", "leucine", "methionine", "phenylalanine", "tyrosine", "tryptophan"];
-        domain.default_option = wildcardSubstrate;
-        domain.substrate = wildcardSubstrate;
-        return domain;
-    }
-
-    createDefaultTEDomain(nameWildcardModule) {
-        let domain = this.createDefaultDomain("Thioesterase", "TE", nameWildcardModule);
-        domain.domainOptions = ["O_131", "O_4", "O_61", "N_125", "Linear product"];
-        domain.default_option = ["Linear product"];
-        return domain;
-    }
-
-    createDefaultKRDomain(nameWildcardModule) {
-        let domain = this.createDefaultDomain("PKS_KR", "KR", nameWildcardModule);
-        domain.predictions = [["KR activity", "active"], ["KR stereochemistry", "B2"]];
-        domain.domainOptions = ["A1", "A2", "B1", "B2", "C1", "C2"];
-        domain.default_option = "A1";
-        return domain;
-    }
-
-    createDefaultATDomain(wildcardSubstrate, nameWildcardModule) {
-        let domain = this.createDefaultDomain("PKS_AT", "AT", nameWildcardModule);
-        domain.predictions = [["consensus", "pk"], ["PKS signature", "Malonyl-CoA"], ["Minowa", "prop"]];
-        domain.domainOptions = ["methylmalonylcoa", "propionylcoa", "malonylcoa"];
-        domain.default_option = "malonylcoa";
-        domain.substrate = wildcardSubstrate;
-        return domain;
-    }
-
-    createDefaultKSDomain(nameWildcardModule) {
-        return this.createDefaultDomain("PKS_KS(Modular-KS)", "KS", nameWildcardModule);
-    }
-
-    createDefaultDHDomain(nameWildcardModule) {
-        return this.createDefaultDomain("PKS_DH", "DH", nameWildcardModule);
     }
 
     updateDetailsData(wildcard_gene) {

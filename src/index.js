@@ -192,6 +192,8 @@ const NAME_TO_STRUCTURE = {
     'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
 }; 
 
+const PKS_SUBSTRATES = Object.keys(NAME_TO_STRUCTURE);
+
 const TRANS_AT_KS_SUBTYPES = { ' Beta Keto groups.': 'BETA_OH_KETO', 'Acetyl groups as the starting building block of the polyketide.': 'ACST', 'Alpha hydroxy groups, beta keto group': 'ALPHA_OH', 'Alpha-L-groups in conjunction with beta-D-hydroxyl groups.': 'ALPHAME_BETA_D_OH', 'Alpha-hydroxyl groups in conjunction with beta-hydroxyl groups.': 'ALPHABETA_OH', 'Alpha-methyl groups in conjunction with beta-L-hydroxyl groups.': 'ALPHAME_BETA_L_OH', 'Alpha-methyl groups in conjunction with beta-hydroxyl groups.': 'ALPHAME_BETAOH', 'Alpha-methyl groups with E-configured double bonds.': 'ALPHAME_EDB', 'Alpha-methyl groups with Z-configured double bonds.': 'ALPHAME_ZDB', 'Alpha-methyl groups with beta-gamma-double bonds.': 'ALPHA_D_ME_SHDB', 'Alpha-methyl groups with double bonds.': 'ALPHAME_DB', 'Alpha-methyl groups with either a reduced bond or a beta-gamma-double bond.': 'ALPHAME', 'Amidated amino acid starters. Amide groups are introduced by a dedicated aminotransferase.': 'ST', 'Amino acids containing oxazole or thiazole rings introduced by the NRPS module upstream.': 'OXA', 'Aromatic rings as the starting building block of the polyketide.': 'ARST', 'Beta-D-hydroxyl groups.': 'BETA_D_OH', 'Beta-L-hydroxyl groups.': 'BETA_L_OH', 'Beta-gamma-double bonds.': 'SHDB', 'Beta-hydroxy E-double bond': 'BETA_OH_EDB', 'Beta-hydroxyl groups.': 'BETA_OH', 'Beta-keto groups.': 'KETO', 'Beta-methoxy groups.': 'BETA_D_OME', 'Beta-methyl groups with double bonds.': 'BETA_MEDB', 'Double bonds of various configurations.': 'DB', 'E-configured double bonds.': 'EDB', 'Either beta-exomethylene groups or reduced beta-methyl groups, depending on the module composition upstream.': 'BETA_ME', 'Exomethylene groups.': 'EXOMETHYLENE', 'Glycine introduced by the NRPS module upstream.': 'AA', 'Lactate as the starting building block of the polyketide.': 'LACST', 'Methoxycarbonyl units as the starting building block of the polyketide.': 'MEOST', 'Non-elongating KS with keto groups': 'NON_ELONGATING_OXA', 'Non-elongating KS with specifity for pyran or furan rings.': 'NON_ELONGATING_PYR', 'Non-elongating with alpha-methyl groups and E-double bonds.': 'NON_ELONGATING_ALPHAME_EDB', 'Non-elongating with beta-L-hydroxy groups.': 'NON_ELONGATING_BETA_L_OH', 'Non-elongating with beta-hydroxy groups.': 'NON_ELONGATING_BETA_OH', 'Non-elongating with double bonds.': 'NON_ELONGATING_DB', 'Phosphoglycerate-derived molecules as the starting building block of the polyketide.': 'UNST', 'Pyran or furan rings, depending on the presence of an in-trans-acting hydroxylases two modules upstream.': 'PYR', 'Reduced bonds.': 'RED', 'Shifted double bond.': 'RED_SHDB', 'Substrates with inserted oxygen, oftentimes resulting in oxidative cleaving.': 'OXI', 'This type is elongating, but the substrate specificity cannot be predicted.': 'MISCELLANEOUS', 'This type is in an out group.': 'OUT', 'This type is specific for vinylogous chain branching.': 'BR', 'When without a suffix, this type is non-elongating, but the substrate specificity cannot be predicted.': 'NON_ELONGATING', 'Z-Double bonds': 'ZDB' }
 
 class Record {
@@ -354,7 +356,10 @@ class Record {
             this.runAlola();
         } else {
             this.reversed = true;
-            this.BGC = regionHandler.getReversedBGC(this.regionIndex, this.recordIndex, this.details_data, this.recordData);
+            this.BGC = regionHandler.getReversedBGC(this.recordIndex, this.regionIndex, this.details_data, this.recordData);
+            this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
+            let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData);
+            this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
             this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
             uiHandler.updateUI(this.geneMatrixHandler);
             uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
@@ -539,21 +544,66 @@ class UIHandler {
     addButtonListeners() {
         const impressumButton = document.getElementById('impressum-button');
         const openAlolaManualButton = document.getElementById('openAlolaManual');
+        const openWildcardModuleButton = document.getElementById('add_module_button');
+        const openNRPSFormButton = document.getElementById('openNRPSForm');
+        const openPKSFormButton = document.getElementById('openPKSForm');
+        const closeMainFormButton = document.getElementById('closeMainForm');
 
         // Remove all existing listeners
-        impressumButton.replaceWith(impressumButton.cloneNode(true));
-        openAlolaManualButton.replaceWith(openAlolaManualButton.cloneNode(true));
+        [impressumButton, openAlolaManualButton, openWildcardModuleButton,
+            openNRPSFormButton, openPKSFormButton, closeMainFormButton].forEach(button => {
+                button.replaceWith(button.cloneNode(true));
+            });
 
         // Re-select the buttons after replacing them
         const newImpressumButton = document.getElementById('impressum-button');
         const newOpenAlolaManualButton = document.getElementById('openAlolaManual');
+        const newOpenWildcardModuleButton = document.getElementById('add_module_button');
+        const newOpenNRPSFormButton = document.getElementById('openNRPSForm');
+        const newOpenPKSFormButton = document.getElementById('openPKSForm');
+        const newCloseMainFormButton = document.getElementById('closeMainForm');
 
         // Add new listeners
         newImpressumButton.addEventListener('click', () => this.showImpressum());
         newOpenAlolaManualButton.addEventListener('click', () => {
             window.location.href = './Alola_Manual_new.html';
         });
+        newOpenWildcardModuleButton.addEventListener('click', () => this.openWildcardModuleForm());
+        newOpenNRPSFormButton.addEventListener('click', () => {
+            this.openNRPSForm();
+            this.closeWildcardModuleForm();
+        });
+        newOpenPKSFormButton.addEventListener('click', () => {
+            this.openPKSForm();
+            this.closeWildcardModuleForm();
+        });
+        newCloseMainFormButton.addEventListener('click', () => this.closeWildcardModuleForm());
     }
+
+    openWildcardModuleForm(){
+            document.getElementById("popupForm").style.display = "block";
+    }
+
+    openNRPSForm() {
+        document.getElementById("popupFormNRPS").style.display = "block";
+    }
+
+    openPKSForm() {
+        document.getElementById("popupFormPKS").style.display = "block";
+    }
+
+    closeWildcardModuleForm() {
+        document.getElementById("popupForm").style.display = "none";
+    }
+
+    closeNRPSForm() {
+        document.getElementById("popupFormNRPS").style.display = "none";
+    }
+
+    closePKSForm() {
+        document.getElementById("popupFormPKS").style.display = "none";
+    }
+
 
     showImpressum() {
         var popup = document.getElementById("popupImpressum");
