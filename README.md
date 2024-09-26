@@ -26,7 +26,7 @@ Clone the RAIChU package:
 git clone https://github.com/BTheDragonMaster/RAIChU.git
 ```
 
-**3. Clone the Pikachu Package**
+**3. Clone the PIkachu Package**
 
 Also, clone the Pikachu package into the Alola directory:
 ```
