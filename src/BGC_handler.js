@@ -943,6 +943,11 @@ class GeneMatrixHandler {
     async reloadGeneCluster() {
         if (document.querySelector('input[type=checkbox]')
             .checked) {
+            this.reloadGeneClusterForce();
+        }
+    }
+
+    async reloadGeneClusterForce() {
             this.tailoringArray = this.findTailoringReactions();
             uiHandler.updateUI(this);
             let raichu_output = await apiService.fetchFromRaichu(this);
@@ -960,7 +965,6 @@ class GeneMatrixHandler {
             uiHandler.addDragDrop(
             );
             this.updateHistory(this.geneMatrix, this.BGC);
-        }
     }
 
     addUndoRedoListeners() {

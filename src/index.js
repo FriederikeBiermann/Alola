@@ -278,7 +278,7 @@ class Record {
         // Add new listeners
         newResetButton.addEventListener('click', () => this.runAlola());
         newReverseButton.addEventListener('click', () => this.reverseBGC());
-        newRefreshButton.addEventListener('click', () => this.geneMatrixHandler.reloadGeneCluster());
+        newRefreshButton.addEventListener('click', () => this.geneMatrixHandler.reloadGeneClusterForce());
     }
 
     createButtonsForEachRegion() {
