@@ -813,6 +813,28 @@ class UIHandler {
 
     setGeneMatrixHandler(geneMatrixHandler) {
         this.geneMatrixHandler = geneMatrixHandler;
+        this.refreshDragDropListeners();
+    }
+
+    refreshDragDropListeners() {
+        const items = document.querySelectorAll('.protein-container .box');
+        items.forEach(item => {
+            // Remove old listeners
+            item.removeEventListener('dragstart', this.handleDragStart);
+            item.removeEventListener('dragenter', this.handleDragEnter);
+            item.removeEventListener('dragover', this.handleDragOver);
+            item.removeEventListener('dragleave', this.handleDragLeave);
+            item.removeEventListener('drop', this.handleDrop);
+            item.removeEventListener('dragend', this.handleDragEnd);
+
+            // Add new listeners
+            item.addEventListener('dragstart', this.handleDragStart.bind(this));
+            item.addEventListener('dragenter', this.handleDragEnter.bind(this));
+            item.addEventListener('dragover', this.handleDragOver);
+            item.addEventListener('dragleave', this.handleDragLeave);
+            item.addEventListener('drop', this.handleDrop.bind(this));
+            item.addEventListener('dragend', this.handleDragEnd);
+        });
     }
 
     addDragDrop() {
@@ -849,29 +871,23 @@ class UIHandler {
         e.target.classList.remove('over');
     }
 
+
     handleDrop(e) {
         e.stopPropagation();
         e.preventDefault();
 
-        if (this.dragSrcEl !== e.target) {
+        const dropTarget = e.target.closest('.box');
+        if (!dropTarget) return false;
+
+        if (this.dragSrcEl !== dropTarget) {
             const locusTagDragged = this.dragSrcEl.id.substring(21);
-            const locusTagTarget = e.target.id.replace('_protein', '').replace('_', '.');
+            const locusTagTarget = dropTarget.id.substring(21);
 
-            if (this.geneMatrixHandler) {
-                if (typeof this.geneMatrixHandler.handleGenePositionUpdate === 'function') {
-                    this.geneMatrixHandler.handleGenePositionUpdate(locusTagDragged, locusTagTarget);
-                } else {
-                    console.error('handleGenePositionUpdate is not a function');
-                }
-
-                if (typeof this.geneMatrixHandler.reloadGeneCluster === 'function') {
-                    this.geneMatrixHandler.reloadGeneCluster();
-                } else {
-                    console.error('reloadGeneCluster is not a function');
-                }
-
+            if (this.geneMatrixHandler && typeof this.geneMatrixHandler.handleGenePositionUpdate === 'function') {
+                this.geneMatrixHandler.handleGenePositionUpdate(locusTagDragged, locusTagTarget);
+                this.geneMatrixHandler.reloadGeneCluster();
             } else {
-                console.error('geneMatrixHandler is not set');
+                console.error('geneMatrixHandler or handleGenePositionUpdate is not available');
             }
         }
 

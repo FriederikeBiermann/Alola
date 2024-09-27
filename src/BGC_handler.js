@@ -964,20 +964,24 @@ class GeneMatrixHandler {
     }
 
     addUndoRedoListeners() {
-        const undoButton = document.getElementById('undoButton');
-        const redoButton = document.getElementById('redoButton');
+        const buttonConfigs = [
+            { id: 'undoButton', handler: () => this.undo() },
+            { id: 'redoButton', handler: () => this.redo() }
+        ];
 
-        if (undoButton) {
-            undoButton.addEventListener('click', () => this.undo());
-        } else {
-            console.warn('Undo button not found');
-        }
+        buttonConfigs.forEach(config => {
+            const button = document.getElementById(config.id);
+            if (button) {
+                // Remove old listeners and replace with a new button
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
 
-        if (redoButton) {
-            redoButton.addEventListener('click', () => this.redo());
-        } else {
-            console.warn('Redo button not found');
-        }
+                // Add new listener
+                newButton.addEventListener('click', config.handler);
+            } else {
+                console.warn(`${config.id} not found`);
+            }
+        });
     }
 
     updateHistory() {
@@ -1035,17 +1039,22 @@ class HistoryStack {
     constructor() {
         this.undoStack = [];
         this.redoStack = [];
+        this.is_undo = false;
     }
 
     push(state) {
+        if (!this.is_undo) {
+            this.redoStack = []; // Clear redo stack when a new action is performed
+        }
         this.undoStack.push(JSON.parse(JSON.stringify(state)));
-        this.redoStack = []; // Clear redo stack when a new action is performed
+        this.is_undo = false;
     }
 
     undo() {
         if (this.undoStack.length > 1) {
             const currentState = this.undoStack.pop();
             this.redoStack.push(currentState);
+            this.is_undo = true;
             return this.undoStack[this.undoStack.length - 1];
         }
         return null;
@@ -1055,6 +1064,7 @@ class HistoryStack {
         if (this.redoStack.length > 0) {
             const state = this.redoStack.pop();
             this.undoStack.push(state);
+            this.is_undo = false; // Redo is not considered an undo operation
             return state;
         }
         return null;
@@ -1071,7 +1081,6 @@ class HistoryStack {
     updateButtonStates() {
         const undoButton = document.getElementById('undoButton');
         const redoButton = document.getElementById('redoButton');
-
         if (!this.canUndo()) {
             undoButton.setAttribute('data-tooltip', 'No job to revert!');
             undoButton.classList.add('disabled');
@@ -1079,7 +1088,6 @@ class HistoryStack {
             undoButton.setAttribute('data-tooltip', 'Click to revert your last action.');
             undoButton.classList.remove('disabled');
         }
-
         if (!this.canRedo()) {
             redoButton.setAttribute('data-tooltip', 'No job to reapply!');
             redoButton.classList.add('disabled');
@@ -1088,9 +1096,8 @@ class HistoryStack {
             redoButton.classList.remove('disabled');
         }
     }
-
-    
 }
+
 
 
 
