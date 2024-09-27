@@ -12,6 +12,7 @@ OptionCreator.createOptionsTerpeneCyclase = (function(atomsForCyclisation = none
   return options
   
 })
+
 OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none) {
   let AT_index = 0;
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {

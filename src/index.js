@@ -219,7 +219,7 @@ class Record {
     init(recordData, details_data) {
         this.recordData = recordData;
         this.details_data = details_data;
-        this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData)
+        this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this. recordIndex, this.recordData)
         
         this.reload_site_with_genecluster();
     }
@@ -227,7 +227,7 @@ class Record {
     async init_from_state(recordData, details_data, geneMatrix, BGC, regionIndex) {
         this.recordData = recordData;
         this.details_data = details_data;
-        this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData)
+        this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordIndex, this.recordData)
         this.regionIndex = regionIndex;
         this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
         this.geneMatrixHandler = new GeneMatrixHandler(BGC, this.details_data, this.regionName, this.cluster_type, this.regionIndex, this.recordData);
@@ -242,6 +242,13 @@ class Record {
         uiHandler.addDragDrop();
         if (this.geneMatrixHandler.cluster_type === "nrpspks") {
             svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
+        }
+        if (this.geneMatrixHandler.cluster_type === "terpene") {
+            if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor", "precursor_drawing");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+            }
         }
 
 
@@ -324,30 +331,54 @@ class Record {
         this.rippPrecursor = "";
         this.cyclization = "None";
         this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
-        let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData);
+        let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordIndex, this.recordData);
        
         
 
         this.BGC = regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
         this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
+        this.geneMatrixHandler.createGeneMatrix()
+        console.log("gene matrix", JSON.stringify(this.geneMatrixHandler.geneMatrix));
         this.addButtonListeners()
         uiHandler.setGeneMatrixHandler(this.geneMatrixHandler);
-        this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
+        let result = this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
         //this.addButtonListeners()
+        if (result){
+            uiHandler.updateUI(this.geneMatrixHandler);
+            uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
 
-        uiHandler.updateUI(this.geneMatrixHandler);
-        uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
+            if (this.geneMatrixHandler.cluster_type === "terpene") {
+                uiHandler.openFormTerpene();
+            }
 
-        if (this.geneMatrixHandler.cluster_type === "terpene") {
-            uiHandler.openFormTerpene();
+            let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
+            uiHandler.updateUI(this.geneMatrixHandler);
+            uiHandler.addDragDrop();
+            if (this.geneMatrixHandler.cluster_type === "nrpspks") {
+                svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
+            }
+            if (this.geneMatrixHandler.cluster_type === "terpene") {
+                if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor", "precursor_drawing");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+                }
+            }
+
+        }
+        else {
+
+            if (this.geneMatrixHandler.cluster_type === "terpene") {
+                console.log("gene matrix", JSON.stringify(this.geneMatrixHandler.geneMatrix));
+                uiHandler.updateUI(this.geneMatrixHandler);
+                uiHandler.addDragDrop();
+                uiHandler.openFormTerpene();
+                
+            }
+
         }
 
-        let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
-        uiHandler.updateUI(this.geneMatrixHandler);
-        uiHandler.addDragDrop();
-        if (this.geneMatrixHandler.cluster_type === "nrpspks") {
-            svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
-        }
+
 
     }
 
@@ -358,7 +389,7 @@ class Record {
             this.reversed = true;
             this.BGC = regionHandler.getReversedBGC(this.recordIndex, this.regionIndex, this.details_data, this.recordData);
             this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
-            let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordData);
+            let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordIndex, this.recordData);
             this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
             this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
             uiHandler.updateUI(this.geneMatrixHandler);
@@ -533,7 +564,11 @@ class UIHandler {
         this.updateProteins(geneMatrix, BGC, recordData);
         
         if (cluster_type === "ripp") {
-            this.updateRiPPs(geneMatrix, BGC);
+            this.updateRiPPs(geneMatrix, BGC, geneMatrixHandler.proteaseOptions, geneMatrixHandler.cleavageSites, geneMatrixHandler);
+        }
+
+        if (cluster_type === "terpene") {
+            this.updateTerpenes(geneMatrixHandler);
         }
         else{
             this.updateDomains(geneMatrixHandler);
@@ -542,62 +577,32 @@ class UIHandler {
     }
 
     addButtonListeners() {
-        const impressumButton = document.getElementById('impressum-button');
-        const openAlolaManualButton = document.getElementById('openAlolaManual');
-        const openWildcardModuleButton = document.getElementById('add_module_button');
-        const openNRPSFormButton = document.getElementById('openNRPSForm');
-        const openPKSFormButton = document.getElementById('openPKSForm');
-        const closeMainFormButton = document.getElementById('closeMainForm');
-        const addTailoringEnzymeButton = document.getElementById('add_tailoring_enzyme_button');
+        const buttonConfigs = [
+            { id: 'impressum-button', handler: () => this.showImpressum() },
+            { id: 'openAlolaManual', handler: () => { window.location.href = './Alola_Manual_new.html'; } },
+            { id: 'add_module_button', handler: () => this.openWildcardModuleForm() },
+            { id: 'openNRPSForm', handler: () => { this.openNRPSForm(); this.closeWildcardModuleForm(); } },
+            { id: 'openPKSForm', handler: () => { this.openPKSForm(); this.closeWildcardModuleForm(); } },
+            { id: 'closeMainForm', handler: () => this.closeWildcardModuleForm() },
+            { id: 'add_tailoring_enzyme_button', handler: () => this.openTailoringForm() },
+            { id: 'ripp_button', handler: () => this.openRiPPForm() },
+            { id: 'addRiPPButton', handler: () => { this.geneMatrixHandler.addRiPP(); this.closeRiPPForm(); } },
+            { id: 'cancelRiPPButton', handler: () => this.closeRiPPForm() },
+            { id: 'submitTerpeneButton', handler: () => { this.geneMatrixHandler.reloadGeneCluster(); this.closeFormTerpene(); } },
+            { id: 'closeTerpeneButton', handler: () => this.closeFormTerpene() }
+        ];
 
-        // Remove all existing listeners
-        [impressumButton, openAlolaManualButton, openWildcardModuleButton,
-            openNRPSFormButton, openPKSFormButton, closeMainFormButton,
-            addTailoringEnzymeButton].forEach(button => {
-                if (button) {
-                    button.replaceWith(button.cloneNode(true));
-                }
-            });
+        buttonConfigs.forEach(config => {
+            const button = document.getElementById(config.id);
+            if (button) {
+                // Remove old listeners and replace with a new button
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
 
-        // Re-select the buttons after replacing them
-        const newImpressumButton = document.getElementById('impressum-button');
-        const newOpenAlolaManualButton = document.getElementById('openAlolaManual');
-        const newOpenWildcardModuleButton = document.getElementById('add_module_button');
-        const newOpenNRPSFormButton = document.getElementById('openNRPSForm');
-        const newOpenPKSFormButton = document.getElementById('openPKSForm');
-        const newCloseMainFormButton = document.getElementById('closeMainForm');
-        const newAddTailoringEnzymeButton = document.getElementById('add_tailoring_enzyme_button');
-
-        // Add new listeners
-        if (newImpressumButton) {
-            newImpressumButton.addEventListener('click', () => this.showImpressum());
-        }
-        if (newOpenAlolaManualButton) {
-            newOpenAlolaManualButton.addEventListener('click', () => {
-                window.location.href = './Alola_Manual_new.html';
-            });
-        }
-        if (newOpenWildcardModuleButton) {
-            newOpenWildcardModuleButton.addEventListener('click', () => this.openWildcardModuleForm());
-        }
-        if (newOpenNRPSFormButton) {
-            newOpenNRPSFormButton.addEventListener('click', () => {
-                this.openNRPSForm();
-                this.closeWildcardModuleForm();
-            });
-        }
-        if (newOpenPKSFormButton) {
-            newOpenPKSFormButton.addEventListener('click', () => {
-                this.openPKSForm();
-                this.closeWildcardModuleForm();
-            });
-        }
-        if (newCloseMainFormButton) {
-            newCloseMainFormButton.addEventListener('click', () => this.closeWildcardModuleForm());
-        }
-        if (newAddTailoringEnzymeButton) {
-            newAddTailoringEnzymeButton.addEventListener('click', () => this.openTailoringForm());
-        }
+                // Add new listener
+                newButton.addEventListener('click', config.handler);
+            }
+        });
     }
 
     openWildcardModuleForm(){
@@ -611,6 +616,39 @@ class UIHandler {
     openPKSForm() {
         document.getElementById("popupFormPKS").style.display = "block";
     }
+
+    openRiPPForm() {
+        document.getElementById("popupFormRiPP").style.display = "block";
+    }
+
+    closeRiPPForm() {
+        document.getElementById("popupFormRiPP").style.display = "none";
+    }
+
+    openFormTerpene() {
+        document.getElementById("popupFormTerpene").style.display = "block";
+    }
+
+    closeFormTerpene() {
+        document.getElementById("popupFormTerpene").style.display = "none";
+    }
+
+    appendButtonsToDropdownTerpene(geneMatrixHandler) {
+        const dropdown = document.getElementById("dropdownContentTerpene");
+        dropdown.innerHTML = '';
+        let entries = TERPENE_SUBSTRATES;
+        for (let i = 0; i < entries.length; i++) {
+            const entry = entries[i];
+            const button = document.createElement("button");
+            button.classList.add("wildcardsubstrate");
+            button.textContent = entry;
+            button.onclick = function () {
+                geneMatrixHandler.addTerpene(entry);
+            };
+            dropdown.appendChild(button);
+        }
+    }
+
 
     closeWildcardModuleForm() {
         document.getElementById("popupForm").style.display = "none";
@@ -648,13 +686,53 @@ class UIHandler {
         return BGCForDisplay;}
 
     addRiPPPrecursorOptions(geneMatrix) {
-        let innerHTML = "";
-        for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-            let id = geneMatrix[geneIndex].id.replace(".", "_");
-            innerHTML += `<button class='wildcardsubstrate' type='button' id='${id}_ripp_button' onclick='session.record.setRiPPPrecursor("${geneIndex}")'>${id}</button>`;
+        const precursorContainer = document.getElementById("ripp_precursor_selection");
+        if (!precursorContainer) {
+            console.error("RiPP precursor selection container not found");
+            return;
         }
-        document.getElementById("ripp_precursor_selection").innerHTML = innerHTML;
+
+        // Clear existing content
+        precursorContainer.innerHTML = '';
+
+        // Create a document fragment to improve performance
+        const fragment = document.createDocumentFragment();
+
+        geneMatrix.forEach((gene, geneIndex) => {
+            const button = document.createElement('button');
+            button.className = 'wildcardsubstrate';
+            button.type = 'button';
+
+            const id = gene.id.replace(".", "_");
+            button.id = `${id}_ripp_button`;
+            button.textContent = id;
+
+            // Add event listener
+            button.addEventListener('click', () => this.setRiPPPrecursor(geneIndex));
+
+            fragment.appendChild(button);
+        });
+
+        // Append all buttons at once
+        precursorContainer.appendChild(fragment);
     }
+
+    setRiPPPrecursor(geneIndex) {
+        this.rippPrecursorGene = geneIndex;
+        console.log(`RiPP precursor set to gene at index ${geneIndex}`);
+
+        // Fetch and display the gene sequence
+        const geneSequence = this.geneMatrixHandler.getTranslation(geneIndex);
+        this.displayRiPPPrecursorSequence(geneSequence);
+    }
+
+    displayRiPPPrecursorSequence(sequence) {
+        const textarea = document.querySelector('#popupFormRiPP textarea');
+        if (textarea) {
+            textarea.value = sequence;
+        }
+    }
+
 
     updateProteins(geneMatrix, BGC, recordData) {
         let proteinsForDisplay = JSON.parse(JSON.stringify(BGC));
@@ -688,22 +766,21 @@ class UIHandler {
 
     }
 
-    updateRiPPs(geneMatrix, BGC, proteaseOptions) {
-        let genesForDisplay = JSON.parse(JSON.stringify(BGC));
-        delete genesForDisplay.orfs;
-        genesForDisplay.orfs = [];
+    updateRiPPs(geneMatrix, BGC, proteaseOptions, cleavageSites, geneMatrixHandler) {
         geneMatrix.sort((a, b) => a.position - b.position);
         for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
             if (geneMatrix[geneIndex].displayed == true && geneMatrix[geneIndex].domains.length != 0) {
                 genesForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC - 1]);
             }
         }
-        $("#Domain_container").html(RiPPer.drawCluster(genesForDisplay, geneMatrix, proteaseOptions), this.viewPortHeight * 0.05);
+        $("#Domain_container").html(RiPPer.drawCluster(genesForDisplay, geneMatrix, proteaseOptions, this.viewPortHeight * 0.05, 600, cleavageSites, geneMatrixHandler));
 
     }
-    
-    openFormTerpene() {
-        document.getElementById("popupFormTerpene").style.display = "block";
+
+    updateTerpenes(geneMatrixHandler) {
+
+        $("#Domain_container").html(Terpener.drawCluster(geneMatrixHandler.geneMatrix, 90, 300, geneMatrixHandler.terpeneCyclaseOptions, geneMatrixHandler));
+
     }
 
     updateRiPPPrecursorTextarea(translation) {

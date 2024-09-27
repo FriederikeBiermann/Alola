@@ -231,16 +231,41 @@ class SVGHandler {
     }
 
     updateIntermediateContainer(containerId, svgContent, svgId, replacementId = null) {
+        console.log('Function called with parameters:', { containerId, svgContent, svgId, replacementId });
+
         let container = document.getElementById(containerId);
+        console.log('Container element:', container);
+
         container.setAttribute("style", "width:25vw");
-        container.innerHTML = this.formatSVGIntermediates(svgContent).replaceAll("final_drawing", replacementId || "intermediate_drawing");
+        console.log('Set container style to width:25vw');
+
+        let formattedSVG = this.formatSVGIntermediates(svgContent);
+        console.log('Formatted SVG content:', formattedSVG);
+
+        let replacedSVG = formattedSVG.replaceAll("final_drawing", replacementId || "intermediate_drawing");
+        console.log('Replaced "final_drawing" with:', replacementId || "intermediate_drawing");
+
+        container.innerHTML = replacedSVG;
+        console.log('Set container innerHTML');
+
         let svg = document.getElementById(replacementId || "intermediate_drawing");
+        console.log('Retrieved SVG element:', svg);
+
         this.reformatSVG(svg);
+        console.log('Reformatted SVG');
+
         svg.setAttribute('id', svgId);
+        console.log('Set SVG id to:', svgId);
+
         svg.setAttribute('class', svgId);
+        console.log('Set SVG class to:', svgId);
+
         if (svgId === "intermediate_drawing_tailored") {
             this.addDropShadowFilterToSVG(svg);
+            console.log('Added drop shadow filter to SVG');
         }
+
+        console.log('Function execution completed');
     }
 
     reformatSVG(svg, id = null, className = null) {

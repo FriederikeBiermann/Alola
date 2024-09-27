@@ -12,13 +12,38 @@ class GeneMatrixHandler {
         this.rippFullPrecursor = "";
         this.rippPrecursorGene = 0;
         this.moduleMatrix = [];
+        this.proteaseOptions = [];
         this.regionIndex = regionIndex;
         this.recordData = recordData;
         this.starterACP = "";
+        this.tailoringArray = this.findTailoringReactions();
         this.addUndoRedoListeners();
         uiHandler.createWildcardButtons("PKS", this);
         uiHandler.createWildcardButtons("NRPS", this);
         uiHandler.createTailoringEnzymeForm(this)
+        uiHandler.appendButtonsToDropdownTerpene(this)
+        this.addRiPPPrecursorListener(); 
+        this.cleavageSites = [];
+        this.terpeneCyclaseOptions = [];
+    }
+
+    addRiPPPrecursorListener() {
+        const textarea = document.querySelector('#popupFormRiPP textarea');
+        if (textarea) {
+            ['mouseup', 'mouseleave'].forEach(eventType => {
+                textarea.addEventListener(eventType, () => {
+                    const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+                    this.updateRiPPPrecursor(selectedText, textarea.value);
+                });
+            });
+        }
+    }
+
+    updateRiPPPrecursor(selectedText, fullText) {
+        this.rippPrecursor = selectedText;
+        this.rippFullPrecursor = fullText;
+        console.log('RiPP Precursor updated:', this.rippPrecursor);
+        console.log('Full RiPP Precursor sequence:', this.rippFullPrecursor);
     }
     
 
@@ -72,24 +97,21 @@ class GeneMatrixHandler {
         return translation;
     }
 
-    addRiPP(rippSelection) {
-        this.RiPPStatus = 1;
-        this.terpeneStatus = 0;
-        this.terpeneCyclaseOptions = [];
-        this.cyclization = [];
+    addRiPP() {
+        this.cluster_type = "ripp";
         this.geneMatrix[this.rippPrecursorGene].ripp_status = true;
 
         let translation = this.getTranslation(this.rippPrecursorGene);
 
         // Generate protease options
         let aminoacidsWithNumber = translation.split('').map((aa, index) => aa + (index + 1));
-        this.terpeneCyclaseOptions = aminoacidsWithNumber.map(aa => "Proteolytic cleavage at " + aa);
+        this.proteaseOptions = aminoacidsWithNumber.map(aa => "Proteolytic cleavage at " + aa);
 
         this.rippFullPrecursor = translation;
-        this.rippPrecursor = rippSelection.length > 0 ? rippSelection : translation.slice(-5);
-
-        return this.terpeneCyclaseOptions;
+        this.rippPrecursor = this.rippPrecursor.length > 0 ? this.rippPrecursor : translation.slice(-5);
+        this.reloadGeneCluster();
     }
+    
     getTranslation(geneIndex) {
         if (this.BGC.orfs[geneIndex].hasOwnProperty("translation")) {
             return this.BGC.orfs[geneIndex].translation;
@@ -100,16 +122,17 @@ class GeneMatrixHandler {
         }
     }
 
-    setRippPrecursor(geneIndex) {
-        this.rippPrecursorGene = geneIndex;
-        return this.getTranslation(geneIndex);
-    }
-
-
     addTerpene(substrate) {
         this.cluster_type = "terpene";
         this.terpeneSubstrate = substrate;
         this.cyclization = [];
+        this.terpeneCyclaseOptions = OptionCreator.createOptionsTerpeneCyclase([], { "METHYL_MUTASE": [], "DOUBLE_BOND_ISOMERASE": []})
+    }
+
+    changeCyclization(atom) {
+        this.cyclization.push(atom)
+        this.removeTailoringEnzymes();
+        this.reloadGeneCluster();
     }
 
     changeSelectedOptionTailoring( geneIndex, reactionOption, atomOption) {
@@ -139,8 +162,9 @@ class GeneMatrixHandler {
         this.reloadGeneCluster();
 
     }
+
     changeSelectedOptionCleavageSites(option) {
-        cleavageSites = [option]
+        this.cleavageSites = [option]
         let translation = ""
         // for antismash 7.0 files
         if (BGCForDisplay["orfs"][rippPrecursorGene].hasOwnProperty("translation")) {
@@ -153,12 +177,9 @@ class GeneMatrixHandler {
             translation = translationSearch[1]; //is the matched group if found
         }
         let cleavageNumber = parseInt(option.replace(/\D/g, ''));
-        rippPrecursor = translation.slice(-cleavageNumber);//
-        removeTailoringEnzymes(geneMatrix);
-        if (document.querySelector('input[type=checkbox]')
-            .checked) {
-            fetchFromRaichu(details_data, regionName, geneMatrix, cluster_type, BGC)
-        }
+        this.rippPrecursor = translation.slice(-cleavageNumber);//
+        this.removeTailoringEnzymes();
+        this.reloadGeneCluster();
     }
 
     //TODO: put into uiHandler
@@ -264,8 +285,8 @@ class GeneMatrixHandler {
         const originalColor2 = getComputedStyle(domain2).fill;
 
         const clickHandler = () => this.handleDomainClick(gene, geneIndex, domainIndex, domain, domain2, originalColor, originalColor2);
-        const mouseEnterHandler = () => this.handleDomainMouseEnter(gene, geneIndex, domain, domain2);
-        const mouseLeaveHandler = () => this.handleDomainMouseLeave(gene, geneIndex, domain, domain2, originalColor, originalColor2);
+        const mouseEnterHandler = () => this.handleDomainMouseEnter(gene, domainIndex, domain, domain2);
+        const mouseLeaveHandler = () => this.handleDomainMouseLeave(gene, domainIndex, domain, domain2, originalColor, originalColor2);
 
         domain.addEventListener('click', clickHandler);
         domain.addEventListener('mouseenter', mouseEnterHandler);
@@ -469,6 +490,7 @@ class GeneMatrixHandler {
             }
         }
     }
+    this.tailoringArray = tailoringArray
     return tailoringArray
 }
 
@@ -522,6 +544,9 @@ class GeneMatrixHandler {
                     });
                 }
             });
+        }
+        else{
+            console.log("No region found in details data", geneMatrix);
         }
 
         return geneMatrix;
@@ -829,9 +854,13 @@ class GeneMatrixHandler {
     extractAntismashPredictionsFromRegion() {
         let antismashExtractor = new AntismashExtractor(this.details_data, this.regionName, this.geneMatrix);
         const [outputForRaichu, starterACP, updatedGeneMatrix] = antismashExtractor.extractAntismashPredictions();
+        if (outputForRaichu.length == 0) {
+            return null
+        }
         this.moduleMatrix = antismashExtractor.moduleMatrix;
         this.geneMatrix = updatedGeneMatrix;
         this.starterACP = starterACP;
+
         return [outputForRaichu, starterACP]
     }
 
@@ -914,11 +943,19 @@ class GeneMatrixHandler {
     async reloadGeneCluster() {
         if (document.querySelector('input[type=checkbox]')
             .checked) {
+            this.tailoringArray = this.findTailoringReactions();
             uiHandler.updateUI(this);
             let raichu_output = await apiService.fetchFromRaichu(this);
             uiHandler.updateUI(this);
             if (this.cluster_type === "nrpspks") {
                 svgHandler.updateIntermediates(raichu_output, this, this.starterACP);
+            }
+            if (this.cluster_type === "terpene") {
+                if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor", "precursor_drawing");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+                }
             }
             uiHandler.addDragDrop(
             );
@@ -969,6 +1006,28 @@ class GeneMatrixHandler {
             this.reloadGeneCluster();
         }
         this.historyStack.updateButtonStates();
+    }
+
+    setDisplayedStatus(id) {
+        /**
+        * knocks out genes.
+        * @fires clickongene
+        *@input id of gene, gene matrix
+        *@yield changes status in gene matrix + if the real time calculation is checked also fetch from raichu to update structures
+        */
+        id.slice(-11, -1);
+        for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
+            if (this.geneMatrix[geneIndex].id === id) {
+                if (this.geneMatrix[geneIndex].displayed === false) {
+                    this.geneMatrix[geneIndex].displayed = true;
+                    this.geneMatrix[geneIndex].ko = false;
+                }
+                else {
+                    this.geneMatrix[geneIndex].displayed = false;
+                    this.geneMatrix[geneIndex].ko = true;
+                }
+            }
+        }
     }
 }
 
@@ -1029,17 +1088,19 @@ class HistoryStack {
             redoButton.classList.remove('disabled');
         }
     }
+
+    
 }
 
 
 
 class ClusterTypeHandler {
-    getClusterType(regionIndex, recordData) {
-        let type = recordData[0].regions[regionIndex].type;
+    getClusterType(regionIndex, recordIndex, recordData) {
+        let type = recordData[recordIndex].regions[regionIndex].type;
         if (type.includes("PKS") || type.includes("NRPS") || type.includes("Fatty_acid")) {
             return "nrpspks";
         }
-        if (type.includes("Terpene")) {
+        if (type.includes("Terpene") || type.includes("terpene")) {
             return "terpene";
         }
         if (type.includes("peptide")) {
@@ -1121,27 +1182,7 @@ class RegionHandler {
         return BGC;
     }
 
-    setDisplayedStatus(id) {
-        /**
-        * knocks out genes.
-        * @fires clickongene
-        *@input id of gene, gene matrix
-        *@yield changes status in gene matrix + if the real time calculation is checked also fetch from raichu to update structures
-        */
-        id.slice(-11, -1);
-        for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
-            if (this.geneMatrix[geneIndex].id === id) {
-                if (this.geneMatrix[geneIndex].displayed === false) {
-                    this.geneMatrix[geneIndex].displayed = true;
-                    this.geneMatrix[geneIndex].ko = false;
-                }
-                else {
-                    this.geneMatrix[geneIndex].displayed = false;
-                    this.geneMatrix[geneIndex].ko = true;
-                }
-            }
-        }
-    }
+
 
     
 
@@ -1176,7 +1217,7 @@ class AntismashExtractor {
         region = this.details_data[this.regionName];
     }
         if (!region) {
-            console.error("Region not found for index:", this.regionName);
+            console.log("Region not found for index:", this.regionName);
             return [outputForRaichu, 1]; // Return empty output and default starterACP
         }
     this.geneMatrix.sort((a, b) => {

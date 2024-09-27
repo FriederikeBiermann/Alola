@@ -128,11 +128,11 @@
       Biosynthetic model
       <button type="button" class="start_button tooltip" id="add_module_button"
         data-tooltip="Add a new module to the biosynthetic model."><strong>Add Module</strong></button>
-      <button type="button" class="start_button tooltip" onclick="uiHandler.openTailoringForm()"
+      <button type="button" class="start_button tooltip" 
         id="add_tailoring_enzyme_button"
         data-tooltip="Add a new tailoring enzyme to the biosynthetic model."><strong>Add tailoring
           Enzyme</strong></button>
-      <button type="button" class="start_button tooltip" id="ripp_button" onclick="uiHandler.openRiPPForm()"
+      <button type="button" class="start_button tooltip" id="ripp_button" 
         data-tooltip="Create a RiPP BGC from the current BGC (select a precursor)."><strong><a> RiPP BGC
           </a></strong></button>
     </div>
@@ -209,9 +209,8 @@
         <div class="dropdown-content" id=dropdownContentTerpene>
         </div>
       </div>
-      <button type="button" class="btn"
-        onclick="record.apiService.fetchFromRaichu();uiHandler.closeFormTerpene()">Submit</button>
-      <button type="button" class="btn cancel" onclick="uiHandler.closeFormTerpene()">Close</button>
+      <button type="button" class="btn" id="submitTerpeneButton">Submit</button>
+      <button type="button" class="btn cancel" id="closeTerpeneButton">Close</button>
       </form>
     </div>
   </div>
@@ -238,9 +237,8 @@
                 <br>
                 <input type="checkbox" id="wildcardProtease" name="wildcardProtease" value="true">
                 <label for="wildcardProtease"> Add Protease</label><br>
-                <button type="button" class="btn"
-                  onclick="record.addRiPP(record.geneMatrix, rippSelection);uiHandler.closeRiPPForm()">Submit</button>
-                <button type="button" class="btn cancel" onclick="uiHandler.closeRiPPForm()">Close</button>
+                <button type="button" class="btn" id="addRiPPButton">Submit</button>
+                <button type="button" class="btn cancel" id="cancel RiPPButton">Close</button>
               </form>
             </div>
 
