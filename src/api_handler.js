@@ -4,6 +4,7 @@ class APIService {
     }
 
     async fetchFromRaichu(geneMatrixHandler) {
+        console.log(geneMatrixHandler.cluster_type);
         let bgcHandler = this.getBGCHandler(geneMatrixHandler.cluster_type);
         let raichu_output;
         if (bgcHandler) {

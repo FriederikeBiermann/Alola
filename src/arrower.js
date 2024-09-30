@@ -20,7 +20,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40, recordData, regionName)
   var draw = SVG(container).size('100%', height).group();
   let fixedWidth = 1500;
   var scale = (function (val) {
-    return (val - cluster.start) / (cluster.end - cluster.start) * fixedWidth;
+    return (val - cluster.start) / Math.abs(cluster.end - cluster.start) * fixedWidth;
   });
 
   // draw line

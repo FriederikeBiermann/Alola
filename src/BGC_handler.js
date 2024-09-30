@@ -1475,6 +1475,7 @@ class AntismashExtractor {
     if (domainArray.length != 0) {
         // set everything that already exists to false
         let newDomainArray = []
+        if (outputForRaichu.length != 0) {
         typesInModule = outputForRaichu[outputForRaichu.length - 1][3].map(function (x) {
             return x[1];
         });
@@ -1513,8 +1514,20 @@ class AntismashExtractor {
             moduleMatrix[moduleMatrix.length - 1].domains = moduleMatrix[moduleMatrix.length - 1].domains.concat(domains);
             moduleMatrix[moduleMatrix.length - 1].numberOfDomains += domains.length;
 
+        }}
+        else{
+            domains = domains.concat(domainArray.map(function (x) {
+                return x[1];
+            }));
+            moduleMatrix.push({
+                "id": moduleIndex,
+                "domains": domains,
+                "numberOfDomains": domains.length,
+                "moduleType": moduleType
+                                    });
         }
     }
+
     this.moduleMatrix = moduleMatrix;
     return [outputForRaichu, starterACP, this.geneMatrix]
 }}

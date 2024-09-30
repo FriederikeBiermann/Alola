@@ -225,6 +225,7 @@ class Record {
     }
 
     async init_from_state(recordData, details_data, geneMatrix, BGC, regionIndex) {
+        uiHandler.resetUI();
         this.recordData = recordData;
         this.details_data = details_data;
         this.cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordIndex, this.recordData)
@@ -256,6 +257,7 @@ class Record {
 
     reload_site_with_genecluster() {
         this.createButtonsForEachRegion();
+        uiHandler.resetUI();
         [this.regionIndex, this.recordIndex] = regionHandler.getFirstRegion(this.recordData);
         this.runAlola();
     }
@@ -333,7 +335,7 @@ class Record {
         this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
         let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordIndex, this.recordData);
        
-        
+        uiHandler.resetUI();
 
         this.BGC = regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
         this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
@@ -342,9 +344,10 @@ class Record {
         this.addButtonListeners()
         uiHandler.setGeneMatrixHandler(this.geneMatrixHandler);
         let result = this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
+        uiHandler.updateUI(this.geneMatrixHandler);
+        uiHandler.addDragDrop();
         //this.addButtonListeners()
         if (result){
-            uiHandler.updateUI(this.geneMatrixHandler);
             uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
 
             if (this.geneMatrixHandler.cluster_type === "terpene") {
@@ -352,8 +355,7 @@ class Record {
             }
 
             let raichu_output = await apiService.fetchFromRaichu(this.geneMatrixHandler);
-            uiHandler.updateUI(this.geneMatrixHandler);
-            uiHandler.addDragDrop();
+
             if (this.geneMatrixHandler.cluster_type === "nrpspks") {
                 svgHandler.updateIntermediates(raichu_output, this.geneMatrixHandler, this.geneMatrixHandler.starterACP);
             }
@@ -369,15 +371,12 @@ class Record {
         else {
 
             if (this.geneMatrixHandler.cluster_type === "terpene") {
-                uiHandler.updateUI(this.geneMatrixHandler);
                 uiHandler.addDragDrop();
                 uiHandler.openFormTerpene();
                 
             }
 
             else {
-                uiHandler.updateUI(this.geneMatrixHandler);
-                uiHandler.addDragDrop();
 
         }
 
@@ -554,7 +553,22 @@ class ApplicationManager {
 class UIHandler {
     constructor() {
         this.dragSrcEl = null;
-        document.getElementById("defaultOpen").click();
+        
+
+    }
+
+    resetUI() {
+        document.getElementById("arrow_container").innerHTML = "";
+        document.getElementById("gene_container").innerHTML = "";
+        document.getElementById("protein_container").innerHTML = "";
+        document.getElementById("domain_container").innerHTML = "";
+        document.getElementById("structure_container").innerHTML = "";
+        document.getElementById("molecular_mass_value").innerHTML = "";
+        document.getElementById("sum_formula_value").innerHTML = "";
+        document.getElementById("module_container").innerHTML = "";
+        document.getElementById("model_gene_container").innerHTML = "";
+        
+
 
     }
 
@@ -580,6 +594,7 @@ class UIHandler {
         else {
             this.displayNotImplemented();
         }
+        
         geneMatrixHandler.addArrowClick();
     }
 
@@ -1305,3 +1320,4 @@ uiHandler.addButtonListeners();
 let svgHandler = new SVGHandler();
 let apiService = new APIService(CONFIG.PORT, svgHandler);
 session.init();
+document.getElementById("defaultOpen").click();
