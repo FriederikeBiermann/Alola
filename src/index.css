@@ -114,7 +114,7 @@ label {
   margin-bottom: 1vh;
   float: left;
   width: 75%;
-  height: 15vh;
+  height: 10vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
 }
 
@@ -126,7 +126,7 @@ label {
   float: left;
 
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
-  height: 15vh;
+  height: 10vh;
   width: 75%;
 }
 
@@ -137,7 +137,7 @@ label {
   float: left;
   padding: 1.5vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
-  height: 54vh;
+  height: 70vh;
   width: 75%;
 }
 
@@ -146,7 +146,7 @@ label {
   margin-bottom: 1vh;
   float: left;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
-  height: 54vh;
+  height: 65vh;
   width: 75%;
 }
 
@@ -375,7 +375,7 @@ input:checked+.slider:before {
 .outerDomainExplorer {
   border-radius: 1vh;
   overflow: auto;
-  height: 42vh;
+  height: 58vh;
   overflow-x: auto;
   background-color: white;
   margin-top: 1%;
@@ -768,4 +768,50 @@ svg text {
 .tooltip::after {
   top: 90%;
   border-bottom-color: #555;
+}
+.tab-container {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.tab {
+  overflow: hidden;
+  background-color: #1F1F1F;
+  border-radius: 0.6vh;
+  width: 75%;
+}
+
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 5px;
+  transition: 0.3s;
+  color: white;
+  font-family: 'Catamaran', sans-serif;
+  font-size: 2vh;
+
+}
+
+.tab button:hover {
+  background-color: #E11839;
+}
+
+.tab button.active {
+  background-color: #E11839;
+}
+
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+#reverse_button {
+  float: right;
+  right: 5vh;
+
 }

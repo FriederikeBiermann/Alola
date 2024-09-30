@@ -272,7 +272,7 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler)
         const domainInfo = gene.modules[moduleIndex].domains[domainIndex];
         if (shortOption === domainInfo.default_option) {
             button.style.backgroundColor = "lightgrey";
-            button.id = `de${button.id}`;
+            //button.id = `de${button.id}`;
         } else if (shortOption === domainInfo.selected_option) {
             button.style.backgroundColor = "#E11839";
         }

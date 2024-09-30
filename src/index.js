@@ -315,7 +315,7 @@ class Record {
 
     renderButtons(buttonElements) {
         // Clear existing content
-        regionsBar = document.getElementById("regionsBar");
+        let regionsBar = document.getElementById("regionsBar");
         regionsBar.innerHTML = '';
 
         // Use DocumentFragment for better performance
@@ -369,18 +369,21 @@ class Record {
         else {
 
             if (this.geneMatrixHandler.cluster_type === "terpene") {
-                console.log("gene matrix", JSON.stringify(this.geneMatrixHandler.geneMatrix));
                 uiHandler.updateUI(this.geneMatrixHandler);
                 uiHandler.addDragDrop();
                 uiHandler.openFormTerpene();
                 
             }
 
+            else {
+                uiHandler.updateUI(this.geneMatrixHandler);
+                uiHandler.addDragDrop();
+
         }
 
 
 
-    }
+    }}
 
     async reverseBGC() {
         if (this.reversed) {
@@ -551,6 +554,7 @@ class ApplicationManager {
 class UIHandler {
     constructor() {
         this.dragSrcEl = null;
+        document.getElementById("defaultOpen").click();
 
     }
 
@@ -570,8 +574,11 @@ class UIHandler {
         if (cluster_type === "terpene") {
             this.updateTerpenes(geneMatrixHandler);
         }
-        else{
+        if (cluster_type === "nrpspks") {
             this.updateDomains(geneMatrixHandler);
+        }
+        else {
+            this.displayNotImplemented();
         }
         geneMatrixHandler.addArrowClick();
     }
@@ -781,6 +788,10 @@ class UIHandler {
 
         $("#Domain_container").html(Terpener.drawCluster(geneMatrixHandler.geneMatrix, 90, 300, geneMatrixHandler.terpeneCyclaseOptions, geneMatrixHandler));
 
+    }
+
+    displayNotImplemented() {
+        $("#Domain_container").innerHTML = "<h1>Not implemented yet, if gene cluster is a RiPP genecluster, press the 'RiPP BGC' button. </h1>";
     }
 
     updateRiPPPrecursorTextarea(translation) {
@@ -1172,6 +1183,21 @@ class UIHandler {
         const formId = formType === 'NRPS' ? 'popupFormNRPS' : 'popupFormPKS';
         document.getElementById(formId).style.display = "none";
     }
+
+    openTab(event, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        event.currentTarget.className += " active";
+    }
+
 
 
 

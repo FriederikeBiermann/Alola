@@ -45,7 +45,6 @@ class GeneMatrixHandler {
         console.log('RiPP Precursor updated:', this.rippPrecursor);
         console.log('Full RiPP Precursor sequence:', this.rippFullPrecursor);
     }
-    
 
     createGeneMatrix() {
         let geneMatrix = [];
@@ -1101,9 +1100,6 @@ class HistoryStack {
         }
     }
 }
-
-
-
 
 class ClusterTypeHandler {
     getClusterType(regionIndex, recordIndex, recordData) {

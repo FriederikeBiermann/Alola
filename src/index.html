@@ -95,32 +95,33 @@
     Please drop 'region.js' files from antiSMASH output
   </div>
 
-  <div id="BGC_explorer">
-    <!-- Biosynthetic gene cluster explorer -->
-    <button type="button" class="start_button tooltip" data-tooltip="Click to reverse the BGC arrangement" id="reverse_button">
-      <strong>Reverse BGC</strong>
-    </button>
-    <div class="heading-container tooltip" id="BGCHeading"
-      data-tooltip="Knock out genes by clicking on them. Hover over them to get more information.">
-      Biosynthetic gene cluster explorer
+<div class="main-container">
+    <div class="right-section">
+      <div id="Gene_explorer">
+        <div class="heading-container">Gene explorer</div>
+        <div id="gene_container">Gene Explorer Content</div>
+      </div>
     </div>
-    <div class="container" id="arrow_container"> </div>
+  <div class="left-section">
+    <div class="tab-container">
+      <div class="tab">
+        <button class="tablinks" onclick="uiHandler.openTab(event, 'BGC_explorer')" id="defaultOpen">BGC Explorer</button>
+        <button class="tablinks" onclick="uiHandler.openTab(event, 'Protein_explorer')">Protein Explorer</button>
+        <button type="button" class="start_button tooltip" data-tooltip="Click to reverse the BGC arrangement"
+          id="reverse_button">
+          <strong>Reverse BGC</strong>
+        </button>
+      </div>
+      <div id="BGC_explorer" class="tabcontent">
+        <div class="container" id="arrow_container">BGC Explorer Content</div>
+      </div>
+      <div id="Protein_explorer" class="tabcontent">
+        <div class="protein-container" id="protein_container">Protein Explorer Content</div>
+      </div>
+    </div>
   </div>
 
-  <!-- ... Gene_explorer section of the page ... -->
-  <div id="Gene_explorer">
-    <div class="heading-container"> Gene explorer</div>
-    <div id="gene_container"></div>
-  </div>
-
-  <!-- ... Protein_explorer section of the page ... -->
-  <div id="Protein_explorer">
-    <div class="heading-container tooltip"
-      data-tooltip="Drag and drop the proteins to change the direction. This might be especially useful when parts of the gene cluster are on the reverse strand. Click on the proteins to knock them out, and click on the domains to knock them out as well.">
-      Protein explorer
-    </div>
-    <div class="protein-container" id="protein_container"> </div>
-  </div>
+</div>
 
   <!-- ... Biosynthetic_model section of the page ... -->
   <div id="Domain_explorer" class="Domain_explorer">
