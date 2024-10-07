@@ -90,7 +90,7 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler)
 
     Domainer.drawModules(moduleMatrix, height, scale);
     Domainer.drawGenes(geneMatrix, height, scale);
-    Domainer.leaveSpaceForTailoring(height * 2, scale);
+    //Domainer.leaveSpaceForTailoring(height * 2, scale);
     Domainer.drawTailoringEnzymes(cluster, geneMatrix, height, scale, geneMatrixHandler);
 
     return container.querySelector("svg");
@@ -568,7 +568,7 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
     innerModelGeneContainer.id = "innerModelGeneContainer_whitespace"
     document.getElementById('model_gene_container')
         .appendChild(innerModelGeneContainer);
-    innerModelGeneContainer.style.width = String(height*2.2) + "px";
+    innerModelGeneContainer.style.width = String(height/10) + "px";
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size = height / 2
 

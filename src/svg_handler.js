@@ -15,9 +15,9 @@ class SVGHandler {
             svgHandler.updateNRPSPKSIntermediateContainer(acp, intermediate, intermediateIndex, carrier_x, max_width, height);
         }
 
-        if (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) {
-            svgHandler.updateTailoringStructure(raichu_output.structureForTailoring);
-        }
+        // if (document.getElementById("innerIntermediateContainer_tailoring_enzymes")) {
+        //     svgHandler.updateTailoringStructure(raichu_output.structureForTailoring);
+        // }
     }
 
     addZoomButtonListeners() {
@@ -97,7 +97,7 @@ class SVGHandler {
         if (this.clusterType === "ripp") {
             this.highlightRippAtom(atom, color, width, shadowId);
         } else {
-            this.highlightOtherAtom(atom, color, width, shadowId);
+            this.highlightOtherAtom(atom, color, width, "intenseGlowShadow");
         }
     }
 
@@ -137,7 +137,8 @@ class SVGHandler {
             "intermediate_drawing_cyclisation_terpene",
             "intermediate_drawing_cyclisation",
             "intermediate_drawing_precursor",
-            "intermediate_drawing_tailored"
+            "intermediate_drawing_tailored",
+            "final_drawing"
         ];
         return validIds.includes(parent.id);
     }
@@ -213,6 +214,7 @@ class SVGHandler {
         let container = document.getElementById("structure_container");
         container.innerHTML = this.formatSVG(raichu_output.svg);
         let drawing = document.getElementById("final_drawing");
+        this.addDropShadowFilterToSVG(drawing);
         drawing.style["max-width"] = "100%";
         drawing.style["max-height"] = "100%";
     }
