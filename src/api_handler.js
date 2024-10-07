@@ -98,23 +98,15 @@ class RiPPHandler extends BGCFetcher {
         if (!raichu_output.hasOwnProperty("Error")) {
             this.processRaichuOutput(raichu_output, geneMatrixHandler);
         }
+        return raichu_output;
     }
 
     processRaichuOutput(raichu_output, geneMatrixHandler) {
         geneMatrixHandler.geneMatrix = OptionCreator.createOptionsDomains(geneMatrixHandler.geneMatrix, JSON.parse(raichu_output.atomsForCyclisation.replaceAll("'", '"')));
         geneMatrixHandler.geneMatrix = OptionCreator.createOptionsTailoringEnzymes(geneMatrixHandler.geneMatrix, raichu_output.tailoringSites);
-        this.updateIntermediates(raichu_output);
     }
 
-    updateIntermediates(raichu_output) {
-        if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor");
-            if (document.getElementById("wildcardProtease").checked || geneMatrixHandler.proteaseOptions) {
-                svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
-            }
-        }
-    }
+
 }
 
 class TerpeneHandler extends BGCFetcher {
@@ -164,8 +156,8 @@ class TerpeneHandler extends BGCFetcher {
     updateIntermediates(raichu_output) {
         if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
             svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing" );
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor", "precursor_drawing");
-            svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+            svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor_terpene", "precursor_drawing");
+            svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_terpene");
         }
     }
 }

@@ -247,8 +247,17 @@ class Record {
         if (this.geneMatrixHandler.cluster_type === "terpene") {
             if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
-                svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor", "precursor_drawing");
-                svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor_terpene", "precursor_drawing");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_terpene");
+            }
+        }
+        if (this.cluster_type === "ripp") {
+            if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
+                if (document.getElementById("wildcardProtease").checked) {
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
+                }
             }
         }
 
@@ -348,7 +357,7 @@ class Record {
 
         //this.addButtonListeners()
         if (result){
-            uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
+            uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler);
 
             if (this.geneMatrixHandler.cluster_type === "terpene") {
                 uiHandler.openFormTerpene();
@@ -364,8 +373,17 @@ class Record {
             if (this.geneMatrixHandler.cluster_type === "terpene") {
                 if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
                     svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
-                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor", "precursor_drawing");
-                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor_terpene", "precursor_drawing");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_terpene");
+                }
+            }
+            if (this.cluster_type === "ripp") {
+                if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
+                    if (document.getElementById("wildcardProtease").checked) {
+                        svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
+                    }
                 }
             }
 
@@ -397,7 +415,7 @@ class Record {
             this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
             this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
             uiHandler.updateUI(this.geneMatrixHandler);
-            uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler.geneMatrix);
+            uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler);
 
             if (this.geneMatrixHandler.cluster_type === "terpene") {
                 uiHandler.openFormTerpene();
@@ -709,7 +727,7 @@ class UIHandler {
         $("#arrow_container").html(Arrower.drawClusterSVG(this.removePaddingBGC(BGCForDisplay), this.viewPortHeight * 0.05, recordData, regionName));
         return BGCForDisplay;}
 
-    addRiPPPrecursorOptions(geneMatrix) {
+    addRiPPPrecursorOptions(geneMatrixHandler) {
         const precursorContainer = document.getElementById("ripp_precursor_selection");
         if (!precursorContainer) {
             console.error("RiPP precursor selection container not found");
@@ -722,7 +740,7 @@ class UIHandler {
         // Create a document fragment to improve performance
         const fragment = document.createDocumentFragment();
 
-        geneMatrix.forEach((gene, geneIndex) => {
+        geneMatrixHandler.geneMatrix.forEach((gene, geneIndex) => {
             const button = document.createElement('button');
             button.className = 'wildcardsubstrate';
             button.type = 'button';
@@ -732,22 +750,13 @@ class UIHandler {
             button.textContent = id;
 
             // Add event listener
-            button.addEventListener('click', () => this.setRiPPPrecursor(geneIndex));
+            button.addEventListener('click', () => geneMatrixHandler.setRiPPPrecursor(geneIndex));
 
             fragment.appendChild(button);
         });
 
         // Append all buttons at once
         precursorContainer.appendChild(fragment);
-    }
-
-    setRiPPPrecursor(geneIndex) {
-        this.rippPrecursorGene = geneIndex;
-        console.log(`RiPP precursor set to gene at index ${geneIndex}`);
-
-        // Fetch and display the gene sequence
-        const geneSequence = this.geneMatrixHandler.getTranslation(geneIndex);
-        this.displayRiPPPrecursorSequence(geneSequence);
     }
 
     displayRiPPPrecursorSequence(sequence) {
@@ -791,13 +800,7 @@ class UIHandler {
     }
 
     updateRiPPs(geneMatrix, BGC, proteaseOptions, cleavageSites, geneMatrixHandler) {
-        geneMatrix.sort((a, b) => a.position - b.position);
-        for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-            if (geneMatrix[geneIndex].displayed == true && geneMatrix[geneIndex].domains.length != 0) {
-                genesForDisplay.orfs.push(BGC.orfs[geneMatrix[geneIndex].position_in_BGC - 1]);
-            }
-        }
-        $("#Domain_container").html(RiPPer.drawCluster(genesForDisplay, geneMatrix, proteaseOptions, this.viewPortHeight * 0.05, 600, cleavageSites, geneMatrixHandler));
+        $("#Domain_container").html(RiPPer.drawCluster(geneMatrix, proteaseOptions, 90, 600, cleavageSites, geneMatrixHandler));
 
     }
 

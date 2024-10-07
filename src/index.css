@@ -684,15 +684,36 @@ svg text {
 }
 .intermediate_drawing_tailoring_ripp{
   position: relative;
-    max-width: 100%;
+    max-width: 60%;
     height: auto;
-    bottom: 6vh;
+    margin: 5vh;
 }
 .intermediate_drawing_precursor {
   position: relative;
-  max-width: 100%;
+  max-width: 60%;
   height: auto;
-  bottom: 6vh;
+  margin: 5vh;
+}
+
+.intermediate_drawing_precursor_terpene {
+  position: relative;
+  max-width: 30%;
+  height: auto;
+  margin: 5vh;
+}
+
+.intermediate_drawing_tailoring_terpene {
+  position: relative;
+  max-width: 30%;
+  height: auto;
+  margin: 5vh;
+}
+
+.intermediate_drawing_cyclisation_terpene {
+  position: relative;
+  max-width: 30%;
+  height: auto;
+  margin: 5vh;
 }
 
 .intermediate_drawing_protease {
@@ -700,6 +721,13 @@ svg text {
   max-width: 100%;
   height: auto;
   bottom: 6vh;
+}
+
+.intermediate_drawing_cleavage {
+  position: relative;
+  max-width: 20%;
+  height: auto;
+  margin: 5vh;
 }
 
 .cleavedProduct {

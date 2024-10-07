@@ -138,7 +138,8 @@ class SVGHandler {
             "intermediate_drawing_cyclisation",
             "intermediate_drawing_precursor",
             "intermediate_drawing_tailored",
-            "final_drawing"
+            "final_drawing",
+            "intermediate_drawing_cyclisation_terpene"
         ];
         return validIds.includes(parent.id);
     }
@@ -271,11 +272,35 @@ class SVGHandler {
     }
 
     reformatSVG(svg, id = null, className = null) {
+        // Remove all whitespace nodes
+        svg.innerHTML = svg.innerHTML.replace(/>\s+</g, '><');
+
+        // Remove unnecessary attributes
+        svg.removeAttribute('xmlns:xlink');
+        svg.removeAttribute('xml:space');
+        svg.removeAttribute('version');
+
+        // Set viewBox based on content
         let bbox = svg.getBBox();
         let viewBox = [bbox.x, bbox.y, bbox.width, bbox.height].join(" ");
         svg.setAttribute("viewBox", viewBox);
+
+        // Remove width and height attributes
+        svg.removeAttribute('width');
+        svg.removeAttribute('height');
+
+        // Set id and class if provided
         if (id) svg.setAttribute('id', id);
         if (className) svg.setAttribute('class', className);
+
+        // Optimize path data
+        let paths = svg.querySelectorAll('path');
+        paths.forEach(path => {
+            let d = path.getAttribute('d');
+            d = d.replace(/\s+/g, ' ').trim(); // Remove extra spaces
+            d = d.replace(/([MmZzLlHhVvCcSsQqTtAa])([^\s])/g, '$1 $2'); // Ensure space after commands
+            path.setAttribute('d', d);
+        });
     }
 
     updateNRPSPKSIntermediateContainer(acp, intermediate, index, carrier_x, max_width, height) {

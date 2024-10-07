@@ -46,6 +46,15 @@ class GeneMatrixHandler {
         console.log('Full RiPP Precursor sequence:', this.rippFullPrecursor);
     }
 
+    setRiPPPrecursor(geneIndex) {
+        this.rippPrecursorGene = geneIndex;
+        console.log(`RiPP precursor set to gene at index ${geneIndex}`);
+
+        // Fetch and display the gene sequence
+        const geneSequence = this.getTranslation(geneIndex);
+        uiHandler.displayRiPPPrecursorSequence(geneSequence);
+    }
+
     createGeneMatrix() {
         let geneMatrix = [];
         for (let geneIndex = 0; geneIndex < this.BGC.orfs.length; geneIndex++) {
@@ -105,9 +114,7 @@ class GeneMatrixHandler {
         // Generate protease options
         let aminoacidsWithNumber = translation.split('').map((aa, index) => aa + (index + 1));
         this.proteaseOptions = aminoacidsWithNumber.map(aa => "Proteolytic cleavage at " + aa);
-
-        this.rippFullPrecursor = translation;
-        this.rippPrecursor = this.rippPrecursor.length > 0 ? this.rippPrecursor : translation.slice(-5);
+        this.rippPrecursor = this.rippPrecursor.length > 0 ? this.rippPrecursor : this.rippFullPrecursor.slice(-5);
         this.reloadGeneCluster();
     }
     
@@ -164,19 +171,8 @@ class GeneMatrixHandler {
 
     changeSelectedOptionCleavageSites(option) {
         this.cleavageSites = [option]
-        let translation = ""
-        // for antismash 7.0 files
-        if (BGCForDisplay["orfs"][rippPrecursorGene].hasOwnProperty("translation")) {
-            translation = BGCForDisplay["orfs"][rippPrecursorGene].translation
-        }
-        // for antismash 6.0 files
-        else {
-            var regExString = new RegExp("(?:QUERY=)((.[\\s\\S]*))(?:&amp;LINK_LOC)", "ig"); //set ig flag for global search and case insensitive
-            var translationSearch = regExString.exec(BGCForDisplay["orfs"][rippPrecursorGene].description);
-            translation = translationSearch[1]; //is the matched group if found
-        }
         let cleavageNumber = parseInt(option.replace(/\D/g, ''));
-        this.rippPrecursor = translation.slice(-cleavageNumber);//
+        this.rippPrecursor = this.rippFullPrecursor.slice(-cleavageNumber);//
         this.removeTailoringEnzymes();
         this.reloadGeneCluster();
     }
@@ -786,8 +782,11 @@ class GeneMatrixHandler {
     }
 
     updateDetailsData(wildcard_gene) {
-        if (this.details_data.hasOwnProperty(this.cluster_type)) {
-            this.details_data[this.cluster_type][this.regionName].orfs.push(wildcard_gene);
+        if (this.cluster_type !== "nrpspks") {
+            return;
+        }
+        if (this.details_data.hasOwnProperty("nrpspks")) {
+            this.details_data["nrpspks"][this.regionName].orfs.push(wildcard_gene);
         } else {
             this.details_data[this.regionName].orfs.push(wildcard_gene);
         }
@@ -954,13 +953,23 @@ class GeneMatrixHandler {
             if (this.cluster_type === "nrpspks") {
                 svgHandler.updateIntermediates(raichu_output, this, this.starterACP);
             }
-            if (this.cluster_type === "terpene") {
-                if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
-                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
-                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor", "precursor_drawing");
-                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailored");
+        if (this.cluster_type === "terpene") {
+            if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor_terpene", "precursor_drawing");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_terpene");
+            }
+        }
+        if (this.cluster_type === "ripp") {
+            if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
+                svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
+                if (document.getElementById("wildcardProtease").checked) {
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
                 }
             }
+        }
+
             uiHandler.addDragDrop(
             );
             this.updateHistory(this.geneMatrix, this.BGC);

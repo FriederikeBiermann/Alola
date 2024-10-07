@@ -8,36 +8,98 @@ var RiPPer = {
     tooltip_id_domain: "RiPPer-tooltip-123"
 };
 
-RiPPer.drawCluster = (function (cluster, geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler){
-    var container = document.getElementById('domain_container')
-    var scale = (function (val) {
+RiPPer.drawArrow = function (width, height, label = null) {
+    const arrowContainer = document.createElement('div');
+    arrowContainer.style.display = 'inline-flex';
+    arrowContainer.style.flexDirection = 'column';
+    arrowContainer.style.alignItems = 'center';
+    arrowContainer.style.justifyContent = 'center';
+    arrowContainer.style.width = width + 'px';
+    arrowContainer.style.height = '100%'; // Take full height of parent
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.style.overflow = "visible"; // Allow content to overflow for label
+
+    // Draw arrow
+    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrow.setAttribute("d", `M0,${height / 2} L${width},${height / 2} M${width - 10},${height / 2 - 5} L${width},${height / 2} L${width - 10},${height / 2 + 5}`);
+    arrow.setAttribute("stroke", "#000000");
+    arrow.setAttribute("stroke-width", "2");
+    arrow.setAttribute("fill", "none");
+    svg.appendChild(arrow);
+
+    // Add label if provided
+    if (label) {
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", width / 2);
+        text.setAttribute("y", height + 20);
+        text.setAttribute("text-anchor", "middle");
+        text.textContent = label;
+        svg.appendChild(text);
+    }
+
+    arrowContainer.appendChild(svg);
+    return arrowContainer;
+};
+
+RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null) {
+    var container = document.createElement('div');
+    container.style.display = 'inline-flex';
+    container.style.alignItems = 'stretch'; // Stretch children to full height
+    container.style.width = String(width) + "px";
+    container.style.height = '100%'; // Take full height of parent
+
+    var innerContainer = document.createElement('div');
+    innerContainer.id = id;
+    innerContainer.style.flex = '1'; // Take remaining space
+    var innerIntermediateContainer = document.createElement('div');
+    innerIntermediateContainer.id = "innerIntermediateContainer_" + id;
+    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring");
+
+    innerContainer.appendChild(innerIntermediateContainer);
+    container.appendChild(innerContainer);
+
+    if (includeArrow) {
+        const arrowWidth = 50; // You can adjust this value
+        const arrowHeight = 30; // You can adjust this value
+        const arrow = RiPPer.drawArrow(arrowWidth, arrowHeight, arrowLabel);
+        container.appendChild(arrow);
+    }
+
+    document.getElementById('domain_container').appendChild(container);
+};
+
+// Example usage within RiPPer.drawCluster
+RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler) {
+    var container = document.getElementById('domain_container');
+    container.style.display = 'flex';
+    container.style.alignItems = 'stretch';
+    container.style.height = height + 'px'; // Set explicit height
+
+    var scale = function (val) {
         return parseInt(val / (1000 / height));
-    })
+    };
+
     document.getElementById('domain_container').innerHTML = "";
     document.getElementById('model_gene_container').innerHTML = "";
-    RiPPer.drawHeadings(height)
-    RiPPer.leaveSpace(space, "precursor", scale)
-    RiPPer.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler)
-    RiPPer.leaveSpace(space, "tailoredProduct", scale)
-    if (document.getElementById("wildcardProtease")
-        .checked || proteaseOptions) {
+
+    RiPPer.drawHeadings(height);
+    RiPPer.leaveSpace(space, "precursor", scale);
+    RiPPer.leaveSpace(50, "arrow1", scale, true, "Tailoring"); // Arrow between precursor and tailoring enzymes
+    RiPPer.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
+    RiPPer.leaveSpace(space, "tailoredProduct", scale);
+
+    if (document.getElementById("wildcardProtease").checked || proteaseOptions) {
+        RiPPer.leaveSpace(50, "arrow2", scale, true, "Cleavage"); // Arrow between tailored product and protease
         RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler);
         RiPPer.leaveSpace(space, "cleavedProduct_space", scale);
     }
 
-    return $(container)
-        .find("svg")[0];
-})
-RiPPer.leaveSpace = (function (width, id, scale) {
-    var innerIntermediateContainer = document.createElement('div');
-    var innerContainer = document.createElement('div');
-    innerContainer.id = id
-    innerIntermediateContainer.id = "innerIntermediateContainer_"+id
-    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring")
-    document.getElementById('domain_container').appendChild(innerContainer);
-    innerContainer.appendChild(innerIntermediateContainer);
-    innerContainer.style.width = String(width) + "px";
-})
+    return $(container).find("svg")[0];
+};
+
 
 RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSites, geneMatrixHandler) {
     var container = document.getElementById('domain_container')
@@ -142,14 +204,14 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
     function createProteaseOptions(proteaseOptions, geneIndex, cleavageSites, innerDropdownContent) {
 
         proteaseOptions.forEach(option => {
-            const button = createOptionButton(option, geneIndex, cleavageSites);
+            const button = createOptionButton(option, geneIndex, cleavageSites, geneMatrixHandler);
             innerDropdownContent.appendChild(button);
         });
 
         return innerDropdownContent;
     }
 
-    function createOptionButton(option, geneIndex, cleavageSites) {
+    function createOptionButton(option, geneIndex, cleavageSites, geneMatrixHandler) {
         const shortOption = getShortOption(option);
         const button = document.createElement('button');
 
@@ -157,7 +219,7 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
         button.textContent = option;
 
         setButtonStyle(button, option, shortOption, cleavageSites);
-        addButtonEventListeners(button, shortOption);
+        addButtonEventListeners(button, shortOption, geneMatrixHandler);
 
         return button;
     }
@@ -178,9 +240,9 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
         }
     }
 
-    function addButtonEventListeners(button, shortOption) {
+    function addButtonEventListeners(button, shortOption, geneMatrixHandler) {
         button.addEventListener('click', () => {
-            this.geneMatrixHandler.changeSelectedOptionCleavageSites(shortOption);
+            geneMatrixHandler.changeSelectedOptionCleavageSites(shortOption);
         });
 
         button.addEventListener('mouseenter', () => {
@@ -193,7 +255,7 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
     }
 
         });
-RiPPer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, scale, geneMatrixHandler) {
+RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneMatrixHandler) {
     var container = document.getElementById('domain_container')
     let size = height / 2
     let indent = 0
