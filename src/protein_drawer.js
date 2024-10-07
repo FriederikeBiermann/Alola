@@ -72,7 +72,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 90, geneMatrix, recordDat
         .innerHTML = "";
     let fixedWidth = 1500;
     var scale = (function (val) {
-        return (val - cluster.start) / (cluster.end - cluster.start) * fixedWidth;
+        return (val) / (cluster.end - cluster.start) * fixedWidth;
     });
     // draw line
     //draw.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({width: 2});
