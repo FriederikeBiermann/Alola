@@ -1,8 +1,10 @@
 /* Copyright 2017 Satria A. Kautsar*/
-var type_colors={
-  "biosynthetic-additional":"grey",
-  "biosynthetic":"white",
-  "other":"#2B2B2B"
+var type_colors = {
+  "biosynthetic-additional": "grey",
+  "biosynthetic": "white",
+  "other": "#2B2B2B",
+  "regulatory": "#025699",
+  "transport": "#025699",
 }
 var Arrower = {
     version: "1.0.0",
@@ -13,10 +15,13 @@ var Arrower = {
     tooltip_id: "arrower-tooltip-1234567890"
 };
 
-Arrower.drawClusterSVG = (function(cluster, height = 40) {
+Arrower.drawClusterSVG = (function(cluster, height = 40, recordData, regionName) {
   var container = document.createElement("div");
   var draw = SVG(container).size('100%', height).group();
-  var scale = (function(val) { return parseInt(val / (1000 / height)); })
+  let fixedWidth = 1500;
+  var scale = (function (val) {
+    return (val) / Math.abs(cluster.end - cluster.start) * fixedWidth;
+  });
 
   // draw line
   draw.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({color: "white",width: 2});
@@ -31,7 +36,7 @@ Arrower.drawClusterSVG = (function(cluster, height = 40) {
         orf_color = orf.color;
       }
       if (orf.hasOwnProperty("type")) {
-        orf_color = type_colors[orf.type]
+        orf_color = type_colors[orf.type];
       }
       var pol = draw.polygon(Arrower.toPointString(Arrower.getArrowPoints(orf, cluster, height, scale)))
 

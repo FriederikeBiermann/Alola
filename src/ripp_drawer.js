@@ -8,38 +8,100 @@ var RiPPer = {
     tooltip_id_domain: "RiPPer-tooltip-123"
 };
 
-RiPPer.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 600, proteaseOptions = null){
-    var container = document.getElementById('domain_container')
-    var scale = (function (val) {
-        return parseInt(val / (1000 / height));
-    })
-    document.getElementById('domain_container').innerHTML = "";
-    document.getElementById('model_gene_container').innerHTML = "";
-    RiPPer.drawHeadings(height)
-    RiPPer.leaveSpace(space, "precursor", scale)
-    RiPPer.drawTailoringEnzymes(geneMatrix, height, scale)
-    RiPPer.leaveSpace(space, "tailoredProduct", scale)
-    if (document.getElementById("wildcardProtease")
-        .checked || proteaseOptions) {
-        RiPPer.drawProtease(height, scale, proteaseOptions);
-        RiPPer.leaveSpace(space, "cleavedProduct", scale);
+RiPPer.drawArrow = function (width, height, label = null) {
+    const arrowContainer = document.createElement('div');
+    arrowContainer.style.display = 'inline-flex';
+    arrowContainer.style.flexDirection = 'column';
+    arrowContainer.style.alignItems = 'center';
+    arrowContainer.style.justifyContent = 'center';
+    arrowContainer.style.width = width + 'px';
+    arrowContainer.style.height = '100%'; // Take full height of parent
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.style.overflow = "visible"; // Allow content to overflow for label
+
+    // Draw arrow
+    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrow.setAttribute("d", `M0,${height / 2} L${width},${height / 2} M${width - 10},${height / 2 - 5} L${width},${height / 2} L${width - 10},${height / 2 + 5}`);
+    arrow.setAttribute("stroke", "#000000");
+    arrow.setAttribute("stroke-width", "2");
+    arrow.setAttribute("fill", "none");
+    svg.appendChild(arrow);
+
+    // Add label if provided
+    if (label) {
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", width / 2);
+        text.setAttribute("y", height + 20);
+        text.setAttribute("text-anchor", "middle");
+        text.textContent = label;
+        svg.appendChild(text);
     }
 
-    return $(container)
-        .find("svg")[0];
-})
-RiPPer.leaveSpace = (function (width, id, scale) {
-    var innerIntermediateContainer = document.createElement('div');
-    var innerContainer = document.createElement('div');
-    innerContainer.id = id
-    innerIntermediateContainer.id = "innerIntermediateContainer_"+id
-    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring")
-    document.getElementById('domain_container').appendChild(innerContainer);
-    innerContainer.appendChild(innerIntermediateContainer);
-    innerContainer.style.width = String(width) + "px";
-})
+    arrowContainer.appendChild(svg);
+    return arrowContainer;
+};
 
-RiPPer.drawProtease = (function ( height = 90, scale, proteaseOptions) {
+RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null) {
+    var container = document.createElement('div');
+    container.style.display = 'inline-flex';
+    container.style.alignItems = 'stretch'; // Stretch children to full height
+    container.style.width = String(width) + "px";
+    container.style.height = '100%'; // Take full height of parent
+
+    var innerContainer = document.createElement('div');
+    innerContainer.id = id;
+    innerContainer.style.flex = '1'; // Take remaining space
+    var innerIntermediateContainer = document.createElement('div');
+    innerIntermediateContainer.id = "innerIntermediateContainer_" + id;
+    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring");
+
+    innerContainer.appendChild(innerIntermediateContainer);
+    container.appendChild(innerContainer);
+
+    if (includeArrow) {
+        const arrowWidth = 50; // You can adjust this value
+        const arrowHeight = 30; // You can adjust this value
+        const arrow = RiPPer.drawArrow(arrowWidth, arrowHeight, arrowLabel);
+        container.appendChild(arrow);
+    }
+
+    document.getElementById('domain_container').appendChild(container);
+};
+
+// Example usage within RiPPer.drawCluster
+RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler) {
+    var container = document.getElementById('domain_container');
+    container.style.display = 'flex';
+    container.style.alignItems = 'stretch';
+    container.style.height = height + 'px'; // Set explicit height
+
+    var scale = function (val) {
+        return parseInt(val / (1000 / height));
+    };
+
+    document.getElementById('domain_container').innerHTML = "";
+    document.getElementById('model_gene_container').innerHTML = "";
+
+    RiPPer.drawHeadings(height);
+    RiPPer.leaveSpace(space, "precursor", scale);
+    RiPPer.leaveSpace(50, "arrow1", scale, true, "Tailoring"); // Arrow between precursor and tailoring enzymes
+    RiPPer.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
+    RiPPer.leaveSpace(space, "tailoredProduct", scale);
+
+    if (document.getElementById("wildcardProtease").checked || proteaseOptions) {
+        RiPPer.leaveSpace(50, "arrow2", scale, true, "Cleavage"); // Arrow between tailored product and protease
+        RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler);
+        RiPPer.leaveSpace(space, "cleavedProduct_space", scale);
+    }
+
+    return $(container).find("svg")[0];
+};
+
+
+RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSites, geneMatrixHandler) {
     var container = document.getElementById('domain_container')
     let size = height /2
     let indent = 0
@@ -119,50 +181,7 @@ RiPPer.drawProtease = (function ( height = 90, scale, proteaseOptions) {
             innerDropdownContent.innerHTML =
                 ""
             if (proteaseOptions){
-            for (let optionIndex = 0; optionIndex <
-                proteaseOptions
-                    .length; optionIndex++) {
-                let option = proteaseOptions[
-                    optionIndex].toString();
-                if (hasNumbers(option) == true) {
-                    short_option = option.split(" ")[option.split(" ").length - 1]
-                }
-                else {
-                    short_option = option
-                }
-
-
-                let optionContent =
-                    "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionCleavageSites(\x22" +
-                short_option +
-                        "\x22);'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                    option +
-                    "</button>";
-                //format default option differently
-                if (option == "No proteolytic cleavage"
-                ) {
-                    optionContent =
-                        "<button id=" + geneIndex + "_" + short_option + " style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOptionCleavageSites('\x22" +
-                        short_option +
-                        "\x22');'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                        option +
-                        "</button>";
-                }
-                //format active option differently
-
-                if (cleavageSites.includes(short_option)
-                ) {
-                    optionContent =
-                        "<button id=" + geneIndex + "_" + short_option + " style= \x22background-color:#E11839; \x22 onclick='changeSelectedOptionCleavageSites('\x22" +
-                        short_option +
-                        "\x22');'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                        option +
-                        "</button>";
-                }
-                innerDropdownContent.innerHTML +=
-                    optionContent
-
-            }}
+                createProteaseOptions(proteaseOptions, "protease", cleavageSites, innerDropdownContent);}
 
 
             var draw = SVG(innerDropdownButton)
@@ -182,11 +201,63 @@ RiPPer.drawProtease = (function ( height = 90, scale, proteaseOptions) {
             }
 
             dom.node.id = "protease"
+    function createProteaseOptions(proteaseOptions, geneIndex, cleavageSites, innerDropdownContent) {
+
+        proteaseOptions.forEach(option => {
+            const button = createOptionButton(option, geneIndex, cleavageSites, geneMatrixHandler);
+            innerDropdownContent.appendChild(button);
+        });
+
+        return innerDropdownContent;
+    }
+
+    function createOptionButton(option, geneIndex, cleavageSites, geneMatrixHandler) {
+        const shortOption = getShortOption(option);
+        const button = document.createElement('button');
+
+        button.id = `${geneIndex}_${shortOption}`;
+        button.textContent = option;
+
+        setButtonStyle(button, option, shortOption, cleavageSites);
+        addButtonEventListeners(button, shortOption, geneMatrixHandler);
+
+        return button;
+    }
+
+    function getShortOption(option) {
+        return hasNumbers(option) ? option.split(" ").pop() : option;
+    }
+
+    function hasNumbers(str) {
+        return /\d/.test(str);
+    }
+
+    function setButtonStyle(button, option, shortOption, cleavageSites) {
+        if (option === "No proteolytic cleavage") {
+            button.style.backgroundColor = 'lightgrey';
+        } else if (cleavageSites.includes(shortOption)) {
+            button.style.backgroundColor = '#E11839';
+        }
+    }
+
+    function addButtonEventListeners(button, shortOption, geneMatrixHandler) {
+        button.addEventListener('click', () => {
+            geneMatrixHandler.changeSelectedOptionCleavageSites(shortOption);
+        });
+
+        button.addEventListener('mouseenter', () => {
+            svgHandler.hoverInAtom(shortOption);
+        });
+
+        button.addEventListener('mouseleave', () => {
+            svgHandler.hoverOutAtom(shortOption);
+        });
+    }
 
         });
-RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
+RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneMatrixHandler) {
     var container = document.getElementById('domain_container')
-    let size = height/2
+    let size = height / 2
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
@@ -195,12 +266,11 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
         .group();
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
-        console.log(gene.tailoringEnzymeStatus)
         if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
             let domainIdentifier = "tailoringEnzyme" + geneMatrix[geneIndex].id.replace(".", "_")
 
             let points = Domainer.getArrowPoints(
-                height/4, height, height, scale)
+                height / 4, height, height, scale)
             let abbreviation = gene.tailoringEnzymeAbbreviation;
 
             // add all the neccesary domain containers
@@ -276,12 +346,11 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
             innerDropdownContent.innerHTML =
                 ""
             options = geneMatrix[geneIndex].options
-            console.log(typeof (options))
             reaction_options = Object.keys(options)
             for (let reactionOptionIndex = 0; reactionOptionIndex <
                 reaction_options.length; reactionOptionIndex++) {
                 let reactionOption = reaction_options[reactionOptionIndex].toString();
-                let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption + "</button>";
+                let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption.replaceAll("_", " ") + "</button>";
                 innerDropdownContent.innerHTML += reactionOptionContent
             }
             for (let reactionOptionIndex = 0; reactionOptionIndex <
@@ -316,56 +385,14 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
                     ""
                 let atomOptions = options[reactionOption]
                 if (atomOptions) {
-                    for (let atomOptionIndex = 0; atomOptionIndex <
-                        atomOptions.length; atomOptionIndex++) {
-                        let atomOption = atomOptions[atomOptionIndex].replaceAll("'", "")
-                        if (atomOption.includes("=")) {
-                            let [atomOption_1, atomOption_2] = atomOption.split("=")
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption_1 + "\x22);hover_in_atom(\x22" + atomOption_2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption_1 + "\x22);hover_out_atom(\x22" + atomOption_2 + "\x22);'>" + atomOption + "</button>";
-
-                        }
-                        else {
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
-                        }
-                    }
+                    createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler);
                 }
 
-                // "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionTailoring(geneMatrix," +
-                // geneIndex + ",\x22" +
-                // short_option +
-                // "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                // option +
-                // "</button>";
-                //format default option differently
-                // if (  geneMatrix[geneIndex].options[
-                //         optionIndex] ==
-                //       geneMatrix[geneIndex].default_option
-                // ) {
-                //     optionContent =
-                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                //         geneIndex +
-                //         ",\x22" +
-                //           short_option+
-                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
-                //           option +
-                //         "</button>";
-                // }
-                // //format active option differently
-
-                // if (  toString(geneMatrix[geneIndex].selected_option).includes(short_option)
-                // ) {
-                //     optionContent =
-                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:#E11839; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                //         geneIndex +
-                //         ",\x22" +
-                //           short_option+
-                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
-                //           option +
-                //         "</button>";
-                // }
             }
+
+
+
+
             let x = 0;
             if (points["0"].x > points["4"].x) {
                 x = points["4"].x
@@ -385,13 +412,48 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
                 .stroke({
                     width: 2, color: outline
                 });
-            if (size > height/4) {
-                var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT").replaceAll("reductase", "RED")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
+            if (size > height / 4) {
+                var text = draw.text(abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
-            dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
+
+            dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id.replace(".", "_")
+
         }
     }
+    function createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler) {
+        atomOptions.forEach(atomOption => {
+            const button = document.createElement('button');
+            const atomOptionCleaned = atomOption.replaceAll(" ", "");
+            button.id = `${geneIndex}_${reactionOption.replaceAll(" ", "")}${atomOptionCleaned}`;
+            button.textContent = atomOptionCleaned;
+
+            button.addEventListener('click', () => {
+                geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
+            });
+
+            if (atomOption.includes(",")) {
+                const [atomOption1, atomOption2] = atomOption.split(",").map(opt => opt.replaceAll(" ", ""));
+
+                button.addEventListener('mouseenter', () => {
+                    svgHandler.hoverInAtom(atomOption1);
+                    svgHandler.hoverInAtom(atomOption2);
+                });
+
+                button.addEventListener('mouseout', () => {
+                    svgHandler.hoverOutAtom(atomOption1);
+                    svgHandler.hoverOutAtom(atomOption2);
+                });
+            } else {
+                button.addEventListener('mouseenter', () => svgHandler.hoverInAtom(atomOptionCleaned));
+                button.addEventListener('mouseout', () => svgHandler.hoverOutAtom(atomOptionCleaned));
+            }
+
+            innerDropdownContainer_folded_1.appendChild(button);
+        });
+    }
+
 });
+
 RiPPer.drawHeadings = (function (height, space = 600) {
     headingHeigth = height/3
     document.getElementById('module_container')

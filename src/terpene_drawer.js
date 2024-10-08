@@ -8,34 +8,105 @@ var Terpener = {
     tooltip_id_domain: "Terpener-tooltip-123"
 };
 
-Terpener.drawCluster = (function (cluster, geneMatrix, height = 90 , space = 300){
-    var container = document.getElementById('domain_container')
-    var scale = (function (val) {
+Terpener.drawArrow = function (width, height, label = null) {
+    const arrowContainer = document.createElement('div');
+    arrowContainer.style.display = 'inline-flex';
+    arrowContainer.style.flexDirection = 'column';
+    arrowContainer.style.alignItems = 'center';
+    arrowContainer.style.justifyContent = 'center';
+    arrowContainer.style.width = width + 'px';
+    arrowContainer.style.height = '100%';
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", height);
+    svg.style.overflow = "visible";
+
+    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrow.setAttribute("d", `M0,${height / 2} L${width},${height / 2} M${width - 10},${height / 2 - 5} L${width},${height / 2} L${width - 10},${height / 2 + 5}`);
+    arrow.setAttribute("stroke", "#000000");
+    arrow.setAttribute("stroke-width", "2");
+    arrow.setAttribute("fill", "none");
+    svg.appendChild(arrow);
+
+    if (label) {
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        text.setAttribute("x", width / 2);
+        text.setAttribute("y", height + 20);
+        text.setAttribute("text-anchor", "middle");
+        text.textContent = label;
+        svg.appendChild(text);
+    }
+
+    arrowContainer.appendChild(svg);
+    return arrowContainer;
+};
+
+
+Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null) {
+    var container = document.createElement('div');
+    container.style.display = 'inline-flex';
+    container.style.alignItems = 'stretch';
+    container.style.width = String(width) + "px";
+    container.style.height = '50%';
+
+    var innerContainer = document.createElement('div');
+    innerContainer.id = id;
+    innerContainer.style.flex = '1';
+    var innerIntermediateContainer = document.createElement('div');
+    innerIntermediateContainer.id = "innerIntermediateContainer_" + id;
+    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring");
+
+    innerContainer.appendChild(innerIntermediateContainer);
+    container.appendChild(innerContainer);
+
+    if (includeArrow) {
+        const arrowWidth = 50; // You can adjust this value
+        const arrowHeight = 30; // You can adjust this value
+        const arrow = Terpener.drawArrow(arrowWidth, arrowHeight, arrowLabel);
+        container.appendChild(arrow);
+    }
+
+    document.getElementById('domain_container').appendChild(container);
+};
+
+
+Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCyclaseOptions, geneMatrixHandler) {
+    var container = document.getElementById('domain_container');
+    // container.style.display = 'flex';
+    // container.style.alignItems = 'stretch';
+    container.style.height = height + 'px';
+
+    var scale = function (val) {
         return parseInt(val / (1000 / height));
-    })
+    };
+
     document.getElementById('domain_container').innerHTML = "";
     document.getElementById('model_gene_container').innerHTML = "";
-    Terpener.drawHeadings(height, space)
-    Terpener.leaveSpace(space, "precursor", scale)
-    Terpener.drawCyclase(height, scale)
-    Terpener.leaveSpace(space, "cyclizedProduct", scale)
-    Terpener.drawTailoringEnzymes(geneMatrix, height, scale)
-    Terpener.leaveSpace(space, "tailoredProduct", scale)
-    return $(container)
-        .find("svg")[0];
-})
-Terpener.leaveSpace = (function (width, id, scale) {
-    var innerIntermediateContainer = document.createElement('div');
-    var innerContainer = document.createElement('div');
-    innerContainer.id = id
-    innerIntermediateContainer.id = "innerIntermediateContainer_"+id
-    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring")
-    document.getElementById('domain_container').appendChild(innerContainer);
-    innerContainer.appendChild(innerIntermediateContainer);
-    innerContainer.style.width = String(width) + "px";
-})
 
-Terpener.drawCyclase = (function ( height = 90, scale) {
+    Terpener.drawHeadings(height, space);
+
+    // Precursor section
+    Terpener.leaveSpace(space, "precursor", scale);
+
+    // Arrow between Precursor and Cyclization
+    Terpener.leaveSpace(50, "arrow1", scale, true, "Cyclization");
+
+    // Cyclization section
+    Terpener.drawCyclase(height, scale, terpeneCyclaseOptions, geneMatrixHandler);
+    Terpener.leaveSpace(space, "cyclizedProduct", scale);
+
+    // Arrow between Cyclization and Tailoring
+    Terpener.leaveSpace(50, "arrow2", scale, true, "Tailoring");
+
+    // Tailoring section
+    Terpener.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
+    Terpener.leaveSpace(space, "tailoredProduct", scale);
+
+    return $(container).find("svg")[0];
+};
+Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, geneMatrixHandler) {
+    console.log(terpeneCyclaseOptions)
     var container = document.getElementById('domain_container')
     let size = height /2
     let indent = 0
@@ -153,29 +224,11 @@ Terpener.drawCyclase = (function ( height = 90, scale) {
         innerDropdownContainer_folded_1.innerHTML =
             ""
         let atomOptions = terpeneCyclaseOptions[reactionOption]
-        if (atomOptions) {
-            for (let atomOptionIndex = 0; atomOptionIndex <
-                atomOptions.length; atomOptionIndex++) {
-                console.log(typeof (atomOptions[atomOptionIndex]))
-                let atomOption = atomOptions[atomOptionIndex]
-                if (!reactionOption.includes("Cyclization")) {
-                if (atomOption.includes("=")) {
-                    let [atomOption_1, atomOption_2] = atomOption.split("=")
-                    innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                        + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption_1 + "\x22);hover_in_atom(\x22" + atomOption_2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption_1 + "\x22);hover_out_atom(\x22" + atomOption_2 + "\x22);'>" + atomOption + "</button>";
-
-                }
-                else {
-                    innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                        + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
-                }
-            }
-            else{
-                    innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                        + " onclick='changeCyclization(\x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
-
-            }
-        }}}
+        console.log(atomOptions)
+        if (atomOptions.length > 0) {
+            createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler)
+            
+        }}
 
 
             var draw = SVG(innerDropdownButton)
@@ -196,25 +249,58 @@ Terpener.drawCyclase = (function ( height = 90, scale) {
 
             dom.node.id = "terpeneCyclase"
 
+        function createButtons(atomOptions, geneIndex, reactionOption, container, geneMatrixHandler, svgHandler) {
+            atomOptions.forEach(atomOption => {
+                if (Array.isArray(atomOption)) {
+                    atomOption = atomOption.join(" ");}
+                const button = document.createElement('button');
+                const atomOptionCleaned = atomOption.replace(/\s/g, '');
+
+                button.id = `${geneIndex}_${reactionOption.replace(/\s/g, '_')}${atomOptionCleaned}`;
+                button.textContent = atomOptionCleaned;
+
+                if (reactionOption.includes("Cyclization")) {
+                    button.onclick = () => geneMatrixHandler.changeCyclization(atomOptionCleaned);
+                } else {
+                    button.onclick = () => geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
+                }
+
+                if (atomOption.includes("=")) {
+                    const [atomOption1, atomOption2] = atomOption.split("=").map(opt => opt.trim());
+                    button.onmouseenter = () => {
+                        svgHandler.hoverInAtom(atomOption1);
+                        svgHandler.hoverInAtom(atomOption2);
+                    };
+                    button.onmouseout = () => {
+                        svgHandler.hoverOutAtom(atomOption1);
+                        svgHandler.hoverOutAtom(atomOption2);
+                    };
+                } else {
+                    button.onmouseenter = () => svgHandler.hoverInAtom(atomOptionCleaned);
+                    button.onmouseout = () => svgHandler.hoverOutAtom(atomOptionCleaned);
+                }
+
+                container.appendChild(button);
+            });
+        }
+
         });
-Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
+Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneMatrixHandler) {
     var container = document.getElementById('domain_container')
-    let size = height/2
+    let size = height / 2
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
     var line_svg = SVG(container)
         .size('100%', height)
         .group();
-    console.log(geneMatrix)
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
-        console.log(gene.tailoringEnzymeStatus)
         if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
             let domainIdentifier = "tailoringEnzyme" + geneMatrix[geneIndex].id.replace(".", "_")
 
             let points = Domainer.getArrowPoints(
-                height/4, height, height, scale)
+                height / 4, height, height, scale)
             let abbreviation = gene.tailoringEnzymeAbbreviation;
 
             // add all the neccesary domain containers
@@ -294,7 +380,7 @@ Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
             for (let reactionOptionIndex = 0; reactionOptionIndex <
                 reaction_options.length; reactionOptionIndex++) {
                 let reactionOption = reaction_options[reactionOptionIndex].toString();
-                let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption + "</button>";
+                let reactionOptionContent = "<button class=dropdown_button_folded id=button" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + ">" + reactionOption.replaceAll("_", " ") + "</button>";
                 innerDropdownContent.innerHTML += reactionOptionContent
             }
             for (let reactionOptionIndex = 0; reactionOptionIndex <
@@ -329,57 +415,14 @@ Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
                     ""
                 let atomOptions = options[reactionOption]
                 if (atomOptions) {
-                    for (let atomOptionIndex = 0; atomOptionIndex <
-                        atomOptions.length; atomOptionIndex++) {
-                        let atomOption = atomOptions[atomOptionIndex].replaceAll("'", "")
-                        if (!reactionOption.includes("Cyclization")){
-                        
-                            let [atomOption_1, atomOption_2] = atomOption.split("=")
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption_1 + "\x22);hover_in_atom(\x22" + atomOption_2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption_1 + "\x22);hover_out_atom(\x22" + atomOption_2 + "\x22);'>" + atomOption + "</button>";
-
-                        }
-                        else {
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "_") + atomOption
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption + "\x22);'>" + atomOption + "</button>";
-                        }
-                }
+                    createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler);
                 }
 
-                // "<button id=" + geneIndex + "_" + short_option + " onclick='changeSelectedOptionTailoring(geneMatrix," +
-                // geneIndex + ",\x22" +
-                // short_option +
-                // "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                // option +
-                // "</button>";
-                //format default option differently
-                // if (  geneMatrix[geneIndex].options[
-                //         optionIndex] ==
-                //       geneMatrix[geneIndex].default_option
-                // ) {
-                //     optionContent =
-                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                //         geneIndex +
-                //         ",\x22" +
-                //           short_option+
-                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
-                //           option +
-                //         "</button>";
-                // }
-                // //format active option differently
-
-                // if (  toString(geneMatrix[geneIndex].selected_option).includes(short_option)
-                // ) {
-                //     optionContent =
-                //         "<button id="+geneIndex  + "_"+short_option+" style= \x22background-color:#E11839; \x22 onclick='changeSelectedOptionTailoring(geneMatrix," +
-                //         geneIndex +
-                //         ",\x22" +
-                //           short_option+
-                //         "\x22,"+optionIndex+");'   onmouseenter='hover_in_atom(\x22"+ short_option +"\x22);' onmouseout='hover_out_atom(\x22"+short_option +"\x22);'>" +
-                //           option +
-                //         "</button>";
-                // }
             }
+
+
+
+
             let x = 0;
             if (points["0"].x > points["4"].x) {
                 x = points["4"].x
@@ -399,13 +442,48 @@ Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale) {
                 .stroke({
                     width: 2, color: outline
                 });
-            if (size > height/4) {
-                var text = draw.text(abbreviation.replaceAll("methyltransferase", "MT").replaceAll("reductase", "RED")).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
+            if (size > height / 4) {
+                var text = draw.text(abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
             }
-            dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id
+
+            dom.node.id = "tailoringEnzyme_" + geneMatrix[geneIndex].id.replace(".", "_")
+
         }
     }
+    function createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler) {
+        atomOptions.forEach(atomOption => {
+            const button = document.createElement('button');
+            const atomOptionCleaned = atomOption.replaceAll(" ", "");
+            button.id = `${geneIndex}_${reactionOption.replaceAll(" ", "")}${atomOptionCleaned}`;
+            button.textContent = atomOptionCleaned;
+
+            button.addEventListener('click', () => {
+                geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
+            });
+
+            if (atomOption.includes(",")) {
+                const [atomOption1, atomOption2] = atomOption.split(",").map(opt => opt.replaceAll(" ", ""));
+
+                button.addEventListener('mouseenter', () => {
+                    svgHandler.hoverInAtom(atomOption1);
+                    svgHandler.hoverInAtom(atomOption2);
+                });
+
+                button.addEventListener('mouseout', () => {
+                    svgHandler.hoverOutAtom(atomOption1);
+                    svgHandler.hoverOutAtom(atomOption2);
+                });
+            } else {
+                button.addEventListener('mouseenter', () => svgHandler.hoverInAtom(atomOptionCleaned));
+                button.addEventListener('mouseout', () => svgHandler.hoverOutAtom(atomOptionCleaned));
+            }
+
+            innerDropdownContainer_folded_1.appendChild(button);
+        });
+    }
+
 });
+
 Terpener.drawHeadings = (function (height, space = 600) {
     headingHeigth = height/3
     document.getElementById('module_container')

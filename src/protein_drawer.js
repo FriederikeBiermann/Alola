@@ -64,13 +64,16 @@ var Proteiner = {
     tooltip_id: "Proteiner-tooltip-1234567890",
     tooltip_id_protein: "Proteiner-tooltip-123"
 };
-Proteiner.drawClusterSVG = (function(cluster, height = 90) {
+Proteiner.drawClusterSVG = (function(cluster, height = 90, geneMatrix, recordData) {
+    console.log("Drawing cluster");
+    console.log(geneMatrix);
     var container = document.createElement("div");
     document.getElementById('protein_container')
         .innerHTML = "";
-    var scale = (function(val) {
-        return parseInt(val / (1000 / height));
-    })
+    let fixedWidth = 1500;
+    var scale = (function (val) {
+        return (val) / (cluster.end - cluster.start) * fixedWidth;
+    });
     // draw line
     //draw.line(0, parseInt(height / 2), scale(cluster.end - cluster.start), parseInt(height / 2)).stroke({width: 2});
     var width = scale(cluster.end - cluster.start);

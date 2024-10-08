@@ -70,430 +70,234 @@ var Domainer = {
     tooltip_id: "Domainer-tooltip-1234567890",
     tooltip_id_domain: "Domainer-tooltip-123"
 };
-Domainer.drawClusterSVG = (function (cluster, height = 90) {
-    var container = document.getElementById('domain_container')
-    var line_svg = SVG(container)
-        .size('100%', height)
-        .group();
+Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler) 
+{
+    let moduleMatrix = geneMatrixHandler.moduleMatrix;
+    let geneMatrix = geneMatrixHandler.geneMatrix;
+    let recordData = geneMatrixHandler.recordData;
+    const container = document.getElementById('domain_container');
     container.innerHTML = "";
-    var scale = (function (val) {
-        return parseInt(val / (1000 / height));
-    })
-    //draw line
-    line_svg.line(0, parseInt(height / 2), scale(cluster.end - cluster.start),
-        parseInt(height / 2))
-        .stroke({
-            color: "white",
-            width: 2
+
+    const scale = val => parseInt(val / (1000 / height));
+    const width = scale(cluster.end - cluster.start);
+
+
+    if (cluster.orfs) {
+        drawOrfs(cluster.orfs, height, scale, geneMatrix);
+    }
+
+    finalizeSvg(container);
+
+    Domainer.drawModules(moduleMatrix, height, scale);
+    Domainer.drawGenes(geneMatrix, height, scale);
+    //Domainer.leaveSpaceForTailoring(height * 2, scale);
+    Domainer.drawTailoringEnzymes(cluster, geneMatrix, height, scale, geneMatrixHandler);
+
+    return container.querySelector("svg");
+
+    function drawOrfs(orfs, height, scale, geneMatrix) {
+        const indentSteps = height / 6;
+        orfs.forEach(orf => {
+            if (orf.domains) {
+                drawDomains(orf, orf.domains, height, scale, geneMatrix, indentSteps);
+            }
         });
-    var width = scale(cluster.end - cluster.start);
-    let indentSteps = height/6
-    let indent = 0
-    if (cluster.hasOwnProperty("orfs")) {
-        // draw domains
-        for (var i in cluster.orfs) {
-            var orf = cluster.orfs[i];
-            if (orf.hasOwnProperty("domains")) {
-                // draw domains
-                for (var j in orf.domains) {
-                    var numberOfDomains = orf.domains.length
-                    var domain = orf.domains[j];
-                    var color = "";
-                    var opacity = "1"
-                    if (domain.hasOwnProperty("type")) {
-                        if (colour_fill_dict.hasOwnProperty(domain.type)) {
-                            color = colour_fill_dict[domain.type];
-                        }
-                        else {
-                            color = "#0486F1"
-                        }
-                        if (colour_outline_dict.hasOwnProperty(domain.type)) {
-                            outline = colour_outline_dict[domain.type];
-                        }
-                        else {
-                            outline = "#025AA1";
-                        }
-                    }
-                    else {
-                        color = "#0486F1";
-                        outline = "#025AA1"
-                    }
-                    let geneIndex = 0
-                    let domainIdentifier = ""
-                    let size = height/ 2
-                    let gene_size = 0
-                    let points = ""
-                    let abbreviation = ""
-                    for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-                        if (geneMatrix[geneIndex].id == orf.locus_tag) {
-                            if (!(geneMatrix[geneIndex].hasOwnProperty(
-                                "modules")) ) {
-                                if (biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic")){
-                                geneMatrix[geneIndex].modules = [{
-                                    domains: geneMatrix[
-                                        geneIndex].domains
-                                }]
-                            }
-                        else{
-                            continue
-                        }}
+    }
 
-                            for (let moduleIndex = 0; moduleIndex <
-                                geneMatrix[geneIndex].modules.length; moduleIndex++
-                            ) {
-                                let moduleLength = 0
+    function drawDomains(orf, domains, height, scale, geneMatrix, indentSteps) {
+        domains.forEach(domain => {
+            const domainData = getDomainData(domain, orf, geneMatrix);
+            if (domainData) {
+                createDomainElements(domainData, height, scale, indentSteps);
+            }
+        });
+    }
 
-                                for (let domainIndex = 0; domainIndex <
-                                    geneMatrix[geneIndex].modules[
-                                        moduleIndex].domains.length; domainIndex++
-                                ) {
-                                    if (geneMatrix[geneIndex].modules[
-                                        moduleIndex].domains[
-                                        domainIndex].start ==
-                                        domain.start) {
+    function getDomainData(domain, orf, geneMatrix) {
+        const geneIndex = geneMatrix.findIndex(gene => gene.id === orf.locus_tag);
+        if (geneIndex === -1) return null;
 
-                                        domainIdentifier = geneMatrix[
-                                            geneIndex].modules[
-                                            moduleIndex].domains[
-                                            domainIndex].identifier.replace(".", "_")
+        const gene = geneMatrix[geneIndex];
+        if ((!gene.modules || gene.modules.length === 0) && !shouldCreateModule(gene)) {
+            return null;
+        }
 
-                                        points = Domainer.getDomainPoints(
-                                            domain, orf, cluster,
-                                            height, scale)
-                                        // declare color if ko
-                                        if (geneMatrix[geneIndex].modules[
-                                            moduleIndex].domains[
-                                            domainIndex].ko == true) { opacity = "0.5" }
-                                        //declare size of balls
-                                        if (geneMatrix[geneIndex].modules[
-                                            moduleIndex].domains[
-                                            domainIndex].type.includes(
-                                                "term") || geneMatrix[
-                                                    geneIndex].modules[
-                                                    moduleIndex].domains[
-                                                    domainIndex].type.includes(
-                                                        "ACP") || geneMatrix[
-                                                            geneIndex].modules[
-                                                            moduleIndex].domains[
-                                                            domainIndex].type.includes(
-                                                                "PP") || geneMatrix[
-                                                                    geneIndex].modules[
-                                                                    moduleIndex].domains[
-                                                                    domainIndex].type.includes(
-                                                                        "PCP") || geneMatrix[
-                                                                            geneIndex].modules[
-                                                                            moduleIndex].domains[
-                                                                            domainIndex].type.includes(
-                                                                                "docking")) {
-                                            size = height/4;
+        if (!gene.modules || gene.modules.length === 0) {
+            gene.modules = [{ domains: gene.domains }];
+        }
 
-                                        }
-                                        else {
-                                            abbreviation = domain.abbreviation
-                                        }
-                                        // add size for module length
-                                        geneMatrix[geneIndex].modules[
-                                            moduleIndex].lengthVisualisation +=
-                                            size
-                                        let cleanedLength = geneMatrix[
-                                            geneIndex].modules[
-                                            moduleIndex].domains.length
-                                        let cleanedDomainIndex =
-                                            domainIndex
-                                        if (JSON.stringify(geneMatrix[
-                                            geneIndex].modules[
-                                            moduleIndex].domains)
-                                            .includes("Nterm")) {
-                                            cleanedLength--
-                                            cleanedDomainIndex--
-                                        }
-                                        if (JSON.stringify(geneMatrix[
-                                            geneIndex].modules[
-                                            moduleIndex].domains)
-                                            .includes("Cterm")) {
-                                            cleanedLength--
-                                        }
-                                        if (JSON.stringify(geneMatrix[
-                                            geneIndex].modules[
-                                            moduleIndex].domains)
-                                            .includes("Thioesterase")) {
-                                            cleanedLength--
-                                        }
-                                        // declare indent for spaghetti diagram
-                                        if (cluster_type != "nrps") {
-                                            if ((cleanedDomainIndex == 2 ||
-                                                cleanedDomainIndex ==
-                                                cleanedLength - 2) &&
-                                                cleanedLength > 4) {
-                                                indent = indentSteps
-                                            }
-                                            else if ((cleanedDomainIndex ==
-                                                3 || cleanedDomainIndex ==
-                                                cleanedLength - 3) &&
-                                                cleanedLength > 4) {
-                                                indent = indentSteps * 2
-                                            }
-                                            else {
-                                                indent = 0
-                                            }
-                                        }
-                                        else {
-                                            indent = 0
-                                        }
-
-                                        // add all the neccesary domain containers
-                                        var innerContainer = document.createElement(
-                                            'div');
-                                        innerContainer.id =
-                                            "innerdomainContainer" +
-                                            domainIdentifier
-                                        var innerDropdownContainer =
-                                            document.createElement(
-                                                'div');
-                                        innerDropdownContainer.id =
-                                            "innerDropdownContainer" +
-                                            domainIdentifier
-                                        var innerIntermediateContainer =
-                                            document.createElement(
-                                                'div');
-                                        innerIntermediateContainer.id =
-                                            "innerIntermediateContainer" +
-                                            domainIdentifier
-                                        var innerDropdownButton =
-                                            document.createElement(
-                                                'button');
-                                        innerDropdownButton.id =
-                                            "innerDropdownButton" +
-                                            domainIdentifier
-                                        var innerDropdownContent =
-                                            document.createElement(
-                                                'div');
-                                        innerDropdownContent.id =
-                                            "innerDropdownContent" +
-                                            domainIdentifier
-                                        innerContainer.style.width =
-                                            String(size - 10) + "px"
-                                        document.getElementById(
-                                            'domain_container')
-                                            .appendChild(innerContainer);
-                                        document.getElementById(
-                                            'innerdomainContainer' +
-                                            domainIdentifier)
-                                            .setAttribute("class",
-                                                "box");
-                                        document.getElementById(
-                                            'innerdomainContainer' +
-                                            domainIdentifier)
-                                            .appendChild(
-                                                innerDropdownContainer);
-                                        document.getElementById(
-                                            'innerdomainContainer' +
-                                            domainIdentifier)
-                                            .appendChild(
-                                                innerIntermediateContainer
-                                            );
-                                        document.getElementById(
-                                            "innerIntermediateContainer" +
-                                            domainIdentifier)
-                                            .setAttribute("class",
-                                                "intermediateContainer"
-                                            );
-                                        document.getElementById(
-                                            "innerDropdownContainer" +
-                                            domainIdentifier)
-                                            .setAttribute("class",
-                                                "dropdown");
-                                        document.getElementById(
-                                            'innerDropdownContainer' +
-                                            domainIdentifier)
-                                            .appendChild(
-                                                innerDropdownButton);
-                                        document.getElementById(
-                                            "innerDropdownButton" +
-                                            domainIdentifier)
-                                            .setAttribute("class",
-                                                "dropbtn");
-                                        document.getElementById(
-                                            'innerDropdownContainer' +
-                                            domainIdentifier)
-                                            .appendChild(
-                                                innerDropdownContent);
-                                        document.getElementById(
-                                            "innerDropdownContent" +
-                                            domainIdentifier)
-                                            .setAttribute("class",
-                                                "dropdown-content");
-                                        innerDropdownContent.innerHTML =
-                                            ""
-                                        geneMatrix[geneIndex].modules[
-                                            moduleIndex].domains[
-                                            domainIndex].domainOptions = geneMatrix[geneIndex].modules[
-                                                moduleIndex].domains[
-                                                domainIndex].domainOptions.sort((a, b) => a.localeCompare(b)).sort(function (a, b) {
-                                                    return a.length - b.length;
-                                                });
-
-                                        for (let optionIndex = 0; optionIndex <
-                                            geneMatrix[geneIndex].modules[
-                                                moduleIndex].domains[
-                                                domainIndex].domainOptions
-                                                .length; optionIndex++) {
-                                            let option = geneMatrix[geneIndex].modules[
-                                                moduleIndex].domains[
-                                                domainIndex].domainOptions[
-                                                optionIndex].toString();
-                                            if (hasNumbers(option) == true) {
-                                                short_option = option.split(" ")[option.split(" ").length - 1]
-                                            }
-                                            else {
-                                                short_option = option
-                                            }
-
-
-                                            let optionContent =
-                                                "<button id=" + geneIndex + '_' + moduleIndex + "_" +
-                                                domainIndex + "_" + optionIndex + " onclick='changeSelectedOption(geneMatrix," +
-                                                geneIndex + ',' + moduleIndex + "," +
-                                                domainIndex + ",\x22" +
-                                                short_option +
-                                                "\x22," + optionIndex + ");'  onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                                                option.replaceAll("_", " ") +
-                                                "</button>";
-                                            //format default option differently
-
-                                            if (short_option == geneMatrix[geneIndex].modules[
-                                                moduleIndex].domains[
-                                                domainIndex].default_option
-                                            ) {
-                                                optionContent =
-                                                    "<button id=de" + geneIndex + '_' + moduleIndex + "_" +
-                                                    domainIndex + "_" + optionIndex + " style= \x22background-color:lightgrey; \x22 onclick='changeSelectedOption(geneMatrix," +
-                                                    geneIndex + ',' + moduleIndex + "," +
-                                                    domainIndex +
-                                                    ",\x22" +
-                                                    short_option +
-                                                    "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                                                    option +
-                                                    "</button>";
-                                            }
-                                            if (short_option == geneMatrix[geneIndex].modules[
-                                                moduleIndex].domains[
-                                                domainIndex].selected_option
-                                            ) {
-                                                optionContent =
-                                                    "<button id=" + geneIndex + '_' + moduleIndex + "_" +
-                                                    domainIndex + "_" + optionIndex + " style= \x22background-color:#E11839; \x22 onclick='changeSelectedOption(geneMatrix," +
-                                                    geneIndex + ',' + moduleIndex + "," +
-                                                    domainIndex +
-                                                    ",\x22," +
-                                                    short_option +
-                                                    "\x22," + optionIndex + ");'   onmouseenter='hover_in_atom(\x22" + short_option + "\x22);' onmouseout='hover_out_atom(\x22" + short_option + "\x22);'>" +
-                                                    option +
-                                                    "</button>";
-                                            }
-                                            innerDropdownContent.innerHTML +=
-                                                optionContent
-
-                                        }
-
-
-                                        break
-
-                                    }
-                                }
-                                // create module visualization
-                                var innerModuleContainer = document.createElement(
-                                    'div');
-                                innerModuleContainer.id =
-                                    "innerModuleContainer" + geneIndex +
-                                    "_" + moduleIndex;
-                            }
-                            let x = 0;
-                            if (points["0"].x > points["4"].x) {
-                                x = points["4"].x
-                            }
-                            else {
-                                x = points["0"].x
-                            }
-                            var draw = SVG(innerDropdownButton)
-                                .size(String(size) + "px", height)
-                                .group();
-                            var dom = draw.rect(size - 2, size - 2)
-                                .x(2)
-                                .y(height - indent - (size + 2))
-                                .rx("200%")
-                                .ry("200%")
-                                .fill(color)
-                                .opacity(opacity)
-                                .stroke({
-                                    width: 2, color: outline
-                                });
-                            if (size > height/4) {
-                                var text = draw.text(domain.abbreviation).x(size / 2 - 1 + 2).y(height - indent - (size / 2 + 1) - 7)
-                            }
-
-                            dom.node.id = "domain" + domainIdentifier.replace(".", "_")
-                            $(dom.node)
-                                .mouseover({
-                                    domain: domain
-                                }, function (handler) {
-                                    $("#" + Domainer.tooltip_id)
-                                        .css("display", "none")
-                                    var start = handler.data.domain
-                                        .start;
-                                    var end = handler.data.domain.end;
-                                    let contentTooltip = ""
-                                    Domainer.showToolTip("Domain: " +
-                                        handler.data.domain.abbreviation +
-                                        " (" + handler.data.domain
-                                            .type + ")" + "<br/>" +
-                                        start + " - " + end,
-                                        handler);
-                                    $(handler.target)
-                                        .css("stroke-width", "3px");
-
-                                    handler.stopPropagation();
-                                });
-                            $(dom.node)
-                                .mouseleave(function (handler) {
-                                    $(handler.target)
-                                        .css("stroke-width", "2px");
-
-                                    $("#" + Domainer.tooltip_id)
-                                        .css("display", "none")
-                                });
-                        }
-                    }
-                }
+        for (let moduleIndex = 0; moduleIndex < gene.modules.length; moduleIndex++) {
+            const domainIndex = gene.modules[moduleIndex].domains.findIndex(d => d.start === domain.start);
+            let domain_with_options = gene.domains.find(d => d.start === domain.start);
+            if (domainIndex !== -1) {
+                return { gene, moduleIndex, domainIndex, domain_with_options};
             }
         }
+
+        return null;
     }
-    $(line_svg)
-        .mouseover({
-            domain: domain
-        }, function (handler) {
-            var bgc_desc = "<b>BGC: " + recordData[0].seq_id +
-                " region " + regionName + "</b>";
-            if (cluster.hasOwnProperty("desc")) {
-                bgc_desc += "<br /> " + cluster["desc"];
-            }
-            Domainer.showToolTip(bgc_desc, handler);
+
+    function shouldCreateModule(gene) {
+        return BIOSYNTHETIC_CORE_ENZYMES.includes(gene.orffunction) || gene.type.includes("biosynthetic") || gene.hasOwnProperty("modules");
+    }
+
+    function shouldIndentDomain(domainType) {
+        return ['DH', 'ER'].includes(domainType);
+    }
+
+    function createDomainElements(domainData, height, scale, indentSteps) {
+        const { gene, moduleIndex, domainIndex, domain_with_options } = domainData;
+        const domainInfo = domain_with_options;
+
+        const domainIdentifier = domainInfo.identifier.replace(".", "_");
+        const containerElements = createContainerElements(domainIdentifier);
+        const size = getDomainSize(domainInfo, height);
+        const color = getDomainColor(domain_with_options);
+        const opacity = domainInfo.ko ? "0.5" : "1";
+        const points = Domainer.getDomainPoints(domain_with_options, gene, cluster, height, scale);
+        const indent = shouldIndentDomain(domainInfo.
+            abbreviation) ? indentSteps : 0;
+
+        // Set the width of the container
+        containerElements.container.style.width = `${size - 10}px`;
+
+        // Ensure the button fills the container
+        containerElements.button.style.width = '100%';
+        containerElements.button.style.height = '100%';
+        containerElements.button.style.padding = '0';
+        containerElements.button.style.border = 'none';
+
+        createDomainSvg(containerElements.button, size, height, color, opacity, domainInfo, points, indent);
+        populateDropdownContent(containerElements.content, gene, moduleIndex, domainIndex, domainInfo);
+
+        return containerElements;
+    }
+    function createContainerElements(domainIdentifier) {
+        const container = document.createElement('div');
+        container.id = `innerdomainContainer${domainIdentifier}`;
+        container.className = "box";
+
+        const dropdownContainer = document.createElement('div');
+        dropdownContainer.id = `innerDropdownContainer${domainIdentifier}`;
+        dropdownContainer.className = "dropdown";
+
+        const button = document.createElement('button');
+        button.id = `innerDropdownButton${domainIdentifier}`;
+        button.className = "dropbtn";
+
+        const content = document.createElement('div');
+        content.id = `innerDropdownContent${domainIdentifier}`;
+        content.className = "dropdown-content";
+
+        const intermediateContainer = document.createElement('div');
+        intermediateContainer.id = `innerIntermediateContainer${domainIdentifier}`;
+        intermediateContainer.className = "intermediateContainer";
+
+        dropdownContainer.appendChild(button);
+        dropdownContainer.appendChild(content);
+        container.appendChild(dropdownContainer);
+        container.appendChild(intermediateContainer);
+
+        document.getElementById('domain_container').appendChild(container);
+
+        return { container, button, content };
+    }
+
+    function getDomainSize(domainInfo, height) {
+        const smallDomainTypes = ["term", "ACP", "PP", "PCP", "docking"];
+        return smallDomainTypes.some(type => domainInfo.type.includes(type)) ? height / 4 : height / 2;
+    }
+
+    function getDomainColor(domain) {
+        if (domain.type) {
+            return {
+                fill: colour_fill_dict[domain.type] || "#0486F1",
+                outline: colour_outline_dict[domain.type] || "#025AA1"
+            };
+        }
+        return { fill: "#0486F1", outline: "#025AA1" };
+    }
+
+
+    function createDomainSvg(container, size, height, color, opacity, domainInfo, points, indent) {
+        const draw = SVG(container).size(`${size}px`, height).group();
+        const dom = draw.rect(size - 2, size - 2)
+            .x(2)
+            .y(height - indent - (size + 2))
+            .rx("200%")
+            .ry("200%")
+            .fill(color.fill)
+            .opacity(opacity)
+            .stroke({ width: 2, color: color.outline });
+
+        if (size > height / 4) {
+            draw.text(domainInfo.abbreviation).x(size / 2 + 1).y(height - indent - (size / 2 + 1) - 7);
+        }
+
+        dom.node.id = `domain${domainInfo.identifier.replace(".", "_")}`;
+        addDomainEventListeners(dom.node, domainInfo);
+    }
+
+    function addDomainEventListeners(domNode, domainInfo) {
+        $(domNode).mouseover({ domain: domainInfo }, function (event) {
+            $("#" + Domainer.tooltip_id).css("display", "none");
+            Domainer.showToolTip(`Domain: ${domainInfo.abbreviation} (${domainInfo.type})<br/>${domainInfo.start} - ${domainInfo.end}`, event);
+            $(event.target).css("stroke-width", "3px");
+            event.stopPropagation();
         });
-    $(line_svg)
-        .mouseleave(function (handler) {
-            $("#" + Domainer.tooltip_id)
-                .css("display", "none");
+
+        $(domNode).mouseleave(function (event) {
+            $(event.target).css("stroke-width", "2px");
+            $("#" + Domainer.tooltip_id).css("display", "none");
         });
-    $(container)
-        .find("svg")
-        .attr("width", width + "px");
-    Domainer.drawModules(moduleMatrix, height, scale)
-    Domainer.drawGenes(geneMatrix, height, scale)
-    Domainer.leaveSpaceForTailoring(height*2, scale)
-    Domainer.drawTailoringEnzymes(cluster, geneMatrix, height, scale)
-    return $(container)
-        .find("svg")[0];
-});
+    }
+
+    function populateDropdownContent(contentElement, gene, moduleIndex, domainIndex, domainInfo) {
+        const options = domainInfo.domainOptions.sort((a, b) => a.localeCompare(b)).sort((a, b) => a.length - b.length);
+        options.forEach((option, optionIndex) => {
+            const shortOption = hasNumbers(option) ? option.split(" ").pop() : option;
+            const button = createOptionButton(gene, moduleIndex, domainIndex, optionIndex, shortOption, option);
+            contentElement.appendChild(button);
+        });
+    }
+
+    function createOptionButton(gene, moduleIndex, domainIndex, optionIndex, shortOption, fullOption) {
+        const button = document.createElement('button');
+        button.id = `${gene.index}_${moduleIndex}_${domainIndex}_${optionIndex}`;
+        button.onclick = () => geneMatrixHandler.changeSelectedOption(gene.index, moduleIndex, domainIndex, shortOption, optionIndex);
+        button.onmouseenter = () => svgHandler.hoverInAtom(shortOption);
+        button.onmouseout = () => svgHandler.hoverOutAtom(shortOption);
+        button.textContent = fullOption.replaceAll("_", " ");
+
+        const domainInfo = gene.modules[moduleIndex].domains[domainIndex];
+        if (shortOption === domainInfo.default_option) {
+            button.style.backgroundColor = "lightgrey";
+            //button.id = `de${button.id}`;
+        } else if (shortOption === domainInfo.selected_option) {
+            button.style.backgroundColor = "#E11839";
+        }
+
+        return button;
+    }
+
+    function updateModuleVisualization(gene, moduleIndex, size) {
+        const moduleContainer = document.createElement('div');
+        moduleContainer.id = `innerModuleContainer${gene.index}_${moduleIndex}`;
+        // Add module visualization logic here
+    }
+
+    function finalizeSvg(container) {
+        $(container).find("svg").each(function () {
+            let currentWidth = parseFloat($(this).attr("width")); // Get current width as a number
+            let newWidth = currentWidth + 3; // Add 3 to the width
+            $(this).attr("width", newWidth + "px"); // Set the new width
+        });
+    }
+
+    function hasNumbers(str) {
+        return /\d/.test(str);
+    }
+};
 Domainer.leaveSpaceForTailoring = (function (width, scale) {
     var innerIntermediateContainer = document.createElement('div');
     var innerContainer = document.createElement('div');
@@ -504,7 +308,7 @@ Domainer.leaveSpaceForTailoring = (function (width, scale) {
     innerContainer.appendChild(innerIntermediateContainer);
     innerContainer.style.width = String(width) + "px";
 })
-Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, scale) {
+Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, scale, geneMatrixHandler) {
     var container = document.getElementById('domain_container')
     let size = height/2
     let indent = 0
@@ -634,22 +438,7 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                     ""
                 let atomOptions = options[reactionOption]
                 if (atomOptions) {
-                    for (let atomOptionIndex = 0; atomOptionIndex <
-                        atomOptions.length; atomOptionIndex++) {
-                        let atomOption = atomOptions[atomOptionIndex]
-                        if (atomOption.includes(",")) {
-                            let atomOptionParts = atomOption.split(",");
-                            let atomOption1 = atomOptionParts[0].replaceAll(" ", "");
-                            let atomOption2 = atomOptionParts[1].replaceAll(" ", "");
-                            innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
-                                + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption1 + "\x22);hover_in_atom(\x22" + atomOption2 + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption1 + "\x22);hover_out_atom(\x22" + atomOption2 + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
-
-                        }
-                        else{
-                        innerDropdownContainer_folded_1.innerHTML += "<button id=" + geneIndex + "_" + reactionOption.replaceAll(" ", "") + atomOption.toString().replaceAll(" ", "")
-                            + " onclick='changeSelectedOptionTailoring(geneMatrix," + geneIndex + ",\x22" + reactionOption + "\x22, \x22" + atomOption.toString().replaceAll(" ", "") + "\x22);'onmouseenter='hover_in_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);' onmouseout='hover_out_atom(\x22" + atomOption.replaceAll(" ", "") + "\x22);'>" + atomOption.replaceAll(" ", "") + "</button>";
-                        }
-                    }
+                    createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler);
                 }
 
             }
@@ -684,9 +473,40 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
 
         }
     }
+    function createButtons(atomOptions, geneIndex, reactionOption, innerDropdownContainer_folded_1, geneMatrixHandler, svgHandler) {
+        atomOptions.forEach(atomOption => {
+            const button = document.createElement('button');
+            const atomOptionCleaned = atomOption.replaceAll(" ", "");
+            button.id = `${geneIndex}_${reactionOption.replaceAll(" ", "")}${atomOptionCleaned}`;
+            button.textContent = atomOptionCleaned;
 
+            button.addEventListener('click', () => {
+                geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
+            });
+
+            if (atomOption.includes(",")) {
+                const [atomOption1, atomOption2] = atomOption.split(",").map(opt => opt.replaceAll(" ", ""));
+
+                button.addEventListener('mouseenter', () => {
+                    svgHandler.hoverInAtom(atomOption1);
+                    svgHandler.hoverInAtom(atomOption2);
+                });
+
+                button.addEventListener('mouseout', () => {
+                    svgHandler.hoverOutAtom(atomOption1);
+                    svgHandler.hoverOutAtom(atomOption2);
+                });
+            } else {
+                button.addEventListener('mouseenter', () => svgHandler.hoverInAtom(atomOptionCleaned));
+                button.addEventListener('mouseout', () => svgHandler.hoverOutAtom(atomOptionCleaned));
+            }
+
+            innerDropdownContainer_folded_1.appendChild(button);
+        });
+    }
 
 });
+
 Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
     document.getElementById('model_gene_container')
         .innerHTML = ""
@@ -694,7 +514,7 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
         let geneSize = 0
         let lengthVisualisation = 0
         if (geneMatrix[geneIndex].ko == false && (geneMatrix[geneIndex].hasOwnProperty(
-            "modules") || biosyntheticCoreEnzymes.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+            "modules") || BIOSYNTHETIC_CORE_ENZYMES.includes(geneMatrix[geneIndex].orffunction) || geneMatrix[geneIndex].type.includes("biosynthetic"))) {
             if (geneMatrix[geneIndex].hasOwnProperty("domains")) {
                 for (let domainIndex = 0; domainIndex < geneMatrix[
                     geneIndex].domains.length; domainIndex++) {
@@ -748,7 +568,7 @@ Domainer.drawGenes = (function (geneMatrix, height = 90, scale) {
     innerModelGeneContainer.id = "innerModelGeneContainer_whitespace"
     document.getElementById('model_gene_container')
         .appendChild(innerModelGeneContainer);
-    innerModelGeneContainer.style.width = String(height*2.2) + "px";
+    innerModelGeneContainer.style.width = String(height/10) + "px";
     for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene_size = height / 2
 
@@ -797,7 +617,6 @@ Domainer.drawModules = (function (moduleMatrix, height, scale) {
                 bubble_size = height/2;
             }
             lengthVisualisation += bubble_size;
-            console.log(bubble_size, domain, domains)
         };
         size = lengthVisualisation - 3;
         if (size > 0) {
