@@ -159,13 +159,28 @@ async def rate_limit_exceeded_handler(request: Request, exc: Exception):
     )
 
 
+def run_sync(func, *args, **kwargs):
+    """
+    Wrapper function to run coroutines in a synchronous context.
+    """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    result = loop.run_until_complete(func(*args, **kwargs))
+    loop.close()
+    return result
+
+
 # Error handling function
 async def process_with_error_handling(func, *args, **kwargs):
     try:
         loop = asyncio.get_running_loop()
-        partial_func = partial(func, *args, **kwargs)
-        result = await loop.run_in_executor(process_pool, partial_func)
+        if asyncio.iscoroutinefunction(func):
+            # If the function is a coroutine function, wrap it with run_sync
+            partial_func = partial(run_sync, func, *args, **kwargs)
+        else:
+            partial_func = partial(func, *args, **kwargs)
         
+        result = await loop.run_in_executor(process_pool, partial_func)
         return JSONResponse(content=result, status_code=HTTP_200_OK)
     
     except AssertionError as ae:

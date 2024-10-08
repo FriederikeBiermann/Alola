@@ -1365,6 +1365,10 @@ class AntismashExtractor {
                                 type = "DH"
                             }
 
+                            if (domain.abbreviation == "cMT" || domain.abbreviation == "CMT") {
+                                type = "AMT"
+                            }
+
                             if (domain.abbreviation == "A" || domain.abbreviation == "CAL") {
                                 if (domain.hasOwnProperty("predictions")) {
                                     if (domain.predictions.length != 0) {
