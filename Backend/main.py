@@ -22,6 +22,12 @@ from typing import List, Optional, Any, Union, Type
 from prometheus_client import Counter, Histogram, generate_latest
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
+import asyncio
+from functools import partial
+from concurrent.futures import ProcessPoolExecutor
+# Adding the path to the cluster_processing module in the docker container
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from cluster_processing import NRPSPKSPathway, RiPPPathway, TerpenePathway
 
 # Pydantic Models
 
@@ -56,10 +62,7 @@ class TerpenePathwayInput(BaseModel):
     methyl_mutase: Optional[List[List[str]]] = Field(default_factory=list)
 
 
-# Adding the path to the cluster_processing module in the docker container
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-from cluster_processing import NRPSPKSPathway, RiPPPathway, TerpenePathway
-
+process_pool = ProcessPoolExecutor(max_workers=8)
 
 # Prometheus Metrics
 REQUEST_COUNT = Counter("request_count", "Total number of requests")
@@ -99,7 +102,6 @@ app.add_middleware(
 # Add the SlowAPI middleware for rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(HTTP_429_TOO_MANY_REQUESTS, _rate_limit_exceeded_handler)
-
 app.add_middleware(SlowAPIMiddleware)
 
 # Mount static files
@@ -160,9 +162,12 @@ async def rate_limit_exceeded_handler(request: Request, exc: Exception):
 # Error handling function
 async def process_with_error_handling(func, *args, **kwargs):
     try:
-        return JSONResponse(
-            content=await func(*args, **kwargs), status_code=HTTP_200_OK
-        )
+        loop = asyncio.get_running_loop()
+        partial_func = partial(func, *args, **kwargs)
+        result = await loop.run_in_executor(process_pool, partial_func)
+        
+        return JSONResponse(content=result, status_code=HTTP_200_OK)
+    
     except AssertionError as ae:
         logging.error(
             {
@@ -222,7 +227,6 @@ async def process_pathway(
         pathway_class(validated_input.dict()).process
     )
 
-
 # FastAPI Endpoints
 @app.get("/")
 # @limiter.limit("1/second")
@@ -233,7 +237,6 @@ async def root(request: Request):
         "state": "state of dropdown-menus, if none== default",
         "output": "SVGs for intermediates+ SVG of final product",
     }
-
 
 # Prometheus Metrics Endpoint
 @app.get("/metrics")
@@ -249,7 +252,6 @@ async def alola_nrps_pks(request: Request, antismash_input: str):
     return await process_pathway(
         request, antismash_input, NRPSPKSPathwayInput, NRPSPKSPathway
     )
-
 
 @app.get("/api/alola/ripp/")
 @app.get("/api/alola/ripp")
