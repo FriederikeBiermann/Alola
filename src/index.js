@@ -354,10 +354,14 @@ class Record {
         this.addButtonListeners()
         uiHandler.setGeneMatrixHandler(this.geneMatrixHandler);
         let result = this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
+        uiHandler.updateUI(this.geneMatrixHandler);
+        uiHandler.addDragDrop();
+        uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler);
+
 
         //this.addButtonListeners()
         if (result){
-            uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler);
+            
 
             if (this.geneMatrixHandler.cluster_type === "terpene") {
                 uiHandler.openFormTerpene();
@@ -394,6 +398,16 @@ class Record {
                 uiHandler.openFormTerpene();
                 
             }
+            if (this.cluster_type === "ripp") {
+                if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
+                    svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
+                    if (document.getElementById("wildcardProtease").checked) {
+                        svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
+                    }
+                }
+            }
+
 
             else {
 
