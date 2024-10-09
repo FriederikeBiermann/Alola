@@ -89,7 +89,7 @@ class BasePathway:
         self.mass = self.final_product.get_mass()
         logging.debug(f"Computed mass: {self.mass}")
 
-        self.sum_formula = self.final_product.get_sum_formula() 
+        self.sum_formula = self.final_product.get_sum_formula()
         logging.debug(f"Computed sum_formula: {self.sum_formula}")
 
         reactions = []
@@ -330,12 +330,20 @@ class NRPSPKSPathway(BasePathway):
             make_linear=False,
             draw_Cs_in_pink=True,
         )
+        structure_final_product = RaichuDrawer(
+            self.final_product,
+            dont_show=True,
+            add_url=True,
+            make_linear=False,
+            draw_Cs_in_pink=True,
+        )
         structure_for_tailoring.draw_structure()
         self.svg_structure_for_tailoring = self.process_svg(
             structure_for_tailoring.get_svg_string_matplotlib(), "tailoring_drawing"
         )
+        structure_final_product.draw_structure()
         self.svg_final = self.process_svg(
-            svg_string_from_structure(self.final_product), "final_drawing"
+            structure_final_product.get_svg_string_matplotlib(), "final_drawing"
         )
         logging.debug("SVGs prepared.")
 
