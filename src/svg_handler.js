@@ -211,6 +211,11 @@ class SVGHandler {
             .replaceAll("<!-- ACP -->    <g style='fill: #ffffff'", "<!-- ACP -->    <g style='fill: transparent'");
     }
 
+    formatSVGForDownload(svg) {
+        return svg.toString()
+            .replaceAll("#ff00ff", "none")
+    }
+
     updateStructure(raichu_output) {
         let container = document.getElementById("structure_container");
         container.innerHTML = this.formatSVG(raichu_output.svg);
@@ -220,10 +225,10 @@ class SVGHandler {
         drawing.style["max-height"] = "100%";
     }
 
-    updateDownloadLinks(raichu_output) {
+    updateDownloadLinks(self, raichu_output) {
         this.setDownloadLink("save_complete_cluster_svg", raichu_output.completeClusterSvg, raichu_output.smiles + "_cluster.svg");
         this.setDownloadLink("save_enzymatic_pathway_svg", raichu_output.pathway_svg, raichu_output.smiles + "_pathway.svg");
-        this.setDownloadLink("save_svg", raichu_output.svg, raichu_output.smiles + ".svg");
+        this.setDownloadLink("save_svg", self.formatSVGForDownload(raichu_output.svg), raichu_output.smiles + ".svg");
     }
 
     setDownloadLink(elementId, svgContent, filename) {
