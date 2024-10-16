@@ -645,7 +645,8 @@ class UIHandler {
             { id: 'addRiPPButton', handler: () => { this.geneMatrixHandler.addRiPP(); this.closeRiPPForm(); } },
             { id: 'cancelRiPPButton', handler: () => this.closeRiPPForm() },
             { id: 'submitTerpeneButton', handler: () => { this.geneMatrixHandler.reloadGeneCluster(); this.closeFormTerpene(); } },
-            { id: 'closeTerpeneButton', handler: () => this.closeFormTerpene() }
+            { id: 'closeTerpeneButton', handler: () => this.closeFormTerpene() },
+            { id: 'save_biosynthetic_model_button', handler: () => this.PrintDiv() }
         ];
 
         buttonConfigs.forEach(config => {
@@ -659,6 +660,53 @@ class UIHandler {
                 newButton.addEventListener('click', config.handler);
             }
         });
+    }
+
+    PrintDiv() {
+        /**
+         * Download biosynthetic_model
+         * Transforms biosynthetic_model div to remove hidden areas, transforms it to canvas, and download a PNG of it
+         * @fires   save_biosynthetic_model_button
+         */
+        (async () => {
+            // Get references to the div elements
+            let div = document.getElementById("outerDomainExplorer");
+            let outer_div = document.getElementById("Domain_explorer");
+            // Set class to indicate that saving is in progress
+            div.setAttribute("class", "outerDomainExplorer_while_saving");
+            // Use html2canvas to capture the content of the div as a canvas
+            const canvas = await html2canvas(div, { scale: 5 });
+            // Reset the class to its original state
+            div.setAttribute("class", "outerDomainExplorer");
+            // Convert canvas content to a data URL representing the PNG image
+            var myImage = canvas.toDataURL();
+            // Download the PNG image
+            this.downloadURI(myImage, "biosynthetic_model.png");
+        })();
+    }
+
+    downloadURI(uri, name) {
+        /**
+         * Creates a link to download the PNG
+         * @fires   PrintDiv
+         */
+        // Create a link element
+        var link = document.createElement("a");
+        // Set the download attribute and the URL
+        link.download = name;
+        link.href = uri;
+
+        // Append the link to the document
+        document.body.appendChild(link);
+        // Trigger a click on the link to start the download
+        link.click();
+        // After creating the link, delete the dynamic link
+        this.clearDynamicLink(link);
+    }
+
+    clearDynamicLink(link) {
+        // Remove the link from the document
+        document.body.removeChild(link);
     }
 
     openWildcardModuleForm(){
