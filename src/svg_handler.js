@@ -97,7 +97,7 @@ class SVGHandler {
         if (this.clusterType === "ripp") {
             this.highlightRippAtom(atom, color, width, shadowId);
         } else {
-            this.highlightOtherAtom(atom, color, width, "intenseGlowShadow");
+            this.highlightOtherAtom(atom, color, width, shadowId);
         }
     }
 
@@ -123,7 +123,10 @@ class SVGHandler {
             let links = document.querySelectorAll(`a[*|href="${atom}"]`);
             links.forEach(link => {
                 if (this.isValidParent(link.parentElement.parentElement.parentElement.parentElement)) {
-                    let path = link.childNodes[3];
+                    if (link.parentElement.parentElement.parentElement.parentElement.id === "final_drawing" && color === "black") {
+                        color = "white";
+                    }
+                    let path = link.lastElementChild;
                     path.setAttribute('style', `fill:${color}; stroke:${color}; stroke-width:${width}; filter:url(#${shadowId});`);
                     this.addHoverEvents(path, atom);
                 }
@@ -156,7 +159,7 @@ class SVGHandler {
     hoverInAtom(atom) {
         const color = "#E11839";
         const width = this.clusterType === "ripp" ? "5" : "50";
-        const shadowId = this.clusterType === "ripp" ? "intenseGlowShadow" : "dropShadow";
+        const shadowId = this.clusterType === "ripp" ? "intenseGlowShadow" : "intenseGlowShadow";
         this.highlightAtomInSVG(atom, color, width, shadowId);
     }
 
