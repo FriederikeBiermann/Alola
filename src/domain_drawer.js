@@ -484,22 +484,17 @@ Domainer.drawTailoringEnzymes = (function (cluster, geneMatrix, height = 90, sca
                 geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
             });
 
-            if (atomOption.includes(",")) {
-                const [atomOption1, atomOption2] = atomOption.split(",").map(opt => opt.replaceAll(" ", ""));
+            const atomOptions = atomOption.includes(",")
+                ? atomOption.split(",").map(opt => opt.replaceAll(" ", ""))
+                : [atomOption.replaceAll(" ", "")];
 
-                button.addEventListener('mouseenter', () => {
-                    svgHandler.hoverInAtom(atomOption1);
-                    svgHandler.hoverInAtom(atomOption2);
-                });
+            button.addEventListener('mouseenter', () => {
+                atomOptions.forEach(option => svgHandler.hoverInAtom(option));
+            });
 
-                button.addEventListener('mouseout', () => {
-                    svgHandler.hoverOutAtom(atomOption1);
-                    svgHandler.hoverOutAtom(atomOption2);
-                });
-            } else {
-                button.addEventListener('mouseenter', () => svgHandler.hoverInAtom(atomOptionCleaned));
-                button.addEventListener('mouseout', () => svgHandler.hoverOutAtom(atomOptionCleaned));
-            }
+            button.addEventListener('mouseout', () => {
+                atomOptions.forEach(option => svgHandler.hoverOutAtom(option));
+            });
 
             innerDropdownContainer_folded_1.appendChild(button);
         });

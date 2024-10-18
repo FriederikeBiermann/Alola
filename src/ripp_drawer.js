@@ -430,24 +430,17 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneMat
             button.addEventListener('click', () => {
                 geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
             });
+            const atomOptions = atomOption.includes(",")
+                ? atomOption.split(",").map(opt => opt.replaceAll(" ", ""))
+                : [atomOption.replaceAll(" ", "")];
 
-            if (atomOption.includes(",")) {
-                const [atomOption1, atomOption2] = atomOption.split(",").map(opt => opt.replaceAll(" ", ""));
+            button.addEventListener('mouseenter', () => {
+                atomOptions.forEach(option => svgHandler.hoverInAtom(option));
+            });
 
-                button.addEventListener('mouseenter', () => {
-                    svgHandler.hoverInAtom(atomOption1);
-                    svgHandler.hoverInAtom(atomOption2);
-                });
-
-                button.addEventListener('mouseout', () => {
-                    svgHandler.hoverOutAtom(atomOption1);
-                    svgHandler.hoverOutAtom(atomOption2);
-                });
-            } else {
-                button.addEventListener('mouseenter', () => svgHandler.hoverInAtom(atomOptionCleaned));
-                button.addEventListener('mouseout', () => svgHandler.hoverOutAtom(atomOptionCleaned));
-            }
-
+            button.addEventListener('mouseout', () => {
+                atomOptions.forEach(option => svgHandler.hoverOutAtom(option));
+            });
             innerDropdownContainer_folded_1.appendChild(button);
         });
     }
