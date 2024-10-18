@@ -117,6 +117,8 @@ class TerpeneHandler extends BGCFetcher {
             gene_name_precursor: "terpene-cyclase",
             substrate: geneMatrixHandler.terpeneSubstrate,
             cyclization: this.splitArrayIntoPairs(geneMatrixHandler.cyclization),
+            double_bond_isomerase: geneMatrixHandler.terpeneDoubleBondIsomerization,
+            methyl_mutase: geneMatrixHandler.terpeneMethylShift,
             tailoring: geneMatrixHandler.tailoringArray,
             terpene_cyclase_type: "Class_1"
         });

@@ -436,12 +436,12 @@ class TerpenePathway(BasePathway):
         ]
         self.precursor: str = self.antismash_input["substrate"]
         self.double_bond_isomerase: List[IsomerizationRepresentation] = [
-            IsomerizationRepresentation(*isomerization)
+            IsomerizationRepresentation(isomerization)
             for isomerization in self.antismash_input.get("double_bond_isomerase", [])
             if len(isomerization) > 0
         ]
         self.methyl_mutase: List[MethylShiftRepresentation] = [
-            MethylShiftRepresentation(*methyl_shift)
+            MethylShiftRepresentation(methyl_shift)
             for methyl_shift in self.antismash_input.get("methyl_mutase", [])
             if len(methyl_shift) > 0
         ]
@@ -481,8 +481,8 @@ class TerpenePathway(BasePathway):
             self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
             "precursor_drawing",
         )
-        if self.macrocyclisations:
-            self.cluster.do_macrocyclization()
+
+        self.cluster.do_macrocyclization()
         cyclised_product_svg = self.process_svg(
             self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
             "cyclized_drawing",
@@ -493,7 +493,7 @@ class TerpenePathway(BasePathway):
         self.tailored_product = self.cluster.chain_intermediate
         self.final_product = self.cluster.chain_intermediate
         svg_final_product = self.process_svg(
-            self.cluster.draw_product(as_string=True),
+            self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
             "final_drawing",
         )
         svg_tailoring = self.process_svg(svg_final_product, "intermediate_drawing")

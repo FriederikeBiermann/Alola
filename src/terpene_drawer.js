@@ -252,7 +252,7 @@ Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, gen
         function createButtons(atomOptions, geneIndex, reactionOption, container, geneMatrixHandler, svgHandler) {
             atomOptions.forEach(atomOption => {
                 if (Array.isArray(atomOption)) {
-                    atomOption = atomOption.join(" ");}
+                    atomOption = atomOption.join(", ");}
                 const button = document.createElement('button');
                 const atomOptionCleaned = atomOption.replace(/\s/g, '');
 
@@ -261,24 +261,31 @@ Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, gen
 
                 if (reactionOption.includes("Cyclization")) {
                     button.onclick = () => geneMatrixHandler.changeCyclization(atomOptionCleaned);
-                } else {
+                } 
+                
+                else if (reactionOption.includes("DOUBLE_BOND_ISOMERASE")) {
+                    button.onclick = () => geneMatrixHandler.changeDoubleBondIsomerization(atomOptionCleaned);
+                }
+
+                else if (reactionOption.includes("Methyl_shift")) {
+                    button.onclick = () => geneMatrixHandler.changeMethylShift(atomOptionCleaned);
+                } 
+
+                else {
                     button.onclick = () => geneMatrixHandler.changeSelectedOptionTailoring(geneIndex, reactionOption, atomOptionCleaned);
                 }
 
-                if (atomOption.includes("=")) {
-                    const [atomOption1, atomOption2] = atomOption.split("=").map(opt => opt.trim());
-                    button.onmouseenter = () => {
-                        svgHandler.hoverInAtom(atomOption1);
-                        svgHandler.hoverInAtom(atomOption2);
-                    };
-                    button.onmouseout = () => {
-                        svgHandler.hoverOutAtom(atomOption1);
-                        svgHandler.hoverOutAtom(atomOption2);
-                    };
-                } else {
-                    button.onmouseenter = () => svgHandler.hoverInAtom(atomOptionCleaned);
-                    button.onmouseout = () => svgHandler.hoverOutAtom(atomOptionCleaned);
-                }
+                const atomOptionsForReaction = atomOption.includes(",")
+                    ? atomOption.split(",").map(opt => opt.replaceAll(" ", ""))
+                    : [atomOption.replaceAll(" ", "")];
+
+                button.addEventListener('mouseenter', () => {
+                    atomOptionsForReaction.forEach(option => svgHandler.hoverInAtom(option));
+                });
+
+                button.addEventListener('mouseout', () => {
+                    atomOptionsForReaction.forEach(option => svgHandler.hoverOutAtom(option));
+                });
 
                 container.appendChild(button);
             });

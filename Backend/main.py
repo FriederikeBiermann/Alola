@@ -25,6 +25,7 @@ from slowapi.util import get_remote_address
 import asyncio
 from functools import partial
 from concurrent.futures import ProcessPoolExecutor
+
 # Adding the path to the cluster_processing module in the docker container
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from cluster_processing import NRPSPKSPathway, RiPPPathway, TerpenePathway
@@ -56,10 +57,10 @@ class TerpenePathwayInput(BaseModel):
     terpene_cyclase_type: str
     cyclization: Optional[List[List[str]]] = Field(default_factory=list)
     double_bond_isomerase: Optional[List[List[str]]] = Field(default_factory=list)
+    methyl_mutase: Optional[List[List[str]]] = Field(default_factory=list)
     tailoring: Optional[List[List[Union[str, List[List[str]]]]]] = Field(
         default_factory=list
     )
-    methyl_mutase: Optional[List[List[str]]] = Field(default_factory=list)
 
 
 process_pool = ProcessPoolExecutor(max_workers=8)
@@ -179,10 +180,10 @@ async def process_with_error_handling(func, *args, **kwargs):
             partial_func = partial(run_sync, func, *args, **kwargs)
         else:
             partial_func = partial(func, *args, **kwargs)
-        
+
         result = await loop.run_in_executor(process_pool, partial_func)
         return JSONResponse(content=result, status_code=HTTP_200_OK)
-    
+
     except AssertionError as ae:
         logging.error(
             {
@@ -242,6 +243,7 @@ async def process_pathway(
         pathway_class(validated_input.dict()).process
     )
 
+
 # FastAPI Endpoints
 @app.get("/")
 # @limiter.limit("1/second")
@@ -252,6 +254,7 @@ async def root(request: Request):
         "state": "state of dropdown-menus, if none== default",
         "output": "SVGs for intermediates+ SVG of final product",
     }
+
 
 # Prometheus Metrics Endpoint
 @app.get("/metrics")
@@ -267,6 +270,7 @@ async def alola_nrps_pks(request: Request, antismash_input: str):
     return await process_pathway(
         request, antismash_input, NRPSPKSPathwayInput, NRPSPKSPathway
     )
+
 
 @app.get("/api/alola/ripp/")
 @app.get("/api/alola/ripp")

@@ -7,6 +7,8 @@ class GeneMatrixHandler {
         this.geneMatrix = this.createGeneMatrix();
         this.historyStack = new HistoryStack();
         this.terpeneSubstrate = "";
+        this.terpeneDoubleBondIsomerization = [];
+        this.terpeneMethylShift = [];
         this.cyclization = [];
         this.rippPrecursor = "";
         this.rippFullPrecursor = "";
@@ -137,6 +139,24 @@ class GeneMatrixHandler {
 
     changeCyclization(atom) {
         this.cyclization.push(atom)
+        this.removeTailoringEnzymes();
+        this.reloadGeneCluster();
+    }
+
+    changeDoubleBondIsomerization(atom) {
+        if (atom.includes(",")) {
+            atom = atom.split(",")
+        }
+        this.terpeneDoubleBondIsomerization.push(atom)
+        this.removeTailoringEnzymes();
+        this.reloadGeneCluster();
+    }
+
+    changeMethylShift(atom) {   
+        if (atom.includes(",")) {
+            atom = atom.split(",")
+        }
+        this.terpeneMethylShift.push(atom)
         this.removeTailoringEnzymes();
         this.reloadGeneCluster();
     }
