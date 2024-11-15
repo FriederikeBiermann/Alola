@@ -4,8 +4,9 @@ import traceback
 import sys
 import os
 import json
+from datetime import datetime, timedelta
 from fastapi import HTTPException
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Header
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
@@ -288,3 +289,78 @@ async def alola_terpene(request: Request, antismash_input: str):
     return await process_pathway(
         request, antismash_input, TerpenePathwayInput, TerpenePathway
     )
+
+
+# The infrastructure to handle antiSMASH API calls. Returns the JSON response from the antiSMASH API to the frontend after sanitizing the input.
+
+# In-memory storage for user data with timestamps
+user_data_storage = {}
+
+# Expiration time (1 day)
+EXPIRATION_TIME = timedelta(hours=2)
+
+
+# Dummy function to validate if the request is from Antismash
+async def is_from_antismash(request: Request, anti_smash_header: str = Header(None)):
+    if anti_smash_header != "antismash":
+        raise HTTPException(status_code=400, detail="Invalid source header")
+
+
+# Dummy function to validate if the data is valid JSON
+async def validate_json(request: Request):
+    try:
+        data = await request.json()
+        return data
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON data")
+
+
+# Endpoint to receive data from Antismash
+@app.post("/api/antismash/receive")
+async def receive_antismash_data(
+    request: Request, anti_smash_header: str = Header(None)
+):
+    # Validate the request origin and JSON data
+    await is_from_antismash(request, anti_smash_header)
+    data = await validate_json(request)
+
+    # Extract user ID from the data
+    user_id = data.get("user_id")
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID is required")
+
+    # Store the data along with the current timestamp
+    user_data_storage[user_id] = {"data": data["data"], "timestamp": datetime.utcnow()}
+
+    return JSONResponse(content={"status": "success"}, status_code=200)
+
+
+# Endpoint to fetch data for a specific user
+@app.get("/api/antismash/fetch_data")
+async def fetch_data(user_id: str):
+    if user_id not in user_data_storage:
+        raise HTTPException(status_code=404, detail="Data not found")
+
+    # Return the data for the specific user
+    return JSONResponse(content=user_data_storage[user_id]["data"])
+
+
+# Background task to cleanup expired data
+async def cleanup_expired_data():
+    while True:
+        current_time = datetime.utcnow()
+
+        # Iterate over stored data and remove expired entries
+        for user_id, entry in list(user_data_storage.items()):
+            if current_time - entry["timestamp"] > EXPIRATION_TIME:
+                del user_data_storage[user_id]  # Delete expired data
+
+        await asyncio.sleep(60)  # Run cleanup every minute
+
+
+# Start the background task when the server starts
+@app.on_event("startup")
+async def startup_event():
+    # Run cleanup task in the background
+    asyncio.create_task(cleanup_expired_data())
