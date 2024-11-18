@@ -524,6 +524,8 @@ class ApplicationManager {
     constructor() {
         this.record = new Record();
         this.fileHandler = new FileHandler(this.record);
+        this.checkUserId()
+
     }
 
     init() {
@@ -580,6 +582,20 @@ class ApplicationManager {
         if (file) {
             this.fileHandler.readFile(file); // FileHandler will automatically call record.init after reading
         }}
+    
+    checkUserId(){
+        // Extract 'user_id' from the URL query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user_id'); // Get 'user_id' from the query string
+        let data = null
+
+        // If 'user_id' is present in the URL, fetch the data
+        if (userId) {
+            // Call the function with the user_id extracted from the URL
+            data = apiService.fetchDataForUser(userId);
+        }
+
+    }
     
 }
 
@@ -1295,6 +1311,7 @@ class FileHandler {
         }
     }
 
+
     triggerFileInput() {
         document.getElementById('fileInput').click();
     }
@@ -1379,11 +1396,12 @@ class FileHandler {
 
 }
 
+let svgHandler = new SVGHandler();
+let apiService = new APIService(CONFIG.PORT, svgHandler);
 let session = new ApplicationManager();
 let regionHandler = new RegionHandler();
 let uiHandler = new UIHandler();
 uiHandler.addButtonListeners();
-let svgHandler = new SVGHandler();
-let apiService = new APIService(CONFIG.PORT, svgHandler);
+
 session.init();
 document.getElementById("defaultOpen").click();

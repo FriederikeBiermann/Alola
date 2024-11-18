@@ -92,10 +92,12 @@ limiter = Limiter(key_func=get_remote_address)
 # FastAPI app setup
 app = FastAPI()
 
+frontend_urls = ["http://localhost:3000", "localhost:3000"]
+
 # Add the CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "localhost:3000"],
+    allow_origins=frontend_urls,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -318,10 +320,15 @@ async def validate_json(request: Request):
 # Endpoint to receive data from Antismash
 @app.post("/api/antismash/receive")
 async def receive_antismash_data(
-    request: Request, anti_smash_header: str = Header(None)
+    request: Request
 ):
     # Validate the request origin and JSON data
-    await is_from_antismash(request, anti_smash_header)
+    logging.debug(f"Headers received: {request.headers}")
+
+    if not request.headers["anti_smash_header"]:
+        raise HTTPException(status_code=400, detail="Missing 'anti_smash_header' in request")
+
+    await is_from_antismash(request, request.headers["anti_smash_header"])
     data = await validate_json(request)
 
     # Extract user ID from the data
@@ -332,13 +339,17 @@ async def receive_antismash_data(
 
     # Store the data along with the current timestamp
     user_data_storage[user_id] = {"data": data["data"], "timestamp": datetime.utcnow()}
+    logging.debug(user_data_storage)
+    url = f"{frontend_urls[0]}/?user_id={user_id}"
 
-    return JSONResponse(content={"status": "success"}, status_code=200)
+    return JSONResponse(content={"status": "success", "url": url}, status_code=200)
 
 
 # Endpoint to fetch data for a specific user
 @app.get("/api/antismash/fetch_data")
 async def fetch_data(user_id: str):
+    logging.debug(user_data_storage)
+    logging.debug(user_id)
     if user_id not in user_data_storage:
         raise HTTPException(status_code=404, detail="Data not found")
 

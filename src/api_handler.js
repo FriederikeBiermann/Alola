@@ -33,6 +33,63 @@ class APIService {
         let module_container = document.getElementById("module_container");
         module_container.innerHTML = `<strong>${message}</strong>`;
     }
+
+    // Fetch data from API using the user_id for antismash loaded data
+    async fetchDataForUser(user_id) {
+        if (!user_id) {
+            console.error("User ID is required to fetch data.");
+            return;
+        }
+
+        console.log("Fetching for user ID", user_id)
+        const maxRetries = 5; // Max number of retries
+        const retryDelay = 2000; // Delay between retries in milliseconds (2 seconds)
+        let attempt = 0;
+        const timeout = 30000; // Timeout duration (30 seconds)
+
+        const tryFetch = async () => {
+            while (attempt < maxRetries) {
+                try {
+                    const response = await fetch(`${this.port}api/antismash/fetch_data?user_id=${user_id}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log("Data fetched from API:", data);
+
+                        // Process the data if needed
+                        if (data) {
+                            return data
+                        }
+                        return; // Exit on success
+                    } else {
+                        throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+                    }
+                } catch (error) {
+                    console.error(`Attempt ${attempt + 1} failed:`, error);
+                    attempt++;
+
+                    // If time exceeds the timeout, stop retrying
+                    if (Date.now() - startTime > timeout) {
+                        console.error("Timed out while fetching data.");
+                        break;
+                    }
+
+                    // Wait for a delay before retrying
+                    await new Promise(resolve => setTimeout(resolve, retryDelay));
+                }
+            }
+
+            console.error("Max retries reached. Could not fetch data.");
+        };
+
+        const startTime = Date.now();
+        await tryFetch();
+    }
 }
 
 class BGCFetcher {
