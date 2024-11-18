@@ -1446,7 +1446,7 @@ class AntismashExtractor {
                             }
                             this.geneMatrix[geneIndex].domains[domainIndex].function = type
                             // to avoid duplicate domains
-                            if (typesInModule.includes(type) || (type == "TD" && typesInModule.includes("TE")) || (type == "TE" && typesInModule.includes("TD"))) {
+                            if (typesInModule.includes(type) || (type == "TD" && typesInModule.includes("TE")) || (type == "TE" && typesInModule.includes("TD")) || (type == "A" && typesInModule.includes("CAL")) || (type == "CAL" && typesInModule.includes("A"))) {
                                 active = "False";
                                 this.geneMatrix[geneIndex].domains[domainIndex].ko = true
                             };
