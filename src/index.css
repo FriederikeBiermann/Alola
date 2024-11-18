@@ -843,3 +843,12 @@ svg text {
   right: 5vh;
 
 }
+
+button:disabled {
+  background-color: grey;
+  color: rgb(77, 77, 77);
+  cursor: not-allowed;
+  /* Indicate that the button is not clickable */
+  opacity: 0.6;
+  /* Make the button look less prominent */
+}

@@ -219,6 +219,10 @@ class SVGHandler {
             .replaceAll("#ff00ff", "none")
     }
 
+    is_svg(svgString) {
+        return svgString.includes("<svg")
+    }
+
     updateStructure(raichu_output) {
         let container = document.getElementById("structure_container");
         container.innerHTML = this.formatSVG(raichu_output.svg);
@@ -230,12 +234,19 @@ class SVGHandler {
 
     updateDownloadLinks(raichu_output) {
         this.setDownloadLink("save_complete_cluster_svg", raichu_output.completeClusterSvg, raichu_output.smiles + "_cluster.svg");
-        this.setDownloadLink("save_enzymatic_pathway_svg", raichu_output.pathway_svg, raichu_output.smiles + "_pathway.svg");
         this.setDownloadLink("save_svg", this.formatSVGForDownload(raichu_output.svg), raichu_output.smiles + ".svg");
+        this.setDownloadLink("save_enzymatic_pathway_svg", raichu_output.pathway_svg, raichu_output.smiles + "_pathway.svg");
+        
+        
     }
 
     setDownloadLink(elementId, svgContent, filename) {
         let element = document.getElementById(elementId);
+        if (!(this.is_svg(svgContent))){
+            element.disabled = true
+            return
+        }
+        
         let url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgContent);
         element.href = url;
         element.setAttribute("download", filename);
