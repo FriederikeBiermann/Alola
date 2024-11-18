@@ -1516,7 +1516,7 @@ class AntismashExtractor {
         moduleSubtype = outputForRaichu[outputForRaichu.length - 1][1]
         for (let domain of domainArray) {
             let newDomain = []
-            if (typesInModule.includes(domain[1]) || (domain[1] == "TD" && typesInModule.includes("TE")) || (domain[1] == "TE" && typesInModule.includes("TD"))) {
+            if (typesInModule.includes(domain[1]) || (domain[1] == "TD" && typesInModule.includes("TE")) || (domain[1] == "TE" && typesInModule.includes("TD")) || (domain[1] == "CAL" && typesInModule.includes("A")) || (domain[1] == "A" && typesInModule.includes("CAL"))) {
                 newDomain = domain.slice(0, 4);
                 newDomain.push("False");
                 newDomain.push(domain[5]);
