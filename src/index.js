@@ -187,7 +187,7 @@ const AMINO_ACIDS = {
 const NAME_TO_STRUCTURE = {
     "methylmalonyl_coa": "CC(C(O)=O)C(S)=O",
     "malonyl_coa": "OC(=O)CC(S)=O",
-    'methoxymalonyl_acp': "SC(=O)C(C(=O)O)OC)O",
+    'methoxymalonyl_coa': "SC(=O)C(C(=O)O)OC)O",
     'ethylmalonyl_coa': "CC(CC(O)=O)C(S)=O",
 }; 
 
