@@ -4,7 +4,7 @@ COPY ./src/package.json ./src/package-lock.json ./
 RUN npm install
 COPY ./src/index.html ./public/
 COPY ./src/index.css ./public/
-COPY ./src/Alola_Manual_new.html ./public/
+COPY ./src/Alola_Manual.html ./public/
 COPY ./src/*.png ./public/
 COPY ./src/*.jpg ./public/
 COPY ./src/*.svg ./public/

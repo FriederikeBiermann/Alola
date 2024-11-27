@@ -544,7 +544,8 @@ class ApplicationManager {
     loadDataFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const encodedData = urlParams.get('data');
-        if (encodedData) {
+        console.log('Encoded data:', encodedData);
+        if (encodedData !== null) {
             try {
                 const decodedData = JSON.parse(atob(encodedData));
                 if (decodedData.currentBGC && decodedData.currentGeneMatrix && decodedData.regionIndex !== undefined) {
@@ -838,7 +839,8 @@ class UIHandler {
 
             // Add event listener
             button.addEventListener('click', () => geneMatrixHandler.setRiPPPrecursor(geneIndex));
-
+            button.addEventListener('mouseover', () => geneMatrixHandler.handleTailoringEnzymeMouseEnter(gene, geneIndex));
+            button.addEventListener('mouseout', () => geneMatrixHandler.handleTailoringEnzymeMouseLeave(gene, geneIndex));
             fragment.appendChild(button);
         });
 
