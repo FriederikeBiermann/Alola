@@ -236,6 +236,10 @@ class SVGHandler {
         this.setDownloadLink("save_complete_cluster_svg", raichu_output.completeClusterSvg, raichu_output.smiles + "_cluster.svg");
         if (this.clusterType === "ripp") {
         this.setDownloadLink("save_complete_cluster_svg", raichu_output.structureForTailoring, raichu_output.smiles + "_marbles.svg");}
+        if (this.clusterType === "terpene") {
+            this.setDownloadLink("save_complete_cluster_svg", this.formatSVGForDownload(raichu_output.cyclizedStructure), raichu_output.smiles + "_cyclized_only.svg");
+        
+        }
         this.setDownloadLink("save_svg", this.formatSVGForDownload(raichu_output.svg), raichu_output.smiles + ".svg");
         this.setDownloadLink("save_enzymatic_pathway_svg", raichu_output.pathway_svg, raichu_output.smiles + "_pathway.svg");
         
@@ -259,6 +263,10 @@ class SVGHandler {
         if (filename.includes("_marbles")) {
             element.innerHTML = "<strong> Save marble representation(svg)</strong> ";
             element.parentElement.setAttribute("data-tooltip", "Save the marble representation as an svg image.");}
+        if (filename.includes("_cyclized_only")) {
+            element.innerHTML = "<strong> Save cyclized structure(svg)</strong> ";
+            element.parentElement.setAttribute("data-tooltip", "Save the cyclized structure as an svg image.");
+        }
         let url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgContent);
         element.href = url;
         element.setAttribute("download", filename);
