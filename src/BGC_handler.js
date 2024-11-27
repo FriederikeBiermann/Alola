@@ -117,7 +117,7 @@ class GeneMatrixHandler {
         let aminoacidsWithNumber = translation.split('').map((aa, index) => aa + (index + 1));
         this.proteaseOptions = aminoacidsWithNumber.map(aa => "Proteolytic cleavage at " + aa);
         this.rippPrecursor = this.rippPrecursor.length > 0 ? this.rippPrecursor : this.rippFullPrecursor.slice(-5);
-        this.reloadGeneCluster();
+        this.reloadGeneClusterForce()
     }
     
     getTranslation(geneIndex) {

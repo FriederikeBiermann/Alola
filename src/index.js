@@ -1442,3 +1442,9 @@ document.getElementById("defaultOpen").click();
 document.getElementById('modalButton').addEventListener('click', function () {
     document.getElementById('modal').classList.add('hidden');
 });
+document.addEventListener('DOMContentLoaded', () => {
+    const checkbox = document.querySelector('input[type=checkbox]');
+    if (checkbox) {
+        checkbox.checked = true; // Automatically check the checkbox for the real time calculation
+    }
+});
