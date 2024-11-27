@@ -6,6 +6,7 @@ class GeneMatrixHandler {
         this.cluster_type = cluster_type;
         this.geneMatrix = this.createGeneMatrix();
         this.historyStack = new HistoryStack();
+        this.updateHistory(this.geneMatrix, this.BGC);
         this.terpeneSubstrate = "";
         this.terpeneDoubleBondIsomerization = [];
         this.terpeneMethylShift = [];
@@ -1029,7 +1030,7 @@ class GeneMatrixHandler {
         if (previousState) {
             this.geneMatrix = previousState.geneMatrix;
             this.BGC = previousState.BGC;
-            this.reloadGeneCluster();
+            this.reloadGeneClusterForce();
         }
         this.historyStack.updateButtonStates();
     }
@@ -1039,7 +1040,7 @@ class GeneMatrixHandler {
         if (nextState) {
             this.geneMatrix = nextState.geneMatrix;
             this.BGC = nextState.BGC;
-            this.reloadGeneCluster();
+            this.reloadGeneClusterForce();
         }
         this.historyStack.updateButtonStates();
     }
@@ -1072,6 +1073,7 @@ class HistoryStack {
         this.undoStack = [];
         this.redoStack = [];
         this.is_undo = false;
+        this.updateButtonStates();
     }
 
     push(state) {
@@ -1085,9 +1087,10 @@ class HistoryStack {
     undo() {
         if (this.undoStack.length > 1) {
             const currentState = this.undoStack.pop();
+            const previousState = this.undoStack.pop();
             this.redoStack.push(currentState);
             this.is_undo = true;
-            return this.undoStack[this.undoStack.length - 1];
+            return previousState;
         }
         return null;
     }
@@ -1095,8 +1098,7 @@ class HistoryStack {
     redo() {
         if (this.redoStack.length > 0) {
             const state = this.redoStack.pop();
-            this.undoStack.push(state);
-            this.is_undo = false; // Redo is not considered an undo operation
+            this.is_undo = true; 
             return state;
         }
         return null;
