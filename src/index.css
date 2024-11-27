@@ -15,6 +15,7 @@ body {
   color: white;
   font-family: 'Catamaran', sans-serif;
   font-size: 3vh;
+  padding-bottom: 10px;
 }
 
 a:link {
@@ -101,10 +102,16 @@ label {
   overflow: auto;
 }
 #popupImpressum{
-  color: #1F1F1F;
-  background-color: white;
   text-align: center;
-  font-size: 3vh;
+  background-color: #1F1F1F;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 80%;
+  font-size: 20px;
+  color: #ccc;
 }
 
 #BGC_explorer {
@@ -842,6 +849,70 @@ svg text {
   float: right;
   right: 5vh;
 
+}
+
+.footer-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  /* Semi-transparent black */
+  color: white;
+  text-align: center;
+  padding: 0px 0;
+  font-size: 12px;
+  z-index: 1000;
+  /* Ensures it stays on top */
+}
+
+/* Style for the modal background */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Style for the modal content box */
+.modal-content {
+  background-color: #1F1F1F;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 400px;
+  width: 80%;
+  font-size: 20px;
+  color: #ccc;
+}
+
+/* Style for the button */
+.modal-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #E11839;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-button:hover {
+  background-color: #45a049;
+}
+
+/* Hide the modal by default */
+.modal-overlay.hidden {
+  display: none;
 }
 
 button:disabled {

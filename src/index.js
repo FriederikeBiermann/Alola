@@ -537,7 +537,7 @@ class ApplicationManager {
         document.getElementById('uploadButton').addEventListener('click', () => this.fileHandler.triggerFileInput());
         document.getElementById('fileInput').addEventListener('change', (event) => this.handleFileSelection(event));
         document.getElementById('load_example_button').addEventListener('click', () => this.fileHandler.loadExampleFile());
-        document.getElementById('shareButton').addEventListener('click', () => this.shareData());
+        // document.getElementById('shareButton').addEventListener('click', () => this.downloadData());
         this.fileHandler.setupDropArea();
     }
 
@@ -559,23 +559,33 @@ class ApplicationManager {
         }
     }
 
-    shareData() {
+    downloadData() {
         const data = {
-            recordData: this.record.recordData,
-            detailsData: this.record.detailsData
+            recordData: this.record.recordData || 'No record data available',
+            detailsData: this.record.detailsData || 'No details data available',
+            currentGeneMatrix: this.record.geneMatrixHandler.GeneMatrix || null,
+            currentBGC: this.record.geneMatrixHandler.BGC || null,
+            regionIndex: this.record.regionIndex !== undefined ? this.record.regionIndex : null
         };
-        const encodedData = btoa(JSON.stringify(data));
-        const url = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
 
-        // You can either copy to clipboard or open in a new tab
-        navigator.clipboard.writeText(url).then(() => {
-            alert('Share URL copied to clipboard!');
-        }).catch(err => {
-            console.error('Failed to copy URL: ', err);
-            // Fallback: open in new tab
-            window.open(url, '_blank');
-        });
+        // Convert data to JSON
+        const jsonData = JSON.stringify(data);
+
+        // Create a blob for the JSON data
+        const blob = new Blob([jsonData], { type: 'application/json' });
+
+        // Create a link element for downloading
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'data.json'; // Set the download file name
+
+        // Programmatically click the link to trigger the download
+        link.click();
+
+        // Clean up the URL object
+        URL.revokeObjectURL(link.href);
     }
+
 
     handleFileSelection(event) {
         const file = event.target.files[0];
@@ -650,7 +660,7 @@ class UIHandler {
     addButtonListeners() {
         const buttonConfigs = [
             { id: 'impressum-button', handler: () => this.showImpressum() },
-            { id: 'openAlolaManual', handler: () => { window.location.href = './Alola_Manual_new.html'; } },
+            { id: 'openAlolaManual', handler: () => { window.location.href = './Alola_Manual.html'; } },
             { id: 'add_module_button', handler: () => this.openWildcardModuleForm() },
             { id: 'openNRPSForm', handler: () => { this.openNRPSForm(); this.closeWildcardModuleForm(); } },
             { id: 'openPKSForm', handler: () => { this.openPKSForm(); this.closeWildcardModuleForm(); } },
@@ -1324,42 +1334,66 @@ class FileHandler {
     }
 
     getFirstRegion(recordData) {
-    let record_index = 0
-    for (const record of recordData) {
-
-        for (let region_index = 0; region_index < record.regions.length; region_index++) {
-            return [region_index, record_index]
+        let record_index = 0;
+        for (const record of recordData) {
+            for (let region_index = 0; region_index < record.regions.length; region_index++) {
+                return [region_index, record_index];
+            }
+            record_index++;
         }
-        record_index++
     }
-
-}
 
     async loadExampleFile() {
         const response = await fetch("./example_regions.js");
         const content = await response.text();
         const blob = new Blob([content], { type: "text/javascript" });
         this.readFile(blob);
-        
     }
 
     readFile(file) {
         const reader = new FileReader();
 
         reader.addEventListener('load', (event) => {
-            const result = event.target.result.split("var ");
+            const fileContent = event.target.result;
 
-            if (result.length != 5) {
+            try {
+                // Try parsing as JSON first
+                const jsonData = JSON.parse(fileContent);
+                if (jsonData.recordData && jsonData.detailsData) {
+                    // Initialize record using JSON data
+                    this.record = new Record();
+                    if (jsonData.currentGeneMatrix && jsonData.currentBGC && jsonData.regionIndex !== undefined) {
+                        this.record.init_from_state(
+                            jsonData.recordData,
+                            jsonData.detailsData,
+                            jsonData.currentGeneMatrix,
+                            jsonData.currentBGC,
+                            jsonData.regionIndex
+                        );
+                    } else {
+                        this.record.init(jsonData.recordData, jsonData.detailsData);
+                    }
+                    console.log("File loaded as JSON.");
+                    return;
+                }
+            } catch (jsonError) {
+                console.log("File is not a valid JSON, trying antiSMASH format...");
+            }
+
+            // If JSON parsing fails, fallback to antiSMASH format
+            const result = fileContent.split("var ");
+            if (result.length !== 5) {
                 const dropArea = document.getElementById('regionsBar');
-                dropArea.innerHTML = "Input file not antiSMASH output";
+                dropArea.innerHTML = "Input file is not a valid antiSMASH output or JSON file.";
             } else {
                 const recordDataString = result[1].replace("recordData = ", "").trim().slice(0, -1);
                 const recordData = JSON.parse(recordDataString);
-                const details_data = JSON.parse(result[3].trim().replace("details_data = ", "").trim().slice(0, -1));
-
+                const detailsDataString = result[3].replace("details_data = ", "").trim().slice(0, -1);
+                const detailsData = JSON.parse(detailsDataString);
 
                 this.record = new Record();
-                this.record.init(recordData, details_data);
+                this.record.init(recordData, detailsData);
+                console.log("File loaded in antiSMASH format.");
             }
         });
 
@@ -1374,7 +1408,6 @@ class FileHandler {
         reader.readAsText(file);
     }
 
-
     setupDropArea() {
         const dropArea = document.getElementById('regionsBar');
 
@@ -1388,13 +1421,12 @@ class FileHandler {
             event.stopPropagation();
             event.preventDefault();
             const fileList = event.dataTransfer.files;
-            const input_file = fileList[0];
-            this.readFile(input_file);
+            const inputFile = fileList[0];
+            this.readFile(inputFile);
         });
     }
-
-
 }
+
 
 let svgHandler = new SVGHandler();
 let apiService = new APIService(CONFIG.PORT, svgHandler);
@@ -1405,3 +1437,6 @@ uiHandler.addButtonListeners();
 
 session.init();
 document.getElementById("defaultOpen").click();
+document.getElementById('modalButton').addEventListener('click', function () {
+    document.getElementById('modal').classList.add('hidden');
+});

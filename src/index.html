@@ -16,6 +16,20 @@
 </head>
 
 <body>
+    <div class="footer-overlay">
+      This website is free and open to all users and there is no login requirement. This site uses no cookies.
+    </div>
+      <!-- Modal overlay -->
+      <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+          <p>Alola is designed to customize biosynthetic models and explore the biosynthetic potential of a BGC. However, it does <span style="font-weight: 900; color: #E11839;">not reliably predict the final structure</span>
+ of a compound solely based on antiSMASH domain predictions. This is because AS
+          domain predictions are often inaccurate, and the protein order may be incorrect. To improve accuracy, please adjust the
+          model using experimental data.</p>
+          <p>Please click "I understand" to proceed.</p>
+          <button class="modal-button" id="modalButton">I Understand</button>
+        </div>
+      </div>
   <!-- Include external scripts -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.7.1/svg.min.js"></script>
   <script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
@@ -50,10 +64,10 @@
       <strong> Upload file </strong>
     </button>
 
-    <button type="button" class="start_button tooltip" id="shareButton"
+    <!-- <button type="button" class="start_button tooltip" id="shareButton"
       data-tooltip="Copy data in form of url to clipboard, to reload data, paste url into browser.">
       <strong> Share Data </strong>
-    </button>
+    </button> -->
 
     <input type="file" id="fileInput" accept=".js" style="display: none" />
 
