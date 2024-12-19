@@ -18,7 +18,7 @@ var Arrower = {
 Arrower.drawClusterSVG = (function(cluster, height = 40, recordData, regionName) {
   var container = document.createElement("div");
   var draw = SVG(container).size('100%', height).group();
-  let fixedWidth = 1500;
+  let fixedWidth = window.innerWidth * 0.7;
   var scale = (function (val) {
     return (val) / Math.abs(cluster.end - cluster.start) * fixedWidth;
   });

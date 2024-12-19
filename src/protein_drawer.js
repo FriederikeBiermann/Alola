@@ -70,7 +70,7 @@ Proteiner.drawClusterSVG = (function(cluster, height = 90, geneMatrix, recordDat
     var container = document.createElement("div");
     document.getElementById('protein_container')
         .innerHTML = "";
-    let fixedWidth = 1500;
+    let fixedWidth = window.innerWidth * 0.7;
     var scale = (function (val) {
         return (val) / (cluster.end - cluster.start) * fixedWidth;
     });
