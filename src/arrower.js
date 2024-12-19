@@ -38,6 +38,9 @@ Arrower.drawClusterSVG = (function(cluster, height = 40, recordData, regionName)
       if (orf.hasOwnProperty("type")) {
         orf_color = type_colors[orf.type];
       }
+      if (orf.hasOwnProperty("ko") && orf["ko"] === true){
+        orf_color = "#E11839"
+      }
       var pol = draw.polygon(Arrower.toPointString(Arrower.getArrowPoints(orf, cluster, height, scale)))
 
                   .fill(orf_color)

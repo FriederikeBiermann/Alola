@@ -851,7 +851,7 @@ svg text {
 
 }
 
-#reverse_button:active {
+#reverse_button:focus {
   background-color: #E11839;
 }
 
@@ -926,4 +926,8 @@ button:disabled {
   /* Indicate that the button is not clickable */
   opacity: 0.6;
   /* Make the button look less prominent */
+}
+
+.dropdown-content button:focus {
+  background-color: #E11839;
 }

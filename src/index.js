@@ -345,9 +345,11 @@ class Record {
         let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordIndex, this.recordData);
        
         uiHandler.resetUI();
+        this.addButtonListeners()
 
         this.BGC = regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
         this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
+        uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler);
         if (!this.geneMatrixHandler.getDefaultOrientation() && this.firstOpening) {
             this.firstOpening = false;
             const newReverseButton = document.getElementById("reverse_button");
@@ -357,12 +359,12 @@ class Record {
         this.geneMatrixHandler.tailoringArray = this.geneMatrixHandler.findTailoringReactions();
         this.geneMatrixHandler.createGeneMatrix()
         console.log("gene matrix", JSON.stringify(this.geneMatrixHandler.geneMatrix));
-        this.addButtonListeners()
+
         uiHandler.setGeneMatrixHandler(this.geneMatrixHandler);
         let result = this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
         uiHandler.updateUI(this.geneMatrixHandler);
         uiHandler.addDragDrop();
-        uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler);
+       
 
 
         //this.addButtonListeners()
@@ -433,6 +435,7 @@ class Record {
             this.regionName = regionHandler.getRegionName(this.regionIndex, this.recordIndex, this.recordData);
             let cluster_type = this.clusterTypeHandler.getClusterType(this.regionIndex, this.recordIndex, this.recordData);
             this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
+            this.geneMatrixHandler.createGeneMatrix()
             this.geneMatrixHandler.extractAntismashPredictionsFromRegion();
             uiHandler.updateUI(this.geneMatrixHandler);
             uiHandler.addRiPPPrecursorOptions(this.geneMatrixHandler);

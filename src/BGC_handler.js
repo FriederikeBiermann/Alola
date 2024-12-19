@@ -444,25 +444,31 @@ class GeneMatrixHandler {
 
     toggleDisplayedStatus(id) {
         /**
-        * knocks out genes.
-       * @fires clickongene
-       *@input id of gene, gene matrix
-       *@yield changes status in gene matrix + if the real time calculation is checked also fetch from raichu to update structures
-       */
-        id.slice(-11, -1);
-        for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
-            if (this.geneMatrix[geneIndex].id === id) {
-                if (this.geneMatrix[geneIndex].displayed === false) {
-                    this.geneMatrix[geneIndex].displayed = true;
-                    this.geneMatrix[geneIndex].ko = false;
-                }
-                else {
-                    this.geneMatrix[geneIndex].displayed = false;
-                    this.geneMatrix[geneIndex].ko = true;
-                }
+         * Toggles the displayed status and knockout (ko) status for a gene and its corresponding ORF.
+         * @fires clickongene
+         * @input id of gene, gene matrix
+         * @yield Updates gene matrix status and optionally fetches updates from Raichu if real-time calculation is enabled.
+         */
+
+
+        // Update geneMatrix
+        for (let gene of this.geneMatrix) {
+            if (gene.id === id) {
+                gene.displayed = !gene.displayed;
+                gene.ko = !gene.ko;
+                break; // Exit loop once match is found
+            }
+        }
+
+        // Update BGC orfs
+        for (let orf of this.BGC.orfs) {
+            if (orf.locus_tag === id) {
+                orf.ko = !(orf.ko ?? false); // Ensures proper toggling even if orf.ko doesn't exist
+                break; // Exit loop once match is found
             }
         }
     }
+
 
 
 
@@ -1057,27 +1063,6 @@ class GeneMatrixHandler {
         this.historyStack.updateButtonStates();
     }
 
-    setDisplayedStatus(id) {
-        /**
-        * knocks out genes.
-        * @fires clickongene
-        *@input id of gene, gene matrix
-        *@yield changes status in gene matrix + if the real time calculation is checked also fetch from raichu to update structures
-        */
-        id.slice(-11, -1);
-        for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
-            if (this.geneMatrix[geneIndex].id === id) {
-                if (this.geneMatrix[geneIndex].displayed === false) {
-                    this.geneMatrix[geneIndex].displayed = true;
-                    this.geneMatrix[geneIndex].ko = false;
-                }
-                else {
-                    this.geneMatrix[geneIndex].displayed = false;
-                    this.geneMatrix[geneIndex].ko = true;
-                }
-            }
-        }
-    }
 }
 
 class HistoryStack {
