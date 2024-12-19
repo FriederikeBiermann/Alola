@@ -213,6 +213,7 @@ class Record {
         this.wildcardEnzyme = "";
         this.recordData = null;
         this.details_data = null;
+        this.firstOpening = true;
     }
 
     init(recordData, details_data) {
@@ -347,6 +348,12 @@ class Record {
 
         this.BGC = regionHandler.getBGC(this.recordIndex, this.regionIndex, this.recordData, this.details_data);
         this.geneMatrixHandler = new GeneMatrixHandler(this.BGC, this.details_data, this.regionName, cluster_type, this.regionIndex, this.recordData);
+        if (!this.geneMatrixHandler.getDefaultOrientation() && this.firstOpening) {
+            this.firstOpening = false;
+            const newReverseButton = document.getElementById("reverse_button");
+            newReverseButton.click();
+            return;
+        }
         this.geneMatrixHandler.tailoringArray = this.geneMatrixHandler.findTailoringReactions();
         this.geneMatrixHandler.createGeneMatrix()
         console.log("gene matrix", JSON.stringify(this.geneMatrixHandler.geneMatrix));
@@ -482,6 +489,7 @@ class Record {
 
     changeRegionTo(regionName) {
         [this.regionIndex, this.recordIndex] = regionHandler.selectRegion(this.recordData, regionName);
+        this.firstOpening = true;
         this.runAlola();
     }
 

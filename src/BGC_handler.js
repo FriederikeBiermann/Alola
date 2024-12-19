@@ -30,6 +30,19 @@ class GeneMatrixHandler {
         this.terpeneCyclaseOptions = [];
     }
 
+    getDefaultOrientation() {
+        let strandCounter = 0;
+        for (let geneIndex = 0; geneIndex < this.BGC.orfs.length; geneIndex++) {
+            const strand = this.BGC.orfs[geneIndex].strand;
+            if (typeof strand === 'number') {
+                strandCounter += strand;
+            } else {
+                console.warn(`Invalid strand value at index ${geneIndex}:`, strand);
+            }
+        }
+        return strandCounter > 0;
+    }
+
     addRiPPPrecursorListener() {
         const textarea = document.querySelector('#popupFormRiPP textarea');
         if (textarea) {
@@ -1219,8 +1232,6 @@ class RegionHandler {
 
         return BGC;
     }
-
-
 
     
 

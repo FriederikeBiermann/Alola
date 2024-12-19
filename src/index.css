@@ -851,6 +851,10 @@ svg text {
 
 }
 
+#reverse_button:active {
+  background-color: #E11839;
+}
+
 .footer-overlay {
   position: fixed;
   bottom: 0;
