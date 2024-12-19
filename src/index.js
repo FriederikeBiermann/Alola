@@ -1,5 +1,5 @@
 const CONFIG = {
-    PORT: "http://127.0.0.1:8000/",
+    PORT: "https://api-alola.bioinformatics.nl/",
     VIEW_PORT_HEIGHT: window.innerHeight,
     VIEW_PORT_WIDTH: window.innerWidth
 };

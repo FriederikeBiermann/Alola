@@ -92,7 +92,7 @@ limiter = Limiter(key_func=get_remote_address)
 # FastAPI app setup
 app = FastAPI()
 
-frontend_urls = ["http://localhost:3000", "localhost:3000"]
+frontend_urls = ["http://alola.bioinformatics.nl", "alola.bioinformatics.nl", "https://www.alola.bioinformatics.nl", "https://alola.bioinformatics.nl",]
 
 # Add the CORS middleware
 app.add_middleware(
