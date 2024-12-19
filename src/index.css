@@ -14,7 +14,7 @@
 body {
   color: white;
   font-family: 'Catamaran', sans-serif;
-  font-size: 3vh;
+  font-size: 2vh;
   padding-bottom: 10px;
 }
 
@@ -237,7 +237,7 @@ label {
   text-align: center;
   padding: 0.2vh 0.2vh;
   text-decoration: none;
-  font-size: 0.7vw;
+  font-size: 0.6vw;
   text-transform: capitalize;
   text-align: center;
 }
@@ -826,7 +826,7 @@ svg text {
   transition: 0.3s;
   color: white;
   font-family: 'Catamaran', sans-serif;
-  font-size: 2vh;
+  font-size: 1.5vh;
 
 }
 

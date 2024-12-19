@@ -110,8 +110,15 @@ class BGCFetcher {
         svgHandler.updateStructure(raichu_output);
         svgHandler.updateDownloadLinks(raichu_output);
         this.setupSmilesButton(raichu_output.smiles);
-        this.updateMolecularMass(raichu_output.mass);
-        this.updateSumFormula(raichu_output.sum_formula);
+        if (raichu_output.sum_formula.includes("*")){
+            this.updateEstimateMolecularMass(raichu_output.mass);
+            this.updateEstimateSumFormula(raichu_output.sum_formula);
+        }
+        else {
+            this.updateMolecularMass(raichu_output.mass);
+            this.updateSumFormula(raichu_output.sum_formula);
+        }
+
     }
 
     showError(message) {
@@ -131,6 +138,16 @@ class BGCFetcher {
     
     updateSumFormula(sum_formula) {
         document.getElementById("sum_formula_value").innerHTML = `${sum_formula}`;
+    }
+
+    updateEstimateSumFormula(sum_formula){
+        document.getElementById("sum_formula_value").innerHTML = `${sum_formula.replaceAll("*","")} + R`;
+    }
+
+    updateEstimateMolecularMass(mass){
+        let roundedMass = mass.toFixed(4);
+        document.getElementById("molecular_mass_value").innerHTML = `>${roundedMass} Da`;
+
     }
 }
 
