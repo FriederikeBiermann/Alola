@@ -273,7 +273,7 @@ class GeneMatrixHandler {
     }
 
     shouldSetupDomains(gene) {
-        return gene.modules || BIOSYNTHETIC_CORE_ENZYMES.includes(gene.orffunction) || gene.type.includes("biosynthetic");
+        return gene.modules || BIOSYNTHETIC_CORE_ENZYMES.includes(gene.orffunction) || gene.type == "biosynthetic";
     }
 
     setupTailoringEnzymeListeners(gene, geneIndex, elements) {
@@ -865,9 +865,8 @@ class GeneMatrixHandler {
         let acpList = [];
         for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
             if (this.geneMatrix[geneIndex].ko == false && this.geneMatrix[geneIndex].domains.length != 0 &&
-                (this.geneMatrix[geneIndex].hasOwnProperty("modules") ||
-                BIOSYNTHETIC_CORE_ENZYMES.includes(this.geneMatrix[geneIndex].orffunction) ||
-                this.geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+                (BIOSYNTHETIC_CORE_ENZYMES.includes(this.geneMatrix[geneIndex].orffunction) ||
+                this.geneMatrix[geneIndex].type == "biosynthetic")) {
                 for (let domainIndex = 0; domainIndex < this.geneMatrix[geneIndex].domains.length; domainIndex++) {
                     if (this.geneMatrix[geneIndex].domains[domainIndex].ko == false || this.geneMatrix[geneIndex].domains[domainIndex].ko == "None") {
                         if ((this.geneMatrix[geneIndex].domains[domainIndex].type.includes("ACP") ||
@@ -1283,8 +1282,7 @@ class AntismashExtractor {
     let moduleSubtype = "PKS_TRANS";
     let moduleIndex = 0;
     for (let geneIndex = 0; geneIndex < this.geneMatrix.length; geneIndex++) {
-        if (this.geneMatrix[geneIndex].ko == false && (this.geneMatrix[geneIndex].hasOwnProperty(
-            "modules") || BIOSYNTHETIC_CORE_ENZYMES.includes(this.geneMatrix[geneIndex].orffunction) || this.geneMatrix[geneIndex].type.includes("biosynthetic"))) {
+        if (this.geneMatrix[geneIndex].ko == false && (BIOSYNTHETIC_CORE_ENZYMES.includes(this.geneMatrix[geneIndex].orffunction) || this.geneMatrix[geneIndex].type == "biosynthetic")) {
             for (let orfIndex = 0; orfIndex < region.orfs.length; orfIndex++) {
                 let orf = region.orfs[orfIndex];
                 if (this.geneMatrix[geneIndex].id == orf.id) {
@@ -1464,12 +1462,14 @@ class AntismashExtractor {
                                 this.geneMatrix[geneIndex].domains[domainIndex].ko = true
                             };
                             domainArray.push([gene, type, subtype, "None", active, used]);
-                            typesInModule.push(type);
+                            
                             // create new module everytime an ACP or PCP occurs, except if last domain was already ACP
                             if ((type == "ACP" || type == "PCP") && domainArray.length == 1) {
                                 active = "False";
                                 this.geneMatrix[geneIndex].domains[domainIndex].ko = true;
                             }
+                            if (active != "False") { typesInModule.push(type); }
+                            
                             if ((type == "ACP" || type == "PCP") && domainArray.length > 1) {
                                 if (substrate === "" && moduleType == "PKS") {
                                     substrate = "MALONYL_COA";
@@ -1486,6 +1486,12 @@ class AntismashExtractor {
                                 if (moduleType == "PKS") {
                                     domainArrayFiltered = domainArray.filter(domain => domain[1] != "A" && domain[1] != "C" && domain[1] != "E" && domain[1] != "PCP");
                                 }
+                                // make sure amino acids are never a pks substrate
+                                if (Object.values(AMINO_ACIDS).includes(substrate) && substrate !== "glycine") {
+                                    moduleType = "NRPS";
+                                    moduleSubtype = "None";
+                                }
+
                                 // create module arrays
                                 let moduleArray = [moduleType, moduleSubtype, substrate, domainArrayFiltered]
                                 if (moduleArray.length != 0) {
@@ -1507,6 +1513,7 @@ class AntismashExtractor {
                                 typesInModule = [];
                                 moduleType = "PKS";
                                 moduleSubtype = "PKS_TRANS";
+                                substrate = ""
 
                             }
                         }
