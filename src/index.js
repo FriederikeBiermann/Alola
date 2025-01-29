@@ -1389,16 +1389,33 @@ class FileHandler {
                     console.log("File loaded as JSON.");
                     return;
                 }
+                if (jsonData.recordData && jsonData.resultsData) {
+                    // Initialize record using JSON data for AS 8
+                    
+                    this.record = new Record();
+                    if (jsonData.currentGeneMatrix && jsonData.currentBGC && jsonData.regionIndex !== undefined) {
+                        this.record.init_from_state(
+                            jsonData.recordData,
+                            jsonData.resultsData,
+                            jsonData.currentGeneMatrix,
+                            jsonData.currentBGC,
+                            jsonData.regionIndex
+                        );
+                    } else {
+                        this.record.init(jsonData.recordData, jsonData.resultsData);
+                    }
+                    console.log("File loaded as JSON.");
+                    return;
+                }
             } catch (jsonError) {
-                console.log("File is not a valid JSON, trying antiSMASH format...");
+                console.log("File is not a valid JSON file");
             }
 
             // If JSON parsing fails, fallback to antiSMASH format
             const result = fileContent.split("var ");
-            if (result.length !== 5) {
-                const dropArea = document.getElementById('regionsBar');
-                dropArea.innerHTML = "Input file is not a valid antiSMASH output or JSON file.";
-            } else {
+            console.log(result.length)
+            if (result.length == 5) {
+
                 const recordDataString = result[1].replace("recordData = ", "").trim().slice(0, -1);
                 const recordData = JSON.parse(recordDataString);
                 const detailsDataString = result[3].replace("details_data = ", "").trim().slice(0, -1);
@@ -1406,7 +1423,22 @@ class FileHandler {
 
                 this.record = new Record();
                 this.record.init(recordData, detailsData);
-                console.log("File loaded in antiSMASH format.");
+                console.log("File loaded in antiSMASH 7 format.");
+            }
+            else if (result.length == 4){
+                const recordDataString = result[1].replace("recordData = ", "").trim().slice(0, -1);
+                const recordData = JSON.parse(recordDataString);
+                const detailsDataString = result[3].replace("resultsData = ", "").trim().slice(0, -1);
+                const detailsData = JSON.parse(detailsDataString);
+
+                this.record = new Record();
+                this.record.init(recordData, detailsData);
+                console.log("File loaded in antiSMASH 8 format.");
+
+            }
+            else {
+                const dropArea = document.getElementById('regionsBar');
+                dropArea.innerHTML = "Input file is not a valid antiSMASH output or JSON file.";
             }
         });
 

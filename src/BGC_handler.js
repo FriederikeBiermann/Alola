@@ -552,8 +552,8 @@ class GeneMatrixHandler {
 
     addModulesGeneMatrix(geneMatrix) {
         let region = this.details_data.hasOwnProperty("nrpspks") ? this.details_data.nrpspks[this.regionName] : this.details_data[this.regionName];
-
-        if (region) {
+        region = region.hasOwnProperty("antismash.outputs.html.visualisers.nrps_pks_domains") ? region["antismash.outputs.html.visualisers.nrps_pks_domains"] : region;
+        if (!(region == null) && region.hasOwnProperty("orfs")) {
             geneMatrix.forEach((gene, geneIndex) => {
                 let orf = region.orfs.find(orf => orf.id === gene.id);
                 if (orf && orf.hasOwnProperty("modules")) {
@@ -826,9 +826,17 @@ class GeneMatrixHandler {
             return;
         }
         if (this.details_data.hasOwnProperty("nrpspks")) {
-            this.details_data["nrpspks"][this.regionName].orfs.push(wildcard_gene);
+            
+            if (details_data["nrpspks"][this.regionName].hasOwnProperty("antismash.outputs.html.visualisers.nrps_pks_domains"))
+            { this.details_data["nrpspks"][this.regionName].orfs["antismash.outputs.html.visualisers.nrps_pks_domains"].push(wildcard_gene); }
+            else{
+                this.details_data["nrpspks"][this.regionName].orfs.push(wildcard_gene);
+            }
         } else {
-            this.details_data[this.regionName].orfs.push(wildcard_gene);
+            if (details_data[this.regionName].hasOwnProperty("antismash.outputs.html.visualisers.nrps_pks_domains")) { this.details_data[this.regionName].orfs["antismash.outputs.html.visualisers.nrps_pks_domains"].push(wildcard_gene); }
+            else {
+                this.details_data[this.regionName].orfs.push(wildcard_gene);
+            }
         }
     }
 
@@ -849,10 +857,6 @@ class GeneMatrixHandler {
 
     getGeneMatrix() {
         return this.geneMatrix;
-    }
-
-    getBGC() {
-        return this.BGC;
     }
 
     getDetailsData() {
@@ -1190,8 +1194,8 @@ class RegionHandler {
 
         let regionName = this.getRegionName(regionIndex, recordIndex, recordData);
         let regionData = details_data.hasOwnProperty("nrpspks") ? details_data.nrpspks[regionName] : details_data[regionName];
-
-        if (regionData) {
+        regionData = regionData.hasOwnProperty("antismash.outputs.html.visualisers.nrps_pks_domains") ? regionData["antismash.outputs.html.visualisers.nrps_pks_domains"] : regionData;
+        if (!(regionData == null) && regionData.hasOwnProperty("orfs")) {
             BGC.orfs.forEach(orf => {
                 let detailedOrf = regionData.orfs.find(o => o.id === orf.locus_tag);
                 if (detailedOrf) {
@@ -1249,7 +1253,8 @@ class AntismashExtractor {
     else {
         region = this.details_data[this.regionName];
     }
-        if (!region) {
+    region = region.hasOwnProperty("antismash.outputs.html.visualisers.nrps_pks_domains") ? region["antismash.outputs.html.visualisers.nrps_pks_domains"] : region;
+        if (!region || !region.hasOwnProperty("orfs")) {
             console.log("Region not found for index:", this.regionName);
             return [outputForRaichu, 1]; // Return empty output and default starterACP
         }
