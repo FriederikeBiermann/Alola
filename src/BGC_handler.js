@@ -830,7 +830,7 @@ class GeneMatrixHandler {
         }
         if (this.details_data.hasOwnProperty("nrpspks")) {
             
-            if (details_data["nrpspks"][this.regionName].hasOwnProperty("antismash.outputs.html.visualisers.nrps_pks_domains"))
+            if (this.details_data["nrpspks"][this.regionName].hasOwnProperty("antismash.outputs.html.visualisers.nrps_pks_domains"))
             { this.details_data["nrpspks"][this.regionName].orfs["antismash.outputs.html.visualisers.nrps_pks_domains"].push(wildcard_gene); }
             else{
                 this.details_data["nrpspks"][this.regionName].orfs.push(wildcard_gene);
