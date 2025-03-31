@@ -1,5 +1,6 @@
-@media screen and (orientation: portrait) {
-  html{
+@media only screen and (orientation: portrait) and (min-device-width: 320px) and (max-device-width: 1024px) {
+
+  html {
     transform: rotate(90deg);
     transform-origin: right top;
     width: 100vh;
