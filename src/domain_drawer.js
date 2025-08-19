@@ -264,16 +264,40 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler)
     function createOptionButton(gene, moduleIndex, domainIndex, optionIndex, shortOption, fullOption) {
         const button = document.createElement('button');
         button.id = `${gene.index}_${moduleIndex}_${domainIndex}_${optionIndex}`;
-        button.onclick = () => geneMatrixHandler.changeSelectedOption(gene.index, moduleIndex, domainIndex, shortOption, optionIndex);
+
+        const domainInfo = gene.modules[moduleIndex].domains[domainIndex];
+        // Some A/CAL domains appear as abbreviation 'A'/'CAL' or as type 'AMP-binding'/'CAL_domain'.
+        const isAminoAcidDomain = (
+            domainInfo.abbreviation === 'A' ||
+            domainInfo.abbreviation === 'CAL' ||
+            domainInfo.type === 'AMP-binding' ||
+            domainInfo.type === 'CAL_domain'
+        );
+        // For A/CAL, always use the full option label (e.g., "aspartic acid").
+        const optionValue = isAminoAcidDomain ? fullOption : shortOption;
+
+        button.onclick = () => geneMatrixHandler.changeSelectedOption(
+            gene.index,
+            moduleIndex,
+            domainIndex,
+            optionValue,
+            optionIndex
+        );
+        // Keep hover behavior as before; it only affects visual atom highlighting for non-AA options.
         button.onmouseenter = () => svgHandler.hoverInAtom(shortOption);
         button.onmouseout = () => svgHandler.hoverOutAtom(shortOption);
         button.textContent = fullOption.replaceAll("_", " ");
 
-        const domainInfo = gene.modules[moduleIndex].domains[domainIndex];
-        if (shortOption === domainInfo.default_option) {
+        const isDefault = isAminoAcidDomain
+            ? (fullOption === domainInfo.default_option)
+            : (shortOption === domainInfo.default_option);
+        const isSelected = isAminoAcidDomain
+            ? (fullOption === domainInfo.selected_option)
+            : (shortOption === domainInfo.selected_option);
+
+        if (isDefault) {
             button.style.backgroundColor = "lightgrey";
-            //button.id = `de${button.id}`;
-        } else if (shortOption === domainInfo.selected_option) {
+        } else if (isSelected) {
             button.style.backgroundColor = "#E11839";
         }
 
@@ -885,3 +909,4 @@ Domainer.showToolTip = (function (html, handler) {
         divTooltip.addClass("dropdown-content");
     }
 });
+

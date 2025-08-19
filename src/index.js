@@ -132,15 +132,15 @@ const AMINO_ACIDS = {
     "val": "valine",
     "3-me-glu": "4-methylglutamic acid",
     "4ppro": "**Unknown**",
-    "aad": "2-aminoadipicacid",
-    'abu': "2-aminobutyricacid",
+    "aad": "2-aminoadipic acid",
+    'abu': "2-aminobutyric acid",
     'aeo': "2-amino-9,10-epoxy-8-oxodecanoid acid",
     'ala-b': "beta-alanine",
     'ala-d': "d-alanine",
     'allo-thr': "allo-threonine",
     'b-ala': "beta-alanine",
     'beta-ala': "beta-alanine",
-    'bmt': "4-butenyl-4-methylthreonine",
+    'bmt': "4-butenyl-4-methyl threonine",
     'cap': "capreomycidine",
     'bht': "**Unknown**",
     'dab': "2,4-diaminobutyric acid",
@@ -169,7 +169,7 @@ const AMINO_ACIDS = {
     'alle': "allo-isoleucine",
     'alaninol': "alaninol",
     'n-(1,1-dimethyl-1-allyl)trp': "**Unknown**",
-    'd-lyserg': "d-lysergicacid",
+    'd-lyserg': "d-lysergic acid",
     'ser-thr': "**Unknown**",
     'mephe': "**Unknown**",
     'haorn': "**Unknown**",
@@ -178,7 +178,7 @@ const AMINO_ACIDS = {
     's-nmethoxy-trp': "**Unknown**",
     'alpha-hydroxy-isocaproic-acid': "**Unknown**",
     'mehoval': "**Unknown**",
-    '2-oxo-isovaleric-acid': "alpha-ketoisovalericacid",
+    '2-oxo-isovaleric-acid': "alpha-ketoisovaleric acid",
     'aoda': "**Unknown**",
     'x': "**Unknown**",
     'foh-orn': "N5-formyl-N5-hydroxyornithine"
@@ -1491,3 +1491,4 @@ document.addEventListener('DOMContentLoaded', () => {
         checkbox.checked = true; // Automatically check the checkbox for the real time calculation
     }
 });
+

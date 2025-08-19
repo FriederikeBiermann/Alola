@@ -92,7 +92,11 @@ limiter = Limiter(key_func=get_remote_address)
 # FastAPI app setup
 app = FastAPI()
 
-frontend_urls = ["http://alola.bioinformatics.nl", "alola.bioinformatics.nl", "https://www.alola.bioinformatics.nl", "https://alola.bioinformatics.nl",]
+frontend_urls = [
+    "http://alola.bioinformatics.nl",
+    "https://alola.bioinformatics.nl",
+    "alola.bioinformatics.nl",
+]
 
 # Add the CORS middleware
 app.add_middleware(
@@ -242,6 +246,24 @@ async def process_pathway(
             "input_data": validated_input.dict(),
         }
     )
+    # Extra debug for NRPS/PKS: show a concise summary of modules & substrates
+    if pathway_class.__name__ == "NRPSPKSPathway":
+        try:
+            cr = validated_input.dict().get("clusterRepresentation", [])
+            summary = [
+                {
+                    "module_index": i,
+                    "type": m[0] if len(m) > 0 else None,
+                    "substrate": m[2] if len(m) > 2 else None,
+                    "domain_count": (
+                        len(m[3]) if len(m) > 3 and isinstance(m[3], list) else None
+                    ),
+                }
+                for i, m in enumerate(cr)
+            ]
+            logging.debug({"clusterRepresentationSummary": summary})
+        except Exception:
+            logging.debug("Failed to summarize clusterRepresentation for logging.")
     return await process_with_error_handling(
         pathway_class(validated_input.dict()).process
     )
@@ -319,14 +341,14 @@ async def validate_json(request: Request):
 
 # Endpoint to receive data from Antismash
 @app.post("/api/antismash/receive")
-async def receive_antismash_data(
-    request: Request
-):
+async def receive_antismash_data(request: Request):
     # Validate the request origin and JSON data
     logging.debug(f"Headers received: {request.headers}")
 
     if not request.headers["anti_smash_header"]:
-        raise HTTPException(status_code=400, detail="Missing 'anti_smash_header' in request")
+        raise HTTPException(
+            status_code=400, detail="Missing 'anti_smash_header' in request"
+        )
 
     await is_from_antismash(request, request.headers["anti_smash_header"])
     data = await validate_json(request)
@@ -375,3 +397,4 @@ async def cleanup_expired_data():
 async def startup_event():
     # Run cleanup task in the background
     asyncio.create_task(cleanup_expired_data())
+

@@ -1,6 +1,7 @@
 import logging
+import difflib
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 from pikachu.chem.structure import Structure
 from pikachu.general import structure_to_smiles, svg_string_from_structure
@@ -25,6 +26,12 @@ from raichu.representations import (
     IsomerizationRepresentation,
     MethylShiftRepresentation,
 )
+from raichu.smiles_handling import get_smiles, UNKNOWN_SUBSTRATE, load_smiles
+
+# Preload known substrates once for fuzzy matching
+_KNOWN_SUBSTRATES: Set[str] = set(load_smiles().keys())
+if UNKNOWN_SUBSTRATE in _KNOWN_SUBSTRATES:
+    _KNOWN_SUBSTRATES.remove(UNKNOWN_SUBSTRATE)
 
 
 def process_svg(svg_string, svg_id):
@@ -243,10 +250,128 @@ class NRPSPKSPathway(BasePathway):
         self.cluster_representation = self._format_modular_cluster(
             self.antismash_input.get("clusterRepresentation", [])
         )
+        # Log raw modules summary
+        try:
+            logging.debug(
+                {
+                    "event": "nrpspks.init.modules_raw",
+                    "modules": [
+                        {
+                            "i": i,
+                            "type": m.type,
+                            "substrate": m.substrate,
+                            "domains": len(getattr(m, "domains", []) or []),
+                        }
+                        for i, m in enumerate(self.cluster_representation.modules)
+                    ],
+                }
+            )
+        except Exception:
+            logging.debug("Failed to log raw modules summary.")
+        # Sanitize NRPS substrates: fall back to **Unknown** if a label is not recognized by RAIChU
+        self._sanitize_nrps_substrates()
+        try:
+            logging.debug(
+                {
+                    "event": "nrpspks.init.modules_sanitized",
+                    "modules": [
+                        {
+                            "i": i,
+                            "type": m.type,
+                            "substrate": m.substrate,
+                            "domains": len(getattr(m, "domains", []) or []),
+                        }
+                        for i, m in enumerate(self.cluster_representation.modules)
+                    ],
+                }
+            )
+        except Exception:
+            logging.debug("Failed to log sanitized modules summary.")
         self.cluster: ModularCluster = build_cluster(
             self.cluster_representation, strict=False
         )
         logging.info("NRPSPKSPathway initialized and cluster built.")
+
+    def _sanitize_nrps_substrates(self) -> None:
+        """Ensure NRPS substrates are valid; otherwise, set to UNKNOWN.
+
+        This prevents failures when the frontend label does not match the
+        backend substrate list by replacing unrecognized names with
+        the canonical unknown token understood by RAIChU.
+        """
+        try:
+            modules = getattr(self.cluster_representation, "modules", [])
+        except Exception:
+            modules = []
+
+        def _canonicalize_name(name: Optional[str]) -> Optional[str]:
+            if name is None:
+                return None
+            try:
+                s = str(name).strip().strip("\"").strip("'")
+            except Exception:
+                return name
+            # Collapse accidental double underscores and convert to spaces
+            s = s.replace("__", "_").replace("_", " ")
+            # If starts with d-/l- in lowercase, try uppercasing the prefix
+            if s.startswith("d-"):
+                return "D-" + s[2:]
+            if s.startswith("l-"):
+                return "L-" + s[2:]
+            return s
+
+        def _closest_known(name: str, cutoff: float = 0.82) -> Optional[str]:
+            try:
+                candidates = difflib.get_close_matches(name, list(_KNOWN_SUBSTRATES), n=1, cutoff=cutoff)
+                return candidates[0] if candidates else None
+            except Exception:
+                return None
+
+        for module in modules:
+            try:
+                if getattr(module, "type", None) == "NRPS":
+                    substrate = getattr(module, "substrate", None)
+                    if substrate is None:
+                        continue
+                    try:
+                        # Will raise ValueError if not known
+                        get_smiles(substrate)
+                    except Exception:
+                        # Try a canonicalized variant (e.g., D-/L- prefix normalization)
+                        canonical = _canonicalize_name(substrate)
+                        if canonical and canonical != substrate:
+                            try:
+                                get_smiles(canonical)
+                                logging.info(
+                                    {
+                                        "event": "nrps.substrate.autocorrect",
+                                        "from": substrate,
+                                        "to": canonical,
+                                    }
+                                )
+                                setattr(module, "substrate", canonical)
+                                continue
+                            except Exception:
+                                pass
+                        # Try fuzzy matching to a known substrate label
+                        suggestion = _closest_known(canonical or substrate)
+                        if suggestion:
+                            logging.info(
+                                {
+                                    "event": "nrps.substrate.fuzzy_match",
+                                    "from": substrate,
+                                    "to": suggestion,
+                                }
+                            )
+                            setattr(module, "substrate", suggestion)
+                            continue
+                        logging.warning(
+                            f"Unrecognized NRPS substrate '{substrate}', falling back to {UNKNOWN_SUBSTRATE}."
+                        )
+                        setattr(module, "substrate", UNKNOWN_SUBSTRATE)
+            except Exception:
+                # Be conservative: never break the whole request on sanitation
+                continue
 
     def _format_modular_cluster(self, raw_cluster: List[Any]) -> ClusterRepresentation:
         """Formats the raw cluster data into a ClusterRepresentation.
@@ -283,8 +408,20 @@ class NRPSPKSPathway(BasePathway):
             Dict[str, Any]: The response data containing SVGs, SMILES, mass, and other molecular information.
         """
         logging.info("Processing NRPS/PKS pathway.")
-        self.cluster.compute_structures(compute_cyclic_products=False)
-        self.cluster.do_tailoring()
+        try:
+            logging.debug("compute_structures: start")
+            self.cluster.compute_structures(compute_cyclic_products=False)
+            logging.debug("compute_structures: done")
+        except Exception as e:
+            logging.error({"event": "compute_structures.error", "error": str(e)})
+            raise
+        try:
+            logging.debug("do_tailoring: start")
+            self.cluster.do_tailoring()
+            logging.debug("do_tailoring: done")
+        except Exception as e:
+            logging.error({"event": "do_tailoring.error", "error": str(e)})
+            raise
         self.tailored_product = self.cluster.chain_intermediate.deepcopy()
         self.final_product = self._perform_cyclization()
         self._draw_pathway_mass_smiles_tailoring_sites()
@@ -537,3 +674,4 @@ class TerpenePathway(BasePathway):
                 "structureForTailoring": svg_tailoring,
             },
         )
+

@@ -162,7 +162,6 @@ class RiPPHandler extends BGCFetcher {
             rippPrecursorName: geneMatrixHandler.rippPrecursorGene,
             rippFullPrecursor: geneMatrixHandler.rippFullPrecursor
         });
-
         let url = `${this.port}api/alola/ripp?antismash_input=${encodeURIComponent(data_string)}`;
         const response = await fetch(url);
         const raichu_output = await response.json();
@@ -196,7 +195,6 @@ class TerpeneHandler extends BGCFetcher {
             tailoring: geneMatrixHandler.tailoringArray,
             terpene_cyclase_type: "Class_1"
         });
-
         let url = `${this.port}api/alola/terpene?antismash_input=${encodeURIComponent(data_string)}`;
         const response = await fetch(url);
         const raichu_output = await response.json();

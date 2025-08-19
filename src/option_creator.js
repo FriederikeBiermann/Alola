@@ -5,15 +5,15 @@ function addStringToArray(string, array) {
 var OptionCreator = {
   version: "1.0.0"
 };
-OptionCreator.createOptionsTerpeneCyclase = (function(atomsForCyclisation = none, tailoringSites = none){
-  options = {"Cyclization": atomsForCyclisation,
+OptionCreator.createOptionsTerpeneCyclase = (function(atomsForCyclisation = undefined, tailoringSites = undefined){
+  const options = {"Cyclization": atomsForCyclisation,
     "DOUBLE_BOND_ISOMERASE": tailoringSites['DOUBLE_BOND_ISOMERASE'],
     "Methyl_shift" : tailoringSites['METHYL_MUTASE']};
   return options
   
 })
 
-OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = none) {
+OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation = undefined) {
   let AT_index = 0;
   for (let geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
     for (let domainIndex = 0; domainIndex < geneMatrix[geneIndex].domains.length; domainIndex++) {
@@ -28,8 +28,11 @@ OptionCreator.createOptionsDomains = (function (geneMatrix, atomsForCyclisation 
 //add substrate specifities for NRPS
 if (domain.abbreviation=="A" || domain.abbreviation == "CAL") {
   domain.domainOptions = [...new Set(Object.values(AMINO_ACIDS))];
-  domain.default_option = AMINO_ACIDS[domain.predictions[0][1].replace(
-  "-", '').toLowerCase()];
+  // Use the same lookup strategy as elsewhere: keep hyphens, just lowercase
+  const predKey = (domain.predictions && domain.predictions[0] && domain.predictions[0][1])
+    ? domain.predictions[0][1].toLowerCase()
+    : undefined;
+  domain.default_option = (predKey && AMINO_ACIDS[predKey]) ? AMINO_ACIDS[predKey] : "**Unknown**";
 AT_index += 1;
 }
 //add substrate specifities for PKS
@@ -191,3 +194,4 @@ return geneMatrix;
 
 
 //add options for cyclization
+
