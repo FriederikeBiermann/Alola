@@ -49,7 +49,7 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     container.style.display = 'inline-flex';
     container.style.alignItems = 'stretch'; // Stretch children to full height
     container.style.width = String(width) + "px";
-    container.style.height = '100%'; // Take full height of parent
+    container.style.height = '200%'; // Take full height of parent
 
     var innerContainer = document.createElement('div');
     innerContainer.id = id;
@@ -90,14 +90,26 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
     RiPPer.leaveSpace(50, "arrow1", scale, true, "Tailoring"); // Arrow between precursor and tailoring enzymes
     RiPPer.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
     RiPPer.leaveSpace(space, "tailoredProduct", scale);
-
-    if (document.getElementById("wildcardProtease").checked || proteaseOptions) {
+    protease = give_protease(geneMatrix);
+    if (document.getElementById("wildcardProtease").checked || protease) {
+        
         RiPPer.leaveSpace(50, "arrow2", scale, true, "Cleavage"); // Arrow between tailored product and protease
-        RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler);
+        RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler, protease);
         RiPPer.leaveSpace(space, "cleavedProduct_space", scale);
     }
 
     return $(container).find("svg")[0];
+    
+    function give_protease(geneMatrix) {
+        let gene = geneMatrix[geneIndex]
+        if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
+            if (gene.tailoringEnzymeAbbreviation == "PROT" || gene.tailoringEnzymeAbbreviation == "PEP") {
+                return gene
+            }
+        }
+    }
+    return null
+
 };
 
 
@@ -181,8 +193,8 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
             innerDropdownContent.innerHTML =
                 ""
             if (proteaseOptions){
-                createProteaseOptions(proteaseOptions, "protease", cleavageSites, innerDropdownContent);}
-
+                createProteaseOptions(proteaseOptions, "protease", cleavageSites, innerDropdownContent);
+            }
 
             var draw = SVG(innerDropdownButton)
                 .size(String(size) + "px", height)
@@ -210,6 +222,7 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
 
         return innerDropdownContent;
     }
+
 
     function createOptionButton(option, geneIndex, cleavageSites, geneMatrixHandler) {
         const shortOption = getShortOption(option);
@@ -268,7 +281,9 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneMat
         let gene = geneMatrix[geneIndex]
         if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
             let domainIdentifier = "tailoringEnzyme" + geneMatrix[geneIndex].id.replace(".", "_")
-
+            if (gene.tailoringEnzymeAbbreviation == "PROT" || gene.tailoringEnzymeAbbreviation == "PEP") {
+                continue
+            }
             let points = Domainer.getArrowPoints(
                 height / 4, height, height, scale)
             let abbreviation = gene.tailoringEnzymeAbbreviation;

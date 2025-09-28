@@ -26,6 +26,7 @@ from raichu.representations import (
     IsomerizationRepresentation,
     MethylShiftRepresentation,
     WaterQuenchingRepresentation,
+    CleavageSiteRepresentation,
 )
 from raichu.smiles_handling import get_smiles, UNKNOWN_SUBSTRATE, load_smiles
 
@@ -101,7 +102,7 @@ class BasePathway:
         logging.debug(f"Computed sum_formula: {self.sum_formula}")
 
         reactions = []
-
+        
         if self.cluster.macrocyclisation_representations:
             reactions.append("cyclisation")
 
@@ -246,7 +247,92 @@ class RiPPPathway(BasePathway):
             },
         )
 
+    def _draw_pathway_mass_smiles_tailoring_sites(self):
+        # we need the full structure to get accurate cleavage
+        cleavage_sites = self._get_cleavage_sites(self.antismash_input)
+        proxy_cluster: RiPPCluster = RiPPCluster(
+            self.antismash_input["rippPrecursorName"],
+            self.antismash_input["rippFullPrecursor"],
+            self.antismash_input["rippFullPrecursor"],
+            cleavage_sites=cleavage_sites
+            macrocyclisations=self.macrocyclisations,
+            tailoring_representations=self.tailoring_reactions,
+        )
+        if not self.final_product or not self.cluster or not self.tailored_product:
+            logging.error("Final product or cluster is not initialized before drawing.")
+            raise ValueError("Final product and cluster must be initialized.")
 
+        self.mass = self.final_product.get_mass()
+        logging.debug(f"Computed mass: {self.mass}")
+
+        self.sum_formula = self.final_product.get_sum_formula()
+        logging.debug(f"Computed sum_formula: {self.sum_formula}")
+
+        reactions = []
+        
+        if self.cluster.macrocyclisation_representations:
+            reactions.append("cyclisation")
+
+        if self.cluster.tailoring_representations:
+            reactions.append("tailoring")
+
+        if cleavage_sites:
+            reactions.append("cleavage")
+
+        if reactions:
+            self.pathway_svg = proxy_cluster.draw_pathway(
+                order=reactions, as_string=True
+            )
+            logging.debug("Generated pathway SVG.")
+        else:
+            self.pathway_svg = "not_able_to_draw_pathway"
+            logging.warning("No pathway SVG could be generated.")
+
+        try:
+            self.smiles = structure_to_smiles(self.final_product, kekule=False)
+            logging.debug(f"Generated SMILES: {self.smiles}")
+        except Exception as e:
+            logging.error(f"Failed to generate SMILES: {e}")
+            self.smiles = "not_able_to_compute_smiles"
+
+        self.tailoring_sites = get_tailoring_sites_atom_names(
+            self.cluster.chain_intermediate
+        )
+        logging.debug(f"Identified tailoring sites: {self.tailoring_sites}")
+
+        # Flatten the lists for C_METHYLTRANSFERASE and DOUBLE_BOND_REDUCTASE without numpy
+        c_methyl = [item for sublist in self.tailoring_sites["C_METHYLTRANSFERASE"] for item in (sublist if isinstance(sublist, list) else [sublist])]
+        double_bond = [item for sublist in self.tailoring_sites["DOUBLE_BOND_REDUCTASE"] for item in (sublist if isinstance(sublist, list) else [sublist])]
+        self.tailoring_sites["WATER_QUENCHING"] = sorted(
+            [list(t) for t in set((atom,) for atom in c_methyl + double_bond)]
+        )
+
+        self.atoms_for_cyclisation = [
+            str(atom)
+            for atom in find_all_o_n_atoms_for_cyclization(self.tailored_product)
+            if str(atom) != "O_0"
+        ]
+        logging.debug(f"Identified atoms for cyclisation: {self.atoms_for_cyclisation}")
+
+    def _get_cleavage_sites(self) -> List[CleavageSiteRepresentation]:
+        cleavage_sites = []
+        # by searching where the core peptide is in the full peptide, get cleavage sites containing the aa and the aa index, if also contains follower peptide, make second cleavage site
+        index_core_peptide = self.antismash_input["rippFullPrecursor"].find(self.antismash_input["rippCorePeptide"])
+        if index_core_peptide > 0:
+            cleavage_sites.append(CleavageSiteRepresentation(
+                amino_acid=self.antismash_input["rippFullPrecursor"][index_core_peptide - 1],
+                amino_acid_index=index_core_peptide - 1,
+                peptide_fragment_to_keep="N_TERMINAL"
+            ))
+        # check if there is a follower peptide
+        index_follower_peptide = index_core_peptide + len(self.antismash_input["rippCorePeptide"])
+        if index_follower_peptide < len(self.antismash_input["rippFullPrecursor"]):
+            cleavage_sites.append(CleavageSiteRepresentation(
+                amino_acid=self.antismash_input["rippFullPrecursor"][index_follower_peptide],
+                amino_acid_index=index_follower_peptide,
+                peptide_fragment_to_keep="C_TERMINAL"
+            ))
+        return cleavage_sites
 class NRPSPKSPathway(BasePathway):
     def __init__(self, antismash_input: str):
         """Initializes the NRPSPKSPathway with given antiSMASH input data.

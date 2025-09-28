@@ -541,7 +541,7 @@ class Record {
             if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
-                if (document.getElementById("wildcardProtease").checked) {
+                if (document.getElementById("wildcardProtease").checked || document.getElementById("innerIntermediateContainer_cleavedProduct_space")) {
                     svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
                 }
             }
@@ -679,7 +679,7 @@ class Record {
                 if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
                     svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
                     svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
-                    if (document.getElementById("wildcardProtease").checked) {
+                    if (document.getElementById("wildcardProtease").checked || document.getElementById("innerIntermediateContainer_cleavedProduct_space")) {
                         svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
                     }
                 }
@@ -696,7 +696,7 @@ class Record {
                 if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
                     svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
                     svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
-                    if (document.getElementById("wildcardProtease").checked) {
+                    if (document.getElementById("wildcardProtease").checked || document.getElementById("innerIntermediateContainer_cleavedProduct_space")) {
                         svgHandler.updateIntermediateContainer("innerIntermediateContainer_cleavedProduct_space", raichu_output.svg, "intermediate_drawing_cleavage", "cleavedProduct");
                     }
                 }
