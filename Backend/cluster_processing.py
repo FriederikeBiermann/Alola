@@ -681,6 +681,8 @@ class TerpenePathway(BasePathway):
             for wq in self.antismash_input.get("water_quenching", [])
             if len(wq) > 0
         ]
+        print(self.water_quenching)
+        print(self.antismash_input.get("water_quenching", []))
         self.cluster: TerpeneCluster = TerpeneCluster(
             self.antismash_input["gene_name_precursor"],
             self.precursor,
@@ -727,9 +729,11 @@ class TerpenePathway(BasePathway):
 
         # Perform any post-cyclization terpene modifications that are wired in the cluster
         # Methyl shift is invoked inside macrocyclization; water quenching is separate
+        print(self.water_quenching)
         if self.water_quenching:
             try:
                 self.cluster.do_water_quenching()
+                print("quenched")
             except Exception as e:
                 logging.error({"event": "terpene.water_quenching.error", "error": str(e)})
 

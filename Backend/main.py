@@ -59,10 +59,10 @@ class TerpenePathwayInput(BaseModel):
     cyclization: Optional[List[List[str]]] = Field(default_factory=list)
     double_bond_isomerase: Optional[List[List[str]]] = Field(default_factory=list)
     methyl_mutase: Optional[List[List[str]]] = Field(default_factory=list)
+    water_quenching: Optional[List[Any]] = Field(default_factory=list)
     tailoring: Optional[List[List[Union[str, List[List[str]]]]]] = Field(
         default_factory=list
     )
-
 
 process_pool = ProcessPoolExecutor(max_workers=8)
 
