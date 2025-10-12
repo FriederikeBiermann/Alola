@@ -53,7 +53,8 @@ Terpener.drawArrow = function (baseWidth, height, label = null) {
 Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null, parentCell = null) {
     const domainContainer = document.getElementById('domain_container');
     const targetParent = parentCell || domainContainer;
-    const clusterHeight = domainContainer ? domainContainer.clientHeight || 90 : 90;
+    // Always use 20% of the viewport height for cluster height (fixed layout baseline)
+    const clusterHeight = Math.round(window.innerHeight * 0.20);
 
     if (includeArrow) {
         const container = document.createElement('div');
