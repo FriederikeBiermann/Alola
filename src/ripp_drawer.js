@@ -206,7 +206,46 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
     RiPPer._lastDrawParams = { geneMatrix, proteaseOptions, height, cleavageSites, geneMatrixHandler };
     attachResizeObserver();
 
+    // Normalize heights & arrow vertical alignment
+    setTimeout(() => unifyLayoutHeights(container), 0);
+
     return $(container).find('svg')[0];
+
+    function unifyLayoutHeights(root) {
+        const structureIds = ['precursor','tailoredProduct','cleavedProduct_space'];
+        const svgEntries = [];
+        structureIds.forEach(id => {
+            const c = root.querySelector(`#innerIntermediateContainer_${id}`);
+            if (!c) return;
+            const svg = c.querySelector('svg');
+            if (!svg) return;
+            try { const bbox = svg.getBBox(); svgEntries.push({container:c, svg, bbox}); } catch(_) {}
+        });
+        if (svgEntries.length === 0) return;
+        const targetHeight = Math.max(...svgEntries.map(e => e.bbox.height));
+        svgEntries.forEach(e => {
+            if (e.bbox.height === 0) return;
+            const scale = targetHeight / e.bbox.height;
+            let g = e.svg.querySelector('g[data-unify]');
+            if (!g) {
+                g = document.createElementNS('http://www.w3.org/2000/svg','g');
+                g.setAttribute('data-unify','true');
+                while (e.svg.firstChild) g.appendChild(e.svg.firstChild);
+                e.svg.appendChild(g);
+            }
+            g.setAttribute('transform', `scale(${scale})`);
+            e.svg.setAttribute('viewBox', `${e.bbox.x} ${e.bbox.y} ${e.bbox.width} ${e.bbox.height}`);
+            e.svg.style.height = targetHeight + 'px';
+            e.svg.style.width = '100%';
+            e.container.style.height = targetHeight + 'px';
+        });
+        // Align arrow containers to same height
+        root.querySelectorAll("div[id^='arrow']").forEach(arrowC => {
+            arrowC.style.height = targetHeight + 'px';
+            arrowC.style.display = 'flex';
+            arrowC.style.alignItems = 'center';
+        });
+    }
 
     function elevateBoxesIntoWrapper(wrapper) {
         const boxes = Array.from(container.querySelectorAll('.box')).filter(b => b.parentElement === container && !wrapper.contains(b));
