@@ -52,11 +52,9 @@ RiPPer.drawArrow = function (baseWidth, height, label = null) {
 };
 
 RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null) {
-    // Width-focused boundary: prevent child SVGs from expanding horizontally beyond this width
     const domainContainer = document.getElementById('domain_container');
     const clusterHeight = domainContainer ? domainContainer.clientHeight || 90 : 90;
 
-    // Specialized arrow container: early return with vertically centered arrow only
     if (includeArrow) {
         const container = document.createElement('div');
         container.style.display = 'flex';
@@ -69,24 +67,23 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
         container.style.overflow = 'visible';
         container.style.flexShrink = '0';
         container.style.marginRight = '12px';
-
         const arrowHeight = 30;
         const arrow = RiPPer.drawArrow(width, arrowHeight, arrowLabel);
-        // Arrow SVG height is small; container alignment centers it vertically
         container.appendChild(arrow);
         domainContainer.appendChild(container);
-        return; // Arrow containers don't need scaling boundaries or inner wrappers
+        return;
     }
 
     const container = document.createElement('div');
     container.style.display = 'inline-flex';
     container.style.flexDirection = 'column';
-    container.style.alignItems = 'center'; // center SVG vertically within height
+    container.style.alignItems = 'center';
     container.style.justifyContent = 'center';
     container.style.boxSizing = 'border-box';
     container.style.width = String(width) + 'px';
-    container.style.height = clusterHeight + 'px';
-    container.style.overflow = 'hidden';
+    container.style.height = 'auto'; // auto height so full SVG shows
+    container.style.minHeight = clusterHeight + 'px';
+    container.style.overflow = 'visible'; // allow full structure
     container.style.flexShrink = '0';
     container.setAttribute('data-scaling-boundary', 'true');
     container.style.marginRight = '12px';
@@ -97,7 +94,7 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     innerContainer.style.flex = '0 0 auto';
     innerContainer.style.width = '100%';
     innerContainer.style.height = 'auto';
-    innerContainer.style.overflow = 'hidden';
+    innerContainer.style.overflow = 'visible';
     innerContainer.setAttribute('data-scaling-boundary', 'true');
 
     const innerIntermediateContainer = document.createElement('div');
@@ -108,7 +105,7 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     innerIntermediateContainer.style.display = 'flex';
     innerIntermediateContainer.style.alignItems = 'center';
     innerIntermediateContainer.style.justifyContent = 'center';
-    innerIntermediateContainer.style.overflow = 'hidden';
+    innerIntermediateContainer.style.overflow = 'visible';
     innerIntermediateContainer.setAttribute('data-scaling-boundary', 'true');
 
     innerContainer.appendChild(innerIntermediateContainer);
@@ -118,64 +115,126 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
 
 // Example usage within RiPPer.drawCluster
 RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler) {
-    var container = document.getElementById('domain_container');
+    const container = document.getElementById('domain_container');
+    container.innerHTML = '';
     container.style.display = 'flex';
-    container.style.alignItems = 'center';
+    container.style.alignItems = 'flex-start';
     container.style.flexWrap = 'nowrap';
     container.style.gap = '0';
     container.style.overflowX = 'auto';
-    container.style.height = height + 'px'; // Set explicit height
+    container.style.overflowY = 'visible';
+    container.style.height = 'auto';
+    container.style.minHeight = height + 'px';
 
-    var scale = function (val) {
-        return parseInt(val / (1000 / height));
-    };
+    const scale = val => parseInt(val / (1000 / height));
 
-    document.getElementById('domain_container').innerHTML = "";
-    document.getElementById('model_gene_container').innerHTML = "";
+    // Dynamic sizing -----------------------------------------------------
+    function computeLayout() {
+        let availableWidth = container.clientWidth;
+        if (!availableWidth || availableWidth < 400) {
+            // fallback if not yet laid out
+            availableWidth = Math.round((window.innerWidth || 1200) * 0.75);
+        }
+        const wrapperCount = 3; // precursor, tailored, cleaved
+        const arrowCount = 2;
+        const gapPx = 12; // margin-right per wrapper
+        const maxArrowFrac = 0.05; // cap arrow width fraction
+        let arrowBase = Math.round(availableWidth * maxArrowFrac);
+        arrowBase = Math.max(50, Math.min(90, arrowBase));
+        const totalGap = gapPx * wrapperCount;
+        const spaceForWrappers = availableWidth - (arrowBase * arrowCount) - totalGap;
+        let slotWidthPx = Math.floor(spaceForWrappers / wrapperCount);
+        slotWidthPx = Math.max(180, slotWidthPx); // enforce minimum
+        return { slotWidthPx, arrowBase };
+    }
+    const layout = computeLayout();
 
-    RiPPer.drawHeadings(height);
-    RiPPer.leaveSpace(space, "precursor", scale);
-    RiPPer.leaveSpace(50, "arrow1", scale, true, "Tailoring");
-    RiPPer.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
-    RiPPer.leaveSpace(space, "tailoredProduct", scale);
-    protease = give_protease(geneMatrix);
-    if (document.getElementById("wildcardProtease").checked || protease) {
-        RiPPer.leaveSpace(50, "arrow2", scale, true, "Cleavage");
-        RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler, protease);
-        RiPPer.leaveSpace(space, "cleavedProduct_space", scale);
+    function setupWrapper(wrapper, widthPx) {
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.width = widthPx + 'px';
+        wrapper.style.flex = '0 0 ' + widthPx + 'px';
+        wrapper.style.marginRight = '12px';
+        wrapper.style.boxSizing = 'border-box';
     }
 
-    // After layout: move domain bubbles above the following structure container
-    repositionDomainBubbles();
+    // Precursor wrapper --------------------------------------------------
+    const precursorWrapper = document.createElement('div');
+    setupWrapper(precursorWrapper, layout.slotWidthPx);
+    RiPPer.leaveSpace(layout.slotWidthPx, 'precursor', scale); // space container appended
+    precursorWrapper.appendChild(container.lastChild);
+    container.appendChild(precursorWrapper);
 
-    return $(container).find("svg")[0];
+    // Arrow 1 ------------------------------------------------------------
+    RiPPer.leaveSpace(layout.arrowBase, 'arrow1', scale, true, 'Tailoring');
 
-    function repositionDomainBubbles() {
-        const dc = document.getElementById('domain_container');
-        if (!dc) return;
-        const children = Array.from(dc.children);
-        for (let i = 0; i < children.length - 1; i++) {
-            const bubble = children[i];
-            if (!bubble.classList || !bubble.classList.contains('box')) continue;
-            // Find next structure container (skip arrows: arrows have overflow visible & single child svg)
-            const target = children.slice(i + 1).find(el => el.getAttribute('data-scaling-boundary') === 'true' && el.style.overflow === 'hidden');
-            if (!target) continue;
-            // Wrap bubble + target
-            const wrapper = document.createElement('div');
-            wrapper.style.display = 'flex';
-            wrapper.style.flexDirection = 'column';
-            wrapper.style.alignItems = 'center';
-            wrapper.style.justifyContent = 'flex-start';
-            wrapper.style.width = target.style.width || target.getBoundingClientRect().width + 'px';
-            wrapper.style.marginRight = target.style.marginRight || '12px';
-            // Move elements
-            dc.insertBefore(wrapper, bubble);
-            wrapper.appendChild(bubble);
-            wrapper.appendChild(target);
-            // Adjust bubble styling
-            bubble.style.marginBottom = '4px';
-            // Remove original references left behind automatically by DOM moves
+    // Tailored wrapper ---------------------------------------------------
+    const tailoredWrapper = document.createElement('div');
+    setupWrapper(tailoredWrapper, layout.slotWidthPx);
+    RiPPer.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
+    RiPPer.leaveSpace(layout.slotWidthPx, 'tailoredProduct', scale);
+    tailoredWrapper.appendChild(container.lastChild);
+    elevateBoxesIntoWrapper(tailoredWrapper);
+    container.appendChild(tailoredWrapper);
+
+    // Arrow 2 ------------------------------------------------------------
+    const proteaseGene = (function give_protease(gm) {
+        for (let i = 0; i < gm.length; i++) {
+            const g = gm[i];
+            if (g.tailoringEnzymeStatus && !g.ko && (g.tailoringEnzymeAbbreviation === 'PROT' || g.tailoringEnzymeAbbreviation === 'PEP')) {
+                return g;
+            }
         }
+        return null;
+    })(geneMatrix);
+    RiPPer.leaveSpace(layout.arrowBase, 'arrow2', scale, true, 'Cleavage');
+
+    // Cleaved wrapper ----------------------------------------------------
+    const cleavedWrapper = document.createElement('div');
+    setupWrapper(cleavedWrapper, layout.slotWidthPx);
+    if (document.getElementById('wildcardProtease').checked || proteaseGene) {
+        RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler, proteaseGene);
+    }
+    RiPPer.leaveSpace(layout.slotWidthPx, 'cleavedProduct_space', scale);
+    cleavedWrapper.appendChild(container.lastChild);
+    elevateBoxesIntoWrapper(cleavedWrapper);
+    container.appendChild(cleavedWrapper);
+    elevateBoxesIntoWrapper(precursorWrapper);
+
+    // Store params for dynamic resize redraw -----------------------------
+    RiPPer._lastDrawParams = { geneMatrix, proteaseOptions, height, cleavageSites, geneMatrixHandler };
+    attachResizeObserver();
+
+    return $(container).find('svg')[0];
+
+    function elevateBoxesIntoWrapper(wrapper) {
+        const boxes = Array.from(container.querySelectorAll('.box')).filter(b => b.parentElement === container && !wrapper.contains(b));
+        boxes.forEach(box => {
+            wrapper.insertBefore(box, wrapper.firstChild);
+            box.style.marginBottom = '6px';
+        });
+    }
+
+    function attachResizeObserver() {
+        if (RiPPer._resizeAttached) return;
+        RiPPer._resizeAttached = true;
+        let timeoutId = null;
+        window.addEventListener('resize', () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                if (!RiPPer._lastDrawParams) return;
+                // Redraw cluster with stored params for responsive layout
+                RiPPer.drawCluster(
+                    RiPPer._lastDrawParams.geneMatrix,
+                    RiPPer._lastDrawParams.proteaseOptions,
+                    RiPPer._lastDrawParams.height,
+                    space,
+                    RiPPer._lastDrawParams.cleavageSites,
+                    RiPPer._lastDrawParams.geneMatrixHandler
+                );
+            }, 120); // debounce
+        });
     }
 };
 
@@ -186,9 +245,6 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
-    var line_svg = SVG(container)
-        .size('100%', height)
-        .group();
 
             let domainIdentifier =  "Protease"
             let abbreviation = "Prot"
@@ -341,9 +397,6 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneMat
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
-    var line_svg = SVG(container)
-        .size('100%', height)
-        .group();
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
         if (gene.tailoringEnzymeStatus == true && gene.ko == false) {

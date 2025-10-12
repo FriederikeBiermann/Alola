@@ -80,8 +80,9 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     container.style.justifyContent = 'center';
     container.style.boxSizing = 'border-box';
     container.style.width = String(width) + 'px';
-    container.style.height = clusterHeight + 'px';
-    container.style.overflow = 'hidden';
+    container.style.height = 'auto';
+    container.style.minHeight = clusterHeight + 'px';
+    container.style.overflow = 'visible';
     container.setAttribute('data-scaling-boundary', 'true');
     container.style.marginRight = '12px';
 
@@ -91,7 +92,7 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     innerContainer.style.flex = '0 0 auto';
     innerContainer.style.width = '100%';
     innerContainer.style.height = 'auto';
-    innerContainer.style.overflow = 'hidden';
+    innerContainer.style.overflow = 'visible';
     innerContainer.setAttribute('data-scaling-boundary', 'true');
 
     var innerIntermediateContainer = document.createElement('div');
@@ -102,66 +103,120 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     innerIntermediateContainer.style.display = 'flex';
     innerIntermediateContainer.style.alignItems = 'center';
     innerIntermediateContainer.style.justifyContent = 'center';
-    innerIntermediateContainer.style.overflow = 'hidden';
+    innerIntermediateContainer.style.overflow = 'visible';
     innerIntermediateContainer.setAttribute('data-scaling-boundary', 'true');
 
     innerContainer.appendChild(innerIntermediateContainer);
     container.appendChild(innerContainer);
-
     domainContainer.appendChild(container);
 };
 
 
 Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCyclaseOptions, geneMatrixHandler) {
-    var container = document.getElementById('domain_container');
+    const container = document.getElementById('domain_container');
+    container.innerHTML = '';
     container.style.display = 'flex';
-    container.style.alignItems = 'center';
+    container.style.alignItems = 'flex-start';
     container.style.flexWrap = 'nowrap';
     container.style.gap = '0';
     container.style.overflowX = 'auto';
-    container.style.height = height + 'px';
+    container.style.overflowY = 'visible';
+    container.style.height = 'auto';
+    container.style.minHeight = height + 'px';
 
-    var scale = function (val) {
-        return parseInt(val / (1000 / height));
-    };
+    const scale = val => parseInt(val / (1000 / height));
 
-    document.getElementById('domain_container').innerHTML = "";
-    document.getElementById('model_gene_container').innerHTML = "";
-
-    Terpener.drawHeadings(height, space);
-    Terpener.leaveSpace(space, "precursor", scale);
-    Terpener.leaveSpace(50, "arrow1", scale, true, "Cyclization");
-    Terpener.drawCyclase(height, scale, terpeneCyclaseOptions, geneMatrixHandler);
-    Terpener.leaveSpace(space, "cyclizedProduct", scale);
-    Terpener.leaveSpace(50, "arrow2", scale, true, "Tailoring");
-    Terpener.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
-    Terpener.leaveSpace(space, "tailoredProduct", scale);
-
-    repositionDomainBubblesTerpene();
-
-    return $(container).find("svg")[0];
-
-    function repositionDomainBubblesTerpene() {
-        const dc = document.getElementById('domain_container');
-        if (!dc) return;
-        const children = Array.from(dc.children);
-        for (let i = 0; i < children.length - 1; i++) {
-            const bubble = children[i];
-            if (!bubble.classList || !bubble.classList.contains('box')) continue;
-            const target = children.slice(i + 1).find(el => el.getAttribute('data-scaling-boundary') === 'true' && el.style.overflow === 'hidden');
-            if (!target) continue;
-            const wrapper = document.createElement('div');
-            wrapper.style.display = 'flex';
-            wrapper.style.flexDirection = 'column';
-            wrapper.style.alignItems = 'center';
-            wrapper.style.justifyContent = 'flex-start';
-            wrapper.style.width = target.style.width || target.getBoundingClientRect().width + 'px';
-            wrapper.style.marginRight = target.style.marginRight || '12px';
-            dc.insertBefore(wrapper, bubble);
-            wrapper.appendChild(bubble);
-            wrapper.appendChild(target);
-            bubble.style.marginBottom = '4px';
+    function computeLayout() {
+        let availableWidth = container.clientWidth;
+        if (!availableWidth || availableWidth < 400) {
+            availableWidth = Math.round((window.innerWidth || 1200) * 0.75);
         }
+        const wrapperCount = 3;
+        const arrowCount = 2;
+        const gapPx = 12;
+        const maxArrowFrac = 0.05;
+        let arrowBase = Math.round(availableWidth * maxArrowFrac);
+        arrowBase = Math.max(50, Math.min(90, arrowBase));
+        const totalGap = gapPx * wrapperCount;
+        const spaceForWrappers = availableWidth - (arrowBase * arrowCount) - totalGap;
+        let slotWidthPx = Math.floor(spaceForWrappers / wrapperCount);
+        slotWidthPx = Math.max(180, slotWidthPx);
+        return { slotWidthPx, arrowBase };
+    }
+    const layout = computeLayout();
+
+    function setupWrapper(wrapper, widthPx) {
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.width = widthPx + 'px';
+        wrapper.style.flex = '0 0 ' + widthPx + 'px';
+        wrapper.style.marginRight = '12px';
+        wrapper.style.boxSizing = 'border-box';
+    }
+
+    // Precursor wrapper
+    const precursorWrapper = document.createElement('div');
+    setupWrapper(precursorWrapper, layout.slotWidthPx);
+    Terpener.leaveSpace(layout.slotWidthPx, 'precursor', scale);
+    precursorWrapper.appendChild(container.lastChild);
+    container.appendChild(precursorWrapper);
+
+    // Arrow 1
+    Terpener.leaveSpace(layout.arrowBase, 'arrow1', scale, true, 'Cyclization');
+
+    // Cyclized wrapper
+    const cyclizedWrapper = document.createElement('div');
+    setupWrapper(cyclizedWrapper, layout.slotWidthPx);
+    Terpener.drawCyclase(height, scale, terpeneCyclaseOptions, geneMatrixHandler);
+    Terpener.leaveSpace(layout.slotWidthPx, 'cyclizedProduct', scale);
+    cyclizedWrapper.appendChild(container.lastChild);
+    elevateBoxesIntoWrapper(cyclizedWrapper);
+    container.appendChild(cyclizedWrapper);
+
+    // Arrow 2
+    Terpener.leaveSpace(layout.arrowBase, 'arrow2', scale, true, 'Tailoring');
+
+    // Tailored wrapper
+    const tailoredWrapper = document.createElement('div');
+    setupWrapper(tailoredWrapper, layout.slotWidthPx);
+    Terpener.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
+    Terpener.leaveSpace(layout.slotWidthPx, 'tailoredProduct', scale);
+    tailoredWrapper.appendChild(container.lastChild);
+    elevateBoxesIntoWrapper(tailoredWrapper);
+    container.appendChild(tailoredWrapper);
+
+    elevateBoxesIntoWrapper(precursorWrapper); // if any future precursor bubbles
+
+    Terpener._lastDrawParams = { geneMatrix, height, space, terpeneCyclaseOptions, geneMatrixHandler };
+    attachResizeObserverTerpene();
+
+    return $(container).find('svg')[0];
+
+    function elevateBoxesIntoWrapper(wrapper) {
+        const boxes = Array.from(container.querySelectorAll('.box')).filter(b => b.parentElement === container && !wrapper.contains(b));
+        boxes.forEach(box => {
+            wrapper.insertBefore(box, wrapper.firstChild);
+            box.style.marginBottom = '6px';
+        });
+    }
+    function attachResizeObserverTerpene() {
+        if (Terpener._resizeAttached) return;
+        Terpener._resizeAttached = true;
+        let timeoutId = null;
+        window.addEventListener('resize', () => {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                if (!Terpener._lastDrawParams) return;
+                Terpener.drawCluster(
+                    Terpener._lastDrawParams.geneMatrix,
+                    Terpener._lastDrawParams.height,
+                    space,
+                    Terpener._lastDrawParams.terpeneCyclaseOptions,
+                    Terpener._lastDrawParams.geneMatrixHandler
+                );
+            }, 120);
+        });
     }
 };
 Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, geneMatrixHandler) {
@@ -171,9 +226,6 @@ Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, gen
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
-    var line_svg = SVG(container)
-        .size('100%', height)
-        .group();
 
             let domainIdentifier =  "Cyclase"
             let abbreviation = "Cycl"
@@ -361,9 +413,6 @@ Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneM
     let indent = 0
     let color = "lightgrey"
     let outline = "black"
-    var line_svg = SVG(container)
-        .size('100%', height)
-        .group();
     for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
         if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
