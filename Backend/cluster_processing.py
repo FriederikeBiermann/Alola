@@ -249,12 +249,12 @@ class RiPPPathway(BasePathway):
 
     def _draw_pathway_mass_smiles_tailoring_sites(self):
         # we need the full structure to get accurate cleavage
-        cleavage_sites = self._get_cleavage_sites(self.antismash_input)
+        cleavage_sites = self._get_cleavage_sites()
         proxy_cluster: RiPPCluster = RiPPCluster(
             self.antismash_input["rippPrecursorName"],
             self.antismash_input["rippFullPrecursor"],
             self.antismash_input["rippFullPrecursor"],
-            cleavage_sites=cleavage_sites
+            cleavage_sites=cleavage_sites,
             macrocyclisations=self.macrocyclisations,
             tailoring_representations=self.tailoring_reactions,
         )
@@ -722,10 +722,6 @@ class TerpenePathway(BasePathway):
         )
 
         self.cluster.do_macrocyclization()
-        cyclised_product_svg = self.process_svg(
-            self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
-            "cyclized_drawing",
-        )
 
         # Perform any post-cyclization terpene modifications that are wired in the cluster
         # Methyl shift is invoked inside macrocyclization; water quenching is separate
@@ -736,6 +732,10 @@ class TerpenePathway(BasePathway):
                 print("quenched")
             except Exception as e:
                 logging.error({"event": "terpene.water_quenching.error", "error": str(e)})
+        cyclised_product_svg = self.process_svg(
+            self.cluster.draw_product(as_string=True, draw_Cs_in_pink=True),
+            "cyclized_drawing",
+        )
 
         if self.tailoring_reactions:
             self.cluster.do_tailoring()
