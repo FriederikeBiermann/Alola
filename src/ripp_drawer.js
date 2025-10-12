@@ -118,7 +118,12 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
 // Example usage within RiPPer.drawCluster
 RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler) {
     const container = document.getElementById('domain_container');
+    // Clear lingering styles from other cluster types before applying RiPP grid layout
+    if (typeof window !== 'undefined' && window.resetDomainContainerLayout) {
+        window.resetDomainContainerLayout();
+    }
     container.innerHTML = '';
+    container.classList.add('ripp-layout');
 
     // Prepare grid layout: 2 rows (bubbles + pipeline), 5 columns
     container.style.display = 'grid';
@@ -266,28 +271,19 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
             e.svg.style.width = '100%';
             e.container.style.height = targetHeight + 'px';
         });
-        // Align arrow containers to same height and top-align arrow path
+        // Keep arrow containers at their original fixed height (clusterHeight) and only recompute path centering inside its own svg
         root.querySelectorAll("div[id^='arrow']").forEach(arrowC => {
-            arrowC.style.height = targetHeight + 'px';
-            arrowC.style.display = 'flex';
-            arrowC.style.alignItems = 'flex-start';
             const svg = arrowC.querySelector('svg');
-            if (svg) {
-                svg.setAttribute('height', targetHeight);
-                const path = svg.querySelector('path');
-                const label = svg.querySelector('text');
-                const labelOffset = label ? 18 : 0; // vertical space reserved for label at bottom
-                // Vertically center arrow line within usable height excluding label
-                const usableHeight = targetHeight - labelOffset;
-                const midY = usableHeight / 2;
-                if (label) {
-                    label.setAttribute('y', targetHeight - (labelOffset - 2));
-                }
-                if (path) {
-                    const arrowLength = parseInt(svg.getAttribute('width')) - 20; // keep margins
-                    path.setAttribute('d', `M10,${midY} L${arrowLength},${midY} M${arrowLength - 10},${midY - 5} L${arrowLength},${midY} L${arrowLength - 10},${midY + 5}`);
-                }
+            if (!svg) return;
+            const path = svg.querySelector('path');
+            const label = svg.querySelector('text');
+            const svgH = parseInt(svg.getAttribute('height')) || 30;
+            const lineY = Math.round((svgH - (label ? 26 : 0)) / 2); // center excluding label space if present
+            if (path) {
+                const arrowLength = parseInt(svg.getAttribute('width')) - 20;
+                path.setAttribute('d', `M10,${lineY} L${arrowLength},${lineY} M${arrowLength - 10},${lineY - 5} L${arrowLength},${lineY} L${arrowLength - 10},${lineY + 5}`);
             }
+            // Leave label y as originally defined in drawArrow
         });
     }
 

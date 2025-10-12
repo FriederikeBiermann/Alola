@@ -116,7 +116,12 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
 
 Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCyclaseOptions, geneMatrixHandler) {
     const container = document.getElementById('domain_container');
+    // Reset previous layout styles before applying terpene grid layout
+    if (typeof window !== 'undefined' && window.resetDomainContainerLayout) {
+        window.resetDomainContainerLayout();
+    }
     container.innerHTML = '';
+    container.classList.add('terpene-layout');
     container.style.display = 'grid';
     container.style.alignItems = 'start';
     container.style.overflowX = 'auto';
@@ -227,26 +232,19 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
             e.svg.style.width = '100%';
             e.container.style.height = targetHeight + 'px';
         });
-        // Resize and top-align arrow SVGs relative to unified height (remove stair look)
+        // Keep arrow containers at original fixed height; just ensure path centered within its own svg height
         root.querySelectorAll("div[id^='arrow']").forEach(arrowC => {
-            arrowC.style.height = targetHeight + 'px';
-            arrowC.style.display = 'flex';
-            arrowC.style.alignItems = 'flex-start';
             const svg = arrowC.querySelector('svg');
-            if (svg) {
-                const label = svg.querySelector('text');
-                const labelOffset = label ? 18 : 0;
-                svg.setAttribute('height', targetHeight);
-                if (label) {
-                    label.setAttribute('y', targetHeight - (labelOffset - 2));
-                }
-                const path = svg.querySelector('path');
-                if (path) {
-                    const arrowLength = parseInt(svg.getAttribute('width')) - 20;
-                    const lineY = 20; // fixed from top
-                    path.setAttribute('d', `M10,${lineY} L${arrowLength},${lineY} M${arrowLength - 10},${lineY - 5} L${arrowLength},${lineY} L${arrowLength - 10},${lineY + 5}`);
-                }
+            if (!svg) return;
+            const path = svg.querySelector('path');
+            const label = svg.querySelector('text');
+            const svgH = parseInt(svg.getAttribute('height')) || 30;
+            const lineY = Math.round((svgH - (label ? 26 : 0)) / 2);
+            if (path) {
+                const arrowLength = parseInt(svg.getAttribute('width')) - 20;
+                path.setAttribute('d', `M10,${lineY} L${arrowLength},${lineY} M${arrowLength - 10},${lineY - 5} L${arrowLength},${lineY} L${arrowLength - 10},${lineY + 5}`);
             }
+            // Leave label position as initially drawn
         });
     }
 

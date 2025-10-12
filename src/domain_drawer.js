@@ -76,6 +76,22 @@ Domainer.drawClusterSVG = function (cluster, height = 90, geneMatrixHandler)
     let geneMatrix = geneMatrixHandler.geneMatrix;
     let recordData = geneMatrixHandler.recordData;
     const container = document.getElementById('domain_container');
+    // Reset any previous inline/grid layout styles applied by other cluster drawers (RiPP / Terpene)
+    if (typeof window !== 'undefined') {
+        if (!window.resetDomainContainerLayout) {
+            window.resetDomainContainerLayout = function() {
+                const c = document.getElementById('domain_container');
+                if (!c) return;
+                // Remove inline styles to prevent persistent grid settings affecting NRPS layout
+                c.removeAttribute('style');
+                // Remove any layout-specific classes if we later add them
+                c.classList.remove('ripp-layout','terpene-layout','nrps-layout');
+            };
+        }
+        window.resetDomainContainerLayout();
+        // Optionally mark current layout type (could assist future conditional styling)
+        container.classList.add('nrps-layout');
+    }
     container.innerHTML = "";
 
     const scale = val => parseInt(val / (1000 / height));
