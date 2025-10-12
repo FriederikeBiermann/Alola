@@ -1117,13 +1117,13 @@ body,
 
 /* Responsive sizing variables */
 :root {
-  --menu-bar-padding-y: 0.4rem;
-  --menu-bar-padding-x: 0.8rem;
-  --menu-gap: 0.6rem;
-  --menu-font-size: clamp(0.55rem, 1.1vw, 0.9rem);
-  --menu-button-padding-y: 0.35rem;
-  --menu-button-padding-x: 0.6rem;
-  --menu-radius: 0.6rem;
+  --menu-bar-padding-y: 0.2rem;
+  --menu-bar-padding-x: 0.4rem;
+  --menu-gap: 0.4rem;
+  --menu-font-size: clamp(0.55rem, 1.0vw, 0.85rem);
+  --menu-button-padding-y: 0.1rem; /* super minimal vertical padding */
+  --menu-button-padding-x: 0.25rem; /* super minimal horizontal padding */
+  --menu-radius: 0.2rem;
   --menu-slider-width: 3.2rem;
   --menu-slider-height: 1.6rem;
   --menu-slider-knob: 1.4rem;
