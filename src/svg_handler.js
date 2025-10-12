@@ -390,4 +390,191 @@ class SVGHandler {
     svg.setAttribute("width", width);
     svg.setAttribute("height", height);
 }
-} 
+
+/**
+ * Scales all SVGs by the same factor so that none overflow their containers.
+ * @param {SVGElement[]} svgs - Array of SVG DOM elements
+ * @param {HTMLElement[]} containers - Array of container DOM elements (same order as svgs)
+ */
+scaleSVGsToFitContainersUniformly(svgs, containers) {
+    // Find the limiting scale for each SVG/container pair
+    let maxScale = Infinity;
+    svgs.forEach((svg, i) => {
+        const bbox = svg.getBBox();
+        const container = containers[i];
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+        // Calculate scale factors for width and height
+        const scaleW = containerWidth / bbox.width;
+        const scaleH = containerHeight / bbox.height;
+        // The limiting scale for this SVG/container
+        const scale = Math.min(scaleW, scaleH);
+        if (scale < maxScale) maxScale = scale;
+    });
+    // Apply the same scale to all SVGs
+    svgs.forEach(svg => {
+        // Optionally wrap content in a <g> for scaling
+        let g = svg.querySelector('g[data-autoscale]');
+        if (!g) {
+            g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('data-autoscale', 'true');
+            while (svg.firstChild) g.appendChild(svg.firstChild);
+            svg.appendChild(g);
+        }
+        g.setAttribute('transform', `scale(${maxScale})`);
+        // Optionally, set viewBox to bbox for consistent scaling
+        const bbox = g.getBBox();
+        svg.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.display = 'block';
+    });
+}
+
+/**
+ * Automatically finds the lowest-level container (closest non-SVG parent) for each SVG,
+ * computes a uniform scale so none overflow their own container, and applies that scale.
+ * @param {SVGElement[]} svgs
+ * @returns {number} applied scale factor
+ */
+scaleSVGsUniformByParent(svgElements) {
+    if (!svgElements || svgElements.length === 0) return 1;
+    // Collect per-SVG limiting scale
+    let limitingScale = Infinity;
+    const svgInfo = [];
+    svgElements.forEach(svg => {
+        if (!svg) return;
+        // Find closest non-SVG ancestor (stop at document.body)
+        let container = svg.parentElement;
+        while (container && container.tagName && container.tagName.toLowerCase() === 'svg') {
+            container = container.parentElement;
+        }
+        if (!container) return;
+        // Force layout measurement
+        const bbox = svg.getBBox();
+        const rect = container.getBoundingClientRect();
+        const cWidth = rect.width;
+        const cHeight = rect.height;
+        if (bbox.width === 0 || bbox.height === 0 || cWidth === 0 || cHeight === 0) return; // skip invalid
+        const scaleW = cWidth / bbox.width;
+        const scaleH = cHeight / bbox.height;
+        const scale = Math.min(scaleW, scaleH);
+        if (scale < limitingScale) limitingScale = scale;
+        svgInfo.push({ svg, container, bbox });
+    });
+    if (limitingScale === Infinity) return 1;
+    // Apply uniform scale
+    svgInfo.forEach(({ svg, bbox }) => {
+        let g = svg.querySelector('g[data-autoscale]');
+        if (!g) {
+            g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('data-autoscale', 'true');
+            while (svg.firstChild) g.appendChild(svg.firstChild);
+            svg.appendChild(g);
+        }
+        g.setAttribute('transform', `scale(${limitingScale})`);
+        // Update viewBox to original bbox so scaling origin is consistent
+        svg.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.display = 'block';
+        svg.style.overflow = 'hidden';
+    });
+    return limitingScale;
+}
+
+/**
+ * Scales all SVGs so that the average length of paths inside groups whose id starts
+ * with lineGroupPrefix (e.g. 'line2d_') becomes identical across all SVGs.
+ * It chooses the largest target length that does NOT overflow any container when scaling up.
+ * @param {SVGElement[]} svgs
+ * @param {Object} opts
+ * @param {string} opts.lineGroupPrefix - Prefix for line group ids.
+ * @param {boolean} opts.useMedian - Use median instead of average per SVG.
+ * @returns {{targetLength:number, scaleFactors:Map<SVGElement,number>}} metadata
+ */
+scaleSVGsUniformByLineLength(svgElements, opts = {}) {
+    const lineGroupPrefix = opts.lineGroupPrefix || 'line2d_';
+    const useMedian = opts.useMedian || false;
+    if (!svgElements || svgElements.length === 0) return { targetLength: 0, scaleFactors: new Map() };
+
+    function collectLineLengths(svg) {
+        const groups = Array.from(svg.querySelectorAll(`g[id^='${lineGroupPrefix}']`));
+        const lengths = [];
+        groups.forEach(g => {
+            const path = g.querySelector('path');
+            if (path) {
+                try {
+                    const len = path.getTotalLength();
+                    if (!isNaN(len) && len > 0) lengths.push(len);
+                } catch (e) { /* ignore */ }
+            }
+        });
+        return lengths;
+    }
+    function statLength(arr) {
+        if (arr.length === 0) return 0;
+        if (useMedian) {
+            const sorted = [...arr].sort((a,b)=>a-b);
+            const mid = Math.floor(sorted.length/2);
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid-1]+sorted[mid])/2;
+        }
+        return arr.reduce((a,b)=>a+b,0)/arr.length;
+    }
+
+    // Gather per-SVG line length and container constraints
+    const perSvg = [];
+    svgElements.forEach(svg => {
+        if (!svg) return;
+        const lengths = collectLineLengths(svg);
+        const repLength = statLength(lengths);
+        if (repLength === 0) return; // skip if no lines
+        // Find container
+        let container = svg.parentElement;
+        while (container && container.tagName && container.tagName.toLowerCase() === 'svg') {
+            container = container.parentElement;
+        }
+        if (!container) return;
+        const bbox = svg.getBBox();
+        const cRect = container.getBoundingClientRect();
+        const cW = cRect.width || 0;
+        const cH = cRect.height || 0;
+        if (bbox.width === 0 || bbox.height === 0 || cW === 0 || cH === 0) return;
+        // Max up-scale so full bbox still fits container
+        const maxScaleWidth = cW / bbox.width;
+        const maxScaleHeight = cH / bbox.height;
+        const maxScale = Math.min(maxScaleWidth, maxScaleHeight);
+        perSvg.push({ svg, repLength, maxScale, bbox });
+    });
+    if (perSvg.length === 0) return { targetLength: 0, scaleFactors: new Map() };
+
+    // Feasible target length cannot exceed repLength * maxScale for any SVG
+    const feasibleMaxTarget = Math.min(...perSvg.map(d => d.repLength * d.maxScale));
+    const targetLength = feasibleMaxTarget; // choose largest possible for clarity
+
+    const scaleMap = new Map();
+    perSvg.forEach(d => {
+        let existingScale = 1;
+        const t = g.getAttribute('transform');
+        const m = /scale\\(([^)]+)\\)/.exec(t);
+        if (m) existingScale = parseFloat(m[1]) || 1;
+        const effectiveRepLength = d.repLength / existingScale;
+        const scaleNeeded = targetLength / effectiveRepLength; // may be <= maxScale by construction
+        // Wrap content for scaling
+        let g = d.svg.querySelector('g[data-line-uniform]');
+        if (!g) {
+            g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('data-line-uniform','true');
+            while (d.svg.firstChild) g.appendChild(d.svg.firstChild);
+            d.svg.appendChild(g);
+        }
+        g.setAttribute('transform', `scale(${scaleNeeded})`);
+        d.svg.setAttribute('viewBox', `${d.bbox.x} ${d.bbox.y} ${d.bbox.width} ${d.bbox.height}`);
+        d.svg.style.width = '100%';
+        d.svg.style.height = '100%';
+        d.svg.style.display = 'block';
+        scaleMap.set(d.svg, scaleNeeded);
+    });
+    return { targetLength, scaleFactors: scaleMap };
+}
+}
