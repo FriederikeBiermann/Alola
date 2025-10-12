@@ -457,13 +457,25 @@ input:checked+.slider:before {
 
 .intermediateContainer {
   position: relative;
-  height: 80vh;
+  height: auto;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 10vw; /* Enforce approximate target width */
 }
 
 .intermediateContainerTailoring {
   position: relative;
-  top: 10%;
-  height: 80vh;
+  top: 0;
+  height: auto;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 10vw; /* Keep tailoring container consistent */
 }
 
 .box {
@@ -1061,43 +1073,42 @@ body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
 
 /* Responsive sizing variables */
 :root {
-  --menu-bar-padding-y: 0.25rem; /* slimmer bar vertical padding */
-  --menu-bar-padding-x: 0.6rem; /* slightly reduced horizontal padding */
-  --menu-gap: 0.45rem; /* tighter gap between items */
-  --menu-font-size: clamp(0.55rem, 0.95vw, 0.85rem); /* keep readable but compact */
-  --menu-button-padding-y: 0.18rem; /* much slimmer button vertical padding */
-  --menu-button-padding-x: 0.45rem; /* reduced horizontal padding */
-  --menu-radius: 0.45rem; /* slightly smaller rounding */
-  --menu-slider-width: 3rem;
-  --menu-slider-height: 1.4rem;
-  --menu-slider-knob: 1.2rem;
+  --menu-bar-padding-y: 0.15rem;
+  --menu-bar-padding-x: 0.5rem;
+  --menu-gap: 0.3rem;
+  --menu-font-size: clamp(0.48rem, 0.75vw, 0.7rem);
+  --menu-button-padding-y: 0.05rem;
+  --menu-button-padding-x: 0.28rem;
+  --menu-radius: 0.3rem;
+  --menu-slider-width: 2.4rem;
+  --menu-slider-height: 1.05rem;
+  --menu-slider-knob: 0.9rem;
 }
 
 /* Top bar: switch from floats to flex for consistent scaling */
 #menu_bar {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* keep in one line for alignment logic */
   align-items: center;
   gap: var(--menu-gap);
   padding: var(--menu-bar-padding-y) var(--menu-bar-padding-x);
-  height: auto; /* allow natural height */
+  height: auto;
   font-size: var(--menu-font-size);
 }
 
 /* Generic menu buttons (undo/redo/start) */
 .redoUndo_button,
 .start_button {
-  float: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
   font-size: var(--menu-font-size);
-  line-height: 1.05;
+  line-height: 1;
   border-radius: var(--menu-radius);
-  min-height: 1.6rem; /* leaner height */
+  min-height: 1.05rem;
   white-space: nowrap;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 }
 
 /* Visual refinement: lighter default background, subtle border for sleekness */
@@ -1110,14 +1121,11 @@ body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
 .start_button:hover { background:#E11839; color:#000; border-color:#E11839; }
 .redoUndo_button.disabled { opacity:0.55; }
 
-/* Spacer element to push right-group buttons to the right */
-#menu_bar .menu-spacer { flex-grow: 1; height: 100%; }
-
-/* Ensure undo/redo always stay left */
-#undoButton, #redoButton { order: 0; }
-#menu_bar .menu-spacer { order: 1; }
-/* All other buttons come after spacer */
-#menu_bar .start_button:not(#undoButton):not(#redoButton) { order: 2; }
+/* Alignment: first right-side button gets auto margin to push group */
+#undoButton, #redoButton { flex: 0 0 auto; }
+#openAlolaManual { margin-left: auto; }
+/* Ensure subsequent buttons do not override auto margin */
+#menu_bar .start_button:not(#openAlolaManual):not(#undoButton):not(#redoButton) { margin-left: 0; }
 
 /* Ensure strong inside buttons does not overflow */
 .redoUndo_button strong,
@@ -1154,9 +1162,9 @@ input:checked + .slider:before {
 
 /* Prevent tooltip buttons from wrapping awkwardly on very small widths */
 @media (max-width: 700px) {
-  #menu_bar { justify-content: center; }
+  #menu_bar { flex-wrap: wrap; }
+  #openAlolaManual { margin-left: 0; }
   .redoUndo_button, .start_button, #fake_button { flex: 1 1 auto; }
-  .switch { order: 99; } /* move switch to end on small screens */
 }
 @media (max-width: 420px) {
   #menu_bar { gap: 0.4rem; }

@@ -14,11 +14,15 @@ Terpener.drawArrow = function (width, height, label = null) {
     arrowContainer.style.flexDirection = 'column';
     arrowContainer.style.alignItems = 'center';
     arrowContainer.style.justifyContent = 'center';
-    arrowContainer.style.width = width + 'px';
-    arrowContainer.style.height = '100%';
+    if (typeof width === 'string' && width.endsWith('vw')) {
+        arrowContainer.style.width = width;
+    } else {
+        arrowContainer.style.width = width + 'px';
+    }
+    arrowContainer.style.height = height + 'px';
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", width);
+    svg.setAttribute("width", typeof width === 'string' ? width : width);
     svg.setAttribute("height", height);
     svg.style.overflow = "visible";
 
@@ -54,7 +58,11 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     container.style.alignItems = 'stretch';
     container.style.justifyContent = 'center';
     container.style.boxSizing = 'border-box';
-    container.style.width = String(width) + "px";
+    if (id.startsWith('arrow')) {
+        container.style.width = '10vw';
+    } else {
+        container.style.width = String(width) + 'px';
+    }
     // Use explicit pixel height to prevent auto-expansion that breaks scaling calculations
     container.style.height = clusterHeight + 'px';
     container.style.overflow = 'hidden';
@@ -86,8 +94,8 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     container.appendChild(innerContainer);
 
     if (includeArrow) {
-        const arrowWidth = 50; // adjustable
-        const arrowHeight = 30; // adjustable
+        const arrowWidth = '10vw';
+        const arrowHeight = 30; // keep same for consistency
         const arrow = Terpener.drawArrow(arrowWidth, arrowHeight, arrowLabel);
         // Arrow should not influence scaling of SVGs -> no data-scaling-boundary
         arrow.style.flex = '0 0 auto';
