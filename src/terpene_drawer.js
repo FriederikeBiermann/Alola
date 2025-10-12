@@ -18,7 +18,7 @@ Terpener.drawArrow = function (baseWidth, height, label = null) {
     arrowContainer.style.alignItems = 'center';
     arrowContainer.style.justifyContent = 'center';
     arrowContainer.style.width = containerWidth + 'px';
-    arrowContainer.style.height = 'auto';
+    arrowContainer.style.height = '100%';
     arrowContainer.style.overflow = 'visible';
     arrowContainer.style.flexShrink = '0';
 
@@ -50,8 +50,9 @@ Terpener.drawArrow = function (baseWidth, height, label = null) {
 };
 
 
-Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null) {
+Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null, parentCell = null) {
     const domainContainer = document.getElementById('domain_container');
+    const targetParent = parentCell || domainContainer;
     const clusterHeight = domainContainer ? domainContainer.clientHeight || 90 : 90;
 
     if (includeArrow) {
@@ -65,16 +66,14 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
         container.style.height = clusterHeight + 'px';
         container.style.overflow = 'visible';
         container.style.flexShrink = '0';
-        container.style.marginRight = '12px';
-    container.className = 'arrow-block';
         const arrowHeight = 30;
         const arrow = Terpener.drawArrow(width, arrowHeight, arrowLabel);
         container.appendChild(arrow);
-        domainContainer.appendChild(container);
-        return;
+        targetParent.appendChild(container);
+        return container;
     }
 
-    var container = document.createElement('div');
+    const container = document.createElement('div');
     container.style.display = 'inline-flex';
     container.style.flexDirection = 'column';
     container.style.alignItems = 'center';
@@ -84,10 +83,10 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     container.style.height = 'auto';
     container.style.minHeight = clusterHeight + 'px';
     container.style.overflow = 'visible';
+    container.style.flexShrink = '0';
     container.setAttribute('data-scaling-boundary', 'true');
-    container.style.marginRight = '12px';
 
-    var innerContainer = document.createElement('div');
+    const innerContainer = document.createElement('div');
     innerContainer.id = id;
     innerContainer.style.position = 'relative';
     innerContainer.style.flex = '0 0 auto';
@@ -96,9 +95,9 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     innerContainer.style.overflow = 'visible';
     innerContainer.setAttribute('data-scaling-boundary', 'true');
 
-    var innerIntermediateContainer = document.createElement('div');
-    innerIntermediateContainer.id = "innerIntermediateContainer_" + id;
-    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring");
+    const innerIntermediateContainer = document.createElement('div');
+    innerIntermediateContainer.id = 'innerIntermediateContainer_' + id;
+    innerIntermediateContainer.setAttribute('class', 'intermediateContainerTailoring');
     innerIntermediateContainer.style.width = '100%';
     innerIntermediateContainer.style.height = 'auto';
     innerIntermediateContainer.style.display = 'flex';
@@ -109,21 +108,22 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
 
     innerContainer.appendChild(innerIntermediateContainer);
     container.appendChild(innerContainer);
-    domainContainer.appendChild(container);
+    targetParent.appendChild(container);
+    return container;
 };
 
 
 Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCyclaseOptions, geneMatrixHandler) {
     const container = document.getElementById('domain_container');
     container.innerHTML = '';
-    container.style.display = 'flex';
-    container.style.alignItems = 'flex-start';
-    container.style.flexWrap = 'nowrap';
-    container.style.gap = '0';
+    container.style.display = 'grid';
+    container.style.alignItems = 'start';
     container.style.overflowX = 'auto';
     container.style.overflowY = 'visible';
     container.style.height = 'auto';
     container.style.minHeight = height + 'px';
+    container.style.rowGap = '4px';
+    container.style.columnGap = '12px';
 
     const scale = val => parseInt(val / (1000 / height));
 
@@ -145,6 +145,23 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
         return { slotWidthPx, arrowBase };
     }
     const layout = computeLayout();
+    container.style.gridTemplateColumns = `${layout.slotWidthPx}px ${layout.arrowBase}px ${layout.slotWidthPx}px ${layout.arrowBase}px ${layout.slotWidthPx}px`;
+    const bubbleRowHeight = 60;
+    container.style.gridTemplateRows = `${bubbleRowHeight}px auto`;
+
+    const bubbleCells = []; const pipelineCells = [];
+    for (let i=0;i<5;i++) {
+        const b = document.createElement('div');
+        b.className = 'bubble-cell';
+        b.style.display='flex'; b.style.justifyContent='center'; b.style.alignItems='center';
+        b.style.height=bubbleRowHeight+'px'; b.style.gridRow='1'; b.style.position='relative';
+        container.appendChild(b); bubbleCells.push(b);
+        const p = document.createElement('div');
+        p.className='pipeline-cell';
+        p.style.display='flex'; p.style.flexDirection='column'; p.style.alignItems='center'; p.style.justifyContent='flex-start';
+        p.style.gridRow='2'; p.style.position='relative';
+        container.appendChild(p); pipelineCells.push(p);
+    }
 
     function setupWrapper(wrapper, widthPx) {
         wrapper.style.display = 'flex';
@@ -156,38 +173,22 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
         wrapper.style.boxSizing = 'border-box';
     }
 
-    // Precursor wrapper
-    const precursorWrapper = document.createElement('div');
-    setupWrapper(precursorWrapper, layout.slotWidthPx);
-    Terpener.leaveSpace(layout.slotWidthPx, 'precursor', scale);
-    precursorWrapper.appendChild(container.lastChild);
-    container.appendChild(precursorWrapper);
+    // Precursor structure column 0
+    Terpener.leaveSpace(layout.slotWidthPx, 'precursor', scale, false, null, pipelineCells[0]);
+    // Arrow Cyclization column 1
+    Terpener.leaveSpace(layout.arrowBase, 'arrow1', scale, true, 'Cyclization', pipelineCells[1]);
+    // Cyclized product column 2
+    Terpener.leaveSpace(layout.slotWidthPx, 'cyclizedProduct', scale, false, null, pipelineCells[2]);
+    // Arrow Tailoring column 3
+    Terpener.leaveSpace(layout.arrowBase, 'arrow2', scale, true, 'Tailoring', pipelineCells[3]);
+    // Tailored product column 4
+    Terpener.leaveSpace(layout.slotWidthPx, 'tailoredProduct', scale, false, null, pipelineCells[4]);
 
-    // Arrow 1
-    Terpener.leaveSpace(layout.arrowBase, 'arrow1', scale, true, 'Cyclization');
-
-    // Cyclized wrapper
-    const cyclizedWrapper = document.createElement('div');
-    setupWrapper(cyclizedWrapper, layout.slotWidthPx);
+    // Draw bubbles then move into bubble row
     Terpener.drawCyclase(height, scale, terpeneCyclaseOptions, geneMatrixHandler);
-    Terpener.leaveSpace(layout.slotWidthPx, 'cyclizedProduct', scale);
-    cyclizedWrapper.appendChild(container.lastChild);
-    elevateBoxesIntoWrapper(cyclizedWrapper);
-    container.appendChild(cyclizedWrapper);
-
-    // Arrow 2
-    Terpener.leaveSpace(layout.arrowBase, 'arrow2', scale, true, 'Tailoring');
-
-    // Tailored wrapper
-    const tailoredWrapper = document.createElement('div');
-    setupWrapper(tailoredWrapper, layout.slotWidthPx);
+    moveSpecificBoxToBubble('Cyclase', bubbleCells[2]);
     Terpener.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
-    Terpener.leaveSpace(layout.slotWidthPx, 'tailoredProduct', scale);
-    tailoredWrapper.appendChild(container.lastChild);
-    elevateBoxesIntoWrapper(tailoredWrapper);
-    container.appendChild(tailoredWrapper);
-
-    elevateBoxesIntoWrapper(precursorWrapper); // if any future precursor bubbles
+    moveTailoringBoxesToBubble(bubbleCells[4]);
 
     Terpener._lastDrawParams = { geneMatrix, height, space, terpeneCyclaseOptions, geneMatrixHandler };
     attachResizeObserverTerpene();
@@ -225,18 +226,36 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
             e.svg.style.width = '100%';
             e.container.style.height = targetHeight + 'px';
         });
-        // Set arrow container heights; inner arrow-block CSS centers actual arrow
+        // Resize and top-align arrow SVGs relative to unified height (remove stair look)
         root.querySelectorAll("div[id^='arrow']").forEach(arrowC => {
             arrowC.style.height = targetHeight + 'px';
+            arrowC.style.display = 'flex';
+            arrowC.style.alignItems = 'flex-start';
+            const svg = arrowC.querySelector('svg');
+            if (svg) {
+                const label = svg.querySelector('text');
+                const labelOffset = label ? 18 : 0;
+                svg.setAttribute('height', targetHeight);
+                if (label) {
+                    label.setAttribute('y', targetHeight - (labelOffset - 2));
+                }
+                const path = svg.querySelector('path');
+                if (path) {
+                    const arrowLength = parseInt(svg.getAttribute('width')) - 20;
+                    const lineY = 20; // fixed from top
+                    path.setAttribute('d', `M10,${lineY} L${arrowLength},${lineY} M${arrowLength - 10},${lineY - 5} L${arrowLength},${lineY} L${arrowLength - 10},${lineY + 5}`);
+                }
+            }
         });
     }
 
-    function elevateBoxesIntoWrapper(wrapper) {
-        const boxes = Array.from(container.querySelectorAll('.box')).filter(b => b.parentElement === container && !wrapper.contains(b));
-        boxes.forEach(box => {
-            wrapper.insertBefore(box, wrapper.firstChild);
-            box.style.marginBottom = '6px';
-        });
+    function moveSpecificBoxToBubble(suffix, cell) {
+        const target = Array.from(container.querySelectorAll('.box')).find(b => b.id.includes(suffix));
+        if (target) { cell.appendChild(target); target.style.marginBottom='0'; }
+    }
+    function moveTailoringBoxesToBubble(cell) {
+        const tailoringBoxes = Array.from(container.querySelectorAll('.box')).filter(b => b.id.includes('tailoringEnzyme'));
+        tailoringBoxes.forEach(b => { cell.appendChild(b); b.style.marginBottom='0'; });
     }
     function attachResizeObserverTerpene() {
         if (Terpener._resizeAttached) return;
