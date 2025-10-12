@@ -498,83 +498,103 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
     const useMedian = opts.useMedian || false;
     if (!svgElements || svgElements.length === 0) return { targetLength: 0, scaleFactors: new Map() };
 
+    // Normalize inputs: allow passing IDs or raw nodes
+    function toSvgNode(item) {
+        if (!item) return null;
+        if (typeof item === 'string') {
+            const el = document.getElementById(item);
+            return el instanceof SVGElement ? el : null;
+        }
+        // Some libraries wrap elements; unwrap common patterns
+        if (item instanceof SVGElement) return item;
+        if (item.nodeType === 1 && item.tagName && item.tagName.toLowerCase() === 'svg') return item;
+        return null;
+    }
+
     function collectLineLengths(svg) {
+        if (!(svg instanceof SVGElement)) return [];
         const groups = Array.from(svg.querySelectorAll(`g[id^='${lineGroupPrefix}']`));
         const lengths = [];
-        groups.forEach(g => {
+        for (const g of groups) {
             const path = g.querySelector('path');
-            if (path) {
-                try {
-                    const len = path.getTotalLength();
-                    if (!isNaN(len) && len > 0) lengths.push(len);
-                } catch (e) { /* ignore */ }
-            }
-        });
+            if (!path) continue;
+            try {
+                const len = path.getTotalLength();
+                if (!isNaN(len) && len > 0) lengths.push(len);
+            } catch (_) { /* ignore path length errors */ }
+        }
         return lengths;
     }
+
     function statLength(arr) {
         if (arr.length === 0) return 0;
         if (useMedian) {
             const sorted = [...arr].sort((a,b)=>a-b);
             const mid = Math.floor(sorted.length/2);
-            return sorted.length % 2 ? sorted[mid] : (sorted[mid-1]+sorted[mid])/2;
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid-1] + sorted[mid]) / 2;
         }
         return arr.reduce((a,b)=>a+b,0)/arr.length;
     }
 
     // Gather per-SVG line length and container constraints
     const perSvg = [];
-    svgElements.forEach(svg => {
-        if (!svg) return;
+    for (const raw of svgElements) {
+        const svg = toSvgNode(raw);
+        if (!svg) continue;
         const lengths = collectLineLengths(svg);
         const repLength = statLength(lengths);
-        if (repLength === 0) return; // skip if no lines
-        // Find container
+        if (repLength === 0) continue; // skip if no target groups
         let container = svg.parentElement;
         while (container && container.tagName && container.tagName.toLowerCase() === 'svg') {
             container = container.parentElement;
         }
-        if (!container) return;
-        const bbox = svg.getBBox();
-        const cRect = container.getBoundingClientRect();
-        const cW = cRect.width || 0;
-        const cH = cRect.height || 0;
-        if (bbox.width === 0 || bbox.height === 0 || cW === 0 || cH === 0) return;
-        // Max up-scale so full bbox still fits container
+        if (!container) continue;
+        let bbox;
+        try { bbox = svg.getBBox(); } catch (_) { continue; }
+        const rect = container.getBoundingClientRect();
+        const cW = rect.width || 0;
+        const cH = rect.height || 0;
+        if (bbox.width === 0 || bbox.height === 0 || cW === 0 || cH === 0) continue;
         const maxScaleWidth = cW / bbox.width;
         const maxScaleHeight = cH / bbox.height;
         const maxScale = Math.min(maxScaleWidth, maxScaleHeight);
         perSvg.push({ svg, repLength, maxScale, bbox });
-    });
+    }
+
     if (perSvg.length === 0) return { targetLength: 0, scaleFactors: new Map() };
 
-    // Feasible target length cannot exceed repLength * maxScale for any SVG
+    // Maximum feasible target (all can reach without overflow)
     const feasibleMaxTarget = Math.min(...perSvg.map(d => d.repLength * d.maxScale));
-    const targetLength = feasibleMaxTarget; // choose largest possible for clarity
+    const targetLength = feasibleMaxTarget;
 
     const scaleMap = new Map();
+
     perSvg.forEach(d => {
+        // Detect existing uniform scale if previously applied
         let existingScale = 1;
-        const t = g.getAttribute('transform');
-        const m = /scale\\(([^)]+)\\)/.exec(t);
-        if (m) existingScale = parseFloat(m[1]) || 1;
-        const effectiveRepLength = d.repLength / existingScale;
-        const scaleNeeded = targetLength / effectiveRepLength; // may be <= maxScale by construction
-        // Wrap content for scaling
-        let g = d.svg.querySelector('g[data-line-uniform]');
-        if (!g) {
-            g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            g.setAttribute('data-line-uniform','true');
-            while (d.svg.firstChild) g.appendChild(d.svg.firstChild);
-            d.svg.appendChild(g);
+        const existingWrapper = d.svg.querySelector('g[data-line-uniform]');
+        if (existingWrapper) {
+            const t = existingWrapper.getAttribute('transform') || '';
+            const m = /scale\(([^)]+)\)/.exec(t);
+            if (m) existingScale = parseFloat(m[1]) || 1;
         }
-        g.setAttribute('transform', `scale(${scaleNeeded})`);
+        const effectiveRepLength = d.repLength / existingScale;
+        const scaleNeeded = targetLength / effectiveRepLength;
+        let wrapper = existingWrapper;
+        if (!wrapper) {
+            wrapper = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            wrapper.setAttribute('data-line-uniform','true');
+            while (d.svg.firstChild) wrapper.appendChild(d.svg.firstChild);
+            d.svg.appendChild(wrapper);
+        }
+        wrapper.setAttribute('transform', `scale(${scaleNeeded})`);
         d.svg.setAttribute('viewBox', `${d.bbox.x} ${d.bbox.y} ${d.bbox.width} ${d.bbox.height}`);
         d.svg.style.width = '100%';
         d.svg.style.height = '100%';
         d.svg.style.display = 'block';
         scaleMap.set(d.svg, scaleNeeded);
     });
+
     return { targetLength, scaleFactors: scaleMap };
 }
 }

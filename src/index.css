@@ -61,6 +61,13 @@ label {
 }
 
 #menu_bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--menu-gap);
+  padding: var(--menu-bar-padding-y) var(--menu-bar-padding-x);
+  height: auto; /* allow natural height */
+  font-size: var(--menu-font-size);
   border-radius: 0.6vh;
   background-color: #1F1F1F;
   margin-bottom: 1vh;
@@ -244,8 +251,14 @@ label {
 }
 
 #fake_button {
+  float: none;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
+  font-size: var(--menu-font-size);
+  border-radius: var(--menu-radius);
+  height: 100%;
   position: relative;
-  float: right;
   background-color: #1F1F1F;
   color: white;
   text-align: center;
@@ -296,8 +309,8 @@ label {
   position: relative;
   float: right;
   display: inline-block;
-  width: 2.5vw;
-  height: 3vh;
+  width: var(--menu-slider-width);
+  height: var(--menu-slider-height);
 }
 
 /* Hide default HTML checkbox */
@@ -318,13 +331,14 @@ label {
   background-color: #ccc;
   -webkit-transition: .4s;
   transition: .4s;
+  border-radius: var(--menu-slider-height);
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 2.4vh;
-  width: 2.4vh;
+  height: var(--menu-slider-knob);
+  width: var(--menu-slider-knob);
   left: 0.1vw;
   bottom: 0.4vh;
   background-color: white;
@@ -341,9 +355,9 @@ input:focus+.slider {
 }
 
 input:checked+.slider:before {
-  -webkit-transform: translateX(2.4vh);
-  -ms-transform: translateX(2.4vh);
-  transform: translateX(2.4vh);
+  -webkit-transform: translateX(calc(var(--menu-slider-width) - var(--menu-slider-knob) - 0.2rem));
+  -ms-transform: translateX(calc(var(--menu-slider-width) - var(--menu-slider-knob) - 0.2rem));
+  transform: translateX(calc(var(--menu-slider-width) - var(--menu-slider-knob) - 0.2rem));
 }
 
 /* Rounded sliders */
@@ -690,12 +704,6 @@ svg text {
   bottom: 6vh;
   left: 50%;
 }
-.intermediate_drawing_tailoring_ripp{
-  position: relative;
-    max-width: 60%;
-    height: auto;
-    margin: 5vh;
-}
 .intermediate_drawing_precursor {
   position: relative;
   max-width: 60%;
@@ -931,4 +939,231 @@ button:disabled {
 
 .dropdown-content button:focus {
   background-color: #E11839;
+}
+
+/* Unified scrollbar styling (Firefox, Edge/Chromium, Safari, Chrome) */
+:root {
+  --scrollbar-bg: #1F1F1F;
+  --scrollbar-thumb: #E11839;
+  --scrollbar-thumb-hover: #ff4d60;
+  --scrollbar-thumb-active: #c40f2d;
+  --scrollbar-width: 10px;
+  --scrollbar-radius: 8px;
+  --scrollbar-border: #1F1F1F;
+}
+
+/* Firefox */
+body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
+.protein-container, .domain-container, .module-container, .container,
+.intermediateContainer, .intermediateContainerTailoring, .dropdown-content,
+.dropdown-content-tailoring, .dropdown-content-tailoring-folded {
+  scrollbar-width: thin; /* auto | thin | none */
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
+}
+
+/* WebKit (Chrome, Edge Chromium, Safari) */
+body::-webkit-scrollbar,
+#gene_container::-webkit-scrollbar,
+.outerDomainExplorer::-webkit-scrollbar,
+.outerDomainExplorer_while_saving::-webkit-scrollbar,
+.protein-container::-webkit-scrollbar,
+.domain-container::-webkit-scrollbar,
+.module-container::-webkit-scrollbar,
+.container::-webkit-scrollbar,
+.intermediateContainer::-webkit-scrollbar,
+.intermediateContainerTailoring::-webkit-scrollbar,
+.dropdown-content::-webkit-scrollbar,
+.dropdown-content-tailoring::-webkit-scrollbar,
+.dropdown-content-tailoring-folded::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+body::-webkit-scrollbar-track,
+#gene_container::-webkit-scrollbar-track,
+.outerDomainExplorer::-webkit-scrollbar-track,
+.outerDomainExplorer_while_saving::-webkit-scrollbar-track,
+.protein-container::-webkit-scrollbar-track,
+.domain-container::-webkit-scrollbar-track,
+.module-container::-webkit-scrollbar-track,
+.container::-webkit-scrollbar-track,
+.intermediateContainer::-webkit-scrollbar-track,
+.intermediateContainerTailoring::-webkit-scrollbar-track,
+.dropdown-content::-webkit-scrollbar-track,
+.dropdown-content-tailoring::-webkit-scrollbar-track,
+.dropdown-content-tailoring-folded::-webkit-scrollbar-track {
+  background: var(--scrollbar-bg);
+}
+
+body::-webkit-scrollbar-thumb,
+#gene_container::-webkit-scrollbar-thumb,
+.outerDomainExplorer::-webkit-scrollbar-thumb,
+.outerDomainExplorer_while_saving::-webkit-scrollbar-thumb,
+.protein-container::-webkit-scrollbar-thumb,
+.domain-container::-webkit-scrollbar-thumb,
+.module-container::-webkit-scrollbar-thumb,
+.container::-webkit-scrollbar-thumb,
+.intermediateContainer::-webkit-scrollbar-thumb,
+.intermediateContainerTailoring::-webkit-scrollbar-thumb,
+.dropdown-content::-webkit-scrollbar-thumb,
+.dropdown-content-tailoring::-webkit-scrollbar-thumb,
+.dropdown-content-tailoring-folded::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-radius);
+  border: 2px solid var(--scrollbar-border);
+}
+
+body::-webkit-scrollbar-thumb:hover,
+#gene_container::-webkit-scrollbar-thumb:hover,
+.outerDomainExplorer::-webkit-scrollbar-thumb:hover,
+.outerDomainExplorer_while_saving::-webkit-scrollbar-thumb:hover,
+.protein-container::-webkit-scrollbar-thumb:hover,
+.domain-container::-webkit-scrollbar-thumb:hover,
+.module-container::-webkit-scrollbar-thumb:hover,
+.container::-webkit-scrollbar-thumb:hover,
+.intermediateContainer::-webkit-scrollbar-thumb:hover,
+.intermediateContainerTailoring::-webkit-scrollbar-thumb:hover,
+.dropdown-content::-webkit-scrollbar-thumb:hover,
+.dropdown-content-tailoring::-webkit-scrollbar-thumb:hover,
+.dropdown-content-tailoring-folded::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+body::-webkit-scrollbar-thumb:active,
+#gene_container::-webkit-scrollbar-thumb:active,
+.outerDomainExplorer::-webkit-scrollbar-thumb:active,
+.outerDomainExplorer_while_saving::-webkit-scrollbar-thumb:active,
+.protein-container::-webkit-scrollbar-thumb:active,
+.domain-container::-webkit-scrollbar-thumb:active,
+.module-container::-webkit-scrollbar-thumb:active,
+.container::-webkit-scrollbar-thumb:active,
+.intermediateContainer::-webkit-scrollbar-thumb:active,
+.intermediateContainerTailoring::-webkit-scrollbar-thumb:active,
+.dropdown-content::-webkit-scrollbar-thumb:active,
+.dropdown-content-tailoring::-webkit-scrollbar-thumb:active,
+.dropdown-content-tailoring-folded::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-active);
+}
+
+/* Legacy Edge/IE (harmless in modern browsers) */
+body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
+.protein-container, .domain-container, .module-container, .container,
+.intermediateContainer, .intermediateContainerTailoring, .dropdown-content,
+.dropdown-content-tailoring, .dropdown-content-tailoring-folded {
+  -ms-overflow-style: scrollbar;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::-webkit-scrollbar-thumb,
+  #gene_container::-webkit-scrollbar-thumb,
+  .outerDomainExplorer::-webkit-scrollbar-thumb,
+  .outerDomainExplorer_while_saving::-webkit-scrollbar-thumb,
+  .protein-container::-webkit-scrollbar-thumb,
+  .domain-container::-webkit-scrollbar-thumb,
+  .module-container::-webkit-scrollbar-thumb,
+  .container::-webkit-scrollbar-thumb,
+  .intermediateContainer::-webkit-scrollbar-thumb,
+  .intermediateContainerTailoring::-webkit-scrollbar-thumb,
+  .dropdown-content::-webkit-scrollbar-thumb,
+  .dropdown-content-tailoring::-webkit-scrollbar-thumb,
+  .dropdown-content-tailoring-folded::-webkit-scrollbar-thumb {
+    transition: none;
+  }
+}
+
+/* Responsive sizing variables */
+:root {
+  --menu-bar-padding-y: 0.4rem;
+  --menu-bar-padding-x: 0.8rem;
+  --menu-gap: 0.6rem;
+  --menu-font-size: clamp(0.55rem, 1.1vw, 0.9rem);
+  --menu-button-padding-y: 0.35rem;
+  --menu-button-padding-x: 0.6rem;
+  --menu-radius: 0.6rem;
+  --menu-slider-width: 3.2rem;
+  --menu-slider-height: 1.6rem;
+  --menu-slider-knob: 1.4rem;
+}
+
+/* Top bar: switch from floats to flex for consistent scaling */
+#menu_bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--menu-gap);
+  padding: var(--menu-bar-padding-y) var(--menu-bar-padding-x);
+  height: auto; /* allow natural height */
+  font-size: var(--menu-font-size);
+}
+
+/* Generic menu buttons (undo/redo/start) */
+.redoUndo_button,
+.start_button {
+  float: none; /* remove legacy float */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
+  font-size: var(--menu-font-size);
+  line-height: 1.1;
+  border-radius: var(--menu-radius);
+  min-height: 2rem;
+  white-space: nowrap;
+}
+
+/* Ensure strong inside buttons does not overflow */
+.redoUndo_button strong,
+.start_button strong { font-weight: 600; }
+
+/* Slider container (switch) adapt sizing */
+.switch {
+  width: var(--menu-slider-width);
+  height: var(--menu-slider-height);
+  flex: 0 0 auto;
+}
+.slider {
+  border-radius: var(--menu-slider-height);
+}
+.slider:before {
+  height: var(--menu-slider-knob);
+  width: var(--menu-slider-knob);
+  bottom: 0.1rem;
+  left: 0.1rem;
+}
+input:checked + .slider:before {
+  transform: translateX(calc(var(--menu-slider-width) - var(--menu-slider-knob) - 0.2rem));
+}
+
+/* Fake button aligns with flex flow */
+#fake_button {
+  float: none;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
+  font-size: var(--menu-font-size);
+  border-radius: var(--menu-radius);
+  height: 100%;
+}
+
+/* Prevent tooltip buttons from wrapping awkwardly on very small widths */
+@media (max-width: 700px) {
+  #menu_bar { justify-content: center; }
+  .redoUndo_button, .start_button, #fake_button { flex: 1 1 auto; }
+  .switch { order: 99; } /* move switch to end on small screens */
+}
+@media (max-width: 420px) {
+  #menu_bar { gap: 0.4rem; }
+  .redoUndo_button, .start_button { font-size: clamp(0.5rem, 3.2vw, 0.75rem); }
+  #fake_button { font-size: clamp(0.5rem, 3.2vw, 0.75rem); }
+  :root { --menu-slider-width: 2.6rem; --menu-slider-height: 1.4rem; --menu-slider-knob: 1.2rem; }
+}
+
+/* High density displays adjustments */
+@media (min-resolution: 2dppx) and (min-width: 1100px) {
+  .redoUndo_button, .start_button { font-size: clamp(0.6rem, 0.8vw, 0.85rem); }
+}
+
+/* Reduce motion accessibility: remove slider transition */
+@media (prefers-reduced-motion: reduce) {
+  .slider, .slider:before { transition: none; }
 }
