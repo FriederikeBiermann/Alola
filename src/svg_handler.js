@@ -464,7 +464,7 @@ scaleSVGsUniformByParent(svgElements) {
     });
     if (limitingScale === Infinity) return 1;
     // Apply uniform scale
-    svgInfo.forEach(({ svg, bbox }) => {
+    svgInfo.forEach(({ svg, bbox, container }) => {
         let g = svg.querySelector('g[data-autoscale]');
         if (!g) {
             g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -479,6 +479,13 @@ scaleSVGsUniformByParent(svgElements) {
         svg.style.height = '100%';
         svg.style.display = 'block';
         svg.style.overflow = 'hidden';
+        // Width guard: ensure scaled width does not exceed container width (rare but possible with fractional rounding)
+        const scaledWidth = bbox.width * limitingScale;
+        const cW = container.getBoundingClientRect().width;
+        if (scaledWidth > cW) {
+            const correction = cW / bbox.width;
+            g.setAttribute('transform', `scale(${correction})`);
+        }
     });
     return limitingScale;
 }
@@ -496,7 +503,11 @@ scaleSVGsUniformByParent(svgElements) {
 scaleSVGsUniformByLineLength(svgElements, opts = {}) {
     const lineGroupPrefix = opts.lineGroupPrefix || 'line2d_';
     const useMedian = opts.useMedian || false;
-    if (!svgElements || svgElements.length === 0) return { targetLength: 0, scaleFactors: new Map() };
+    // strategy: 'fit' (existing behavior) tries to scale up as far as all containers allow.
+    // 'downscale' only reduces larger drawings to the smallest representative length (prevents overflow growth).
+    const strategy = opts.strategy || 'downscale';
+    const maxWidthFraction = typeof opts.maxWidthFraction === 'number' ? opts.maxWidthFraction : 0.98; // allow small margin
+    if (!svgElements || svgElements.length === 0) return { targetLength: 0, scaleFactors: new Map(), strategy };
 
     // Normalize inputs: allow passing IDs or raw nodes
     function toSvgNode(item) {
@@ -544,9 +555,13 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
         const lengths = collectLineLengths(svg);
         const repLength = statLength(lengths);
         if (repLength === 0) continue; // skip if no target groups
-        let container = svg.parentElement;
-        while (container && container.tagName && container.tagName.toLowerCase() === 'svg') {
-            container = container.parentElement;
+        // Prefer nearest ancestor marked as scaling boundary
+        let container = svg.closest('[data-scaling-boundary]');
+        if (!container) {
+            container = svg.parentElement;
+            while (container && container.tagName && container.tagName.toLowerCase() === 'svg') {
+                container = container.parentElement;
+            }
         }
         if (!container) continue;
         let bbox;
@@ -560,12 +575,16 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
         const maxScale = Math.min(maxScaleWidth, maxScaleHeight);
         perSvg.push({ svg, repLength, maxScale, bbox });
     }
+    if (perSvg.length === 0) return { targetLength: 0, scaleFactors: new Map(), strategy };
 
-    if (perSvg.length === 0) return { targetLength: 0, scaleFactors: new Map() };
-
-    // Maximum feasible target (all can reach without overflow)
-    const feasibleMaxTarget = Math.min(...perSvg.map(d => d.repLength * d.maxScale));
-    const targetLength = feasibleMaxTarget;
+    let targetLength;
+    if (strategy === 'fit') {
+        // Previous behavior: largest target all can reach without overflow (may upscale)
+        targetLength = Math.min(...perSvg.map(d => d.repLength * d.maxScale));
+    } else {
+        // Downscale: choose smallest current representative length (no growth, only shrink larger ones)
+        targetLength = Math.min(...perSvg.map(d => d.repLength));
+    }
 
     const scaleMap = new Map();
 
@@ -587,14 +606,25 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
             while (d.svg.firstChild) wrapper.appendChild(d.svg.firstChild);
             d.svg.appendChild(wrapper);
         }
-        wrapper.setAttribute('transform', `scale(${scaleNeeded})`);
+        // Width overflow guard: ensure final scaled width fits boundary margin
+        const boundary = d.svg.closest('[data-scaling-boundary]') || d.svg.parentElement;
+        let finalScale = scaleNeeded;
+        if (boundary) {
+            const boundaryWidth = boundary.getBoundingClientRect().width;
+            const projectedWidth = d.bbox.width * scaleNeeded;
+            const allowedWidth = boundaryWidth * maxWidthFraction;
+            if (projectedWidth > allowedWidth) {
+                finalScale = allowedWidth / d.bbox.width;
+            }
+        }
+        wrapper.setAttribute('transform', `scale(${finalScale})`);
         d.svg.setAttribute('viewBox', `${d.bbox.x} ${d.bbox.y} ${d.bbox.width} ${d.bbox.height}`);
         d.svg.style.width = '100%';
         d.svg.style.height = '100%';
         d.svg.style.display = 'block';
-        scaleMap.set(d.svg, scaleNeeded);
+        scaleMap.set(d.svg, finalScale);
     });
 
-    return { targetLength, scaleFactors: scaleMap };
+    return { targetLength, scaleFactors: scaleMap, strategy };
 }
 }

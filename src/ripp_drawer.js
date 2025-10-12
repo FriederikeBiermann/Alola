@@ -45,30 +45,55 @@ RiPPer.drawArrow = function (width, height, label = null) {
 };
 
 RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null) {
-    var container = document.createElement('div');
-    container.style.display = 'inline-flex';
-    container.style.alignItems = 'stretch'; // Stretch children to full height
-    container.style.width = String(width) + "px";
-    container.style.height = '200%'; // Take full height of parent
+    // Width-focused boundary: prevent child SVGs from expanding horizontally beyond this width
+    const domainContainer = document.getElementById('domain_container');
+    const clusterHeight = domainContainer ? domainContainer.clientHeight || 90 : 90;
 
-    var innerContainer = document.createElement('div');
+    const container = document.createElement('div');
+    container.style.display = 'inline-flex';
+    container.style.flexDirection = 'column';
+    container.style.alignItems = 'stretch';
+    container.style.justifyContent = 'center';
+    container.style.boxSizing = 'border-box';
+    container.style.width = String(width) + 'px';
+    container.style.height = clusterHeight + 'px';
+    container.style.overflow = 'hidden';
+    container.style.flexShrink = '0'; // preserve intended width in flex layouts
+    container.setAttribute('data-scaling-boundary', 'true');
+
+    const innerContainer = document.createElement('div');
     innerContainer.id = id;
-    innerContainer.style.flex = '1'; // Take remaining space
-    var innerIntermediateContainer = document.createElement('div');
-    innerIntermediateContainer.id = "innerIntermediateContainer_" + id;
-    innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring");
+    innerContainer.style.position = 'relative';
+    innerContainer.style.flex = '1';
+    innerContainer.style.width = '100%';
+    innerContainer.style.height = '100%';
+    innerContainer.style.overflow = 'hidden';
+    innerContainer.setAttribute('data-scaling-boundary', 'true');
+
+    const innerIntermediateContainer = document.createElement('div');
+    innerIntermediateContainer.id = 'innerIntermediateContainer_' + id;
+    innerIntermediateContainer.setAttribute('class', 'intermediateContainerTailoring');
+    innerIntermediateContainer.style.width = '100%';
+    innerIntermediateContainer.style.height = '100%';
+    innerIntermediateContainer.style.display = 'flex';
+    innerIntermediateContainer.style.alignItems = 'center';
+    innerIntermediateContainer.style.justifyContent = 'center';
+    innerIntermediateContainer.style.overflow = 'hidden';
+    innerIntermediateContainer.setAttribute('data-scaling-boundary', 'true');
 
     innerContainer.appendChild(innerIntermediateContainer);
     container.appendChild(innerContainer);
 
     if (includeArrow) {
-        const arrowWidth = 50; // You can adjust this value
-        const arrowHeight = 30; // You can adjust this value
+        const arrowWidth = 50;
+        const arrowHeight = 30;
         const arrow = RiPPer.drawArrow(arrowWidth, arrowHeight, arrowLabel);
+        arrow.style.flex = '0 0 auto';
+        // Arrow is visual aid; do not mark as scaling boundary
         container.appendChild(arrow);
     }
 
-    document.getElementById('domain_container').appendChild(container);
+    domainContainer.appendChild(container);
 };
 
 // Example usage within RiPPer.drawCluster
@@ -101,6 +126,7 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
     return $(container).find("svg")[0];
     
     function give_protease(geneMatrix) {
+        for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
         let gene = geneMatrix[geneIndex]
         if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
             if (gene.tailoringEnzymeAbbreviation == "PROT" || gene.tailoringEnzymeAbbreviation == "PEP") {
@@ -110,7 +136,7 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
     }
     return null
 
-};
+}};
 
 
 RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSites, geneMatrixHandler) {

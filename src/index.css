@@ -127,7 +127,6 @@ label {
   border-radius: 0.6vh;
   background-color: #1F1F1F;
   margin-bottom: 1vh;
-  float: left;
   width: 75%;
   height: 10vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
@@ -138,8 +137,6 @@ label {
   border-radius: 0.6vh;
   margin-bottom: 1vh;
   background-color: #1F1F1F;
-  float: left;
-
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 10vh;
   width: 75%;
@@ -149,7 +146,6 @@ label {
   border-radius: 0.6vh;
   margin-bottom: 1vh;
   background-color: #1F1F1F;
-  float: left;
   padding: 1.5vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 71vh;
@@ -159,7 +155,6 @@ label {
 .Domain_explorer_while_saving {
   border-radius: 0.6vh;
   margin-bottom: 1vh;
-  float: left;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 71vh;
   width: 75%;
@@ -169,7 +164,6 @@ label {
   padding: 1.5vh;
   border-radius: 0.6vh;
   background-color: #1F1F1F;
-  float: right;
   height: 45vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   width: 24.5%;
@@ -183,7 +177,6 @@ label {
   border-radius: 0.6vh;
   width: 24.5%;
   background-color: #1F1F1F;
-  float: right;
   height: 40vh;
   overflow-x: auto;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
@@ -192,7 +185,6 @@ label {
 .start_button {
   position: relative;
   margin: 0.2vh;
-  float: right;
   color: #2B2B2B;
   text-align: center;
   padding: 0.1vh 0.1vh;
@@ -201,14 +193,12 @@ label {
 }
 .redoUndo_button {
   position: relative;
-  float: left;
   margin: 0.2vh;
   color: #2B2B2B;
   text-align: center;
   padding: 0.1vh 0.1vh;
   text-decoration: none;
   font-size: 0.7vw;
-
 }
 .redoUndo_button:hover:not(.disabled) {
   background-color: #E11839; /* Hover color for enabled state */
@@ -281,13 +271,12 @@ label {
 
 .save_button {
   margin: 0.3vh;
-  float: right;
   color: #2B2B2B;
   text-align: center;
   padding: 0.2vh 0.5vh;
   text-decoration: none;
-  font-size: 1.7 vh;
-  margin-right: 0.5 vh;
+  font-size: 1.7vh;
+  margin-right: 0.5vh;
 }
 
 .save_button:hover {
@@ -855,9 +844,8 @@ svg text {
 }
 
 #reverse_button {
-  float: right;
+  position: relative;
   right: 5vh;
-
 }
 
 #reverse_button:focus {
@@ -1073,16 +1061,16 @@ body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
 
 /* Responsive sizing variables */
 :root {
-  --menu-bar-padding-y: 0.4rem;
-  --menu-bar-padding-x: 0.8rem;
-  --menu-gap: 0.6rem;
-  --menu-font-size: clamp(0.55rem, 1.1vw, 0.9rem);
-  --menu-button-padding-y: 0.35rem;
-  --menu-button-padding-x: 0.6rem;
-  --menu-radius: 0.6rem;
-  --menu-slider-width: 3.2rem;
-  --menu-slider-height: 1.6rem;
-  --menu-slider-knob: 1.4rem;
+  --menu-bar-padding-y: 0.25rem; /* slimmer bar vertical padding */
+  --menu-bar-padding-x: 0.6rem; /* slightly reduced horizontal padding */
+  --menu-gap: 0.45rem; /* tighter gap between items */
+  --menu-font-size: clamp(0.55rem, 0.95vw, 0.85rem); /* keep readable but compact */
+  --menu-button-padding-y: 0.18rem; /* much slimmer button vertical padding */
+  --menu-button-padding-x: 0.45rem; /* reduced horizontal padding */
+  --menu-radius: 0.45rem; /* slightly smaller rounding */
+  --menu-slider-width: 3rem;
+  --menu-slider-height: 1.4rem;
+  --menu-slider-knob: 1.2rem;
 }
 
 /* Top bar: switch from floats to flex for consistent scaling */
@@ -1099,17 +1087,37 @@ body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
 /* Generic menu buttons (undo/redo/start) */
 .redoUndo_button,
 .start_button {
-  float: none; /* remove legacy float */
+  float: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
   font-size: var(--menu-font-size);
-  line-height: 1.1;
+  line-height: 1.05;
   border-radius: var(--menu-radius);
-  min-height: 2rem;
+  min-height: 1.6rem; /* leaner height */
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
+
+/* Visual refinement: lighter default background, subtle border for sleekness */
+.redoUndo_button,
+.start_button {
+  background: #f5f5f5;
+  border: 1px solid #d1d1d1;
+}
+.redoUndo_button:hover:not(.disabled),
+.start_button:hover { background:#E11839; color:#000; border-color:#E11839; }
+.redoUndo_button.disabled { opacity:0.55; }
+
+/* Spacer element to push right-group buttons to the right */
+#menu_bar .menu-spacer { flex-grow: 1; height: 100%; }
+
+/* Ensure undo/redo always stay left */
+#undoButton, #redoButton { order: 0; }
+#menu_bar .menu-spacer { order: 1; }
+/* All other buttons come after spacer */
+#menu_bar .start_button:not(#undoButton):not(#redoButton) { order: 2; }
 
 /* Ensure strong inside buttons does not overflow */
 .redoUndo_button strong,
@@ -1136,7 +1144,6 @@ input:checked + .slider:before {
 
 /* Fake button aligns with flex flow */
 #fake_button {
-  float: none;
   display: inline-flex;
   align-items: center;
   padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
@@ -1160,7 +1167,7 @@ input:checked + .slider:before {
 
 /* High density displays adjustments */
 @media (min-resolution: 2dppx) and (min-width: 1100px) {
-  .redoUndo_button, .start_button { font-size: clamp(0.6rem, 0.8vw, 0.85rem); }
+  .redoUndo_button, .start_button { font-size: clamp(0.55rem, 0.7vw, 0.8rem); }
 }
 
 /* Reduce motion accessibility: remove slider transition */
