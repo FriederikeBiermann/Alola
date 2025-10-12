@@ -174,7 +174,8 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
         bubbleCell.style.alignItems = 'center';
         bubbleCell.style.height = bubbleRowHeight + 'px';
         bubbleCell.style.gridRow = '1';
-        bubbleCell.style.position = 'relative';
+    bubbleCell.style.position = 'relative';
+    bubbleCell.style.zIndex = '10'; // ensure bubble dropdowns overlay pipeline cells
         container.appendChild(bubbleCell);
         bubbleCells.push(bubbleCell);
 
@@ -185,7 +186,8 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
         pipelineCell.style.alignItems = 'center';
         pipelineCell.style.justifyContent = 'flex-start';
         pipelineCell.style.gridRow = '2';
-        pipelineCell.style.position = 'relative';
+    pipelineCell.style.position = 'relative';
+    pipelineCell.style.zIndex = '1';
         container.appendChild(pipelineCell);
         pipelineCells.push(pipelineCell);
     }
@@ -369,6 +371,9 @@ RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSi
                 domainIdentifier)
                 .setAttribute("class",
                     "box");
+            // Elevate bubble box stacking context
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.position='relative';
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.zIndex='20';
             document.getElementById(
                 'innerdomainContainer' +
                 domainIdentifier)
@@ -534,6 +539,8 @@ RiPPer.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneMat
                 domainIdentifier)
                 .setAttribute("class",
                     "box");
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.position='relative';
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.zIndex='20';
             document.getElementById(
                 'innerdomainContainer' +
                 domainIdentifier)

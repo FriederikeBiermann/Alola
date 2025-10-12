@@ -161,11 +161,12 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
         b.className = 'bubble-cell';
         b.style.display='flex'; b.style.justifyContent='center'; b.style.alignItems='center';
         b.style.height=bubbleRowHeight+'px'; b.style.gridRow='1'; b.style.position='relative';
+    b.style.zIndex='10'; // elevate bubble dropdown layer
         container.appendChild(b); bubbleCells.push(b);
         const p = document.createElement('div');
         p.className='pipeline-cell';
         p.style.display='flex'; p.style.flexDirection='column'; p.style.alignItems='center'; p.style.justifyContent='flex-start';
-        p.style.gridRow='2'; p.style.position='relative';
+    p.style.gridRow='2'; p.style.position='relative'; p.style.zIndex='1';
         container.appendChild(p); pipelineCells.push(p);
     }
 
@@ -320,6 +321,8 @@ Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, gen
                 domainIdentifier)
                 .setAttribute("class",
                     "box");
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.position='relative';
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.zIndex='20';
             document.getElementById(
                 'innerdomainContainer' +
                 domainIdentifier)
@@ -518,6 +521,8 @@ Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneM
                 domainIdentifier)
                 .setAttribute("class",
                     "box");
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.position='relative';
+            document.getElementById('innerdomainContainer' + domainIdentifier).style.zIndex='20';
             document.getElementById(
                 'innerdomainContainer' +
                 domainIdentifier)
