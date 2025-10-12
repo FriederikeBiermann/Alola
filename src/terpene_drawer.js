@@ -100,11 +100,12 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
 
 Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCyclaseOptions, geneMatrixHandler) {
     var container = document.getElementById('domain_container');
-    // Ensure we keep the grid layout from CSS (.domain-container) instead of forcing flex
-    if (container.classList.contains('domain-container')) {
-        container.style.removeProperty('display');
-        container.style.removeProperty('align-items');
-    }
+    // Use flex for terpene clusters so arrows/text are not constrained by grid columns
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.flexWrap = 'nowrap';
+    container.style.gap = '8px';
+    container.style.overflowX = 'auto';
     container.style.height = height + 'px';
 
     var scale = function (val) {

@@ -101,13 +101,12 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
 // Example usage within RiPPer.drawCluster
 RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler) {
     var container = document.getElementById('domain_container');
-    // Use CSS grid defined by .domain-container instead of overriding with flex
-    // (flex caused vertical stacking / loss of horizontal flow). If an inline
-    // flex was previously set, remove it.
-    if (container.classList.contains('domain-container')) {
-        container.style.removeProperty('display');
-        container.style.removeProperty('align-items');
-    }
+    // Revert to flex for RiPP clusters to avoid grid cell width capping arrows & labels
+    container.style.display = 'flex';
+    container.style.alignItems = 'center';
+    container.style.flexWrap = 'nowrap';
+    container.style.gap = '8px';
+    container.style.overflowX = 'auto';
     container.style.height = height + 'px'; // Set explicit height
 
     var scale = function (val) {

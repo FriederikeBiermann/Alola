@@ -1,5 +1,4 @@
 @media only screen and (orientation: portrait) and (min-device-width: 320px) and (max-device-width: 1024px) {
-
   html {
     transform: rotate(90deg);
     transform-origin: right top;
@@ -12,11 +11,30 @@
   }
 }
 
-body {
-  color: white;
-  font-family: 'Catamaran', sans-serif;
-  font-size: 2vh;
-  padding-bottom: 10px;
+/* Two-column page layout replacing former floats */
+.main-container {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1vw;
+  width: 100%;
+}
+.left-section {
+  flex: 1 1 75%;
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+}
+.right-section {
+  flex: 0 0 24.5%;
+  max-width: 24.5%;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 1100px) {
+  .main-container { flex-wrap: wrap; }
+  .left-section, .right-section { flex: 1 1 100%; max-width: 100%; }
 }
 
 a:link {
@@ -305,27 +323,30 @@ label {
 /* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
-  width: 0;
-  height: 0;
-}
+  #reverse_button { margin-left: auto; }
 
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: var(--menu-slider-height);
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
+  /* Flex layout for tab bar (BGC/Protein/Reverse) */
+  .tab {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    background-color: #1F1F1F;
+    border-radius: 0.6vh;
+    width: 75%;
+    overflow: hidden;
+  }
+  .tab button {
+    background-color: inherit;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: 0.3s;
+    color: white;
+    font-family: 'Catamaran', sans-serif;
+    font-size: 1.5vh;
+    flex: 0 0 auto;
+  }
   height: var(--menu-slider-knob);
   width: var(--menu-slider-knob);
   left: 0.1vw;
@@ -854,8 +875,9 @@ svg text {
 }
 
 #reverse_button {
+  margin-left: auto;           /* push to right end of flex row */
   position: relative;
-  right: 5vh;
+  right: auto;
 }
 
 #reverse_button:focus {
