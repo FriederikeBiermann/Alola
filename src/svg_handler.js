@@ -277,11 +277,12 @@ class SVGHandler {
 
         let container = document.getElementById(containerId);
         console.log('Container element:', container);
-    // Use CSS class-driven sizing (~10vw). Ensure class present.
+        // Apply compact 10vw only for ripp/terpene, keep previous width for others (leave widths untouched if already set)
+        if (this.clusterType === 'ripp' || this.clusterType === 'terpene') {
+            container.style.width = '10vw';
+        }
     container.classList.add('intermediateContainer');
-    // Remove any inline width so CSS controls it.
-    container.style.width = '';
-    console.log('Applied class-based width (10vw via CSS)');
+        console.log('Applied conditional container width (if compact clusterType)');
 
         let formattedSVG = this.formatSVGIntermediates(svgContent);
         console.log('Formatted SVG content:', formattedSVG);
@@ -309,8 +310,8 @@ class SVGHandler {
             console.log('Added drop shadow filter to SVG');
         }
 
-    // Fit SVG to container width maintaining aspect ratio
-    this.fitSVGToContainerWidth(svg, container);
+    // Adjust SVG sizing: fill container width while preserving aspect
+    this.adjustSVGToContainer(svg, container);
 
         console.log('Function execution completed');
     }
@@ -355,19 +356,16 @@ class SVGHandler {
             viewPortWidth = window.innerHeight;
         }
         let container = document.getElementById(`innerIntermediateContainer${acp.replace(".", "_")}`);
-    // Enforce class-based sizing (10vw) instead of legacy 5vw inline style.
+    // Preserve original width logic for NRPS/PKS (do not force viewport units)
+    container.style.width = '5vw';
     container.classList.add('intermediateContainer');
-    container.style.width = '';
         container.innerHTML = this.formatSVGIntermediates(intermediate);
         let svg = document.getElementById("intermediate_drawing");
         let bbox = svg.getBBox();
         let viewBox = [bbox.x, bbox.y, max_width, height].join(" ");
         svg.setAttribute("viewBox", viewBox);
-    // Remove explicit width to allow responsive scaling within 10vw container
-    svg.removeAttribute('width');
-    svg.removeAttribute('height');
-    svg.style.width = '100%';
-    svg.style.height = 'auto';
+    svg.setAttribute("width", max_width);
+    svg.setAttribute("height", height);
         svg.setAttribute('id', `intermediate_drawing${index}`);
         svg.setAttribute('class', "intermediate_drawing");
 
@@ -376,10 +374,7 @@ class SVGHandler {
             : (carrier_x - bbox.x - 13000 / viewPortHeight);
         svg.setAttribute('style', `right: ${rightPosition}${0.05 * viewPortWidth <= max_width ? 'vw' : 'px'};`);
         // Adjust container height based on aspect ratio after scaling
-        const aspect = bbox.height / max_width;
-        if (aspect && isFinite(aspect)) {
-            container.style.height = `${(aspect * 10).toFixed(3)}vw`; // 10vw * aspect
-        }
+    // Container height remains driven by outer layout; avoid dynamic vw-based height changes
     }
 
     updateTailoringStructure(structureForTailoring) {
@@ -644,27 +639,16 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
     return { targetLength, scaleFactors: scaleMap, strategy };
 }
 
-    /**
-     * Scales an SVG to fit the container's fixed CSS width (~10vw) while maintaining aspect ratio.
-     * Sets container height proportionally (10vw * aspect ratio) for visual consistency.
-     * @param {SVGElement} svg
-     * @param {HTMLElement} container
-     */
-    fitSVGToContainerWidth(svg, container) {
+    // Resize SVG content to fill container width (percentage) without altering container height
+    adjustSVGToContainer(svg, container) {
         if (!svg || !container) return;
-        let bbox;
-        try { bbox = svg.getBBox(); } catch (_) { return; }
-        if (!bbox || bbox.width === 0 || bbox.height === 0) return;
-        // Normalize viewBox to intrinsic content
+        let bbox; try { bbox = svg.getBBox(); } catch { return; }
+        if (!bbox.width || !bbox.height) return;
         svg.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
         svg.removeAttribute('width');
         svg.removeAttribute('height');
         svg.style.width = '100%';
         svg.style.height = 'auto';
-        // Container height based on aspect ratio relative to 10vw width
-        const aspect = bbox.height / bbox.width;
-        if (aspect && isFinite(aspect)) {
-            container.style.height = `${(aspect * 10).toFixed(3)}vw`;
-        }
+        // Do not adjust container height here to avoid layout collapse.
     }
 }

@@ -15,16 +15,11 @@ RiPPer.drawArrow = function (width, height, label = null) {
     arrowContainer.style.alignItems = 'center';
     arrowContainer.style.justifyContent = 'center';
     // Width may be passed as pixels; convert if numeric and treat ~10vw target when flagged
-    if (typeof width === 'string' && width.endsWith('vw')) {
-        arrowContainer.style.width = width;
-    } else {
-        arrowContainer.style.width = width + 'px';
-    }
-    // Constrain arrow container height to content; we'll center via flex within parent
-    arrowContainer.style.height = height + 'px';
+    arrowContainer.style.width = width + 'px';
+    arrowContainer.style.height = '100%';
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", typeof width === 'string' ? width : width);
+    svg.setAttribute("width", width);
     svg.setAttribute("height", height);
     svg.style.overflow = "visible"; // Allow content to overflow for label
 
@@ -62,11 +57,7 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     container.style.justifyContent = 'center';
     container.style.boxSizing = 'border-box';
     // Use viewport width for arrow gaps if id indicates arrow or width equals special token
-    if (id.startsWith('arrow')) {
-        container.style.width = '10vw';
-    } else {
-        container.style.width = String(width) + 'px';
-    }
+    container.style.width = String(width) + 'px';
     container.style.height = clusterHeight + 'px';
     container.style.overflow = 'hidden';
     container.style.flexShrink = '0'; // preserve intended width in flex layouts
@@ -96,9 +87,8 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     container.appendChild(innerContainer);
 
     if (includeArrow) {
-        // Arrow width matches container (10vw) for visual consistency; choose a stable pixel fallback
-        const arrowWidth = '10vw';
-        const arrowHeight = 30; // keep modest height so midline matches roughly half of domain height
+        const arrowWidth = 50;
+        const arrowHeight = 30;
         const arrow = RiPPer.drawArrow(arrowWidth, arrowHeight, arrowLabel);
         arrow.style.flex = '0 0 auto';
         // Arrow is visual aid; do not mark as scaling boundary
@@ -111,8 +101,13 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
 // Example usage within RiPPer.drawCluster
 RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler) {
     var container = document.getElementById('domain_container');
-    container.style.display = 'flex';
-    container.style.alignItems = 'stretch';
+    // Use CSS grid defined by .domain-container instead of overriding with flex
+    // (flex caused vertical stacking / loss of horizontal flow). If an inline
+    // flex was previously set, remove it.
+    if (container.classList.contains('domain-container')) {
+        container.style.removeProperty('display');
+        container.style.removeProperty('align-items');
+    }
     container.style.height = height + 'px'; // Set explicit height
 
     var scale = function (val) {

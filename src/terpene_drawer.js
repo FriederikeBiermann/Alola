@@ -14,15 +14,11 @@ Terpener.drawArrow = function (width, height, label = null) {
     arrowContainer.style.flexDirection = 'column';
     arrowContainer.style.alignItems = 'center';
     arrowContainer.style.justifyContent = 'center';
-    if (typeof width === 'string' && width.endsWith('vw')) {
-        arrowContainer.style.width = width;
-    } else {
-        arrowContainer.style.width = width + 'px';
-    }
-    arrowContainer.style.height = height + 'px';
+    arrowContainer.style.width = width + 'px';
+    arrowContainer.style.height = '100%';
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", typeof width === 'string' ? width : width);
+    svg.setAttribute("width", width);
     svg.setAttribute("height", height);
     svg.style.overflow = "visible";
 
@@ -58,11 +54,7 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     container.style.alignItems = 'stretch';
     container.style.justifyContent = 'center';
     container.style.boxSizing = 'border-box';
-    if (id.startsWith('arrow')) {
-        container.style.width = '10vw';
-    } else {
-        container.style.width = String(width) + 'px';
-    }
+    container.style.width = String(width) + 'px';
     // Use explicit pixel height to prevent auto-expansion that breaks scaling calculations
     container.style.height = clusterHeight + 'px';
     container.style.overflow = 'hidden';
@@ -94,8 +86,8 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     container.appendChild(innerContainer);
 
     if (includeArrow) {
-        const arrowWidth = '10vw';
-        const arrowHeight = 30; // keep same for consistency
+        const arrowWidth = 50;
+        const arrowHeight = 30; // adjustable
         const arrow = Terpener.drawArrow(arrowWidth, arrowHeight, arrowLabel);
         // Arrow should not influence scaling of SVGs -> no data-scaling-boundary
         arrow.style.flex = '0 0 auto';
@@ -108,8 +100,11 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
 
 Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCyclaseOptions, geneMatrixHandler) {
     var container = document.getElementById('domain_container');
-    // container.style.display = 'flex';
-    // container.style.alignItems = 'stretch';
+    // Ensure we keep the grid layout from CSS (.domain-container) instead of forcing flex
+    if (container.classList.contains('domain-container')) {
+        container.style.removeProperty('display');
+        container.style.removeProperty('align-items');
+    }
     container.style.height = height + 'px';
 
     var scale = function (val) {
