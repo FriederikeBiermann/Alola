@@ -353,6 +353,9 @@ Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, gen
                 domainIdentifier)
                 .setAttribute("class",
                     "dropdown-content-tailoring");
+            // Elevate terpene cyclase dropdown above other layout layers
+            innerDropdownContent.style.position = 'absolute';
+            innerDropdownContent.style.zIndex = '1000';
             innerDropdownContent.innerHTML =
                 ""
 
@@ -385,9 +388,12 @@ Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, gen
         innerDropdownContainer_folded_1
             .setAttribute("class",
                 "dropdown-tailoring-folded");
-        innerDropdownContainer_folded_1
-            .appendChild(
-                innerDropdownContent);
+    // Elevate folded submenu for cyclase options and append its content correctly
+    innerDropdownContainer_folded_1.style.position='absolute';
+    innerDropdownContainer_folded_1.style.zIndex='1001';
+    innerDropdownContent.style.position='absolute';
+    innerDropdownContent.style.zIndex='1002';
+    innerDropdownContainer_folded_1.appendChild(innerDropdownContent);
         innerDropdownContainer_folded_1
             .setAttribute("class",
                 "dropdown-content-tailoring-folded");
@@ -553,6 +559,8 @@ Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneM
                 domainIdentifier)
                 .setAttribute("class",
                     "dropdown-content-tailoring");
+            innerDropdownContent.style.position = 'absolute';
+            innerDropdownContent.style.zIndex = '1000';
             innerDropdownContent.innerHTML =
                 ""
             options = geneMatrix[geneIndex].options
@@ -585,9 +593,11 @@ Terpener.drawTailoringEnzymes = (function (geneMatrix, height = 90, scale, geneM
                 innerDropdownContainer_folded_1
                     .setAttribute("class",
                         "dropdown-tailoring-folded");
-                innerDropdownContainer_folded_1
-                    .appendChild(
-                        innerDropdownContent);
+            innerDropdownContainer_folded_1.style.position='absolute';
+            innerDropdownContainer_folded_1.style.zIndex='1001';
+            innerDropdownContent.style.position='absolute';
+            innerDropdownContent.style.zIndex='1002';
+            innerDropdownContainer_folded_1.appendChild(innerDropdownContent);
                 innerDropdownContainer_folded_1
                     .setAttribute("class",
                         "dropdown-content-tailoring-folded");
