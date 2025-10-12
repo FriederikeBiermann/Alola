@@ -1,4 +1,5 @@
 @media only screen and (orientation: portrait) and (min-device-width: 320px) and (max-device-width: 1024px) {
+
   html {
     transform: rotate(90deg);
     transform-origin: right top;
@@ -11,30 +12,11 @@
   }
 }
 
-/* Two-column page layout replacing former floats */
-.main-container {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1vw;
-  width: 100%;
-}
-.left-section {
-  flex: 1 1 75%;
-  max-width: 75%;
-  display: flex;
-  flex-direction: column;
-}
-.right-section {
-  flex: 0 0 24.5%;
-  max-width: 24.5%;
-  display: flex;
-  flex-direction: column;
-}
-@media (max-width: 1100px) {
-  .main-container { flex-wrap: wrap; }
-  .left-section, .right-section { flex: 1 1 100%; max-width: 100%; }
+body {
+  color: white;
+  font-family: 'Catamaran', sans-serif;
+  font-size: 2vh;
+  padding-bottom: 10px;
 }
 
 a:link {
@@ -48,15 +30,18 @@ button {
   border-radius: 0.3vh;
 
 }
+
 textarea {
   color: black;
   min-height: 30vh;
   width: 100%;
 }
+
 #save_complete_cluster_svg {
   color: black;
   text-decoration-color: white;
 }
+
 #save_enzymatic_pathway_svg {
   color: black;
   text-decoration-color: white;
@@ -84,7 +69,8 @@ label {
   align-items: center;
   gap: var(--menu-gap);
   padding: var(--menu-bar-padding-y) var(--menu-bar-padding-x);
-  height: auto; /* allow natural height */
+  height: auto;
+  /* allow natural height */
   font-size: var(--menu-font-size);
   border-radius: 0.6vh;
   background-color: #1F1F1F;
@@ -94,6 +80,12 @@ label {
   height: 3vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
 }
+/* Conservative tweaks: slightly tighter spacing & right push for manual button group */
+#menu_bar { padding: 0.2rem 0.45rem; gap: 0.35rem; }
+#menu_bar #openAlolaManual { margin-left: auto; }
+#menu_bar .redoUndo_button, #menu_bar .start_button { float:none; }
+#Domain_explorer .start_button { float:none; }
+#reverse_button { margin-left:auto; float:none; }
 
 #regionsBar {
   position: relative;
@@ -127,7 +119,8 @@ label {
   text-align: center;
   overflow: auto;
 }
-#popupImpressum{
+
+#popupImpressum {
   text-align: center;
   background-color: #1F1F1F;
   padding: 20px;
@@ -145,6 +138,7 @@ label {
   border-radius: 0.6vh;
   background-color: #1F1F1F;
   margin-bottom: 1vh;
+  float: left;
   width: 75%;
   height: 10vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
@@ -155,6 +149,8 @@ label {
   border-radius: 0.6vh;
   margin-bottom: 1vh;
   background-color: #1F1F1F;
+  float: left;
+
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 10vh;
   width: 75%;
@@ -164,6 +160,7 @@ label {
   border-radius: 0.6vh;
   margin-bottom: 1vh;
   background-color: #1F1F1F;
+  float: left;
   padding: 1.5vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 71vh;
@@ -173,6 +170,7 @@ label {
 .Domain_explorer_while_saving {
   border-radius: 0.6vh;
   margin-bottom: 1vh;
+  float: left;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   height: 71vh;
   width: 75%;
@@ -182,6 +180,7 @@ label {
   padding: 1.5vh;
   border-radius: 0.6vh;
   background-color: #1F1F1F;
+  float: right;
   height: 45vh;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
   width: 24.5%;
@@ -195,6 +194,7 @@ label {
   border-radius: 0.6vh;
   width: 24.5%;
   background-color: #1F1F1F;
+  float: right;
   height: 40vh;
   overflow-x: auto;
   box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.19), 0 0.6vh 0.6vh rgba(0, 0, 0, 0.23);
@@ -203,38 +203,52 @@ label {
 .start_button {
   position: relative;
   margin: 0.2vh;
+  float: right;
   color: #2B2B2B;
   text-align: center;
   padding: 0.1vh 0.1vh;
   text-decoration: none;
   font-size: 0.7vw;
 }
+
 .redoUndo_button {
   position: relative;
+  float: left;
   margin: 0.2vh;
   color: #2B2B2B;
   text-align: center;
   padding: 0.1vh 0.1vh;
   text-decoration: none;
   font-size: 0.7vw;
+
 }
+
 .redoUndo_button:hover:not(.disabled) {
-  background-color: #E11839; /* Hover color for enabled state */
+  background-color: #E11839;
+  /* Hover color for enabled state */
   color: black;
 }
 
 .redoUndo_button.disabled {
-  background-color: white; /* No background color change for disabled state */
-  color: #2B2B2B; /* Keep the text color same as the default */
-  cursor: not-allowed; /* Change cursor to indicate the button is not clickable */
+  background-color: white;
+  /* No background color change for disabled state */
+  color: #2B2B2B;
+  /* Keep the text color same as the default */
+  cursor: not-allowed;
+  /* Change cursor to indicate the button is not clickable */
 }
 
 #mass_and_formula_container {
-  display: flex;            /* Align elements horizontally */
-  gap: 80px;                /* Space between Mass and Sum Formula */
-  align-items: center;      /* Vertically center items if needed */
-  margin-bottom: 10px;      /* Optional space below this section */
+  display: flex;
+  /* Align elements horizontally */
+  gap: 80px;
+  /* Space between Mass and Sum Formula */
+  align-items: center;
+  /* Vertically center items if needed */
+  margin-bottom: 10px;
+  /* Optional space below this section */
 }
+
 .molecular_mass {
   position: relative;
   text-decoration: none;
@@ -242,8 +256,8 @@ label {
 }
 
 .molecular_mass .mass_value {
-  font-size: 0.8vw; 
-  font-weight: normal; 
+  font-size: 0.8vw;
+  font-weight: normal;
 }
 
 .regionButton {
@@ -289,12 +303,13 @@ label {
 
 .save_button {
   margin: 0.3vh;
+  float: right;
   color: #2B2B2B;
   text-align: center;
   padding: 0.2vh 0.5vh;
   text-decoration: none;
-  font-size: 1.7vh;
-  margin-right: 0.5vh;
+  font-size: 1.7 vh;
+  margin-right: 0.5 vh;
 }
 
 .save_button:hover {
@@ -323,30 +338,27 @@ label {
 /* Hide default HTML checkbox */
 .switch input {
   opacity: 0;
-  #reverse_button { margin-left: auto; }
+  width: 0;
+  height: 0;
+}
 
-  /* Flex layout for tab bar (BGC/Protein/Reverse) */
-  .tab {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    background-color: #1F1F1F;
-    border-radius: 0.6vh;
-    width: 75%;
-    overflow: hidden;
-  }
-  .tab button {
-    background-color: inherit;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding: 5px;
-    transition: 0.3s;
-    color: white;
-    font-family: 'Catamaran', sans-serif;
-    font-size: 1.5vh;
-    flex: 0 0 auto;
-  }
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: var(--menu-slider-height);
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
   height: var(--menu-slider-knob);
   width: var(--menu-slider-knob);
   left: 0.1vw;
@@ -456,12 +468,13 @@ input:checked+.slider:before {
 
 .domain-container {
   display: grid;
-  grid-template-columns: repeat(100, 1fr);
+  grid-auto-flow: column; /* place items left-to-right */
+  grid-auto-columns: max-content; /* each item width fits content */
   gap: 10px;
-  padding: 0px;
+  padding: 0;
   height: 100%;
-  white-space: nowrap;
   font-size: medium;
+  overflow-x: auto; /* allow scroll instead of cropping */
 }
 
 .module-container {
@@ -478,23 +491,13 @@ input:checked+.slider:before {
 
 .intermediateContainer {
   position: relative;
-  height: auto;
-  max-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+  height: 80vh;
 }
 
 .intermediateContainerTailoring {
   position: relative;
-  top: 0;
-  height: auto;
-  max-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+  top: 10%;
+  height: 80vh;
 }
 
 .box {
@@ -526,9 +529,12 @@ input:checked+.slider:before {
   z-index: 1;
   min-width: 3.75vw;
   margin-top: -0.5vw;
-  max-height: 200px; /* Feste Höhe */
-  overflow-y: auto; /* Vertikale Scrollbar hinzufügen, wenn der Inhalt zu groß ist */
-  scrollbar-width: auto; /* Scrollbar-Breite: auto, thin, oder none */
+  max-height: 200px;
+  /* Feste Höhe */
+  overflow-y: auto;
+  /* Vertikale Scrollbar hinzufügen, wenn der Inhalt zu groß ist */
+  scrollbar-width: auto;
+  /* Scrollbar-Breite: auto, thin, oder none */
   scrollbar-color: red #f1f1f1;
 }
 
@@ -546,7 +552,7 @@ svg text {
   width: 100%;
   text-transform: capitalize;
   text-align: start;
-  
+
 }
 
 .dropdown-content button:active {
@@ -610,9 +616,12 @@ svg text {
   min-width: 5vw;
   max-width: 10vw;
   margin-top: -2vh;
-  max-height: 200px; /* Feste Höhe */
-  overflow-y: auto; /* Vertikale Scrollbar hinzufügen, wenn der Inhalt zu groß ist */
-  scrollbar-width: auto; /* Scrollbar-Breite: auto, thin, oder none */
+  max-height: 200px;
+  /* Feste Höhe */
+  overflow-y: auto;
+  /* Vertikale Scrollbar hinzufügen, wenn der Inhalt zu groß ist */
+  scrollbar-width: auto;
+  /* Scrollbar-Breite: auto, thin, oder none */
   scrollbar-color: red #f1f1f1;
 }
 
@@ -693,7 +702,8 @@ svg text {
   background-color: #fff;
   color: black;
   font-size: 1.6vh;
-  max-height: 250px; /* Feste Höhe */
+  max-height: 250px;
+  /* Feste Höhe */
 
 }
 
@@ -724,6 +734,7 @@ svg text {
   bottom: 6vh;
   left: 50%;
 }
+
 .intermediate_drawing_precursor {
   position: relative;
   max-width: 60%;
@@ -773,6 +784,7 @@ svg text {
   bottom: 6vh;
   left: 50%;
 }
+
 /* Tooltip styling */
 .tooltip::before,
 .tooltip-above::before {
@@ -833,6 +845,7 @@ svg text {
   top: 90%;
   border-bottom-color: #555;
 }
+
 .tab-container {
   width: 100%;
   margin-bottom: 20px;
@@ -875,9 +888,9 @@ svg text {
 }
 
 #reverse_button {
-  margin-left: auto;           /* push to right end of flex row */
-  position: relative;
-  right: auto;
+  float: right;
+  right: 5vh;
+
 }
 
 #reverse_button:focus {
@@ -973,11 +986,21 @@ button:disabled {
 }
 
 /* Firefox */
-body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
-.protein-container, .domain-container, .module-container, .container,
-.intermediateContainer, .intermediateContainerTailoring, .dropdown-content,
-.dropdown-content-tailoring, .dropdown-content-tailoring-folded {
-  scrollbar-width: thin; /* auto | thin | none */
+body,
+#gene_container,
+.outerDomainExplorer,
+.outerDomainExplorer_while_saving,
+.protein-container,
+.domain-container,
+.module-container,
+.container,
+.intermediateContainer,
+.intermediateContainerTailoring,
+.dropdown-content,
+.dropdown-content-tailoring,
+.dropdown-content-tailoring-folded {
+  scrollbar-width: thin;
+  /* auto | thin | none */
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-bg);
 }
 
@@ -1066,14 +1089,24 @@ body::-webkit-scrollbar-thumb:active,
 }
 
 /* Legacy Edge/IE (harmless in modern browsers) */
-body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
-.protein-container, .domain-container, .module-container, .container,
-.intermediateContainer, .intermediateContainerTailoring, .dropdown-content,
-.dropdown-content-tailoring, .dropdown-content-tailoring-folded {
+body,
+#gene_container,
+.outerDomainExplorer,
+.outerDomainExplorer_while_saving,
+.protein-container,
+.domain-container,
+.module-container,
+.container,
+.intermediateContainer,
+.intermediateContainerTailoring,
+.dropdown-content,
+.dropdown-content-tailoring,
+.dropdown-content-tailoring-folded {
   -ms-overflow-style: scrollbar;
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   body::-webkit-scrollbar-thumb,
   #gene_container::-webkit-scrollbar-thumb,
   .outerDomainExplorer::-webkit-scrollbar-thumb,
@@ -1093,63 +1126,51 @@ body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
 
 /* Responsive sizing variables */
 :root {
-  --menu-bar-padding-y: 0.15rem;
-  --menu-bar-padding-x: 0.5rem;
-  --menu-gap: 0.3rem;
-  --menu-font-size: clamp(0.48rem, 0.75vw, 0.7rem);
-  --menu-button-padding-y: 0.05rem;
-  --menu-button-padding-x: 0.28rem;
-  --menu-radius: 0.3rem;
-  --menu-slider-width: 2.4rem;
-  --menu-slider-height: 1.05rem;
-  --menu-slider-knob: 0.9rem;
+  --menu-bar-padding-y: 0.4rem;
+  --menu-bar-padding-x: 0.8rem;
+  --menu-gap: 0.6rem;
+  --menu-font-size: clamp(0.55rem, 1.1vw, 0.9rem);
+  --menu-button-padding-y: 0.35rem;
+  --menu-button-padding-x: 0.6rem;
+  --menu-radius: 0.6rem;
+  --menu-slider-width: 3.2rem;
+  --menu-slider-height: 1.6rem;
+  --menu-slider-knob: 1.4rem;
 }
 
 /* Top bar: switch from floats to flex for consistent scaling */
 #menu_bar {
   display: flex;
-  flex-wrap: nowrap; /* keep in one line for alignment logic */
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--menu-gap);
   padding: var(--menu-bar-padding-y) var(--menu-bar-padding-x);
   height: auto;
+  /* allow natural height */
   font-size: var(--menu-font-size);
 }
 
 /* Generic menu buttons (undo/redo/start) */
 .redoUndo_button,
 .start_button {
+  float: none;
+  /* remove legacy float */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
   font-size: var(--menu-font-size);
-  line-height: 1;
+  line-height: 1.1;
   border-radius: var(--menu-radius);
-  min-height: 1.05rem;
+  min-height: 2rem;
   white-space: nowrap;
-  letter-spacing: 0.01em;
 }
-
-/* Visual refinement: lighter default background, subtle border for sleekness */
-.redoUndo_button,
-.start_button {
-  background: #f5f5f5;
-  border: 1px solid #d1d1d1;
-}
-.redoUndo_button:hover:not(.disabled),
-.start_button:hover { background:#E11839; color:#000; border-color:#E11839; }
-.redoUndo_button.disabled { opacity:0.55; }
-
-/* Alignment: first right-side button gets auto margin to push group */
-#undoButton, #redoButton { flex: 0 0 auto; }
-#openAlolaManual { margin-left: auto; }
-/* Ensure subsequent buttons do not override auto margin */
-#menu_bar .start_button:not(#openAlolaManual):not(#undoButton):not(#redoButton) { margin-left: 0; }
 
 /* Ensure strong inside buttons does not overflow */
 .redoUndo_button strong,
-.start_button strong { font-weight: 600; }
+.start_button strong {
+  font-weight: 600;
+}
 
 /* Slider container (switch) adapt sizing */
 .switch {
@@ -1157,21 +1178,25 @@ body, #gene_container, .outerDomainExplorer, .outerDomainExplorer_while_saving,
   height: var(--menu-slider-height);
   flex: 0 0 auto;
 }
+
 .slider {
   border-radius: var(--menu-slider-height);
 }
+
 .slider:before {
   height: var(--menu-slider-knob);
   width: var(--menu-slider-knob);
   bottom: 0.1rem;
   left: 0.1rem;
 }
-input:checked + .slider:before {
+
+input:checked+.slider:before {
   transform: translateX(calc(var(--menu-slider-width) - var(--menu-slider-knob) - 0.2rem));
 }
 
 /* Fake button aligns with flex flow */
 #fake_button {
+  float: none;
   display: inline-flex;
   align-items: center;
   padding: var(--menu-button-padding-y) var(--menu-button-padding-x);
@@ -1182,23 +1207,84 @@ input:checked + .slider:before {
 
 /* Prevent tooltip buttons from wrapping awkwardly on very small widths */
 @media (max-width: 700px) {
-  #menu_bar { flex-wrap: wrap; }
-  #openAlolaManual { margin-left: 0; }
-  .redoUndo_button, .start_button, #fake_button { flex: 1 1 auto; }
+  #menu_bar {
+    justify-content: center;
+  }
+
+  .redoUndo_button,
+  .start_button,
+  #fake_button {
+    flex: 1 1 auto;
+  }
+
+  .switch {
+    order: 99;
+  }
+
+  /* move switch to end on small screens */
 }
+
 @media (max-width: 420px) {
-  #menu_bar { gap: 0.4rem; }
-  .redoUndo_button, .start_button { font-size: clamp(0.5rem, 3.2vw, 0.75rem); }
-  #fake_button { font-size: clamp(0.5rem, 3.2vw, 0.75rem); }
-  :root { --menu-slider-width: 2.6rem; --menu-slider-height: 1.4rem; --menu-slider-knob: 1.2rem; }
+  #menu_bar {
+    gap: 0.4rem;
+  }
+
+  .redoUndo_button,
+  .start_button {
+    font-size: clamp(0.5rem, 3.2vw, 0.75rem);
+  }
+
+  #fake_button {
+    font-size: clamp(0.5rem, 3.2vw, 0.75rem);
+  }
+
+  :root {
+    --menu-slider-width: 2.6rem;
+    --menu-slider-height: 1.4rem;
+    --menu-slider-knob: 1.2rem;
+  }
 }
 
 /* High density displays adjustments */
 @media (min-resolution: 2dppx) and (min-width: 1100px) {
-  .redoUndo_button, .start_button { font-size: clamp(0.55rem, 0.7vw, 0.8rem); }
+
+  .redoUndo_button,
+  .start_button {
+    font-size: clamp(0.6rem, 0.8vw, 0.85rem);
+  }
 }
 
 /* Reduce motion accessibility: remove slider transition */
 @media (prefers-reduced-motion: reduce) {
-  .slider, .slider:before { transition: none; }
+
+  .slider,
+  .slider:before {
+    transition: none;
+  }
 }
+
+/* === Domain Explorer float layout enhancements (conservative) === */
+/* Prevent right-floated panels from overlapping left content by forcing clearfix */
+#Domain_explorer::after { content: ""; display: block; clear: both; }
+/* Ensure right panels stay aligned vertically */
+#Structure_explorer, #Gene_explorer { clear: right; }
+/* Slight width adjustment to avoid sub-pixel wrap */
+#Domain_explorer { width: 74.75%; }
+/* Make intermediate SVG structures appear larger inside domain explorer without altering other sections */
+#domain_container svg.intermediate_drawing,
+#domain_container svg.intermediate_drawing_tailoring,
+#domain_container svg.intermediate_drawing_precursor,
+#domain_container svg.intermediate_drawing_tailoring_terpene,
+#domain_container svg.intermediate_drawing_cyclisation_terpene,
+#domain_container svg.intermediate_drawing_tailored {
+  max-width: 88%;
+  height: auto;
+}
+/* Ensure intermediate containers do not shrink below their intrinsic width */
+#domain_container .intermediateContainer,
+#domain_container .intermediateContainerTailoring {
+  flex: 0 0 auto;
+  min-width: 160px;
+}
+/* If height is constrained, allow a bit more visual space */
+#domain_container .intermediateContainer, #domain_container .intermediateContainerTailoring { height: 82vh; }

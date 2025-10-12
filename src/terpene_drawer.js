@@ -8,32 +8,39 @@ var Terpener = {
     tooltip_id_domain: "Terpener-tooltip-123"
 };
 
-Terpener.drawArrow = function (width, height, label = null) {
+Terpener.drawArrow = function (baseWidth, height, label = null) {
+    const estimatedLabelWidth = label ? (label.length * 7 + 20) : 0;
+    const containerWidth = Math.max(baseWidth, estimatedLabelWidth);
+
     const arrowContainer = document.createElement('div');
     arrowContainer.style.display = 'inline-flex';
     arrowContainer.style.flexDirection = 'column';
     arrowContainer.style.alignItems = 'center';
     arrowContainer.style.justifyContent = 'center';
-    arrowContainer.style.width = width + 'px';
+    arrowContainer.style.width = containerWidth + 'px';
     arrowContainer.style.height = '100%';
+    arrowContainer.style.overflow = 'visible';
+    arrowContainer.style.flexShrink = '0';
 
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", width);
-    svg.setAttribute("height", height);
-    svg.style.overflow = "visible";
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', containerWidth);
+    svg.setAttribute('height', height + (label ? 26 : 0));
+    svg.style.overflow = 'visible';
 
-    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    arrow.setAttribute("d", `M0,${height / 2} L${width},${height / 2} M${width - 10},${height / 2 - 5} L${width},${height / 2} L${width - 10},${height / 2 + 5}`);
-    arrow.setAttribute("stroke", "#000000");
-    arrow.setAttribute("stroke-width", "2");
-    arrow.setAttribute("fill", "none");
+    const arrowLength = containerWidth - 20;
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrow.setAttribute('d', `M10,${height / 2} L${arrowLength},${height / 2} M${arrowLength - 10},${height / 2 - 5} L${arrowLength},${height / 2} L${arrowLength - 10},${height / 2 + 5}`);
+    arrow.setAttribute('stroke', '#000000');
+    arrow.setAttribute('stroke-width', '2');
+    arrow.setAttribute('fill', 'none');
     svg.appendChild(arrow);
 
     if (label) {
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", width / 2);
-        text.setAttribute("y", height + 20);
-        text.setAttribute("text-anchor", "middle");
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', containerWidth / 2);
+        text.setAttribute('y', height + 18);
+        text.setAttribute('text-anchor', 'middle');
+        text.style.fontSize = '12px';
         text.textContent = label;
         svg.appendChild(text);
     }
@@ -44,38 +51,54 @@ Terpener.drawArrow = function (width, height, label = null) {
 
 
 Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null) {
-    // Create outer container acting as a fixed scaling boundary
     const domainContainer = document.getElementById('domain_container');
     const clusterHeight = domainContainer ? domainContainer.clientHeight || 90 : 90;
+
+    if (includeArrow) {
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'center';
+        container.style.flexDirection = 'row';
+        container.style.boxSizing = 'border-box';
+        container.style.width = width + 'px';
+        container.style.height = clusterHeight + 'px';
+        container.style.overflow = 'visible';
+        container.style.flexShrink = '0';
+        container.style.marginRight = '12px';
+        const arrowHeight = 30;
+        const arrow = Terpener.drawArrow(width, arrowHeight, arrowLabel);
+        container.appendChild(arrow);
+        domainContainer.appendChild(container);
+        return;
+    }
 
     var container = document.createElement('div');
     container.style.display = 'inline-flex';
     container.style.flexDirection = 'column';
-    container.style.alignItems = 'stretch';
+    container.style.alignItems = 'center';
     container.style.justifyContent = 'center';
     container.style.boxSizing = 'border-box';
     container.style.width = String(width) + 'px';
-    // Use explicit pixel height to prevent auto-expansion that breaks scaling calculations
     container.style.height = clusterHeight + 'px';
     container.style.overflow = 'hidden';
     container.setAttribute('data-scaling-boundary', 'true');
+    container.style.marginRight = '12px';
 
-    // Inner wrapper (flex item)
     var innerContainer = document.createElement('div');
     innerContainer.id = id;
     innerContainer.style.position = 'relative';
-    innerContainer.style.flex = '1';
+    innerContainer.style.flex = '0 0 auto';
     innerContainer.style.width = '100%';
-    innerContainer.style.height = '100%';
+    innerContainer.style.height = 'auto';
     innerContainer.style.overflow = 'hidden';
     innerContainer.setAttribute('data-scaling-boundary', 'true');
 
-    // Intermediate container that will hold the SVG content
     var innerIntermediateContainer = document.createElement('div');
     innerIntermediateContainer.id = "innerIntermediateContainer_" + id;
     innerIntermediateContainer.setAttribute("class", "intermediateContainerTailoring");
     innerIntermediateContainer.style.width = '100%';
-    innerIntermediateContainer.style.height = '100%';
+    innerIntermediateContainer.style.height = 'auto';
     innerIntermediateContainer.style.display = 'flex';
     innerIntermediateContainer.style.alignItems = 'center';
     innerIntermediateContainer.style.justifyContent = 'center';
@@ -85,26 +108,16 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
     innerContainer.appendChild(innerIntermediateContainer);
     container.appendChild(innerContainer);
 
-    if (includeArrow) {
-        const arrowWidth = 50;
-        const arrowHeight = 30; // adjustable
-        const arrow = Terpener.drawArrow(arrowWidth, arrowHeight, arrowLabel);
-        // Arrow should not influence scaling of SVGs -> no data-scaling-boundary
-        arrow.style.flex = '0 0 auto';
-        container.appendChild(arrow);
-    }
-
     domainContainer.appendChild(container);
 };
 
 
 Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCyclaseOptions, geneMatrixHandler) {
     var container = document.getElementById('domain_container');
-    // Use flex for terpene clusters so arrows/text are not constrained by grid columns
     container.style.display = 'flex';
     container.style.alignItems = 'center';
     container.style.flexWrap = 'nowrap';
-    container.style.gap = '8px';
+    container.style.gap = '0';
     container.style.overflowX = 'auto';
     container.style.height = height + 'px';
 
@@ -116,25 +129,40 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
     document.getElementById('model_gene_container').innerHTML = "";
 
     Terpener.drawHeadings(height, space);
-
-    // Precursor section
     Terpener.leaveSpace(space, "precursor", scale);
-
-    // Arrow between Precursor and Cyclization
     Terpener.leaveSpace(50, "arrow1", scale, true, "Cyclization");
-
-    // Cyclization section
     Terpener.drawCyclase(height, scale, terpeneCyclaseOptions, geneMatrixHandler);
     Terpener.leaveSpace(space, "cyclizedProduct", scale);
-
-    // Arrow between Cyclization and Tailoring
     Terpener.leaveSpace(50, "arrow2", scale, true, "Tailoring");
-
-    // Tailoring section
     Terpener.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
     Terpener.leaveSpace(space, "tailoredProduct", scale);
 
+    repositionDomainBubblesTerpene();
+
     return $(container).find("svg")[0];
+
+    function repositionDomainBubblesTerpene() {
+        const dc = document.getElementById('domain_container');
+        if (!dc) return;
+        const children = Array.from(dc.children);
+        for (let i = 0; i < children.length - 1; i++) {
+            const bubble = children[i];
+            if (!bubble.classList || !bubble.classList.contains('box')) continue;
+            const target = children.slice(i + 1).find(el => el.getAttribute('data-scaling-boundary') === 'true' && el.style.overflow === 'hidden');
+            if (!target) continue;
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.justifyContent = 'flex-start';
+            wrapper.style.width = target.style.width || target.getBoundingClientRect().width + 'px';
+            wrapper.style.marginRight = target.style.marginRight || '12px';
+            dc.insertBefore(wrapper, bubble);
+            wrapper.appendChild(bubble);
+            wrapper.appendChild(target);
+            bubble.style.marginBottom = '4px';
+        }
+    }
 };
 Terpener.drawCyclase = (function (height = 90, scale, terpeneCyclaseOptions, geneMatrixHandler) {
     console.log(terpeneCyclaseOptions)

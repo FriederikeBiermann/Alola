@@ -277,9 +277,12 @@ class SVGHandler {
 
         let container = document.getElementById(containerId);
         console.log('Container element:', container);
-        // Apply compact 10vw only for ripp/terpene, keep previous width for others (leave widths untouched if already set)
+        // Dynamically size ripp / terpene intermediate containers (avoid affecting NRPS/PKS)
         if (this.clusterType === 'ripp' || this.clusterType === 'terpene') {
-            container.style.width = '10vw';
+            // Prepare SVG first (temporary inject to measure bbox later)
+            // We'll set width after SVG is inserted & reformatted.
+            container.style.width = '';
+            container.style.minWidth = '240px'; // baseline size
         }
     container.classList.add('intermediateContainer');
         console.log('Applied conditional container width (if compact clusterType)');
@@ -302,7 +305,7 @@ class SVGHandler {
         svg.setAttribute('id', svgId);
         console.log('Set SVG id to:', svgId);
 
-        svg.setAttribute('class', svgId);
+    svg.setAttribute('class', svgId);
         console.log('Set SVG class to:', svgId);
 
         if (svgId === "intermediate_drawing_tailored") {
@@ -310,8 +313,23 @@ class SVGHandler {
             console.log('Added drop shadow filter to SVG');
         }
 
-    // Adjust SVG sizing: fill container width while preserving aspect
-    this.adjustSVGToContainer(svg, container);
+        // For ripp / terpene enlarge visually based on intrinsic bbox
+        if (this.clusterType === 'ripp' || this.clusterType === 'terpene') {
+            try {
+                const bbox = svg.getBBox();
+                // Scale factor tuned: ripp larger than terpene
+                const factor = this.clusterType === 'ripp' ? 1.25 : 1.15;
+                const targetWidth = Math.min(Math.max(bbox.width * factor, 240), 520); // clamp
+                container.style.width = targetWidth + 'px';
+                container.style.height = 'auto';
+            } catch (e) {
+                console.warn('BBox measurement failed, fallback width applied', e);
+                container.style.width = this.clusterType === 'ripp' ? '380px' : '320px';
+            }
+        }
+
+        // Adjust SVG sizing: fill container width while preserving aspect
+        this.adjustSVGToContainer(svg, container);
 
         console.log('Function execution completed');
     }

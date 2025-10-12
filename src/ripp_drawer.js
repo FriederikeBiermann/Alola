@@ -8,35 +8,41 @@ var RiPPer = {
     tooltip_id_domain: "RiPPer-tooltip-123"
 };
 
-RiPPer.drawArrow = function (width, height, label = null) {
+RiPPer.drawArrow = function (baseWidth, height, label = null) {
+    // Dynamically enlarge container width based on label length to avoid cropping.
+    const estimatedLabelWidth = label ? (label.length * 7 + 20) : 0; // rough per-char estimate + padding
+    const containerWidth = Math.max(baseWidth, estimatedLabelWidth);
+
     const arrowContainer = document.createElement('div');
     arrowContainer.style.display = 'inline-flex';
     arrowContainer.style.flexDirection = 'column';
     arrowContainer.style.alignItems = 'center';
     arrowContainer.style.justifyContent = 'center';
-    // Width may be passed as pixels; convert if numeric and treat ~10vw target when flagged
-    arrowContainer.style.width = width + 'px';
+    arrowContainer.style.width = containerWidth + 'px';
     arrowContainer.style.height = '100%';
+    arrowContainer.style.overflow = 'visible';
+    arrowContainer.style.flexShrink = '0';
 
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", width);
-    svg.setAttribute("height", height);
-    svg.style.overflow = "visible"; // Allow content to overflow for label
+    // Use full container width for SVG so arrow centers nicely
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', containerWidth);
+    svg.setAttribute('height', height + (label ? 26 : 0)); // extend height slightly if label present
+    svg.style.overflow = 'visible';
 
-    // Draw arrow
-    const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    arrow.setAttribute("d", `M0,${height / 2} L${width},${height / 2} M${width - 10},${height / 2 - 5} L${width},${height / 2} L${width - 10},${height / 2 + 5}`);
-    arrow.setAttribute("stroke", "#000000");
-    arrow.setAttribute("stroke-width", "2");
-    arrow.setAttribute("fill", "none");
+    const arrowLength = containerWidth - 20; // keep margins
+    const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    arrow.setAttribute('d', `M10,${height / 2} L${arrowLength},${height / 2} M${arrowLength - 10},${height / 2 - 5} L${arrowLength},${height / 2} L${arrowLength - 10},${height / 2 + 5}`);
+    arrow.setAttribute('stroke', '#000000');
+    arrow.setAttribute('stroke-width', '2');
+    arrow.setAttribute('fill', 'none');
     svg.appendChild(arrow);
 
-    // Add label if provided
     if (label) {
-        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        text.setAttribute("x", width / 2);
-        text.setAttribute("y", height + 20);
-        text.setAttribute("text-anchor", "middle");
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', containerWidth / 2);
+        text.setAttribute('y', height + 18);
+        text.setAttribute('text-anchor', 'middle');
+        text.style.fontSize = '12px';
         text.textContent = label;
         svg.appendChild(text);
     }
@@ -50,25 +56,47 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     const domainContainer = document.getElementById('domain_container');
     const clusterHeight = domainContainer ? domainContainer.clientHeight || 90 : 90;
 
+    // Specialized arrow container: early return with vertically centered arrow only
+    if (includeArrow) {
+        const container = document.createElement('div');
+        container.style.display = 'flex';
+        container.style.alignItems = 'center';
+        container.style.justifyContent = 'center';
+        container.style.flexDirection = 'row';
+        container.style.boxSizing = 'border-box';
+        container.style.width = width + 'px';
+        container.style.height = clusterHeight + 'px';
+        container.style.overflow = 'visible';
+        container.style.flexShrink = '0';
+        container.style.marginRight = '12px';
+
+        const arrowHeight = 30;
+        const arrow = RiPPer.drawArrow(width, arrowHeight, arrowLabel);
+        // Arrow SVG height is small; container alignment centers it vertically
+        container.appendChild(arrow);
+        domainContainer.appendChild(container);
+        return; // Arrow containers don't need scaling boundaries or inner wrappers
+    }
+
     const container = document.createElement('div');
     container.style.display = 'inline-flex';
     container.style.flexDirection = 'column';
-    container.style.alignItems = 'stretch';
+    container.style.alignItems = 'center'; // center SVG vertically within height
     container.style.justifyContent = 'center';
     container.style.boxSizing = 'border-box';
-    // Use viewport width for arrow gaps if id indicates arrow or width equals special token
     container.style.width = String(width) + 'px';
     container.style.height = clusterHeight + 'px';
     container.style.overflow = 'hidden';
-    container.style.flexShrink = '0'; // preserve intended width in flex layouts
+    container.style.flexShrink = '0';
     container.setAttribute('data-scaling-boundary', 'true');
+    container.style.marginRight = '12px';
 
     const innerContainer = document.createElement('div');
     innerContainer.id = id;
     innerContainer.style.position = 'relative';
-    innerContainer.style.flex = '1';
+    innerContainer.style.flex = '0 0 auto';
     innerContainer.style.width = '100%';
-    innerContainer.style.height = '100%';
+    innerContainer.style.height = 'auto';
     innerContainer.style.overflow = 'hidden';
     innerContainer.setAttribute('data-scaling-boundary', 'true');
 
@@ -76,7 +104,7 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     innerIntermediateContainer.id = 'innerIntermediateContainer_' + id;
     innerIntermediateContainer.setAttribute('class', 'intermediateContainerTailoring');
     innerIntermediateContainer.style.width = '100%';
-    innerIntermediateContainer.style.height = '100%';
+    innerIntermediateContainer.style.height = 'auto';
     innerIntermediateContainer.style.display = 'flex';
     innerIntermediateContainer.style.alignItems = 'center';
     innerIntermediateContainer.style.justifyContent = 'center';
@@ -85,27 +113,16 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
 
     innerContainer.appendChild(innerIntermediateContainer);
     container.appendChild(innerContainer);
-
-    if (includeArrow) {
-        const arrowWidth = 50;
-        const arrowHeight = 30;
-        const arrow = RiPPer.drawArrow(arrowWidth, arrowHeight, arrowLabel);
-        arrow.style.flex = '0 0 auto';
-        // Arrow is visual aid; do not mark as scaling boundary
-        container.appendChild(arrow);
-    }
-
     domainContainer.appendChild(container);
 };
 
 // Example usage within RiPPer.drawCluster
 RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, space = 600, cleavageSites, geneMatrixHandler) {
     var container = document.getElementById('domain_container');
-    // Revert to flex for RiPP clusters to avoid grid cell width capping arrows & labels
     container.style.display = 'flex';
     container.style.alignItems = 'center';
     container.style.flexWrap = 'nowrap';
-    container.style.gap = '8px';
+    container.style.gap = '0';
     container.style.overflowX = 'auto';
     container.style.height = height + 'px'; // Set explicit height
 
@@ -118,31 +135,49 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
 
     RiPPer.drawHeadings(height);
     RiPPer.leaveSpace(space, "precursor", scale);
-    RiPPer.leaveSpace(50, "arrow1", scale, true, "Tailoring"); // Arrow between precursor and tailoring enzymes
+    RiPPer.leaveSpace(50, "arrow1", scale, true, "Tailoring");
     RiPPer.drawTailoringEnzymes(geneMatrix, height, scale, geneMatrixHandler);
     RiPPer.leaveSpace(space, "tailoredProduct", scale);
     protease = give_protease(geneMatrix);
     if (document.getElementById("wildcardProtease").checked || protease) {
-        
-        RiPPer.leaveSpace(50, "arrow2", scale, true, "Cleavage"); // Arrow between tailored product and protease
+        RiPPer.leaveSpace(50, "arrow2", scale, true, "Cleavage");
         RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler, protease);
         RiPPer.leaveSpace(space, "cleavedProduct_space", scale);
     }
 
+    // After layout: move domain bubbles above the following structure container
+    repositionDomainBubbles();
+
     return $(container).find("svg")[0];
-    
-    function give_protease(geneMatrix) {
-        for (geneIndex = 0; geneIndex < geneMatrix.length; geneIndex++) {
-        let gene = geneMatrix[geneIndex]
-        if (gene.tailoringEnzymeStatus == true && gene.ko == false) {
-            if (gene.tailoringEnzymeAbbreviation == "PROT" || gene.tailoringEnzymeAbbreviation == "PEP") {
-                return gene
-            }
+
+    function repositionDomainBubbles() {
+        const dc = document.getElementById('domain_container');
+        if (!dc) return;
+        const children = Array.from(dc.children);
+        for (let i = 0; i < children.length - 1; i++) {
+            const bubble = children[i];
+            if (!bubble.classList || !bubble.classList.contains('box')) continue;
+            // Find next structure container (skip arrows: arrows have overflow visible & single child svg)
+            const target = children.slice(i + 1).find(el => el.getAttribute('data-scaling-boundary') === 'true' && el.style.overflow === 'hidden');
+            if (!target) continue;
+            // Wrap bubble + target
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.flexDirection = 'column';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.justifyContent = 'flex-start';
+            wrapper.style.width = target.style.width || target.getBoundingClientRect().width + 'px';
+            wrapper.style.marginRight = target.style.marginRight || '12px';
+            // Move elements
+            dc.insertBefore(wrapper, bubble);
+            wrapper.appendChild(bubble);
+            wrapper.appendChild(target);
+            // Adjust bubble styling
+            bubble.style.marginBottom = '4px';
+            // Remove original references left behind automatically by DOM moves
         }
     }
-    return null
-
-}};
+};
 
 
 RiPPer.drawProtease = (function (height = 90, scale, proteaseOptions, cleavageSites, geneMatrixHandler) {
