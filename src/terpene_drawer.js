@@ -18,7 +18,7 @@ Terpener.drawArrow = function (baseWidth, height, label = null) {
     arrowContainer.style.alignItems = 'center';
     arrowContainer.style.justifyContent = 'center';
     arrowContainer.style.width = containerWidth + 'px';
-    arrowContainer.style.height = '100%';
+    arrowContainer.style.height = 'auto';
     arrowContainer.style.overflow = 'visible';
     arrowContainer.style.flexShrink = '0';
 
@@ -66,6 +66,7 @@ Terpener.leaveSpace = function (width, id, scale, includeArrow = false, arrowLab
         container.style.overflow = 'visible';
         container.style.flexShrink = '0';
         container.style.marginRight = '12px';
+    container.className = 'arrow-block';
         const arrowHeight = 30;
         const arrow = Terpener.drawArrow(width, arrowHeight, arrowLabel);
         container.appendChild(arrow);
@@ -224,10 +225,9 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
             e.svg.style.width = '100%';
             e.container.style.height = targetHeight + 'px';
         });
+        // Set arrow container heights; inner arrow-block CSS centers actual arrow
         root.querySelectorAll("div[id^='arrow']").forEach(arrowC => {
             arrowC.style.height = targetHeight + 'px';
-            arrowC.style.display = 'flex';
-            arrowC.style.alignItems = 'center';
         });
     }
 

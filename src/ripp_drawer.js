@@ -9,45 +9,48 @@ var RiPPer = {
 };
 
 RiPPer.drawArrow = function (baseWidth, height, label = null) {
-    // Dynamically enlarge container width based on label length to avoid cropping.
-    const estimatedLabelWidth = label ? (label.length * 7 + 20) : 0; // rough per-char estimate + padding
+    // Calculate width from label length for container sizing
+    const estimatedLabelWidth = label ? (label.length * 7 + 20) : 0;
     const containerWidth = Math.max(baseWidth, estimatedLabelWidth);
 
     const arrowContainer = document.createElement('div');
     arrowContainer.style.display = 'inline-flex';
     arrowContainer.style.flexDirection = 'column';
     arrowContainer.style.alignItems = 'center';
-    arrowContainer.style.justifyContent = 'center';
+    arrowContainer.style.justifyContent = 'flex-start';
     arrowContainer.style.width = containerWidth + 'px';
-    arrowContainer.style.height = '100%';
+    arrowContainer.style.height = 'auto';
     arrowContainer.style.overflow = 'visible';
     arrowContainer.style.flexShrink = '0';
 
-    // Use full container width for SVG so arrow centers nicely
+    // Fixed svg height so midline known (height/2)
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('width', containerWidth);
-    svg.setAttribute('height', height + (label ? 26 : 0)); // extend height slightly if label present
+    svg.setAttribute('height', height);
     svg.style.overflow = 'visible';
 
-    const arrowLength = containerWidth - 20; // keep margins
+    const arrowLength = containerWidth - 20;
+    const midY = height / 2;
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    arrow.setAttribute('d', `M10,${height / 2} L${arrowLength},${height / 2} M${arrowLength - 10},${height / 2 - 5} L${arrowLength},${height / 2} L${arrowLength - 10},${height / 2 + 5}`);
+    arrow.setAttribute('d', `M10,${midY} L${arrowLength},${midY} M${arrowLength - 10},${midY - 5} L${arrowLength},${midY} L${arrowLength - 10},${midY + 5}`);
     arrow.setAttribute('stroke', '#000000');
     arrow.setAttribute('stroke-width', '2');
     arrow.setAttribute('fill', 'none');
     svg.appendChild(arrow);
 
+    arrowContainer.appendChild(svg);
+
     if (label) {
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        text.setAttribute('x', containerWidth / 2);
-        text.setAttribute('y', height + 18);
-        text.setAttribute('text-anchor', 'middle');
-        text.style.fontSize = '12px';
-        text.textContent = label;
-        svg.appendChild(text);
+        const labelDiv = document.createElement('div');
+        labelDiv.className = 'arrow-label';
+        labelDiv.textContent = label;
+        labelDiv.style.fontSize = '12px';
+        labelDiv.style.marginTop = '4px';
+        labelDiv.style.textAlign = 'center';
+        labelDiv.style.width = '100%';
+        arrowContainer.appendChild(labelDiv);
     }
 
-    arrowContainer.appendChild(svg);
     return arrowContainer;
 };
 
@@ -67,6 +70,7 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
         container.style.overflow = 'visible';
         container.style.flexShrink = '0';
         container.style.marginRight = '12px';
+        container.className = 'arrow-block';
         const arrowHeight = 30;
         const arrow = RiPPer.drawArrow(width, arrowHeight, arrowLabel);
         container.appendChild(arrow);
@@ -239,11 +243,17 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
             e.svg.style.width = '100%';
             e.container.style.height = targetHeight + 'px';
         });
-        // Align arrow containers to same height
+        // Set arrow container heights and vertically center arrow line ignoring label height.
         root.querySelectorAll("div[id^='arrow']").forEach(arrowC => {
             arrowC.style.height = targetHeight + 'px';
-            arrowC.style.display = 'flex';
-            arrowC.style.alignItems = 'center';
+            const innerSvg = arrowC.querySelector('svg');
+            if (innerSvg) {
+                // Arrow svg fixed 30px; center line: margin-top so midline sits at pipeline mid
+                const lineMid = 15; // 30px svg height /2
+                const desiredMid = targetHeight / 2;
+                const marginTop = Math.max(0, desiredMid - lineMid);
+                innerSvg.style.marginTop = marginTop + 'px';
+            }
         });
     }
 
