@@ -329,7 +329,7 @@ class SVGHandler {
         }
 
         // Adjust SVG sizing: fill container width while preserving aspect
-        this.adjustSVGToContainer(svg, container);
+        //this.adjustSVGToContainer(svg, container);
 
         console.log('Function execution completed');
     }
@@ -571,6 +571,26 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
         return arr.reduce((a,b)=>a+b,0) / arr.length;
     }
 
+    // Helper: get closest ancestor with fixed pixel width
+    function getClosestFixedWidthAncestor(el) {
+        let node = el.closest('[data-scaling-boundary]') || el.parentElement;
+        while (node) {
+            if (node.nodeType === 1 && node instanceof HTMLElement) {
+                const style = window.getComputedStyle(node);
+                // Only consider pixel widths, not percentages or 'auto'
+                if (style.width && style.width.endsWith('px') && parseFloat(style.width) > 0) {
+                    return node;
+                }
+            }
+            if (node.parentElement) {
+                node = node.parentElement;
+            } else {
+                break;
+            }
+        }
+        return null;
+    }
+
     const perSvg = [];
     let anyLineGroups = false;
 
@@ -608,21 +628,16 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
             }
         }
 
-        let container = svg.closest('[data-scaling-boundary]');
-        if (!container) {
-            container = svg.parentElement;
-            while (container && container.tagName && container.tagName.toLowerCase() === 'svg')
-                container = container.parentElement;
-        }
-        if (!container) continue;
+    let container = getClosestFixedWidthAncestor(svg);
+    if (!container) continue;
 
-        const rect = container.getBoundingClientRect();
-        const cW = rect.width || 0;
-        const cH = rect.height || 0;
-        if (!cW || !cH) continue;
+    const rect = container.getBoundingClientRect();
+    const cW = rect.width || 0;
+    const cH = rect.height || 0;
+    if (!cW || !cH) continue;
 
-        const maxScale = Math.min(cW / bbox.width, cH / bbox.height);
-        perSvg.push({ svg, repLength, maxScale, bbox });
+    const maxScale = Math.min(cW / bbox.width, cH / bbox.height);
+    perSvg.push({ svg, repLength, maxScale, bbox });
     }
 
     if (!perSvg.length)
@@ -665,4 +680,5 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
     });
 
     return { targetLength, scaleFactors: scaleMap, strategy, usedFallback: !anyLineGroups };
-}
+    }
+}[]
