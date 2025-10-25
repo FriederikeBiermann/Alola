@@ -249,12 +249,12 @@ class RiPPPathway(BasePathway):
 
     def _draw_pathway_mass_smiles_tailoring_sites(self):
         # we need the full structure to get accurate cleavage
-        cleavage_sites = self._get_cleavage_sites()
+        # cleavage_sites = self._get_cleavage_sites()
         proxy_cluster: RiPPCluster = RiPPCluster(
             self.antismash_input["rippPrecursorName"],
             self.antismash_input["rippFullPrecursor"],
-            self.antismash_input["rippFullPrecursor"],
-            cleavage_sites=cleavage_sites,
+            self.antismash_inputt["rippPrecursor"],
+            #cleavage_sites=cleavage_sites,
             macrocyclisations=self.macrocyclisations,
             tailoring_representations=self.tailoring_reactions,
         )
@@ -269,7 +269,7 @@ class RiPPPathway(BasePathway):
         logging.debug(f"Computed sum_formula: {self.sum_formula}")
 
         reactions = []
-        
+
         if self.cluster.macrocyclisation_representations:
             reactions.append("cyclisation")
 
