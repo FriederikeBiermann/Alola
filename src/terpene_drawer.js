@@ -201,7 +201,7 @@ Terpener.drawCluster = function (geneMatrix, height = 90, space = 300, terpeneCy
     attachResizeObserverTerpene();
 
     // Normalize heights & arrow alignment
-    setTimeout(() => unifyLayoutHeightsTerpene(container), 0);
+    //setTimeout(() => unifyLayoutHeightsTerpene(container), 0);
 
     return $(container).find('svg')[0];
 

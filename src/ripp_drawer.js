@@ -241,7 +241,7 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
     attachResizeObserver();
 
     // Normalize heights & arrow vertical alignment
-    setTimeout(() => unifyLayoutHeights(container), 0);
+    //setTimeout(() => unifyLayoutHeights(container), 0);
 
     return $(container).find('svg')[0];
 
