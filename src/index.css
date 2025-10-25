@@ -733,27 +733,6 @@ svg text {
   margin: 5vh;
 }
 
-.intermediate_drawing_precursor_terpene {
-  position: relative;
-  max-width: 30%;
-  height: auto;
-  margin: 5vh;
-}
-
-.intermediate_drawing_tailoring_terpene {
-  position: relative;
-  max-width: 30%;
-  height: auto;
-  margin: 5vh;
-}
-
-.intermediate_drawing_cyclisation_terpene {
-  position: relative;
-  max-width: 30%;
-  height: auto;
-  margin: 5vh;
-}
-
 .intermediate_drawing_protease {
   position: relative;
   max-width: 100%;

@@ -532,6 +532,18 @@ scaleSVGsUniformByParent(svgElements) {
  * @returns {{targetLength:number, scaleFactors:Map<SVGElement,number>, strategy:string, usedFallback:boolean}}
  */
 scaleSVGsUniformByLineLength(svgElements, opts = {}) {
+    // Helper: set viewBox to encompass all SVG content
+    function setViewBoxToContent(svg) {
+        if (!svg) return;
+        try {
+            const bbox = svg.getBBox();
+            svg.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+            svg.removeAttribute('width');
+            svg.removeAttribute('height');
+        } catch (e) {
+            // Fallback: do nothing
+        }
+    }
     const lineGroupPrefix   = opts.lineGroupPrefix || 'line2d_';
     const useMedian         = opts.useMedian || false;
     const strategy          = opts.strategy || 'downscale';
@@ -597,6 +609,7 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
     for (const raw of svgElements) {
         const svg = toSvgNode(raw);
         if (!svg) continue;
+        setViewBoxToContent(svg); // Ensure viewBox covers all content before scaling
         let bbox; try { bbox = svg.getBBox(); } catch { continue; }
         if (!bbox.width || !bbox.height) continue;
 
@@ -628,16 +641,16 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
             }
         }
 
-    let container = getClosestFixedWidthAncestor(svg);
-    if (!container) continue;
+        let container = getClosestFixedWidthAncestor(svg);
+        if (!container) continue;
 
-    const rect = container.getBoundingClientRect();
-    const cW = rect.width || 0;
-    const cH = rect.height || 0;
-    if (!cW || !cH) continue;
+        const rect = container.getBoundingClientRect();
+        const cW = rect.width || 0;
+        const cH = rect.height || 0;
+        if (!cW || !cH) continue;
 
-    const maxScale = Math.min(cW / bbox.width, cH / bbox.height);
-    perSvg.push({ svg, repLength, maxScale, bbox });
+        const maxScale = Math.min(cW / bbox.width, cH / bbox.height);
+        perSvg.push({ svg, repLength, maxScale, bbox });
     }
 
     if (!perSvg.length)
