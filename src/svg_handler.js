@@ -561,8 +561,12 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
         return null;
     }
     function collectLineLengths(svg) {
-        const groups = Array.from(svg.querySelectorAll(`g[id^='${lineGroupPrefix}']`));
+        let groups = Array.from(svg.querySelectorAll(`g[id^='${lineGroupPrefix}']`));
         const lengths = [];
+        // If no lineGroupPrefix groups found, fallback to atom_ prefix
+        if (groups.length === 0) {
+            groups = Array.from(svg.querySelectorAll(`g[id^='atom_']`));
+        }
         for (const g of groups) {
             const path = g.querySelector('path');
             if (path) {
