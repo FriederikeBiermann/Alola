@@ -231,7 +231,7 @@ RiPPer.drawCluster = function (geneMatrix, proteaseOptions = null, height = 90, 
     // Protease bubble -> bubble column 4
     if (document.getElementById('wildcardProtease').checked || proteaseGene) {
         RiPPer.drawProtease(height, scale, proteaseOptions, cleavageSites, geneMatrixHandler, proteaseGene);
-        moveSpecificBoxToCell('protease', bubbleCells[4]);
+        moveSpecificBoxToCell('protease', bubbleCells[3]);
     }
     // Precursor peptide heading boxes (if any) -> bubble column 0 (heuristic by id prefix tailoringEnzyme?)
     // Currently precursor has no .box bubbles; left empty intentionally.

@@ -565,11 +565,28 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
         const lengths = [];
         for (const g of groups) {
             const path = g.querySelector('path');
-            if (!path) continue;
-            try {
-                const len = path.getTotalLength();
-                if (!isNaN(len) && len > 0) lengths.push(len);
-            } catch {}
+            if (path) {
+                try {
+                    const len = path.getTotalLength();
+                    if (!isNaN(len) && len > 0) lengths.push(len);
+                } catch {}
+                continue;
+            }
+            // If no path found, look for <line> elements
+            const lines = g.querySelectorAll('line');
+            if (lines.length > 0) {
+                lines.forEach(line => {
+                    // Calculate line length from x1,y1 to x2,y2
+                    const x1 = parseFloat(line.getAttribute('x1'));
+                    const y1 = parseFloat(line.getAttribute('y1'));
+                    const x2 = parseFloat(line.getAttribute('x2'));
+                    const y2 = parseFloat(line.getAttribute('y2'));
+                    if (!isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2)) {
+                        const len = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                        if (len > 0) lengths.push(len);
+                    }
+                });
+            }
         }
         return lengths;
     }
