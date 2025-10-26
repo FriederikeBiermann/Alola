@@ -1015,13 +1015,13 @@ class GeneMatrixHandler {
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_cyclizedProduct", raichu_output.cyclizedStructure, "intermediate_drawing_cyclisation_terpene", "cyclized_drawing");
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.precursor, "intermediate_drawing_precursor_terpene", "precursor_drawing");
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_terpene");
-                svgHandler.scaleSVGsUniformByLineLength(["intermediate_drawing_cyclisation_terpene", "intermediate_drawing_precursor_terpene", "intermediate_drawing_tailoring_terpene"], maxWidth = 400);
+                svgHandler.scaleSVGsUniformByLineLength(["intermediate_drawing_cyclisation_terpene", "intermediate_drawing_precursor_terpene", "intermediate_drawing_tailoring_terpene"], 400);
             }
 
         }
         if (this.cluster_type === "ripp") {
             if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
-                svgElements = ["intermediate_drawing_tailoring_ripp", "intermediate_drawing_precursor", "intermediate_drawing_cleavage"]
+                let svgElements = ["intermediate_drawing_tailoring_ripp", "intermediate_drawing_precursor", "intermediate_drawing_cleavage"]
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
                 if (document.getElementById("wildcardProtease").checked || document.getElementById("innerIntermediateContainer_cleavedProduct_space")) {
@@ -1030,7 +1030,7 @@ class GeneMatrixHandler {
                 }
                 
                 ///get the svgs added and scale them on their line length
-                svgHandler.scaleSVGsUniformByLineLength(this.setupDomainListenersvgElements, maxWidth = 400);
+                svgHandler.scaleSVGsUniformByLineLength(svgElements, 400);
             }
         }
 
