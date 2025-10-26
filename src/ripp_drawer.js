@@ -54,8 +54,6 @@ RiPPer.drawArrow = function (baseWidth, height, label = null) {
 RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel = null, parentCell = null) {
     const domainContainer = document.getElementById('domain_container');
     const targetParent = parentCell || domainContainer;
-    // Always use 20% of viewport height for a stable cluster height baseline
-    const clusterHeight = Math.round(window.innerHeight * 0.20);
 
     if (includeArrow) {
         const container = document.createElement('div');
@@ -65,10 +63,9 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
         container.style.flexDirection = 'row';
         container.style.boxSizing = 'border-box';
         container.style.width = width + 'px';
-        container.style.height = clusterHeight + 'px';
+        container.style.height = 'auto'; // allow arrow container height to be flexible
         container.style.overflow = 'visible';
         container.style.flexShrink = '0';
-        // In grid mode we rely on column-gap, so omit margin-right
         const arrowHeight = 30;
         const arrow = RiPPer.drawArrow(width, arrowHeight, arrowLabel);
         container.appendChild(arrow);
@@ -84,7 +81,7 @@ RiPPer.leaveSpace = function (width, id, scale, includeArrow = false, arrowLabel
     container.style.boxSizing = 'border-box';
     container.style.width = String(width) + 'px';
     container.style.height = 'auto';
-    container.style.minHeight = clusterHeight + 'px';
+    // Remove minHeight and clusterHeight for flexible height
     container.style.overflow = 'visible';
     container.style.flexShrink = '0';
     container.setAttribute('data-scaling-boundary', 'true');
