@@ -718,42 +718,7 @@ svg text {
   opacity: 1;
 }
 
-.intermediate_drawing_tailoring {
-  position: relative;
-  max-width: 100%;
-  height: auto;
-  bottom: 6vh;
-  left: 50%;
-}
 
-.intermediate_drawing_precursor {
-  position: relative;
-  max-width: 60%;
-  height: auto;
-  margin: 5vh;
-}
-
-.intermediate_drawing_protease {
-  position: relative;
-  max-width: 100%;
-  height: auto;
-  bottom: 6vh;
-}
-
-.intermediate_drawing_cleavage {
-  position: relative;
-  max-width: 20%;
-  height: auto;
-  margin: 5vh;
-}
-
-.cleavedProduct {
-  position: relative;
-  max-width: 100%;
-  height: auto;
-  bottom: 6vh;
-  left: 50%;
-}
 
 /* Tooltip styling */
 .tooltip::before,
