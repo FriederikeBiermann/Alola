@@ -313,23 +313,6 @@ class SVGHandler {
             console.log('Added drop shadow filter to SVG');
         }
 
-        // For ripp / terpene enlarge visually based on intrinsic bbox
-        if (this.clusterType === 'ripp' || this.clusterType === 'terpene') {
-            try {
-                const bbox = svg.getBBox();
-                // Scale factor tuned: ripp larger than terpene
-                const factor = this.clusterType === 'ripp' ? 1.25 : 1.15;
-                const targetWidth = Math.min(Math.max(bbox.width * factor, 240), 520); // clamp
-                container.style.width = targetWidth + 'px';
-                container.style.height = 'auto';
-            } catch (e) {
-                console.warn('BBox measurement failed, fallback width applied', e);
-                container.style.width = this.clusterType === 'ripp' ? '380px' : '320px';
-            }
-        }
-
-        // Adjust SVG sizing: fill container width while preserving aspect
-        //this.adjustSVGToContainer(svg, container);
 
         console.log('Function execution completed');
     }
