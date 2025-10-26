@@ -561,6 +561,13 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
         return null;
     }
     function collectLineLengths(svg) {
+        // Normalize SVG: set viewBox to bounding box and remove width/height
+        try {
+            const bbox = svg.getBBox();
+            svg.setAttribute('viewBox', `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
+            svg.removeAttribute('width');
+            svg.removeAttribute('height');
+        } catch (e) {}
         let groups = Array.from(svg.querySelectorAll(`g[id^='${lineGroupPrefix}']`));
         const lengths = [];
         // If no lineGroupPrefix groups found, fallback to atom_ prefix
@@ -570,6 +577,21 @@ scaleSVGsUniformByLineLength(svgElements, opts = {}) {
         for (const g of groups) {
             const path = g.querySelector('path');
             if (path) {
+                // Try to manually parse simple M ... L ... path as a straight line
+                const d = path.getAttribute('d');
+                const match = d && d.match(/M\s*([\d.\-]+)\s*([\d.\-]+)\s*L\s*([\d.\-]+)\s*([\d.\-]+)/);
+                if (match) {
+                    const x1 = parseFloat(match[1]);
+                    const y1 = parseFloat(match[2]);
+                    const x2 = parseFloat(match[3]);
+                    const y2 = parseFloat(match[4]);
+                    if (!isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2)) {
+                        const len = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                        if (len > 0) lengths.push(len);
+                        continue;
+                    }
+                }
+                // Otherwise, fallback to getTotalLength
                 try {
                     const len = path.getTotalLength();
                     if (!isNaN(len) && len > 0) lengths.push(len);
