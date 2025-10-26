@@ -1021,7 +1021,7 @@ class GeneMatrixHandler {
         }
         if (this.cluster_type === "ripp") {
             if (document.getElementById("innerIntermediateContainer_tailoredProduct")) {
-                let svgElements = ["intermediate_drawing_tailoring_ripp", "intermediate_drawing_precursor", "intermediate_drawing_cleavage"]
+                let svgElements = ["intermediate_drawing_tailoring_ripp", "intermediate_drawing_precursor"]
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_tailoredProduct", raichu_output.structureForTailoring, "intermediate_drawing_tailoring_ripp");
                 svgHandler.updateIntermediateContainer("innerIntermediateContainer_precursor", raichu_output.rawPeptideChain, "intermediate_drawing_precursor", "precursor_drawing");
                 if (document.getElementById("wildcardProtease").checked || document.getElementById("innerIntermediateContainer_cleavedProduct_space")) {
