@@ -684,7 +684,7 @@ svg text {
   top: 50%;
   transform: translate(-50%, -50%);
   border: 0.3vh solid #999999;
-  z-index: 9;
+  z-index: 10009;
 }
 
 .formContainer {
